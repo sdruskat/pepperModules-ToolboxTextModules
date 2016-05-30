@@ -1,6 +1,6 @@
-package org.corpus_tools.pepperModules.ToolboxTextModules;
+package org.corpus_tools.peppermodules.toolbox.text;
 
-import org.corpus_tools.pepperModules.ToolboxTextModules.ToolboxTextManipulator;
+import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextManipulator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

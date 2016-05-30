@@ -1,4 +1,4 @@
-package org.corpus_tools.pepperModules.ToolboxTextModules;
+package org.corpus_tools.peppermodules.toolbox.text;
 
 import java.util.ArrayList;
 import java.util.List;

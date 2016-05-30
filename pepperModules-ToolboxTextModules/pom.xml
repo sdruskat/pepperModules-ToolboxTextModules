@@ -24,12 +24,12 @@
 		</repository>
 	</distributionManagement>
 	<organization>
-		<name>Humboldt-Universität zu Berlin, MelaTAMP research project</name>
+		<name>Humboldt-Universität zu Berlin</name>
 	</organization>
 	<developers>
 		<developer>
 			<name>Stephan Druskat</name>
-			<organization>Humboldt-Universität zu Berlin, MelaTAMP research project</organization>
+			<organization>Humboldt-Universität zu Berlin</organization>
 		</developer>
 	</developers>
 </project>
