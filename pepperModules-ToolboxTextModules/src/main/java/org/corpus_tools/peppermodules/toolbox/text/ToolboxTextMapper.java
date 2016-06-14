@@ -156,7 +156,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			while (line != null) {
 				line = line.trim();
 				if (!line.isEmpty()) {
-					if (!line.startsWith(((ToolboxTextImporterProperties) getProperties()).getRefMarker())) {
+					if (!line.startsWith("\\" + ((ToolboxTextImporterProperties) getProperties()).getRefMarker())) {
 						addLineToBlock(line);
 					}
 					else { // Hit a "\ref" or "\id" marker or similar

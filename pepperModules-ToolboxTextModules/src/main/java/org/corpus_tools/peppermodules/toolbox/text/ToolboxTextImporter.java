@@ -94,6 +94,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		addSupportedFormat("toolbox-text", "3.0", null);
 		getDocumentEndings().add(ENDING_TXT);
 		getDocumentEndings().add("lbl");
+		this.setProperties(new ToolboxTextImporterProperties());
 	}
 	
 
