@@ -53,7 +53,7 @@ import org.corpus_tools.pepper.modules.PepperModuleProperty;
  * 	<td>morphologyAnnotationMarkers</td>
  * 	<td>String</td>
  * 	<td></td>
- * 	<td></td>
+ * 	<td>ge,ps</td>
  * </tr>
  * <tr>
  * 	<td>morphemeDelimiters</td>
@@ -87,12 +87,12 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * All Toolbox markers which precede lines with annotations of source text segments (usually "words"),
 	 * without the preceding backslashes, and as a comma-separated list.
 	 */
-	public static final String PROP_TEXT_ANNOTATIONS = "textAnnotationMarkers";
+	public static final String PROP_TEXT_ANNOTATION_MARKERS = "textAnnotationMarkers";
 	/**
 	 * All Toolbox markers which precede lines with annotations of morphemes,
 	 * without the preceding backslashes, and as a comma-separated list.
 	 */
-	public static final String PROP_MORPH_ANNOTATIONS = "morphologyAnnotationMarkers";
+	public static final String PROP_MORPH_ANNOTATION_MARKERS = "morphologyAnnotationMarkers";
 	/**
 	 * The morpheme delimiters used in the Toolbox files as a comma-separated two-point list where
 	 * the first element is the <strong>affix</strong> delimiter, and the second element is the
@@ -111,19 +111,42 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"The Toolbox marker that precedes lines with morphological information, without the preceding backslash.",
 				"mb",
 				true));
-		addProperty(new PepperModuleProperty<>(PROP_TEXT_ANNOTATIONS, 
+		addProperty(new PepperModuleProperty<>(PROP_TEXT_ANNOTATION_MARKERS, 
 				String.class, 
 				"All Toolbox markers which precede lines with annotations of source text segments (usually \"words\"), without the preceding backslashes, and as a comma-separated list.",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_MORPH_ANNOTATIONS, 
+		addProperty(new PepperModuleProperty<>(PROP_MORPH_ANNOTATION_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with annotations of morphemes, without the preceding backslashes, and as a comma-separated list.",
+				"ge,ps",
 				false));
 		addProperty(new PepperModuleProperty<>(PROP_MORPHEME_DELIMITERS, 
 				String.class,
 				"The morpheme delimiters used in the Toolbox files as a comma-separated two-point list where the first element is the affix delimiter, and the second element is the clitics delimiter.",
 				"-,=",
 				false));
+	}
+	
+	// Getter mathods for the different property values.
+	
+	public String getTextMarker() {
+		return (String) getProperty(PROP_TEXT_MARKER).getValue();
+	}
+	
+	public String getMorphMarker() {
+		return (String) getProperty(PROP_MORPH_MARKER).getValue();
+	}
+	
+	public String getTextAnnotationMarkers() {
+		return (String) getProperty(PROP_TEXT_ANNOTATION_MARKERS).getValue();
+	}
+	
+	public String getMorphAnnotationMarkers() {
+		return (String) getProperty(PROP_MORPH_ANNOTATION_MARKERS).getValue();
+	}
+	
+	public String getMorphemeDelimiters() {
+		return (String) getProperty(PROP_MORPHEME_DELIMITERS).getValue();
 	}
 
 }
