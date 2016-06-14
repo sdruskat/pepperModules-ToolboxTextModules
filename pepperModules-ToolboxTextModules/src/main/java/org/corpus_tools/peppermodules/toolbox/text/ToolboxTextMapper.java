@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.Generated;
+
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
@@ -143,7 +145,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 
 		/** 
-		 * STEP 3: Map the file info to document
+		 * STEP 3: Map the file to document
 		 * File MUST be in UTF-8 encoding, otherwise the backslash may not be recognized!
 		 */
 		BufferedReader br = null;
@@ -154,10 +156,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			while (line != null) {
 				line = line.trim();
 				if (!line.isEmpty()) {
-					if (!line.startsWith("\\ref")) {
+					if (!line.startsWith(((ToolboxTextImporterProperties) getProperties()).getRefMarker())) {
 						addLineToBlock(line);
 					}
-					else { // Hit a "\ref" marker
+					else { // Hit a "\ref" or "\id" marker or similar
 						if (!isHeaderBlockMapped) { // "\ref" hit is first instance of "\ret", active block must be the header block
 							mapHeaderToModel(block);
 						}
@@ -208,7 +210,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 *
 	 * @param lastLine
 	 */
-	private static void addLineToBlock(String line) {
+	private void addLineToBlock(String line) {
 		if (line.startsWith("\\")) {
 			// Remove backslash from marker, include everything up to but excluding the first whitespace
 			String[] markerAndValues = line.split("\\s+");
@@ -239,10 +241,13 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 *
 	 * @param headerBlock
 	 */
-	private static void mapHeaderToModel(Map<String, List<String>> headerBlock) {
+	private void mapHeaderToModel(Map<String, List<String>> headerBlock) {
 		for (Entry<String, List<String>> entry : headerBlock.entrySet()) {
 			for (String value : entry.getValue()) {
-				// TODO
+				SMetaAnnotation metaAnno = SaltFactory.createSMetaAnnotation();
+				metaAnno.setName(entry.getKey());
+				metaAnno.setValue(value);
+				getDocument().addMetaAnnotation(metaAnno);
 			}
 		}
 		isHeaderBlockMapped = true;
@@ -254,7 +259,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 *
 	 * @param refBlock
 	 */
-	private static void mapRefToModel(Map<String, List<String>> refBlock) {
+	private void mapRefToModel(Map<String, List<String>> refBlock) {
 		for (Entry<String, List<String>> entry : refBlock.entrySet()) {
 			for (String value : entry.getValue()) {
 				// TODO

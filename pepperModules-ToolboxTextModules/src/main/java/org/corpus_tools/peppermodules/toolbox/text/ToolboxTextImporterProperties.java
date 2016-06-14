@@ -100,6 +100,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	public static final String PROP_MORPHEME_DELIMITERS = "morphemeDelimiters";
 	
+	/**
+	 * The marker used for references, i.e., usually "ref" or "id".
+	 */
+	public static final String PROP_REF_MARKER = "refMarker";
+	
 	public ToolboxTextImporterProperties() {
 		addProperty(new PepperModuleProperty<>(PROP_TEXT_MARKER, 
 				String.class, 
@@ -125,9 +130,14 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"The morpheme delimiters used in the Toolbox files as a comma-separated two-point list where the first element is the affix delimiter, and the second element is the clitics delimiter.",
 				"-,=",
 				false));
+		addProperty(new PepperModuleProperty<>(PROP_REF_MARKER, 
+				String.class,
+				"The marker used for references, i.e., usually \"ref\" or \"id\".",
+				"ref",
+				true));
 	}
 	
-	// Getter mathods for the different property values.
+	// Getter methods for the different property values.
 	
 	public String getTextMarker() {
 		return (String) getProperty(PROP_TEXT_MARKER).getValue();
@@ -147,6 +157,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	
 	public String getMorphemeDelimiters() {
 		return (String) getProperty(PROP_MORPHEME_DELIMITERS).getValue();
+	}
+	
+	public String getRefMarker() {
+		return (String) getProperty(PROP_REF_MARKER).getValue();
 	}
 
 }
