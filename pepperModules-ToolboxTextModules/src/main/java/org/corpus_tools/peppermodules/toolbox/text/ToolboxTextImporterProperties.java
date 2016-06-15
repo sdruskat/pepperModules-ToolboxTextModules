@@ -62,7 +62,7 @@ import org.corpus_tools.pepper.modules.PepperModuleProperty;
  * 	<td>-,=</td>
  * </tr>
  * </table>
- *
+ * TODO FIXME Finalize table
  * @author Stephan Druskat <mail@sdruskat.net>
  *
  */
@@ -77,7 +77,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * The Toolbox marker that precedes lines with source text (usually "words"),
 	 * without the preceding backslash.
 	 */
-	private static final String PROP_TEXT_MARKER = "textMarker";
+	private static final String PROP_LEX_MARKER = "lexicalMarker";
 	
 	/**
 	 * The Toolbox marker that precedes lines with morphological information,
@@ -89,7 +89,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * All Toolbox markers which precede lines with annotations of source text segments (usually "words"),
 	 * without the preceding backslashes, and as a comma-separated list.
 	 */
-	private static final String PROP_TEXT_ANNOTATION_MARKERS = "textAnnotationMarkers";
+	private static final String PROP_LEX_ANNOTATION_MARKERS = "textAnnotationMarkers";
 	
 	/**
 	 * All Toolbox markers which precede lines with annotations of morphemes,
@@ -115,9 +115,9 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	private static final String PROP_FILE_EXTENSIONS = "fileExtensions";
 	
 	public ToolboxTextImporterProperties() {
-		addProperty(new PepperModuleProperty<>(PROP_TEXT_MARKER, 
+		addProperty(new PepperModuleProperty<>(PROP_LEX_MARKER, 
 				String.class, 
-				"The Toolbox marker that precedes lines with source text (usually \"words\"), without the preceding backslash.", 
+				"The Toolbox marker that precedes lines with source text (usually lexical items), without the preceding backslash.", 
 				"tx",
 				true));
 		addProperty(new PepperModuleProperty<>(PROP_MORPH_MARKER, 
@@ -125,9 +125,9 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"The Toolbox marker that precedes lines with morphological information, without the preceding backslash.",
 				"mb",
 				true));
-		addProperty(new PepperModuleProperty<>(PROP_TEXT_ANNOTATION_MARKERS, 
+		addProperty(new PepperModuleProperty<>(PROP_LEX_ANNOTATION_MARKERS, 
 				String.class, 
-				"All Toolbox markers which precede lines with annotations of source text segments (usually \"words\"), without the preceding backslashes, and as a comma-separated list.",
+				"All Toolbox markers which precede lines with annotations of source text segments (usually lexical items), without the preceding backslashes, and as a comma-separated list.",
 				false));
 		addProperty(new PepperModuleProperty<>(PROP_MORPH_ANNOTATION_MARKERS, 
 				String.class,
@@ -153,8 +153,8 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	
 	// Getter methods for the different property values.
 	
-	public String getTextMarker() {
-		return (String) getProperty(PROP_TEXT_MARKER).getValue();
+	public String getLexMarker() {
+		return (String) getProperty(PROP_LEX_MARKER).getValue();
 	}
 	
 	public String getMorphMarker() {
@@ -162,7 +162,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	}
 	
 	public String getTextAnnotationMarkers() {
-		return (String) getProperty(PROP_TEXT_ANNOTATION_MARKERS).getValue();
+		return (String) getProperty(PROP_LEX_ANNOTATION_MARKERS).getValue();
 	}
 	
 	public String getMorphAnnotationMarkers() {

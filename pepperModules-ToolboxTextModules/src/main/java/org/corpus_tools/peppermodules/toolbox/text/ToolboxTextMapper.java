@@ -28,24 +28,56 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.salt.SaltFactory;
+import org.corpus_tools.salt.common.STimeline;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.eclipse.emf.common.util.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO Description
+ * A mapper for the Toolbox text format.
+ * <p>
+ * The mapping works as follows.
+ * The Toolbox file is read line by line, cleaned up and compiled
+ * into a list of {@link MarkerValuesTuple}s, which represent a
+ * Toolbox marker and its "values", i.e., the remainder of the marker
+ * line (and subsequent unmarked non-empty lines). 
+ * <p>
+ * This list is iterated and all lines belonging to a "block" -
+ * i.e., all lines following a reference marker, including the line with
+ * the reference marker itself - are subsequently mapped onto the Salt document graph.
+ * <p>
+ * One special case is the lines before the first reference marker, 
+ * which are assumed to belong to the "header". These lines are
+ * mapped onto meta annotations on the document itself.
+ * <p>
+ * The marked lines following a reference marker are mapped onto
+ * the Salt document graph as follows.
+ * The values from the lexical and morphology markers (as defined
+ * by {@link ToolboxTextImporterProperties#PROP_LEX_MARKER} and
+ * {@link ToolboxTextImporterProperties#PROP_MORPH_MARKER}) are
+ * used as two separate tokenizations, which are synchronized via
+ * a {@link STimeline}. The tokens are subsequently annotated
+ * with the values from the text annotations markers (as defined by
+ * {@link ToolboxTextImporterProperties#PROP_LEX_ANNOTATION_MARKERS})
+ * and the morphology annotation markers (as defined by
+ * {@link ToolboxTextImporterProperties#PROP_MORPH_ANNOTATION_MARKERS})
+ * respectively. (<strong>NOTE:</strong>It is assumed that the 
+ * number of annotations always matches the number of tokens 
+ * per reference!).
+ * <p>
+ * The reference marker itself is modeled as a span over the <em>text</em>
+ * marker tokens of the reference. All markers <em>not</em>
+ * belonging to either lexical or morphology annotation layer are assumed
+ * to be reference level annotations and are as such modeled as annotations
+ * on the reference span.
  *
  * @author Stephan Druskat <mail@sdruskat.net>
  */
