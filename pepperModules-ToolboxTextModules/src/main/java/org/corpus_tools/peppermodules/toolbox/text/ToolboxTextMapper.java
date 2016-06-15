@@ -35,6 +35,7 @@ import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.salt.SaltFactory;
+import org.corpus_tools.salt.common.STextualDS;
 import org.corpus_tools.salt.common.STimeline;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.eclipse.emf.common.util.URI;
@@ -63,8 +64,9 @@ import org.slf4j.LoggerFactory;
  * The values from the lexical and morphology markers (as defined
  * by {@link ToolboxTextImporterProperties#PROP_LEX_MARKER} and
  * {@link ToolboxTextImporterProperties#PROP_MORPH_MARKER}) are
- * used as two separate tokenizations, which are synchronized via
- * a {@link STimeline}. The tokens are subsequently annotated
+ * used as two separate tokenizations on two separate {@link STextualDS}s,
+ * which are synchronized via a {@link STimeline}. 
+ * The tokens are subsequently annotated
  * with the values from the text annotations markers (as defined by
  * {@link ToolboxTextImporterProperties#PROP_LEX_ANNOTATION_MARKERS})
  * and the morphology annotation markers (as defined by
@@ -93,7 +95,33 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * Whether the header block of the file has already been mapped.
 	 */
 	private boolean isHeaderBlockMapped = false;
+	
+	/**
+	 * The timeline used to anchor both lexical and morphological tokens.
+	 */
+	private final STimeline timeline = SaltFactory.createSTimeline();
 
+	/**
+	 * The textual data source containing the lexical source text of the whole document.
+	 */
+	private final STextualDS lexicalTextualDS = SaltFactory.createSTextualDS();
+
+	/**
+	 * The textual data source containing the "morphological source text", i.e.,
+	 * the concatenated morpheme-based morphological units.
+	 */
+	private final STextualDS morphologicalTextualDS = SaltFactory.createSTextualDS();
+
+	/**
+	 * The affix delimiter as defined in the property {@link ToolboxTextImporterProperties#PROP_MORPHEME_DELIMITERS}.
+	 */
+	private String affixDelimiter;
+
+	/**
+	 * The clitics delimiter as defined in the property {@link ToolboxTextImporterProperties#PROP_MORPHEME_DELIMITERS}.
+	 */
+	private String cliticsDelimiter;
+	
 	/**
 	 * Adds a single metadate to the corpus, namely the current date (no time).
 	 */
@@ -117,15 +145,20 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 */
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
-		// FIXME: Add progress via addProgress(0.n)
+		// Set up fields
+		getMorphologicalTextualDS().setText("");
+		getMorphologicalTextualDS().setName("morph"); // FIXME: Check whether ID or NAme, check useful name
+		getLexicalTextualDS().setText("");
+		String[] delimiters = getProperties().getMorphemeDelimiters().split("\\s*,\\s*");
+		affixDelimiter = delimiters[0].trim();
+		cliticsDelimiter = delimiters[1].trim();
+
 		getDocument().setDocumentGraph(SaltFactory.createSDocumentGraph());
 		URI resource = getResourceURI();
 		File file = null;
 		logger.debug("Importing the file {}.", resource);
 
-		/**
-		 * STEP 1: Prepare the file for reading.
-		 */
+		// Create a File object from the resource
 		if (getResourceURI() == null) {
 			throw new PepperModuleException(this, "Cannot map Toolbox file, because the given resource URI is empty.");
 		}
@@ -139,24 +172,20 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			}
 		}
 
-		/**
-		 * STEP 2:
-		 */
+		// Create the SDocumentGraph
 		if (getDocument().getDocumentGraph() == null) {
 			getDocument().setDocumentGraph(SaltFactory.createSDocumentGraph());
 		}
 
-		/**
-		 * STEP 3: Map the file to document File MUST be in UTF-8 encoding, otherwise the backslash may not be recognized!
-		 */
 		// Read and clean up file
 		LinkedList<String> lineList = readFileToList(file);
 
 		// Go through the list and compile a list of tuples of marker and values
 		// Map the tuple list whenever you hit a ref marker
 		List<MarkerValuesTuple> block = new ArrayList<>();
+		int lineListSize = lineList.size();
 		for (String line : lineList) {
-			if (!line.startsWith("\\" + ((ToolboxTextImporterProperties) getProperties()).getRefMarker())) {
+			if (!line.startsWith("\\" + getProperties().getRefMarker())) {
 				String[] markerAndValues = line.split("\\s+");
 				if (markerAndValues[0] == null) {
 					LinkedList<String> markerandValuesList = new LinkedList<String>(Arrays.asList(markerAndValues));
@@ -170,7 +199,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				}
 				block.add(new MarkerValuesTuple(marker, valueList));
 			}
-			else {
+			else { // Hit a ref marker
 				if (!isHeaderBlockMapped) { // First hit of ref marker, i.e., block must be header block
 					mapHeaderToModel(block);
 					isHeaderBlockMapped = true;
@@ -180,22 +209,31 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				}
 				block.clear();
 			}
+			addProgress(((double) 1) / lineListSize);
 		}
-		// Map ref block to Model once, because we cannot hit a ref marker at the end of the list anymore
+		/* Map ref block to model once, because we cannot hit a 
+		 * ref marker at the end of the list anymore to trigger
+		 * a block mapping process.
+		 */
 		mapRefToModel(block);
+		
+		getDocument().getDocumentGraph().addNode(getMorphologicalTextualDS());
 
 		return (DOCUMENT_STATUS.COMPLETED);
 	}
 
 	/**
-	 * TODO: Description
+	 * Reads a {@link File} and writes it to a {@link LinkedList},
+	 * line by line, removing empty lines and trimming non-empty lines
+	 * in the process
 	 *
-	 * @param file
-	 * @return 
+	 * @param file The file to write to the {@link LinkedList}
+	 * @return the list of non-empty, trimmed lines included in the file
 	 */
 	private LinkedList<String> readFileToList(File file) {
 		BufferedReader br = null;
 		LinkedList<String> lineList = new LinkedList<>();
+		// Compile a list of trimmed, non-empty lines
 		try {
 			br = new BufferedReader(new FileReader(file));
 			String line = null;
@@ -223,18 +261,19 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			}
 		}
 
+		// Iterate through the list and pull together non-marked lines under the respective ref marker
 		String attachmentLine = null;
 		ListIterator<String> iterator = lineList.listIterator(lineList.size());
 		while (iterator.hasPrevious()) {
 			String thisLine = iterator.previous();
 			if (thisLine.startsWith("\\")) {
 				if (attachmentLine != null) {
-					iterator.set(thisLine + " " /* REPLACE WITH LINEBREAK*/ + attachmentLine);
+					iterator.set(thisLine + System.getProperty("line.separator") + attachmentLine);
 				}
 				attachmentLine = null;
 			}
 			else if (attachmentLine != null){
-				attachmentLine = new String(thisLine) + " " /* REPLACE WITH LINEBREAK*/ + attachmentLine;
+				attachmentLine = new String(thisLine) + System.getProperty("line.separator") + attachmentLine;
 				iterator.remove();
 			}
 			else {
@@ -246,62 +285,135 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 	
 	/**
-	 * TODO: Description
+	 * Maps the header block onto the Salt model, i.e.,
+	 * adding its marker lines as meta annotations on
+	 * the document.
 	 *
-	 * @param block
+	 * @param block The header block to process
 	 */
 	private void mapHeaderToModel(List<MarkerValuesTuple> block) {
 		for (MarkerValuesTuple line : block) {
-			String qualifiedId = SALT_NAMESPACE_TOOLBOX + "::" + line.getMarker();
+			String marker = line.getMarker();
+			String qualifiedId = SALT_NAMESPACE_TOOLBOX + "::" + marker;
 			SMetaAnnotation annotation;
+			// One meta annotation per marker, hence concatenate the list of values.
+			StringBuilder builder = new StringBuilder();
+			for (String val : line.getValues()) {
+				builder.append(val).append(" ");
+			}
+			String value = builder.toString().trim();
 			if ((annotation = getDocument().getMetaAnnotation(qualifiedId)) != null) {
-				annotation.setValue(line.getValues().toString()); // FIXME: Concat the values
+				annotation.setValue(value);
 			}
 			else {
-				getDocument().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, line.getMarker(), line.getValues().toString()); // FIXME Concat the values
-				logger.info("   #############   CREATE " + getDocument().getMetaAnnotation(qualifiedId));
-
+				getDocument().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, marker, value);
 			}
-			logger.info(">>>>>>>>>>>>>>>>>>>>> " + getDocument().getMetaAnnotation(qualifiedId));
 		}
-		
 	}
 
 	/**
-	 * TODO: Description
+	 * Maps a reference block onto the Salt model,
+	 * i.e., adding its marker lines as tokens,
+	 * spans, and annotations to the document graph.
 	 *
-	 * @param block
+	 * @param block The reference block to process
 	 */
 	private void mapRefToModel(List<MarkerValuesTuple> block) {
-		// TODO Auto-generated method stub
-		
+		for (MarkerValuesTuple line : block) {
+			// Morphology marker: Add to STextualDS, create Tokens, connect to timeline
+			if (line.getMarker().equals(getProperties().getMorphMarker())) {
+				StringBuilder morphSourceTextBuilder = new StringBuilder();
+				StringBuilder morphologicalUnitBuilder = new StringBuilder();
+				for (String value : line.getValues()) {
+					if (!value.startsWith(getAffixDelimiter()) && !value.startsWith(getCliticsDelimiter())) {
+						if (morphologicalUnitBuilder.length() > 0) { 
+							/* 
+							 * There is at least one morpheme, and possibly affixes and/or clitics 
+							 * represented in the builder, but now we've hit a new morpheme, so
+							 * first of all append what's in the unit builder to the source text builder.
+							 */
+							morphSourceTextBuilder.append(" ").append(morphologicalUnitBuilder.toString());
+							morphologicalUnitBuilder.setLength(0);
+						}
+					}
+					morphologicalUnitBuilder.append(value);
+				}
+				/* 
+				 * Append what's in the unit builder one last time, as once we
+				 * hit the end of the list, the appending won't be triggered
+				 * as no new morpheme is hit. 
+				 */
+				morphSourceTextBuilder.append(" ").append(morphologicalUnitBuilder.toString());
+				// Now append the source text to the morphological data source
+				String currentDataSource = getMorphologicalTextualDS().getText();
+				int currentDataSourceLength = currentDataSource.length(); // Needed for correct tokenization
+				String updatedDataSource = currentDataSource.concat(" ").concat(morphSourceTextBuilder.toString());
+				getMorphologicalTextualDS().setText(updatedDataSource);
+				
+				// FIXME: Check how duplicate whitespaces can creep in!
+				// FIXME: Check for affixes "asd-" !
+				// FIXME: Check how to treat non lexical information = ELAN indices, etc.
+				
+			}
+		}
 	}
 
+	/**
+	 * @return the timeline
+	 */
+	private STimeline getTimeline() {
+		return timeline;
+	}
 
+	/**
+	 * @return the lexicalTextualDS
+	 */
+	private STextualDS getLexicalTextualDS() {
+		return lexicalTextualDS;
+	}
 
-//	/**
-//	 * TODO: Description
-//	 *
-//	 * @param headerBlock
-//	 */
-//	// TODO FIXME Make this method private again after testing!
-//	public void mapHeaderToModel(Map<String, List<String>> headerBlock) {
-//		for (Entry<String, List<String>> entry : headerBlock.entrySet()) {
-//			String qualifiedId = SALT_NAMESPACE_TOOLBOX + "::" + entry.getKey();
-//			logger.info(getResourceURI() + " >>>>>>>>>>>>>>>>>>>>> FULLY QUALIFIED ID: " + qualifiedId);
-//			// Writing one marker to meta annotation on document.
-//			if (getDocument().getMetaAnnotation(qualifiedId) == null) {
-//				getDocument().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, entry.getKey(), null);
-//			}
-//			StringBuilder valueBuilder = new StringBuilder();
-//			for (String value : entry.getValue()) {
-//				valueBuilder.append(value);
-//			}
-//			getDocument().getMetaAnnotation(qualifiedId).setValue(valueBuilder.toString());
-//		}
-//		isHeaderBlockMapped = true;
-//
-//	}
+	/**
+	 * @return the morphologicalTextualDS
+	 */
+	private STextualDS getMorphologicalTextualDS() {
+		return morphologicalTextualDS;
+	}
+	
+	/**
+	 * @return the affixDelimiter
+	 */
+	private String getAffixDelimiter() {
+		return affixDelimiter;
+	}
+
+	/**
+	 * @param affixDelimiter the affixDelimiter to set
+	 */
+	private void setAffixDelimiter(String affixDelimiter) {
+		this.affixDelimiter = affixDelimiter;
+	}
+
+	/**
+	 * @return the cliticsDelimiter
+	 */
+	private String getCliticsDelimiter() {
+		return cliticsDelimiter;
+	}
+
+	/**
+	 * @param cliticsDelimiter the cliticsDelimiter to set
+	 */
+	private void setCliticsDelimiter(String cliticsDelimiter) {
+		this.cliticsDelimiter = cliticsDelimiter;
+	}
+
+	/* 
+	 * @copydoc @see org.corpus_tools.pepper.impl.PepperMapperImpl#getProperties()
+	 */
+	@Override
+	public ToolboxTextImporterProperties getProperties() {
+		return (ToolboxTextImporterProperties) super.getProperties();
+	}
 
 	/**
 	 * A tuple of a Toolbox marker and its values, i.e., the content of the marker line excluding the marker itself.
@@ -311,32 +423,32 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @author Stephan Druskat <mail@sdruskat.net>
 	 */
 	protected class MarkerValuesTuple {
-
+	
 		private String marker;
 		private List<String> values;
-
+	
 		/**
-		 * Constructor taking the marker and values as arguments.
+		 * Constructor taking the marker and values list as arguments.
 		 */
 		public MarkerValuesTuple(String marker, List<String> values) {
 			this.marker = marker;
 			this.values = values;
 		}
-
+	
 		/**
 		 * @return the marker
 		 */
 		public String getMarker() {
 			return marker;
 		}
-
+	
 		/**
 		 * @return the values
 		 */
 		public List<String> getValues() {
 			return values;
 		}
-
+	
 	}
 
 }
