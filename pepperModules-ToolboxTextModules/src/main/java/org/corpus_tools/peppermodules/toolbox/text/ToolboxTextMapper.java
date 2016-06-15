@@ -347,8 +347,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				// Now append the source text to the morphological data source
 				String currentDataSource = getMorphologicalTextualDS().getText();
 				int currentDataSourceLength = currentDataSource.length(); // Needed for correct tokenization
+				// Replace all double whitespaces with 1 whitespace. Two whitespaces occur when marker runs over more than one line...  
 				String updatedDataSource = currentDataSource.concat(" ").concat(morphSourceTextBuilder.toString());
-				getMorphologicalTextualDS().setText(updatedDataSource);
+				// Replace all double whitespaces with 1 whitespace. Two whitespaces occur when marker runs over more than one line...  
+				getMorphologicalTextualDS().setText(updatedDataSource.replaceAll("\\s{2}", " "));
 				
 				// FIXME: Check how duplicate whitespaces can creep in!
 				// FIXME: Check for affixes "asd-" !
