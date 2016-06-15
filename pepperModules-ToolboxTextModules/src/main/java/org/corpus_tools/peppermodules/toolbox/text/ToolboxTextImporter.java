@@ -92,8 +92,6 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		setSupplierHomepage(URI.createURI("http://corpus-tools.org"));
 		setDesc("An importer for the text-based format written by SIL Toolbox (as opposed to the respective XML format).");
 		addSupportedFormat("toolbox-text", "3.0", null);
-		getDocumentEndings().add(ENDING_TXT);
-		getDocumentEndings().add("lbl");
 		this.setProperties(new ToolboxTextImporterProperties());
 	}
 	
@@ -457,7 +455,6 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 *         overridden
 	 */
 	public Double isImportable(URI corpusPath) {
-		// TODO some code to analyze the given corpus-structure
 		return (null);
 	}
 
@@ -478,7 +475,15 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 */
 	@Override
 	public boolean isReadyToStart() throws PepperModuleNotReadyException {
-		// TODO make some initializations if necessary
+		for (String fileExtension : ((String) ((ToolboxTextImporterProperties) getProperties()).getFileExtensions()).split("\\s*,\\s*")) {
+			getDocumentEndings().add(fileExtension);
+		}
 		return (super.isReadyToStart());
+	}
+	
+	@Override
+	public void end(){
+	    super.end();
+	    getSaltProject().saveSaltProject(URI.createFileURI("/home/stephan/Dokumente/melatamp/daten/pre-project.OLD/Data/CorpusMavea/testSave/"));
 	}
 }

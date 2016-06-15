@@ -38,7 +38,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 
 		FormatDesc formatDef = new FormatDesc();
 		formatDef.setFormatName("toolbox-text");
-		formatDef.setFormatVersion("1.0");
+		formatDef.setFormatVersion("3.0");
 		this.supportedFormatsCheck.add(formatDef);
 	}
 

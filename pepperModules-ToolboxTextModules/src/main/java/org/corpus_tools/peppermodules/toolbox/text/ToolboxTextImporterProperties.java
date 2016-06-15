@@ -77,33 +77,42 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * The Toolbox marker that precedes lines with source text (usually "words"),
 	 * without the preceding backslash.
 	 */
-	public static final String PROP_TEXT_MARKER = "textMarker";
+	private static final String PROP_TEXT_MARKER = "textMarker";
+	
 	/**
 	 * The Toolbox marker that precedes lines with morphological information,
 	 * without the preceding backslash.
 	 */
-	public static final String PROP_MORPH_MARKER = "morphologyMarker";
+	private static final String PROP_MORPH_MARKER = "morphologyMarker";
+	
 	/**
 	 * All Toolbox markers which precede lines with annotations of source text segments (usually "words"),
 	 * without the preceding backslashes, and as a comma-separated list.
 	 */
-	public static final String PROP_TEXT_ANNOTATION_MARKERS = "textAnnotationMarkers";
+	private static final String PROP_TEXT_ANNOTATION_MARKERS = "textAnnotationMarkers";
+	
 	/**
 	 * All Toolbox markers which precede lines with annotations of morphemes,
 	 * without the preceding backslashes, and as a comma-separated list.
 	 */
-	public static final String PROP_MORPH_ANNOTATION_MARKERS = "morphologyAnnotationMarkers";
+	private static final String PROP_MORPH_ANNOTATION_MARKERS = "morphologyAnnotationMarkers";
+	
 	/**
 	 * The morpheme delimiters used in the Toolbox files as a comma-separated two-point list where
 	 * the first element is the <strong>affix</strong> delimiter, and the second element is the
 	 * <strong>clitics</strong> delimiter.
 	 */
-	public static final String PROP_MORPHEME_DELIMITERS = "morphemeDelimiters";
+	private static final String PROP_MORPHEME_DELIMITERS = "morphemeDelimiters";
 	
 	/**
 	 * The marker used for references, i.e., usually "ref" or "id".
 	 */
-	public static final String PROP_REF_MARKER = "refMarker";
+	private static final String PROP_REF_MARKER = "refMarker";
+
+	/**
+	 * The file extensions that corpus files can have as a comma-separated list.
+	 */
+	private static final String PROP_FILE_EXTENSIONS = "fileExtensions";
 	
 	public ToolboxTextImporterProperties() {
 		addProperty(new PepperModuleProperty<>(PROP_TEXT_MARKER, 
@@ -135,6 +144,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"The marker used for references, i.e., usually \"ref\" or \"id\".",
 				"ref",
 				true));
+		addProperty(new PepperModuleProperty<>(PROP_FILE_EXTENSIONS, 
+				String.class,
+				"The file extensions that corpus files can have as a comma-separated list.",
+				"txt,lbl",
+				true));
 	}
 	
 	// Getter methods for the different property values.
@@ -161,6 +175,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	
 	public String getRefMarker() {
 		return (String) getProperty(PROP_REF_MARKER).getValue();
+	}
+
+	public String getFileExtensions() {
+		return (String) getProperty(PROP_FILE_EXTENSIONS).getValue();
 	}
 
 }
