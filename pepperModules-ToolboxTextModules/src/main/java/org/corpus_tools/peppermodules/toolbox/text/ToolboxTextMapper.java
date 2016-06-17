@@ -28,18 +28,25 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.salt.SaltFactory;
+import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.STextualDS;
+import org.corpus_tools.salt.common.STextualRelation;
 import org.corpus_tools.salt.common.STimeline;
+import org.corpus_tools.salt.common.STimelineRelation;
+import org.corpus_tools.salt.common.SToken;
+import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.eclipse.emf.common.util.URI;
 import org.slf4j.Logger;
@@ -99,10 +106,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 */
 	private boolean isHeaderBlockMapped = false;
 	
-	/**
-	 * The timeline used to anchor both lexical and morphological tokens.
-	 */
-	private final STimeline timeline = SaltFactory.createSTimeline();
+//	/**
+//	 * The timeline used to anchor both lexical and morphological tokens.
+//	 */
+//	private final STimeline timeline = SaltFactory.createSTimeline();
 
 	/**
 	 * The textual data source containing the lexical source text of the whole document.
@@ -124,6 +131,11 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * The clitics delimiter as defined in the property {@link ToolboxTextImporterProperties#PROP_MORPHEME_DELIMITERS}.
 	 */
 	private String cliticsDelimiter;
+
+	/**
+	 * Maps marker {@link String}s to {@link SLayer}s belonging to that marker.
+	 */
+	private Map<String, SLayer> layers = new HashMap<>();
 	
 	/**
 	 * Adds a single metadate to the corpus, namely the current date (no time).
@@ -157,8 +169,14 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		cliticsDelimiter = delimiters[1].trim();
 
 		getDocument().setDocumentGraph(SaltFactory.createSDocumentGraph());
+		getDocument().getDocumentGraph().createTimeline();
+		
 		URI resource = getResourceURI();
 		File file = null;
+		
+		// Set up layers
+		createLayer(getProperties().getMorphMarker());
+
 		logger.debug("Importing the file {}.", resource);
 
 		// Create a File object from the resource
@@ -219,8 +237,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		 * a block mapping process.
 		 */
 		mapRefToModel(block);
-		
-		getDocument().getDocumentGraph().addNode(getMorphologicalTextualDS());
 
 		return (DOCUMENT_STATUS.COMPLETED);
 	}
@@ -322,24 +338,16 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param block The reference block to process
 	 */
 	private void mapRefToModel(List<MarkerValuesTuple> block) {
-		/*
-		 *  Check how many sections this block has, where "section" is one set of all markers.
-		 *  Sections are introduced when the lexical information does not fit onto one line in Toolbox.
-		 *  This is done by counting the number of unique marker, and dividing the number of lines by it. 
-		 */
-//		Set<String> markerSet = new HashSet<>();
-//		for (MarkerValuesTuple line : block) {
-//			markerSet.add(line.getMarker());
-//		}
-//		int numberOfSections = block.size() / markerSet.size();
-//		int morphLineCounter = 0;
+		int morphDataSourceIndex = 0;
+		int timelineIndex = 0;
 		for (MarkerValuesTuple line : block) {
-			// Morphology marker: Add to STextualDS, create Tokens, connect to timeline
+			// TODO Morphology marker: Add to STextualDS, create Tokens, connect to timeline
+			getDocument().getDocumentGraph().addNode(getMorphologicalTextualDS());
 			if (line.getMarker().equals(getProperties().getMorphMarker())) {
-//				morphLineCounter++;
 				StringBuilder morphSourceTextBuilder = new StringBuilder();
 				StringBuilder morphologicalUnitBuilder = new StringBuilder();
 				for (String value : line.getValues()) {
+					// Add value to data source
 					if (!value.startsWith(getAffixDelimiter()) && !value.startsWith(getCliticsDelimiter())) {
 						if (morphologicalUnitBuilder.length() > 0) {
 							/*
@@ -354,12 +362,17 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 								 * first of all append what's in the unit builder to the source text builder.
 								 */
 								morphSourceTextBuilder.append(morphSourceTextBuilder.length() == 0 ? "" : " ").append(morphologicalUnitBuilder.toString());
-//								logger.info(">>>>>>>>>" + morphSourceTextBuilder.toString() + "<<<<<<<<<");
 								morphologicalUnitBuilder.setLength(0);
 							}
 						}
 					}
 					morphologicalUnitBuilder.append(value);
+					
+					// Add a token for this value
+					int tokenLength = value.length();
+					createToken(morphDataSourceIndex, tokenLength, timelineIndex, 1, layers.get(getProperties().getMorphMarker()), getMorphologicalTextualDS());
+					morphDataSourceIndex = morphDataSourceIndex + tokenLength + 1; // Increment the morphDSIndex by length + 1 (accounting for whitespace)
+					timelineIndex = timelineIndex + 1; // Increment timelineIndex by 1, as all morphemes are exactly 1 timeline units "long".
 				}
 				/* 
 				 * Append what's in the unit builder one last time, as once we
@@ -371,27 +384,62 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				String currentDataSource = getMorphologicalTextualDS().getText();
 				String morphSourceText = morphSourceTextBuilder.toString();
 				boolean isDelimitedRunOnLine = morphSourceText.startsWith(getAffixDelimiter()) || morphSourceText.startsWith(getCliticsDelimiter()) || currentDataSource.endsWith(getAffixDelimiter()) || currentDataSource.endsWith(getCliticsDelimiter());
-				// Replace all double whitespaces with 1 whitespace. Two whitespaces occur when marker runs over more than one line...
-//				logger.info("LINE " + morphLineCounter + ": >>>" + morphSourceTextBuilder.toString() + "<<<");
-
-//				if (currentDataSource.length() == 0)
 				String updatedDataSource = currentDataSource.concat((isDelimitedRunOnLine || currentDataSource.length() == 0) ? "" : " ").concat(morphSourceText);
-				// Replace all double whitespaces with 1 whitespace. Two whitespaces occur when marker runs over more than one line...  
-				getMorphologicalTextualDS().setText(updatedDataSource);//.replaceAll("\\s{2}", " "));
-				
-				// FIXME: Check for affixes "asd-" !
-				// FIXME: Check how to treat non lexical information = ELAN indices, etc.
-				
+				getMorphologicalTextualDS().setText(updatedDataSource);
 			}
 		}
 	}
 
 	/**
-	 * @return the timeline
+	 * Creates and names an {@link SLayer} and puts it to the 
+	 * {@link #layers} {@link Map} under its name.
+	 * 
+	 * @param name 
 	 */
-	private STimeline getTimeline() {
-		return timeline;
+	private void createLayer(String name) {
+		SLayer layer = SaltFactory.createSLayer();
+		layer.setName(name);
+		getDocument().getDocumentGraph().addLayer(layer);
+		layers.put(name, layer);
 	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param dSStartIndex
+	 * @param tokenLength
+	 */
+	private void createToken(int dSStartIndex, int tokenLength, int tlStartIndex, int timelineUnits, SLayer layer, STextualDS ds) {
+		SDocumentGraph graph = getDocument().getDocumentGraph();
+		SToken token = SaltFactory.createSToken();
+		graph.addNode(token);
+		if (layer != null) {
+			layer.addNode(token);
+		}
+		
+		// Create STextualRelation
+		STextualRelation textRel = SaltFactory.createSTextualRelation();
+		textRel.setSource(token);
+		textRel.setTarget(ds);
+		textRel.setStart(dSStartIndex);
+		textRel.setEnd(dSStartIndex + tokenLength);
+		graph.addRelation(textRel);
+		
+		// Create STimelineRelation
+		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
+		timeRel.setSource(token);
+		timeRel.setTarget(graph.getTimeline());
+		timeRel.setStart(tlStartIndex);
+		timeRel.setEnd(tlStartIndex + timelineUnits);
+		graph.addRelation(timeRel);
+	}
+
+//	/**
+//	 * @return the timeline
+//	 */
+//	private STimeline getTimeline() {
+//		return timeline;
+//	}
 
 	/**
 	 * @return the lexicalTextualDS
