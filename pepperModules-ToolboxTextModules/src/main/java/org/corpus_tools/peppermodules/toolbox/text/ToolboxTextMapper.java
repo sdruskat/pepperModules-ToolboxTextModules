@@ -369,16 +369,16 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				morphSourceTextBuilder.append(morphSourceTextBuilder.length() == 0 ? "" : " ").append(morphologicalUnitBuilder.toString());
 				// Now append the source text to the morphological data source
 				String currentDataSource = getMorphologicalTextualDS().getText();
-				int currentDataSourceLength = currentDataSource.length(); // Needed for correct tokenization
+				String morphSourceText = morphSourceTextBuilder.toString();
+				boolean isDelimitedRunOnLine = morphSourceText.startsWith(getAffixDelimiter()) || morphSourceText.startsWith(getCliticsDelimiter()) || currentDataSource.endsWith(getAffixDelimiter()) || currentDataSource.endsWith(getCliticsDelimiter());
 				// Replace all double whitespaces with 1 whitespace. Two whitespaces occur when marker runs over more than one line...
 //				logger.info("LINE " + morphLineCounter + ": >>>" + morphSourceTextBuilder.toString() + "<<<");
 
 //				if (currentDataSource.length() == 0)
-				String updatedDataSource = currentDataSource.concat(currentDataSource.length() == 0 ? "" : " ").concat(morphSourceTextBuilder.toString());
+				String updatedDataSource = currentDataSource.concat((isDelimitedRunOnLine || currentDataSource.length() == 0) ? "" : " ").concat(morphSourceText);
 				// Replace all double whitespaces with 1 whitespace. Two whitespaces occur when marker runs over more than one line...  
 				getMorphologicalTextualDS().setText(updatedDataSource);//.replaceAll("\\s{2}", " "));
 				
-				// FIXME: Check how duplicate whitespaces can creep in!
 				// FIXME: Check for affixes "asd-" !
 				// FIXME: Check how to treat non lexical information = ELAN indices, etc.
 				
