@@ -28,9 +28,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
+
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
@@ -319,21 +322,41 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param block The reference block to process
 	 */
 	private void mapRefToModel(List<MarkerValuesTuple> block) {
+		/*
+		 *  Check how many sections this block has, where "section" is one set of all markers.
+		 *  Sections are introduced when the lexical information does not fit onto one line in Toolbox.
+		 *  This is done by counting the number of unique marker, and dividing the number of lines by it. 
+		 */
+//		Set<String> markerSet = new HashSet<>();
+//		for (MarkerValuesTuple line : block) {
+//			markerSet.add(line.getMarker());
+//		}
+//		int numberOfSections = block.size() / markerSet.size();
+//		int morphLineCounter = 0;
 		for (MarkerValuesTuple line : block) {
 			// Morphology marker: Add to STextualDS, create Tokens, connect to timeline
 			if (line.getMarker().equals(getProperties().getMorphMarker())) {
+//				morphLineCounter++;
 				StringBuilder morphSourceTextBuilder = new StringBuilder();
 				StringBuilder morphologicalUnitBuilder = new StringBuilder();
 				for (String value : line.getValues()) {
 					if (!value.startsWith(getAffixDelimiter()) && !value.startsWith(getCliticsDelimiter())) {
-						if (morphologicalUnitBuilder.length() > 0) { 
-							/* 
-							 * There is at least one morpheme, and possibly affixes and/or clitics 
-							 * represented in the builder, but now we've hit a new morpheme, so
-							 * first of all append what's in the unit builder to the source text builder.
+						if (morphologicalUnitBuilder.length() > 0) {
+							/*
+							 *  Value does not start with a delimiter.
+							 *  But does the last value end with a delimiter, making this value a prefixed morpheme? 
 							 */
-							morphSourceTextBuilder.append(" ").append(morphologicalUnitBuilder.toString());
-							morphologicalUnitBuilder.setLength(0);
+							String lastUnitString = morphologicalUnitBuilder.toString(); 
+							if (!lastUnitString.endsWith(getAffixDelimiter()) && !lastUnitString.endsWith(getCliticsDelimiter())) {
+								/* 
+								 * There is at least one morpheme, and possibly affixes and/or clitics 
+								 * represented in the builder, but now we've hit a new morpheme, so
+								 * first of all append what's in the unit builder to the source text builder.
+								 */
+								morphSourceTextBuilder.append(morphSourceTextBuilder.length() == 0 ? "" : " ").append(morphologicalUnitBuilder.toString());
+//								logger.info(">>>>>>>>>" + morphSourceTextBuilder.toString() + "<<<<<<<<<");
+								morphologicalUnitBuilder.setLength(0);
+							}
 						}
 					}
 					morphologicalUnitBuilder.append(value);
@@ -343,14 +366,17 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				 * hit the end of the list, the appending won't be triggered
 				 * as no new morpheme is hit. 
 				 */
-				morphSourceTextBuilder.append(" ").append(morphologicalUnitBuilder.toString());
+				morphSourceTextBuilder.append(morphSourceTextBuilder.length() == 0 ? "" : " ").append(morphologicalUnitBuilder.toString());
 				// Now append the source text to the morphological data source
 				String currentDataSource = getMorphologicalTextualDS().getText();
 				int currentDataSourceLength = currentDataSource.length(); // Needed for correct tokenization
+				// Replace all double whitespaces with 1 whitespace. Two whitespaces occur when marker runs over more than one line...
+//				logger.info("LINE " + morphLineCounter + ": >>>" + morphSourceTextBuilder.toString() + "<<<");
+
+//				if (currentDataSource.length() == 0)
+				String updatedDataSource = currentDataSource.concat(currentDataSource.length() == 0 ? "" : " ").concat(morphSourceTextBuilder.toString());
 				// Replace all double whitespaces with 1 whitespace. Two whitespaces occur when marker runs over more than one line...  
-				String updatedDataSource = currentDataSource.concat(" ").concat(morphSourceTextBuilder.toString());
-				// Replace all double whitespaces with 1 whitespace. Two whitespaces occur when marker runs over more than one line...  
-				getMorphologicalTextualDS().setText(updatedDataSource.replaceAll("\\s{2}", " "));
+				getMorphologicalTextualDS().setText(updatedDataSource);//.replaceAll("\\s{2}", " "));
 				
 				// FIXME: Check how duplicate whitespaces can creep in!
 				// FIXME: Check for affixes "asd-" !
