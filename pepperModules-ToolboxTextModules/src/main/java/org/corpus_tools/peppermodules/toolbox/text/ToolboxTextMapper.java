@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import java.io.BufferedReader;
+import java.io.BufferedReader; 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -29,12 +29,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
@@ -57,8 +56,8 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The mapping works as follows.
  * The Toolbox file is read line by line, cleaned up and compiled
- * into a list of {@link MarkerValuesTuple}s, which represent a
- * Toolbox marker and its "values", i.e., the remainder of the marker
+ * into a map mapping Toolbox markers to lists of "values", 
+ * i.e., the remainder of the marker
  * line (and subsequent unmarked non-empty lines). 
  * <p>
  * This list is iterated and all lines belonging to a "block" -
@@ -106,11 +105,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 */
 	private boolean isHeaderBlockMapped = false;
 	
-//	/**
-//	 * The timeline used to anchor both lexical and morphological tokens.
-//	 */
-//	private final STimeline timeline = SaltFactory.createSTimeline();
-
 	/**
 	 * The textual data source containing the lexical source text of the whole document.
 	 */
@@ -203,7 +197,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 
 		// Go through the list and compile a list of tuples of marker and values
 		// Map the tuple list whenever you hit a ref marker
-		List<MarkerValuesTuple> block = new ArrayList<>();
+//		List<MarkerValuesTuple> block = new ArrayList<>();
+		Map<String, List<String>> block = new HashMap<>();
 		int lineListSize = lineList.size();
 		for (String line : lineList) {
 			if (!line.startsWith("\\" + getProperties().getRefMarker())) {
@@ -218,7 +213,12 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				for (int i = 1; i < markerAndValues.length; i++) {
 					valueList.add(markerAndValues[i]);
 				}
-				block.add(new MarkerValuesTuple(marker, valueList));
+				if (!block.containsKey(marker)) {
+					block.put(marker, valueList);
+				}
+				else {
+					block.get(marker).addAll(valueList);
+				}
 			}
 			else { // Hit a ref marker
 				if (!isHeaderBlockMapped) { // First hit of ref marker, i.e., block must be header block
@@ -310,14 +310,14 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 *
 	 * @param block The header block to process
 	 */
-	private void mapHeaderToModel(List<MarkerValuesTuple> block) {
-		for (MarkerValuesTuple line : block) {
-			String marker = line.getMarker();
+	private void mapHeaderToModel(Map<String, List<String>> block) {
+		for (Entry<String, List<String>> line : block.entrySet()) {
+			String marker = line.getKey();
 			String qualifiedId = SALT_NAMESPACE_TOOLBOX + "::" + marker;
 			SMetaAnnotation annotation;
 			// One meta annotation per marker, hence concatenate the list of values.
 			StringBuilder builder = new StringBuilder();
-			for (String val : line.getValues()) {
+			for (String val : line.getValue()) {
 				builder.append(val).append(" ");
 			}
 			String value = builder.toString().trim();
@@ -337,16 +337,16 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 *
 	 * @param block The reference block to process
 	 */
-	private void mapRefToModel(List<MarkerValuesTuple> block) {
+	private void mapRefToModel(Map<String, List<String>> block) {
 		int morphDataSourceIndex = 0;
 		int timelineIndex = 0;
-		for (MarkerValuesTuple line : block) {
-			// TODO Morphology marker: Add to STextualDS, create Tokens, connect to timeline
+		for (Entry<String, List<String>> line : block.entrySet()) {
+			// Morphology marker: Add to STextualDS and create STokens
 			getDocument().getDocumentGraph().addNode(getMorphologicalTextualDS());
-			if (line.getMarker().equals(getProperties().getMorphMarker())) {
+			if (line.getKey().equals(getProperties().getMorphMarker())) {
 				StringBuilder morphSourceTextBuilder = new StringBuilder();
 				StringBuilder morphologicalUnitBuilder = new StringBuilder();
-				for (String value : line.getValues()) {
+				for (String value : line.getValue()) {
 					// Add value to data source
 					if (!value.startsWith(getAffixDelimiter()) && !value.startsWith(getCliticsDelimiter())) {
 						if (morphologicalUnitBuilder.length() > 0) {
@@ -360,6 +360,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 								 * There is at least one morpheme, and possibly affixes and/or clitics 
 								 * represented in the builder, but now we've hit a new morpheme, so
 								 * first of all append what's in the unit builder to the source text builder.
+								 * If this is the first morpheme to be appended to the builder, do not add a whitespace.
 								 */
 								morphSourceTextBuilder.append(morphSourceTextBuilder.length() == 0 ? "" : " ").append(morphologicalUnitBuilder.toString());
 								morphologicalUnitBuilder.setLength(0);
@@ -383,8 +384,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				// Now append the source text to the morphological data source
 				String currentDataSource = getMorphologicalTextualDS().getText();
 				String morphSourceText = morphSourceTextBuilder.toString();
-				boolean isDelimitedRunOnLine = morphSourceText.startsWith(getAffixDelimiter()) || morphSourceText.startsWith(getCliticsDelimiter()) || currentDataSource.endsWith(getAffixDelimiter()) || currentDataSource.endsWith(getCliticsDelimiter());
-				String updatedDataSource = currentDataSource.concat((isDelimitedRunOnLine || currentDataSource.length() == 0) ? "" : " ").concat(morphSourceText);
+				String updatedDataSource = currentDataSource.concat(currentDataSource.length() == 0 ? "" : " ").concat(morphSourceText);
 				getMorphologicalTextualDS().setText(updatedDataSource);
 			}
 		}
@@ -434,13 +434,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		graph.addRelation(timeRel);
 	}
 
-//	/**
-//	 * @return the timeline
-//	 */
-//	private STimeline getTimeline() {
-//		return timeline;
-//	}
-
 	/**
 	 * @return the lexicalTextualDS
 	 */
@@ -463,24 +456,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
-	 * @param affixDelimiter the affixDelimiter to set
-	 */
-	private void setAffixDelimiter(String affixDelimiter) {
-		this.affixDelimiter = affixDelimiter;
-	}
-
-	/**
 	 * @return the cliticsDelimiter
 	 */
 	private String getCliticsDelimiter() {
 		return cliticsDelimiter;
-	}
-
-	/**
-	 * @param cliticsDelimiter the cliticsDelimiter to set
-	 */
-	private void setCliticsDelimiter(String cliticsDelimiter) {
-		this.cliticsDelimiter = cliticsDelimiter;
 	}
 
 	/* 
@@ -489,42 +468,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	@Override
 	public ToolboxTextImporterProperties getProperties() {
 		return (ToolboxTextImporterProperties) super.getProperties();
-	}
-
-	/**
-	 * A tuple of a Toolbox marker and its values, i.e., the content of the marker line excluding the marker itself.
-	 * <p>
-	 * The marker is a {@link String}, the values are represented as a {@link List<String>}.
-	 *
-	 * @author Stephan Druskat <mail@sdruskat.net>
-	 */
-	protected class MarkerValuesTuple {
-	
-		private String marker;
-		private List<String> values;
-	
-		/**
-		 * Constructor taking the marker and values list as arguments.
-		 */
-		public MarkerValuesTuple(String marker, List<String> values) {
-			this.marker = marker;
-			this.values = values;
-		}
-	
-		/**
-		 * @return the marker
-		 */
-		public String getMarker() {
-			return marker;
-		}
-	
-		/**
-		 * @return the values
-		 */
-		public List<String> getValues() {
-			return values;
-		}
-	
 	}
 
 }
