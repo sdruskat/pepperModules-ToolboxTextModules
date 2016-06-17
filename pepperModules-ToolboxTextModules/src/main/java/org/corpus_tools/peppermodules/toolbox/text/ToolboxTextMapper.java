@@ -165,12 +165,16 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		getDocument().setDocumentGraph(SaltFactory.createSDocumentGraph());
 		getDocument().getDocumentGraph().createTimeline();
 		
+		getDocument().getDocumentGraph().addNode(getMorphologicalTextualDS());
+		getDocument().getDocumentGraph().addNode(getLexicalTextualDS());
+		
 		URI resource = getResourceURI();
 		File file = null;
 		
 		// Set up layers
 		createLayer(getProperties().getMorphMarker());
-
+		createLayer(getProperties().getLexMarker());
+		
 		logger.debug("Importing the file {}.", resource);
 
 		// Create a File object from the resource
