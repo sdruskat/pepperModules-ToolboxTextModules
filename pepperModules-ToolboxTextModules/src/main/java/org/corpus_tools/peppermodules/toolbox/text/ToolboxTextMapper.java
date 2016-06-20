@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import java.io.BufferedReader; 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -54,41 +55,19 @@ import org.slf4j.LoggerFactory;
 /**
  * A mapper for the Toolbox text format.
  * <p>
- * The mapping works as follows.
- * The Toolbox file is read line by line, cleaned up and compiled
- * into a map mapping Toolbox markers to lists of "values", 
- * i.e., the remainder of the marker
- * line (and subsequent unmarked non-empty lines). 
+ * The mapping works as follows. The Toolbox file is read line by line, cleaned up and compiled into a map mapping Toolbox markers to lists of "values", i.e., the remainder of the marker line (and subsequent unmarked non-empty lines).
  * <p>
- * This list is iterated and all lines belonging to a "block" -
- * i.e., all lines following a reference marker, including the line with
- * the reference marker itself - are subsequently mapped onto the Salt document graph.
+ * This list is iterated and all lines belonging to a "block" - i.e., all lines following a reference marker, including the line with the reference marker itself - are subsequently mapped onto the Salt document graph.
  * <p>
- * One special case is the lines before the first reference marker, 
- * which are assumed to belong to the "header". These lines are
- * mapped onto meta annotations on the document itself.
+ * One special case is the lines before the first reference marker, which are assumed to belong to the "header". These lines are mapped onto meta annotations on the document itself.
  * <p>
- * The marked lines following a reference marker are mapped onto
- * the Salt document graph as follows.
- * The values from the lexical and morphology markers (as defined
- * by {@link ToolboxTextImporterProperties#PROP_LEX_MARKER} and
- * {@link ToolboxTextImporterProperties#PROP_MORPH_MARKER}) are
- * used as two separate tokenizations on two separate {@link STextualDS}s,
- * which are synchronized via a {@link STimeline}. 
- * The tokens are subsequently annotated
- * with the values from the text annotations markers (as defined by
- * {@link ToolboxTextImporterProperties#PROP_LEX_ANNOTATION_MARKERS})
- * and the morphology annotation markers (as defined by
- * {@link ToolboxTextImporterProperties#PROP_MORPH_ANNOTATION_MARKERS})
- * respectively. (<strong>NOTE:</strong>It is assumed that the 
- * number of annotations always matches the number of tokens 
- * per reference!).
+ * The marked lines following a reference marker are mapped onto the Salt document graph as follows. The values from the lexical and morphology markers (as defined by {@link ToolboxTextImporterProperties#PROP_LEX_MARKER} and
+ * {@link ToolboxTextImporterProperties#PROP_MORPH_MARKER}) are used as two separate tokenizations on two separate {@link STextualDS}s, which are synchronized via a {@link STimeline}. The tokens are subsequently annotated with the values
+ * from the text annotations markers (as defined by {@link ToolboxTextImporterProperties#PROP_LEX_ANNOTATION_MARKERS}) and the morphology annotation markers (as defined by {@link ToolboxTextImporterProperties#PROP_MORPH_ANNOTATION_MARKERS})
+ * respectively. (<strong>NOTE:</strong>It is assumed that the number of annotations always matches the number of tokens per reference!).
  * <p>
- * The reference marker itself is modeled as a span over the <em>text</em>
- * marker tokens of the reference. All markers <em>not</em>
- * belonging to either lexical or morphology annotation layer are assumed
- * to be reference level annotations and are as such modeled as annotations
- * on the reference span.
+ * The reference marker itself is modeled as a span over the <em>text</em> marker tokens of the reference. All markers <em>not</em> belonging to either lexical or morphology annotation layer are assumed to be reference level annotations and
+ * are as such modeled as annotations on the reference span.
  *
  * @author Stephan Druskat <mail@sdruskat.net>
  */
@@ -104,15 +83,14 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * Whether the header block of the file has already been mapped.
 	 */
 	private boolean isHeaderBlockMapped = false;
-	
+
 	/**
 	 * The textual data source containing the lexical source text of the whole document.
 	 */
 	private final STextualDS lexicalTextualDS = SaltFactory.createSTextualDS();
 
 	/**
-	 * The textual data source containing the "morphological source text", i.e.,
-	 * the concatenated morpheme-based morphological units.
+	 * The textual data source containing the "morphological source text", i.e., the concatenated morpheme-based morphological units.
 	 */
 	private final STextualDS morphologicalTextualDS = SaltFactory.createSTextualDS();
 
@@ -130,7 +108,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * Maps marker {@link String}s to {@link SLayer}s belonging to that marker.
 	 */
 	private Map<String, SLayer> layers = new HashMap<>();
-	
+
 	/**
 	 * Adds a single metadate to the corpus, namely the current date (no time).
 	 */
@@ -164,17 +142,17 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 
 		getDocument().setDocumentGraph(SaltFactory.createSDocumentGraph());
 		getDocument().getDocumentGraph().createTimeline();
-		
+
 		getDocument().getDocumentGraph().addNode(getMorphologicalTextualDS());
 		getDocument().getDocumentGraph().addNode(getLexicalTextualDS());
-		
+
 		URI resource = getResourceURI();
 		File file = null;
-		
+
 		// Set up layers
 		createLayer(getProperties().getMorphMarker());
 		createLayer(getProperties().getLexMarker());
-		
+
 		logger.debug("Importing the file {}.", resource);
 
 		// Create a File object from the resource
@@ -201,7 +179,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 
 		// Go through the list and compile a list of tuples of marker and values
 		// Map the tuple list whenever you hit a ref marker
-//		List<MarkerValuesTuple> block = new ArrayList<>();
+		// List<MarkerValuesTuple> block = new ArrayList<>();
 		Map<String, List<String>> block = new HashMap<>();
 		int lineListSize = lineList.size();
 		for (String line : lineList) {
@@ -236,9 +214,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			}
 			addProgress(((double) 1) / lineListSize);
 		}
-		/* Map ref block to model once, because we cannot hit a 
-		 * ref marker at the end of the list anymore to trigger
-		 * a block mapping process.
+		/*
+		 * Map ref block to model once, because we cannot hit a ref marker at the end of the list anymore to trigger a block mapping process.
 		 */
 		mapRefToModel(block);
 
@@ -246,9 +223,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
-	 * Reads a {@link File} and writes it to a {@link LinkedList},
-	 * line by line, removing empty lines and trimming non-empty lines
-	 * in the process
+	 * Reads a {@link File} and writes it to a {@link LinkedList}, line by line, removing empty lines and trimming non-empty lines in the process
 	 *
 	 * @param file The file to write to the {@link LinkedList}
 	 * @return the list of non-empty, trimmed lines included in the file
@@ -274,11 +249,13 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 		catch (IOException e) {
 			throw new PepperModuleException(this, "Cannot read file '" + getResourceURI() + "', because of nested exception: ", e);
-			} finally {
+		}
+		finally {
 			if (br != null) {
 				try {
 					br.close();
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					throw new PepperModuleException(this, "Cannot close file '" + getResourceURI() + "', because of nested exception: ", e);
 				}
 			}
@@ -295,7 +272,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				}
 				attachmentLine = null;
 			}
-			else if (attachmentLine != null){
+			else if (attachmentLine != null) {
 				attachmentLine = new String(thisLine) + System.getProperty("line.separator") + attachmentLine;
 				iterator.remove();
 			}
@@ -306,11 +283,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 		return lineList;
 	}
-	
+
 	/**
-	 * Maps the header block onto the Salt model, i.e.,
-	 * adding its marker lines as meta annotations on
-	 * the document.
+	 * Maps the header block onto the Salt model, i.e., adding its marker lines as meta annotations on the document.
 	 *
 	 * @param block The header block to process
 	 */
@@ -334,10 +309,75 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 	}
 
+	public void processRefs(Map<String, List<String>> block) {
+		String[] delimiters = getProperties().getMorphemeDelimiters().split("\\s*,\\s*");
+		affixDelimiter = delimiters[0].trim();
+		cliticsDelimiter = delimiters[1].trim();
+
+		Map<String, String> wordToMorph = new LinkedHashMap<>();
+			
+		for (Entry<String, List<String>> line : block.entrySet()) {
+			List<String> lexicalTokens = block.get(getProperties().getLexMarker());
+			if (lexicalTokens != null) {
+				if (line.getKey().equals(getProperties().getMorphMarker())) {
+					List<String> vals = line.getValue();
+					int morphCounter = 0;
+					int wordCounter = -1;
+					String lastVal = null;
+					StringBuilder morphUnitBuilder = new StringBuilder();
+					for (int i = 0; i < vals.size(); i++) {
+						if (i > 0) {
+							morphCounter++;
+						}
+						String singleVal = vals.get(i);
+						if (isHead(singleVal, lastVal) && lastVal != null) {
+							wordCounter++;
+							String lexicalToken = lexicalTokens.get(wordCounter);
+							System.err.println("   LEX TOK " + lexicalToken + " - " + morphCounter);
+							wordToMorph.put(lexicalToken, morphUnitBuilder.toString());
+							
+							// Prepare next iteration
+							morphCounter = 0;
+							morphUnitBuilder.setLength(0);
+						}
+						morphUnitBuilder.append(singleVal);
+						lastVal = singleVal;
+					}
+					// Write one last time because no further head will be hit
+					wordCounter++;
+					morphCounter++;
+					String lexicalToken = lexicalTokens.get(wordCounter);
+					System.err.println("   LEX TOK " + lexicalToken + " - " + morphCounter);
+					wordToMorph.put(lexicalToken, morphUnitBuilder.toString());
+				}
+			}
+			else {
+				throw new PepperModuleException("Reference block does not contain any lexical tokens!");
+			}
+		}
+		for (Entry<String, String> line : wordToMorph.entrySet()) {
+			System.err.println(line.getKey() + " > " + line.getValue());
+		}
+	}
+
 	/**
-	 * Maps a reference block onto the Salt model,
-	 * i.e., adding its marker lines as tokens,
-	 * spans, and annotations to the document graph.
+	 * TODO: Description
+	 *
+	 * @param singleVal
+	 * @param lastVal
+	 * @return
+	 */
+	private boolean isHead(String singleVal, String lastVal) {
+		if (lastVal == null) {
+			return true;
+		}
+		else {
+			return !singleVal.startsWith(getAffixDelimiter()) && !singleVal.startsWith(getCliticsDelimiter()) && !lastVal.endsWith(getAffixDelimiter()) && !lastVal.endsWith(getCliticsDelimiter());
+		}
+	}
+
+	/**
+	 * Maps a reference block onto the Salt model, i.e., adding its marker lines as tokens, spans, and annotations to the document graph.
 	 *
 	 * @param block The reference block to process
 	 */
@@ -355,16 +395,13 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 					if (!value.startsWith(getAffixDelimiter()) && !value.startsWith(getCliticsDelimiter())) {
 						if (morphologicalUnitBuilder.length() > 0) {
 							/*
-							 *  Value does not start with a delimiter.
-							 *  But does the last value end with a delimiter, making this value a prefixed morpheme? 
+							 * Value does not start with a delimiter. But does the last value end with a delimiter, making this value a prefixed morpheme?
 							 */
-							String lastUnitString = morphologicalUnitBuilder.toString(); 
+							String lastUnitString = morphologicalUnitBuilder.toString();
 							if (!lastUnitString.endsWith(getAffixDelimiter()) && !lastUnitString.endsWith(getCliticsDelimiter())) {
-								/* 
-								 * There is at least one morpheme, and possibly affixes and/or clitics 
-								 * represented in the builder, but now we've hit a new morpheme, so
-								 * first of all append what's in the unit builder to the source text builder.
-								 * If this is the first morpheme to be appended to the builder, do not add a whitespace.
+								/*
+								 * There is at least one morpheme, and possibly affixes and/or clitics represented in the builder, but now we've hit a new morpheme, so first of all append what's in the unit builder to the source text
+								 * builder. If this is the first morpheme to be appended to the builder, do not add a whitespace.
 								 */
 								morphSourceTextBuilder.append(morphSourceTextBuilder.length() == 0 ? "" : " ").append(morphologicalUnitBuilder.toString());
 								morphologicalUnitBuilder.setLength(0);
@@ -372,17 +409,15 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 						}
 					}
 					morphologicalUnitBuilder.append(value);
-					
+
 					// Add a token for this value
 					int tokenLength = value.length();
 					createToken(morphDataSourceIndex, tokenLength, timelineIndex, 1, layers.get(getProperties().getMorphMarker()), getMorphologicalTextualDS());
 					morphDataSourceIndex = morphDataSourceIndex + tokenLength + 1; // Increment the morphDSIndex by length + 1 (accounting for whitespace)
 					timelineIndex = timelineIndex + 1; // Increment timelineIndex by 1, as all morphemes are exactly 1 timeline units "long".
 				}
-				/* 
-				 * Append what's in the unit builder one last time, as once we
-				 * hit the end of the list, the appending won't be triggered
-				 * as no new morpheme is hit. 
+				/*
+				 * Append what's in the unit builder one last time, as once we hit the end of the list, the appending won't be triggered as no new morpheme is hit.
 				 */
 				morphSourceTextBuilder.append(morphSourceTextBuilder.length() == 0 ? "" : " ").append(morphologicalUnitBuilder.toString());
 				// Now append the source text to the morphological data source
@@ -395,10 +430,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
-	 * Creates and names an {@link SLayer} and puts it to the 
-	 * {@link #layers} {@link Map} under its name.
+	 * Creates and names an {@link SLayer} and puts it to the {@link #layers} {@link Map} under its name.
 	 * 
-	 * @param name 
+	 * @param name
 	 */
 	private void createLayer(String name) {
 		SLayer layer = SaltFactory.createSLayer();
@@ -420,7 +454,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		if (layer != null) {
 			layer.addNode(token);
 		}
-		
+
 		// Create STextualRelation
 		STextualRelation textRel = SaltFactory.createSTextualRelation();
 		textRel.setSource(token);
@@ -428,7 +462,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		textRel.setStart(dSStartIndex);
 		textRel.setEnd(dSStartIndex + tokenLength);
 		graph.addRelation(textRel);
-		
+
 		// Create STimelineRelation
 		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
 		timeRel.setSource(token);
@@ -441,17 +475,17 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	/**
 	 * @return the lexicalTextualDS
 	 */
-	private STextualDS getLexicalTextualDS() {
+	public STextualDS getLexicalTextualDS() {
 		return lexicalTextualDS;
 	}
 
 	/**
 	 * @return the morphologicalTextualDS
 	 */
-	private STextualDS getMorphologicalTextualDS() {
+	public STextualDS getMorphologicalTextualDS() {
 		return morphologicalTextualDS;
 	}
-	
+
 	/**
 	 * @return the affixDelimiter
 	 */
@@ -466,7 +500,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		return cliticsDelimiter;
 	}
 
-	/* 
+	/*
 	 * @copydoc @see org.corpus_tools.pepper.impl.PepperMapperImpl#getProperties()
 	 */
 	@Override
