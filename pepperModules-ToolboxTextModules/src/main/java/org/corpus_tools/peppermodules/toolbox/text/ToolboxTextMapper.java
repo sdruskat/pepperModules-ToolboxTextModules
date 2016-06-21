@@ -29,12 +29,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
@@ -150,8 +153,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		File file = null;
 
 		// Set up layers
-		createLayer(getProperties().getMorphMarker());
-		createLayer(getProperties().getLexMarker());
+		createLayer(morphMarker);
+		createLayer(lexMarker);
 
 		logger.debug("Importing the file {}.", resource);
 
@@ -309,17 +312,19 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 	}
 
-	public void processRefs(Map<String, List<String>> block) {
+	public Map<String, Integer> processRefs(Map<String, List<String>> block) {
 		String[] delimiters = getProperties().getMorphemeDelimiters().split("\\s*,\\s*");
 		affixDelimiter = delimiters[0].trim();
 		cliticsDelimiter = delimiters[1].trim();
 
+		Map<String, Integer> fakeMap = new HashMap<>();
+		
 		Map<String, String> wordToMorph = new LinkedHashMap<>();
 			
 		for (Entry<String, List<String>> line : block.entrySet()) {
-			List<String> lexicalTokens = block.get(getProperties().getLexMarker());
+			List<String> lexicalTokens = block.get(lexMarker);
 			if (lexicalTokens != null) {
-				if (line.getKey().equals(getProperties().getMorphMarker())) {
+				if (line.getKey().equals(morphMarker)) {
 					List<String> vals = line.getValue();
 					int morphCounter = 0;
 					int wordCounter = -1;
@@ -333,8 +338,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 						if (isHead(singleVal, lastVal) && lastVal != null) {
 							wordCounter++;
 							String lexicalToken = lexicalTokens.get(wordCounter);
-							System.err.println("   LEX TOK " + lexicalToken + " - " + morphCounter);
-							wordToMorph.put(lexicalToken, morphUnitBuilder.toString());
+							
+							fakeMap.put(lexicalToken, morphCounter);
 							
 							// Prepare next iteration
 							morphCounter = 0;
@@ -347,8 +352,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 					wordCounter++;
 					morphCounter++;
 					String lexicalToken = lexicalTokens.get(wordCounter);
-					System.err.println("   LEX TOK " + lexicalToken + " - " + morphCounter);
-					wordToMorph.put(lexicalToken, morphUnitBuilder.toString());
+					
+					fakeMap.put(lexicalToken, morphCounter);
 				}
 			}
 			else {
@@ -358,6 +363,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		for (Entry<String, String> line : wordToMorph.entrySet()) {
 			System.err.println(line.getKey() + " > " + line.getValue());
 		}
+		return fakeMap;
 	}
 
 	/**
@@ -382,51 +388,130 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param block The reference block to process
 	 */
 	private void mapRefToModel(Map<String, List<String>> block) {
-		int morphDataSourceIndex = 0;
-		int timelineIndex = 0;
-		for (Entry<String, List<String>> line : block.entrySet()) {
-			// Morphology marker: Add to STextualDS and create STokens
-			getDocument().getDocumentGraph().addNode(getMorphologicalTextualDS());
-			if (line.getKey().equals(getProperties().getMorphMarker())) {
-				StringBuilder morphSourceTextBuilder = new StringBuilder();
-				StringBuilder morphologicalUnitBuilder = new StringBuilder();
-				for (String value : line.getValue()) {
-					// Add value to data source
-					if (!value.startsWith(getAffixDelimiter()) && !value.startsWith(getCliticsDelimiter())) {
-						if (morphologicalUnitBuilder.length() > 0) {
-							/*
-							 * Value does not start with a delimiter. But does the last value end with a delimiter, making this value a prefixed morpheme?
-							 */
-							String lastUnitString = morphologicalUnitBuilder.toString();
-							if (!lastUnitString.endsWith(getAffixDelimiter()) && !lastUnitString.endsWith(getCliticsDelimiter())) {
-								/*
-								 * There is at least one morpheme, and possibly affixes and/or clitics represented in the builder, but now we've hit a new morpheme, so first of all append what's in the unit builder to the source text
-								 * builder. If this is the first morpheme to be appended to the builder, do not add a whitespace.
-								 */
-								morphSourceTextBuilder.append(morphSourceTextBuilder.length() == 0 ? "" : " ").append(morphologicalUnitBuilder.toString());
-								morphologicalUnitBuilder.setLength(0);
-							}
-						}
-					}
-					morphologicalUnitBuilder.append(value);
-
-					// Add a token for this value
-					int tokenLength = value.length();
-					createToken(morphDataSourceIndex, tokenLength, timelineIndex, 1, layers.get(getProperties().getMorphMarker()), getMorphologicalTextualDS());
-					morphDataSourceIndex = morphDataSourceIndex + tokenLength + 1; // Increment the morphDSIndex by length + 1 (accounting for whitespace)
-					timelineIndex = timelineIndex + 1; // Increment timelineIndex by 1, as all morphemes are exactly 1 timeline units "long".
-				}
-				/*
-				 * Append what's in the unit builder one last time, as once we hit the end of the list, the appending won't be triggered as no new morpheme is hit.
-				 */
-				morphSourceTextBuilder.append(morphSourceTextBuilder.length() == 0 ? "" : " ").append(morphologicalUnitBuilder.toString());
-				// Now append the source text to the morphological data source
-				String currentDataSource = getMorphologicalTextualDS().getText();
-				String morphSourceText = morphSourceTextBuilder.toString();
-				String updatedDataSource = currentDataSource.concat(currentDataSource.length() == 0 ? "" : " ").concat(morphSourceText);
-				getMorphologicalTextualDS().setText(updatedDataSource);
+		// TODO Catch free morpheme delimiter error
+		// Resolve properties
+		String commaDelimRegex = "\\s*,\\s*";
+		String[] delimiters = getProperties().getMorphemeDelimiters().split(commaDelimRegex);
+		affixDelimiter = delimiters[0].trim();
+		cliticsDelimiter = delimiters[1].trim();
+		String lexMarker = getProperties().getLexMarker();
+		String morphMarker = getProperties().getMorphMarker();
+		String refMarker = getProperties().getRefMarker();
+		
+		Set<String> lexAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getLexAnnotationMarkers().split(commaDelimRegex)));
+		Set<String> morphAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getMorphAnnotationMarkers().split(commaDelimRegex)));
+		
+		StringBuilder morphDSBuilder = new StringBuilder();
+		StringBuilder lexDSBuilder = new StringBuilder();
+		
+		List<String> lexicalTokens = block.get(lexMarker);
+		Set<SToken> refTokens = new HashSet<>();
+		
+		HashMap<String, List<String>> lexAnnotationLines = new HashMap<>();
+		HashMap<String, List<String>> morphAnnotationLines = new HashMap<>();
+		HashMap<String, List<String>> refAnnotationLines = new HashMap<>();
+		
+		// Build maps of annotation levels
+		Iterator<Entry<String, List<String>>> mapIterator = block.entrySet().iterator();
+		while (mapIterator.hasNext()) {
+			Entry<String, List<String>> line = mapIterator.next();
+			String key = line.getKey();
+			if (key.equals(lexMarker) || key.equals(morphMarker) || key.equals(refMarker)) {
+				continue;
+			}
+			else if (lexAnnotationMarkers.contains(key)) {
+				lexAnnotationLines.put(key, line.getValue());
+			}
+			else if (morphAnnotationMarkers.contains(key)) {
+				morphAnnotationLines.put(key, line.getValue());
+			}
+			else {
+				refAnnotationLines.put(key, line.getValue());
 			}
 		}
+
+		List<String> morphologyValues = block.get(morphMarker);
+		// Build morphological and lexical tokens with annotations, and build data sources
+		// for (Entry<String, List<String>> line : block.entrySet()) {
+		// if (lexicalTokens != null) {
+		// if (line.getKey().equals(morphMarker)) {
+//		List<String> vals = line.getValue();
+		int morphCounter = 0;
+		int lexIndex = -1;
+		String lastMorpheme = null;
+		// StringBuilder morphUnitBuilder = new StringBuilder();
+		for (int morphIndex = 0; morphIndex < morphologyValues.size(); morphIndex++) {
+			if (morphIndex > 0) {
+				morphCounter++;
+			}
+			String morphemeTextToken = morphologyValues.get(morphIndex);
+			if (isHead(morphemeTextToken, lastMorpheme) && lastMorpheme != null) {
+				lexIndex++;
+				String lexicalTextToken = lexicalTokens.get(lexIndex);
+				// Map
+				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
+				refTokens.add(createLexicalToken(lexicalTextToken, morphCounter, lexIndex, lexAnnotationLines));
+
+				// Prepare next iteration
+				morphCounter = 0;
+				// morphUnitBuilder.setLength(0);
+			}
+			// morphUnitBuilder.append(singleVal);
+			morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
+			createMorphToken(morphemeTextToken, morphIndex, morphAnnotationLines);
+			lastMorpheme = morphemeTextToken;
+		}
+		// Map the loop's final iteration results as it has ended.
+		lexIndex++;
+		morphCounter++;
+		String lexicalTextToken = lexicalTokens.get(lexIndex);
+		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
+		refTokens.add(createLexicalToken(lexicalTextToken, morphCounter, lexIndex, lexAnnotationLines));
+		
+		int lastMorphIndex = morphologyValues.size() - 1;
+		String morphemeTextToken = morphologyValues.get(lastMorphIndex);
+		morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
+		createMorphToken(morphemeTextToken, lastMorphIndex, morphAnnotationLines);
+
+		// Add to data sources
+		String oldLexDSText = getLexicalTextualDS().getText();
+		getLexicalTextualDS().setText(oldLexDSText.concat(oldLexDSText.isEmpty() ? "" : " ").concat(lexDSBuilder.toString()));
+		String oldMorphDSText = getMorphologicalTextualDS().getText();
+		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : morphDSBuilder.toString()));
+		
+		// Now build the ref span and add ref-level annotations
+	}
+
+	// }
+	// else {
+	// throw new PepperModuleException("Reference block does not contain any lexical tokens!");
+	// }
+	// // Do work on ref-related lines
+	// }
+	// // Do block-wide work
+//	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param singleVal
+	 * @param i 
+	 */
+	private SToken createMorphToken(String singleVal, int i) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param lexicalTextToken
+	 * @param morphCounter
+	 * @return 
+	 */
+	private SToken createLexicalToken(String lexicalTextToken, int morphCounter) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**

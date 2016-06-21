@@ -62,12 +62,12 @@ public class ToolboxTextMapperTest {
 		block.put("ta", Arrays.asList(new String[]{"Dies", "ist", "ein", "Geburtstag", "Pony"}));
 		block.put("mb", Arrays.asList(new String[]{"Th", "-is", "is", "a", "bi-", "rth-", "day", "po", "=ny"}));
 		block.put("ma", Arrays.asList(new String[]{"TH", "-IS", "BE", "DET", "BI-", "RTH-", "TEMP", "PO", "=CLIT"}));
-		getFixture().processRefs(block);
-//		SDocumentGraph graph;
-//		assertNotNull(graph = getFixture().getDocument().getDocumentGraph());
-//		assertEquals(2, graph.getTextualDSs().size());
-//		assertNotNull(graph.getTimeline());
-//		assertEquals(9, graph.getTimeline().getEnd());
+		Map<String, Integer> result = getFixture().processRefs(block);
+		assertEquals(Integer.valueOf(2), result.get("This"));
+		assertEquals(Integer.valueOf(1), result.get("is"));
+		assertEquals(Integer.valueOf(1), result.get("a"));
+		assertEquals(Integer.valueOf(3), result.get("birthday"));
+		assertEquals(Integer.valueOf(2), result.get("pony"));
 	}
 
 	/**

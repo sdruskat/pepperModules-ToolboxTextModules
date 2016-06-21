@@ -161,7 +161,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return (String) getProperty(PROP_MORPH_MARKER).getValue();
 	}
 	
-	public String getTextAnnotationMarkers() {
+	public String getLexAnnotationMarkers() {
 		return (String) getProperty(PROP_LEX_ANNOTATION_MARKERS).getValue();
 	}
 	
