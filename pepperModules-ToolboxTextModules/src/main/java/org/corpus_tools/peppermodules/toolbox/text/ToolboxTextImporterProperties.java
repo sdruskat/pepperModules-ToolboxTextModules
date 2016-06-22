@@ -89,7 +89,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * All Toolbox markers which precede lines with annotations of source text segments (usually "words"),
 	 * without the preceding backslashes, and as a comma-separated list.
 	 */
-	private static final String PROP_LEX_ANNOTATION_MARKERS = "textAnnotationMarkers";
+	private static final String PROP_LEX_ANNOTATION_MARKERS = "lexAnnotationMarkers";
 	
 	/**
 	 * All Toolbox markers which precede lines with annotations of morphemes,

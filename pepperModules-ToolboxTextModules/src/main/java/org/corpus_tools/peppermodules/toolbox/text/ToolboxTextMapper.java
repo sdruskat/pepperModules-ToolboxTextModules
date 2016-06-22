@@ -31,7 +31,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -44,6 +43,7 @@ import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.SOrderRelation;
 import org.corpus_tools.salt.common.STextualDS;
 import org.corpus_tools.salt.common.STextualRelation;
 import org.corpus_tools.salt.common.STimeline;
@@ -51,6 +51,7 @@ import org.corpus_tools.salt.common.STimelineRelation;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
+import org.corpus_tools.salt.graph.Layer;
 import org.eclipse.emf.common.util.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,6 +112,14 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * Maps marker {@link String}s to {@link SLayer}s belonging to that marker.
 	 */
 	private Map<String, SLayer> layers = new HashMap<>();
+	
+	private SDocumentGraph graph = null;
+
+	private String lexMarker;
+
+	private String morphMarker;
+
+	private String refMarker;
 
 	/**
 	 * Adds a single metadate to the corpus, namely the current date (no time).
@@ -139,15 +148,20 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		getMorphologicalTextualDS().setText("");
 		getMorphologicalTextualDS().setName("morph"); // FIXME: Check whether ID or NAme, check useful name
 		getLexicalTextualDS().setText("");
+		getLexicalTextualDS().setName("lex");
 		String[] delimiters = getProperties().getMorphemeDelimiters().split("\\s*,\\s*");
 		affixDelimiter = delimiters[0].trim();
 		cliticsDelimiter = delimiters[1].trim();
-
+		String morphMarker = getProperties().getMorphMarker();
+		String refMarker = getProperties().getRefMarker();
+		String lexMarker = getProperties().getLexMarker();
+		
 		getDocument().setDocumentGraph(SaltFactory.createSDocumentGraph());
-		getDocument().getDocumentGraph().createTimeline();
+		setGraph(getDocument().getDocumentGraph());
+		getGraph().createTimeline();
 
-		getDocument().getDocumentGraph().addNode(getMorphologicalTextualDS());
-		getDocument().getDocumentGraph().addNode(getLexicalTextualDS());
+		getGraph().addNode(getMorphologicalTextualDS());
+		getGraph().addNode(getLexicalTextualDS());
 
 		URI resource = getResourceURI();
 		File file = null;
@@ -155,6 +169,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Set up layers
 		createLayer(morphMarker);
 		createLayer(lexMarker);
+		createLayer(refMarker);
 
 		logger.debug("Importing the file {}.", resource);
 
@@ -173,7 +188,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 
 		// Create the SDocumentGraph
-		if (getDocument().getDocumentGraph() == null) {
+		if (getGraph() == null) {
 			getDocument().setDocumentGraph(SaltFactory.createSDocumentGraph());
 		}
 
@@ -312,60 +327,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 	}
 
-	public Map<String, Integer> processRefs(Map<String, List<String>> block) {
-		String[] delimiters = getProperties().getMorphemeDelimiters().split("\\s*,\\s*");
-		affixDelimiter = delimiters[0].trim();
-		cliticsDelimiter = delimiters[1].trim();
-
-		Map<String, Integer> fakeMap = new HashMap<>();
-		
-		Map<String, String> wordToMorph = new LinkedHashMap<>();
-			
-		for (Entry<String, List<String>> line : block.entrySet()) {
-			List<String> lexicalTokens = block.get(lexMarker);
-			if (lexicalTokens != null) {
-				if (line.getKey().equals(morphMarker)) {
-					List<String> vals = line.getValue();
-					int morphCounter = 0;
-					int wordCounter = -1;
-					String lastVal = null;
-					StringBuilder morphUnitBuilder = new StringBuilder();
-					for (int i = 0; i < vals.size(); i++) {
-						if (i > 0) {
-							morphCounter++;
-						}
-						String singleVal = vals.get(i);
-						if (isHead(singleVal, lastVal) && lastVal != null) {
-							wordCounter++;
-							String lexicalToken = lexicalTokens.get(wordCounter);
-							
-							fakeMap.put(lexicalToken, morphCounter);
-							
-							// Prepare next iteration
-							morphCounter = 0;
-							morphUnitBuilder.setLength(0);
-						}
-						morphUnitBuilder.append(singleVal);
-						lastVal = singleVal;
-					}
-					// Write one last time because no further head will be hit
-					wordCounter++;
-					morphCounter++;
-					String lexicalToken = lexicalTokens.get(wordCounter);
-					
-					fakeMap.put(lexicalToken, morphCounter);
-				}
-			}
-			else {
-				throw new PepperModuleException("Reference block does not contain any lexical tokens!");
-			}
-		}
-		for (Entry<String, String> line : wordToMorph.entrySet()) {
-			System.err.println(line.getKey() + " > " + line.getValue());
-		}
-		return fakeMap;
-	}
-
 	/**
 	 * TODO: Description
 	 *
@@ -394,9 +355,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		String[] delimiters = getProperties().getMorphemeDelimiters().split(commaDelimRegex);
 		affixDelimiter = delimiters[0].trim();
 		cliticsDelimiter = delimiters[1].trim();
-		String lexMarker = getProperties().getLexMarker();
-		String morphMarker = getProperties().getMorphMarker();
-		String refMarker = getProperties().getRefMarker();
+		lexMarker = getProperties().getLexMarker();
+		morphMarker = getProperties().getMorphMarker();
+		refMarker = getProperties().getRefMarker();
 		
 		Set<String> lexAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getLexAnnotationMarkers().split(commaDelimRegex)));
 		Set<String> morphAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getMorphAnnotationMarkers().split(commaDelimRegex)));
@@ -432,13 +393,14 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 
 		List<String> morphologyValues = block.get(morphMarker);
 		// Build morphological and lexical tokens with annotations, and build data sources
-		// for (Entry<String, List<String>> line : block.entrySet()) {
-		// if (lexicalTokens != null) {
-		// if (line.getKey().equals(morphMarker)) {
-//		List<String> vals = line.getValue();
 		int morphCounter = 0;
 		int lexIndex = -1;
+		int morphTokenStart = 0;
+		int lexTokenStart = 0;
+		SToken lastMorphToken = null;
+		SToken lastLexToken = null;
 		String lastMorpheme = null;
+		int timelineCounter = 0;
 		// StringBuilder morphUnitBuilder = new StringBuilder();
 		for (int morphIndex = 0; morphIndex < morphologyValues.size(); morphIndex++) {
 			if (morphIndex > 0) {
@@ -450,68 +412,83 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				String lexicalTextToken = lexicalTokens.get(lexIndex);
 				// Map
 				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
-				refTokens.add(createLexicalToken(lexicalTextToken, morphCounter, lexIndex, lexAnnotationLines));
-
+				SToken lexToken = createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken);
+				refTokens.add(lexToken);
+				lastLexToken = lexToken;
+				
 				// Prepare next iteration
+				lexTokenStart += lexicalTextToken.length() + 1; // 1 accounting for whitespace 
 				morphCounter = 0;
-				// morphUnitBuilder.setLength(0);
 			}
-			// morphUnitBuilder.append(singleVal);
 			morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
-			createMorphToken(morphemeTextToken, morphIndex, morphAnnotationLines);
+			lastMorphToken = createMorphToken(morphemeTextToken, morphTokenStart, morphIndex, morphAnnotationLines, lastMorphToken, timelineCounter++);
+			morphTokenStart += morphemeTextToken.length() + 1; // 1 accounting for whitespace
 			lastMorpheme = morphemeTextToken;
 		}
 		// Map the loop's final iteration results as it has ended.
 		lexIndex++;
-		morphCounter++;
+//		morphCounter++;
 		String lexicalTextToken = lexicalTokens.get(lexIndex);
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
-		refTokens.add(createLexicalToken(lexicalTextToken, morphCounter, lexIndex, lexAnnotationLines));
+		refTokens.add(createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken));
 		
-		int lastMorphIndex = morphologyValues.size() - 1;
-		String morphemeTextToken = morphologyValues.get(lastMorphIndex);
-		morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
-		createMorphToken(morphemeTextToken, lastMorphIndex, morphAnnotationLines);
-
 		// Add to data sources
 		String oldLexDSText = getLexicalTextualDS().getText();
 		getLexicalTextualDS().setText(oldLexDSText.concat(oldLexDSText.isEmpty() ? "" : " ").concat(lexDSBuilder.toString()));
 		String oldMorphDSText = getMorphologicalTextualDS().getText();
-		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : morphDSBuilder.toString()));
+		
+		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
 		
 		// Now build the ref span and add ref-level annotations
 	}
 
-	// }
-	// else {
-	// throw new PepperModuleException("Reference block does not contain any lexical tokens!");
-	// }
-	// // Do work on ref-related lines
-	// }
-	// // Do block-wide work
-//	}
-
 	/**
 	 * TODO: Description
 	 *
-	 * @param singleVal
-	 * @param i 
+	 * @param morpheme
+	 * @param start
+	 * @param morphIndex
+	 * @param morphAnnotationLines
+	 * @param lastMorphToken 
+	 * @param timelineCounter 
+	 * @return
 	 */
-	private SToken createMorphToken(String singleVal, int i) {
-		// TODO Auto-generated method stub
+	private SToken createMorphToken(String morpheme, int start, int morphIndex, HashMap<String,List<String>> morphAnnotationLines, SToken lastMorphToken, int timelineCounter) {
+		SToken token = getGraph().createToken(getMorphologicalTextualDS(), start, start + morpheme.length());
+		for (Entry<String, List<String>> annotationLine : morphAnnotationLines.entrySet()) {
+			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(morphIndex));
+		}
+		if (lastMorphToken != null) {
+			SOrderRelation rel = SaltFactory.createSOrderRelation();
+			rel.setSource(lastMorphToken);
+			rel.setTarget(token);
+			getGraph().addRelation(rel);
+		}
 		
+		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
+		timeRel.setSource(token);
+		timeRel.setTarget(getGraph().getTimeline());
+		timeRel.setStart(timelineCounter);
+		timeRel.setEnd(timelineCounter);
+		getGraph().addRelation(timeRel);
+		token.addLayer((Layer<?, ?>) getGraph().getLayerByName(morphMarker).get(0));
+		
+		return token;
 	}
 
 	/**
 	 * TODO: Description
 	 *
 	 * @param lexicalTextToken
-	 * @param morphCounter
-	 * @return 
+	 * @param start
+	 * @param timelineUnits
+	 * @param lexIndex
+	 * @param lexAnnotationLines
+	 * @param lastLexToken 
+	 * @return
 	 */
-	private SToken createLexicalToken(String lexicalTextToken, int morphCounter) {
-		// TODO Auto-generated method stub
-		
+	private SToken createLexicalToken(String lexicalTextToken, int start, int timelineUnits, int lexIndex, HashMap<String,List<String>> lexAnnotationLines, SToken lastLexToken) {
+		return SaltFactory.createSToken();
 	}
 
 	/**
@@ -522,7 +499,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	private void createLayer(String name) {
 		SLayer layer = SaltFactory.createSLayer();
 		layer.setName(name);
-		getDocument().getDocumentGraph().addLayer(layer);
+		getGraph().addLayer(layer);
 		layers.put(name, layer);
 	}
 
@@ -533,7 +510,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param tokenLength
 	 */
 	private void createToken(int dSStartIndex, int tokenLength, int tlStartIndex, int timelineUnits, SLayer layer, STextualDS ds) {
-		SDocumentGraph graph = getDocument().getDocumentGraph();
 		SToken token = SaltFactory.createSToken();
 		graph.addNode(token);
 		if (layer != null) {
@@ -591,6 +567,20 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	@Override
 	public ToolboxTextImporterProperties getProperties() {
 		return (ToolboxTextImporterProperties) super.getProperties();
+	}
+
+	/**
+	 * @return the graph
+	 */
+	public SDocumentGraph getGraph() {
+		return graph;
+	}
+
+	/**
+	 * @param graph the graph to set
+	 */
+	public void setGraph(SDocumentGraph graph) {
+		this.graph = graph;
 	}
 
 }
