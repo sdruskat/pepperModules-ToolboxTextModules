@@ -51,7 +51,6 @@ import org.corpus_tools.salt.common.STimelineRelation;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
-import org.corpus_tools.salt.graph.Layer;
 import org.eclipse.emf.common.util.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,12 +113,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	private Map<String, SLayer> layers = new HashMap<>();
 	
 	private SDocumentGraph graph = null;
-
-	private String lexMarker;
-
-	private String morphMarker;
-
-	private String refMarker;
 
 	/**
 	 * Adds a single metadate to the corpus, namely the current date (no time).
@@ -355,9 +348,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		String[] delimiters = getProperties().getMorphemeDelimiters().split(commaDelimRegex);
 		affixDelimiter = delimiters[0].trim();
 		cliticsDelimiter = delimiters[1].trim();
-		lexMarker = getProperties().getLexMarker();
-		morphMarker = getProperties().getMorphMarker();
-		refMarker = getProperties().getRefMarker();
+		String lexMarker = getProperties().getLexMarker();
+		String morphMarker = getProperties().getMorphMarker();
+		String refMarker = getProperties().getRefMarker();
 		
 		Set<String> lexAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getLexAnnotationMarkers().split(commaDelimRegex)));
 		Set<String> morphAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getMorphAnnotationMarkers().split(commaDelimRegex)));
@@ -427,7 +420,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 		// Map the loop's final iteration results as it has ended.
 		lexIndex++;
-//		morphCounter++;
 		String lexicalTextToken = lexicalTokens.get(lexIndex);
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 		refTokens.add(createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken));
@@ -443,7 +435,15 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
-	 * TODO: Description
+	 * Creates a morphological token in the Salt graph.
+	 * <p>
+	 * More precisely, creates a token in this document's
+	 * {@link SDocumentGraph} on the data source object
+	 * defined by {@link #lexicalTextualDS},<br>then creates
+	 * an order relation from the last token (if it exists)
+	 * to this token,<br>then links the token to exactly
+	 * one point on the timeline (i.e., e.g., [1,1]),<br>
+	 * then adds the token to the morphological layer.
 	 *
 	 * @param morpheme
 	 * @param start
@@ -471,7 +471,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		timeRel.setStart(timelineCounter);
 		timeRel.setEnd(timelineCounter);
 		getGraph().addRelation(timeRel);
-		token.addLayer((Layer<?, ?>) getGraph().getLayerByName(morphMarker).get(0));
+		
+		token.addLayer(getGraph().getLayerByName(getProperties().getMorphMarker()).get(0)); // Get 1st element because there should only be exactly one layer by that name.
 		
 		return token;
 	}
