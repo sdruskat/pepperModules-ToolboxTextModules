@@ -195,23 +195,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		int lineListSize = lineList.size();
 		for (String line : lineList) {
 			if (!line.startsWith("\\" + getProperties().getRefMarker())) {
-				String[] markerAndValues = line.split("\\s+");
-				if (markerAndValues[0] == null) {
-					LinkedList<String> markerandValuesList = new LinkedList<String>(Arrays.asList(markerAndValues));
-					markerandValuesList.removeFirst();
-					markerAndValues = (String[]) markerandValuesList.toArray();
-				}
-				String marker = markerAndValues[0].substring(1, markerAndValues[0].length());
-				ArrayList<String> valueList = new ArrayList<>();
-				for (int i = 1; i < markerAndValues.length; i++) {
-					valueList.add(markerAndValues[i]);
-				}
-				if (!block.containsKey(marker)) {
-					block.put(marker, valueList);
-				}
-				else {
-					block.get(marker).addAll(valueList);
-				}
+				addLineToBlock(block, line);
 			}
 			else { // Hit a ref marker
 				if (!isHeaderBlockMapped) { // First hit of ref marker, i.e., block must be header block
@@ -222,6 +206,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 					mapRefToModel(block);
 				}
 				block.clear();
+				// Add the ref marker to the new block!
+				addLineToBlock(block, line);
+				
 			}
 			addProgress(((double) 1) / lineListSize);
 		}
@@ -231,6 +218,32 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		mapRefToModel(block);
 
 		return (DOCUMENT_STATUS.COMPLETED);
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param block
+	 * @param line
+	 */
+	private void addLineToBlock(Map<String, List<String>> block, String line) {
+		String[] markerAndValues = line.split("\\s+");
+		if (markerAndValues[0] == null) {
+			LinkedList<String> markerandValuesList = new LinkedList<String>(Arrays.asList(markerAndValues));
+			markerandValuesList.removeFirst();
+			markerAndValues = (String[]) markerandValuesList.toArray();
+		}
+		String marker = markerAndValues[0].substring(1, markerAndValues[0].length());
+		ArrayList<String> valueList = new ArrayList<>();
+		for (int i = 1; i < markerAndValues.length; i++) {
+			valueList.add(markerAndValues[i]);
+		}
+		if (!block.containsKey(marker)) {
+			block.put(marker, valueList);
+		}
+		else {
+			block.get(marker).addAll(valueList);
+		}
 	}
 
 	/**
@@ -321,18 +334,21 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
-	 * TODO: Description
+	 * Returns whether a morpheme (the current morpheme) is the
+	 * head morpheme. This is detected solely on the basis of
+	 * notation, i.e. a "head morpheme" in the meaning used here
+	 * is a morpheme which is neither an affix or a clitic.
 	 *
-	 * @param singleVal
-	 * @param lastVal
-	 * @return
+	 * @param currentMorpheme
+	 * @param lastMorpheme
+	 * @return whether the first argument is a "head morpheme" as defined in the description.
 	 */
-	private boolean isHead(String singleVal, String lastVal) {
-		if (lastVal == null) {
+	private boolean isHead(String currentMorpheme, String lastMorpheme) {
+		if (lastMorpheme == null) {
 			return true;
 		}
 		else {
-			return !singleVal.startsWith(getAffixDelimiter()) && !singleVal.startsWith(getCliticsDelimiter()) && !lastVal.endsWith(getAffixDelimiter()) && !lastVal.endsWith(getCliticsDelimiter());
+			return !currentMorpheme.startsWith(getAffixDelimiter()) && !currentMorpheme.startsWith(getCliticsDelimiter()) && !lastMorpheme.endsWith(getAffixDelimiter()) && !lastMorpheme.endsWith(getCliticsDelimiter());
 		}
 	}
 
@@ -342,6 +358,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param block The reference block to process
 	 */
 	private void mapRefToModel(Map<String, List<String>> block) {
+		String refMarker = getProperties().getRefMarker();
+		logger.debug("Mapping ref block \"" + block.get(refMarker).toString() + "\".");
 		// TODO Catch free morpheme delimiter error
 		// Resolve properties
 		String commaDelimRegex = "\\s*,\\s*";
@@ -350,7 +368,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		cliticsDelimiter = delimiters[1].trim();
 		String lexMarker = getProperties().getLexMarker();
 		String morphMarker = getProperties().getMorphMarker();
-		String refMarker = getProperties().getRefMarker();
 		
 		Set<String> lexAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getLexAnnotationMarkers().split(commaDelimRegex)));
 		Set<String> morphAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getMorphAnnotationMarkers().split(commaDelimRegex)));
@@ -359,6 +376,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		StringBuilder lexDSBuilder = new StringBuilder();
 		
 		List<String> lexicalTokens = block.get(lexMarker);
+		String refId = block.get(refMarker).toString();
 		Set<SToken> refTokens = new HashSet<>();
 		
 		HashMap<String, List<String>> lexAnnotationLines = new HashMap<>();
@@ -370,7 +388,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		while (mapIterator.hasNext()) {
 			Entry<String, List<String>> line = mapIterator.next();
 			String key = line.getKey();
-			if (key.equals(lexMarker) || key.equals(morphMarker) || key.equals(refMarker)) {
+			if (key.equals(refMarker) || key.equals(morphMarker) || key.equals(lexMarker)) {
 				continue;
 			}
 			else if (lexAnnotationMarkers.contains(key)) {
@@ -394,7 +412,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		SToken lastLexToken = null;
 		String lastMorpheme = null;
 		int timelineCounter = 0;
-		// StringBuilder morphUnitBuilder = new StringBuilder();
 		for (int morphIndex = 0; morphIndex < morphologyValues.size(); morphIndex++) {
 			if (morphIndex > 0) {
 				morphCounter++;
@@ -402,7 +419,17 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			String morphemeTextToken = morphologyValues.get(morphIndex);
 			if (isHead(morphemeTextToken, lastMorpheme) && lastMorpheme != null) {
 				lexIndex++;
-				String lexicalTextToken = lexicalTokens.get(lexIndex);
+				String lexicalTextToken = null;
+				try {
+					lexicalTextToken  = lexicalTokens.get(lexIndex);
+				}
+				catch (IndexOutOfBoundsException e) {
+					throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refMarker + 
+							"\"! There are only " + lexicalTokens.size() + " lexical items in the reference block, but the importer is trying to access an item number " + 
+							lexIndex + ".\n" + 
+							"This indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\n" + 
+							"Please fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
+				}
 				// Map
 				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 				SToken lexToken = createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken);
@@ -414,13 +441,19 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				morphCounter = 0;
 			}
 			morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
-			lastMorphToken = createMorphToken(morphemeTextToken, morphTokenStart, morphIndex, morphAnnotationLines, lastMorphToken, timelineCounter++);
+			lastMorphToken = createMorphToken(morphemeTextToken, morphTokenStart, morphIndex, morphAnnotationLines, lastMorphToken, timelineCounter++, refId);
 			morphTokenStart += morphemeTextToken.length() + 1; // 1 accounting for whitespace
 			lastMorpheme = morphemeTextToken;
 		}
 		// Map the loop's final iteration results as it has ended.
 		lexIndex++;
-		String lexicalTextToken = lexicalTokens.get(lexIndex);
+		String lexicalTextToken = null;
+		try {
+			lexicalTextToken = lexicalTokens.get(lexIndex);
+		}
+		catch (IndexOutOfBoundsException e) {
+			throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + block.get(refMarker).toString() + "\"! There are only " + lexicalTokens.size() + " lexical items in the reference block, but the importer is trying to access item number " + (lexIndex + 1) + ".\n" + "This indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\n" + "Please fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
+		}
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 		refTokens.add(createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken));
 		
@@ -428,14 +461,13 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		String oldLexDSText = getLexicalTextualDS().getText();
 		getLexicalTextualDS().setText(oldLexDSText.concat(oldLexDSText.isEmpty() ? "" : " ").concat(lexDSBuilder.toString()));
 		String oldMorphDSText = getMorphologicalTextualDS().getText();
-		
 		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
 		
 		// Now build the ref span and add ref-level annotations
 	}
 
 	/**
-	 * Creates a morphological token in the Salt graph.
+ 	 * Creates a morphological token in the Salt graph.
 	 * <p>
 	 * More precisely, creates a token in this document's
 	 * {@link SDocumentGraph} on the data source object
@@ -449,14 +481,25 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param start
 	 * @param morphIndex
 	 * @param morphAnnotationLines
-	 * @param lastMorphToken 
-	 * @param timelineCounter 
+	 * @param lastMorphToken
+	 * @param timelineCounter
+	 * @param refMarker Can be used for error reporting
 	 * @return
 	 */
-	private SToken createMorphToken(String morpheme, int start, int morphIndex, HashMap<String,List<String>> morphAnnotationLines, SToken lastMorphToken, int timelineCounter) {
+	private SToken createMorphToken(String morpheme, int start, int morphIndex, HashMap<String,List<String>> morphAnnotationLines, SToken lastMorphToken, int timelineCounter, String refMarker) {
 		SToken token = getGraph().createToken(getMorphologicalTextualDS(), start, start + morpheme.length());
 		for (Entry<String, List<String>> annotationLine : morphAnnotationLines.entrySet()) {
+			try {
 			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(morphIndex));
+			}
+			catch (IndexOutOfBoundsException e) {
+				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refMarker + 
+						"\" with morpheme \'" + morpheme + 
+						"\' and its annotation on level \'" + annotationLine.getKey() + 
+						"\'!\nThere are only " + annotationLine.getValue().size() + 
+						" values on this line, whereas the importer is trying to access value number " + (morphIndex + 1) + "...\n" +
+						"As the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", e);
+			}
 		}
 		if (lastMorphToken != null) {
 			SOrderRelation rel = SaltFactory.createSOrderRelation();
@@ -504,35 +547,35 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		layers.put(name, layer);
 	}
 
-	/**
-	 * TODO: Description
-	 *
-	 * @param dSStartIndex
-	 * @param tokenLength
-	 */
-	private void createToken(int dSStartIndex, int tokenLength, int tlStartIndex, int timelineUnits, SLayer layer, STextualDS ds) {
-		SToken token = SaltFactory.createSToken();
-		graph.addNode(token);
-		if (layer != null) {
-			layer.addNode(token);
-		}
-
-		// Create STextualRelation
-		STextualRelation textRel = SaltFactory.createSTextualRelation();
-		textRel.setSource(token);
-		textRel.setTarget(ds);
-		textRel.setStart(dSStartIndex);
-		textRel.setEnd(dSStartIndex + tokenLength);
-		graph.addRelation(textRel);
-
-		// Create STimelineRelation
-		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
-		timeRel.setSource(token);
-		timeRel.setTarget(graph.getTimeline());
-		timeRel.setStart(tlStartIndex);
-		timeRel.setEnd(tlStartIndex + timelineUnits);
-		graph.addRelation(timeRel);
-	}
+//	/**
+//	 * TODO: Description
+//	 *
+//	 * @param dSStartIndex
+//	 * @param tokenLength
+//	 */
+//	private void createToken(int dSStartIndex, int tokenLength, int tlStartIndex, int timelineUnits, SLayer layer, STextualDS ds) {
+//		SToken token = SaltFactory.createSToken();
+//		graph.addNode(token);
+//		if (layer != null) {
+//			layer.addNode(token);
+//		}
+//
+//		// Create STextualRelation
+//		STextualRelation textRel = SaltFactory.createSTextualRelation();
+//		textRel.setSource(token);
+//		textRel.setTarget(ds);
+//		textRel.setStart(dSStartIndex);
+//		textRel.setEnd(dSStartIndex + tokenLength);
+//		graph.addRelation(textRel);
+//
+//		// Create STimelineRelation
+//		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
+//		timeRel.setSource(token);
+//		timeRel.setTarget(graph.getTimeline());
+//		timeRel.setStart(tlStartIndex);
+//		timeRel.setEnd(tlStartIndex + timelineUnits);
+//		graph.addRelation(timeRel);
+//	}
 
 	/**
 	 * @return the lexicalTextualDS
