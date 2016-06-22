@@ -432,7 +432,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				}
 				// Map
 				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
-				SToken lexToken = createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken);
+				SToken lexToken = createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken, refId);
 				refTokens.add(lexToken);
 				lastLexToken = lexToken;
 				
@@ -455,7 +455,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + block.get(refMarker).toString() + "\"! There are only " + lexicalTokens.size() + " lexical items in the reference block, but the importer is trying to access item number " + (lexIndex + 1) + ".\n" + "This indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\n" + "Please fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
 		}
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
-		refTokens.add(createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken));
+		refTokens.add(createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken, refId));
 		
 		// Add to data sources
 		String oldLexDSText = getLexicalTextualDS().getText();
@@ -471,10 +471,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * <p>
 	 * More precisely, creates a token in this document's
 	 * {@link SDocumentGraph} on the data source object
-	 * defined by {@link #lexicalTextualDS},<br>then creates
+	 * defined by {@link #morphologicalTextualDS},<br>then creates
 	 * an order relation from the last token (if it exists)
 	 * to this token,<br>then links the token to exactly
-	 * one point on the timeline (i.e., e.g., [1,1]),<br>
+	 * one step on the timeline (i.e., e.g., [7,8]),<br>
 	 * then adds the token to the morphological layer.
 	 *
 	 * @param morpheme
@@ -483,17 +483,17 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param morphAnnotationLines
 	 * @param lastMorphToken
 	 * @param timelineCounter
-	 * @param refMarker Can be used for error reporting
+	 * @param refId Can be used for error reporting
 	 * @return
 	 */
-	private SToken createMorphToken(String morpheme, int start, int morphIndex, HashMap<String,List<String>> morphAnnotationLines, SToken lastMorphToken, int timelineCounter, String refMarker) {
+	private SToken createMorphToken(String morpheme, int start, int morphIndex, HashMap<String,List<String>> morphAnnotationLines, SToken lastMorphToken, int timelineCounter, String refId) {
 		SToken token = getGraph().createToken(getMorphologicalTextualDS(), start, start + morpheme.length());
 		for (Entry<String, List<String>> annotationLine : morphAnnotationLines.entrySet()) {
 			try {
 			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(morphIndex));
 			}
 			catch (IndexOutOfBoundsException e) {
-				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refMarker + 
+				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refId + 
 						"\" with morpheme \'" + morpheme + 
 						"\' and its annotation on level \'" + annotationLine.getKey() + 
 						"\'!\nThere are only " + annotationLine.getValue().size() + 
@@ -512,16 +512,23 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		timeRel.setSource(token);
 		timeRel.setTarget(getGraph().getTimeline());
 		timeRel.setStart(timelineCounter);
-		timeRel.setEnd(timelineCounter);
+		timeRel.setEnd(timelineCounter + 1);
 		getGraph().addRelation(timeRel);
 		
-		token.addLayer(getGraph().getLayerByName(getProperties().getMorphMarker()).get(0)); // Get 1st element because there should only be exactly one layer by that name.
+		token.addLayer(layers.get(getProperties().getMorphMarker()));
 		
 		return token;
 	}
 
 	/**
-	 * TODO: Description
+ 	 * Creates a lexical token in the Salt graph.
+	 * <p>
+	 * More precisely, creates a token in this document's
+	 * {@link SDocumentGraph} on the data source object
+	 * defined by {@link #lexicalTextualDS},<br>then creates
+	 * an order relation from the last token (if it exists)
+	 * to this token,<br>then links the token to the number of index spans on the timeline as defined by the {@code timelineUnits} parameter,<br>
+	 * then adds the token to the lexical layer.
 	 *
 	 * @param lexicalTextToken
 	 * @param start
@@ -531,8 +538,38 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param lastLexToken 
 	 * @return
 	 */
-	private SToken createLexicalToken(String lexicalTextToken, int start, int timelineUnits, int lexIndex, HashMap<String,List<String>> lexAnnotationLines, SToken lastLexToken) {
-		return SaltFactory.createSToken();
+	private SToken createLexicalToken(String lexicalTextToken, int start, int timelineUnits, int lexIndex, HashMap<String,List<String>> lexAnnotationLines, SToken lastLexToken, String refId) {
+		SToken token = getGraph().createToken(getMorphologicalTextualDS(), start, start + lexicalTextToken.length());
+		for (Entry<String, List<String>> annotationLine : lexAnnotationLines.entrySet()) {
+			try {
+			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(lexIndex));
+			}
+			catch (IndexOutOfBoundsException e) {
+				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refId + 
+						"\" with lexical unit \'" + lexicalTextToken + 
+						"\' and its annotation on level \'" + annotationLine.getKey() + 
+						"\'!\nThere are only " + annotationLine.getValue().size() + 
+						" values on this line, whereas the importer is trying to access value number " + (lexIndex + 1) + "...\n" +
+						"As the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", e);
+			}
+		}
+		if (lastLexToken != null) {
+			SOrderRelation rel = SaltFactory.createSOrderRelation();
+			rel.setSource(lastLexToken);
+			rel.setTarget(token);
+			getGraph().addRelation(rel);
+		}
+		
+		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
+		timeRel.setSource(token);
+		timeRel.setTarget(getGraph().getTimeline());
+		timeRel.setStart(start);
+		timeRel.setEnd(start + timelineUnits);
+		getGraph().addRelation(timeRel);
+		
+		token.addLayer(layers.get(getProperties().getLexMarker()));
+		
+		return token;
 	}
 
 	/**
