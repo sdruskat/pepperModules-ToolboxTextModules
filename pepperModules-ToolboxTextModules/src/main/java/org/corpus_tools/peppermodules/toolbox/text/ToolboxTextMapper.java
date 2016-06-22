@@ -44,8 +44,8 @@ import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SOrderRelation;
+import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.STextualDS;
-import org.corpus_tools.salt.common.STextualRelation;
 import org.corpus_tools.salt.common.STimeline;
 import org.corpus_tools.salt.common.STimelineRelation;
 import org.corpus_tools.salt.common.SToken;
@@ -58,19 +58,40 @@ import org.slf4j.LoggerFactory;
 /**
  * A mapper for the Toolbox text format.
  * <p>
- * The mapping works as follows. The Toolbox file is read line by line, cleaned up and compiled into a map mapping Toolbox markers to lists of "values", i.e., the remainder of the marker line (and subsequent unmarked non-empty lines).
+ * The mapping works as follows. The Toolbox file is read line by line, 
+ * cleaned up and compiled into a map mapping Toolbox markers to lists 
+ * of "values", i.e., the remainder of the marker line (and subsequent 
+ * unmarked non-empty lines).
  * <p>
- * This list is iterated and all lines belonging to a "block" - i.e., all lines following a reference marker, including the line with the reference marker itself - are subsequently mapped onto the Salt document graph.
+ * This list is iterated and all lines belonging to a "block" - i.e., 
+ * all lines following a reference marker, including the line with the 
+ * reference marker itself - are subsequently mapped onto the Salt document graph.
  * <p>
- * One special case is the lines before the first reference marker, which are assumed to belong to the "header". These lines are mapped onto meta annotations on the document itself.
+ * One special case is the lines before the first reference marker, 
+ * which are assumed to belong to the "header". These lines are mapped 
+ * onto meta annotations on the document itself.
  * <p>
- * The marked lines following a reference marker are mapped onto the Salt document graph as follows. The values from the lexical and morphology markers (as defined by {@link ToolboxTextImporterProperties#PROP_LEX_MARKER} and
- * {@link ToolboxTextImporterProperties#PROP_MORPH_MARKER}) are used as two separate tokenizations on two separate {@link STextualDS}s, which are synchronized via a {@link STimeline}. The tokens are subsequently annotated with the values
- * from the text annotations markers (as defined by {@link ToolboxTextImporterProperties#PROP_LEX_ANNOTATION_MARKERS}) and the morphology annotation markers (as defined by {@link ToolboxTextImporterProperties#PROP_MORPH_ANNOTATION_MARKERS})
- * respectively. (<strong>NOTE:</strong>It is assumed that the number of annotations always matches the number of tokens per reference!).
+ * The marked lines following a reference marker are mapped onto the 
+ * Salt document graph as follows. The values from the lexical and 
+ * morphology markers (as defined by 
+ * {@link ToolboxTextImporterProperties#PROP_LEX_MARKER} and
+ * {@link ToolboxTextImporterProperties#PROP_MORPH_MARKER}) are used 
+ * as two separate tokenizations on two separate {@link STextualDS}s, 
+ * which are synchronized via a {@link STimeline}. The tokens are 
+ * subsequently annotated with the values
+ * from the text annotations markers (as defined by 
+ * {@link ToolboxTextImporterProperties#PROP_LEX_ANNOTATION_MARKERS}) 
+ * and the morphology annotation markers (as defined by 
+ * {@link ToolboxTextImporterProperties#PROP_MORPH_ANNOTATION_MARKERS})
+ * respectively. (<strong>NOTE:</strong>It is assumed that the number 
+ * of annotations always matches the number of tokens per reference!).
  * <p>
- * The reference marker itself is modeled as a span over the <em>text</em> marker tokens of the reference. All markers <em>not</em> belonging to either lexical or morphology annotation layer are assumed to be reference level annotations and
- * are as such modeled as annotations on the reference span.
+ * The reference marker itself is modeled as a span over those  
+ * marker tokens of the reference which are defined by 
+ * {@link ToolboxTextImporterProperties#PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER}.
+ * All markers <em>not</em> belonging to either a lexical or 
+ * a morphological annotation layer are assumed to be reference level 
+ * annotations and are as such modeled as annotations on the reference span.
  *
  * @author Stephan Druskat <mail@sdruskat.net>
  */
@@ -433,7 +454,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				// Map
 				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 				SToken lexToken = createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken, refId);
-				refTokens.add(lexToken);
+				if (getProperties().mapRefAnnotationsToLexicalLayer()) {
+					refTokens.add(lexToken);
+				}
 				lastLexToken = lexToken;
 				
 				// Prepare next iteration
@@ -442,6 +465,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			}
 			morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
 			lastMorphToken = createMorphToken(morphemeTextToken, morphTokenStart, morphIndex, morphAnnotationLines, lastMorphToken, timelineCounter++, refId);
+			if (!getProperties().mapRefAnnotationsToLexicalLayer()) {
+				refTokens.add(lastMorphToken);
+			}
 			morphTokenStart += morphemeTextToken.length() + 1; // 1 accounting for whitespace
 			lastMorpheme = morphemeTextToken;
 		}
@@ -455,7 +481,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + block.get(refMarker).toString() + "\"! There are only " + lexicalTokens.size() + " lexical items in the reference block, but the importer is trying to access item number " + (lexIndex + 1) + ".\n" + "This indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\n" + "Please fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
 		}
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
-		refTokens.add(createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken, refId));
+		SToken lexicalToken = createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken, refId);
+		if (getProperties().mapRefAnnotationsToLexicalLayer()) {
+			refTokens.add(lexicalToken);
+		}
 		
 		// Add to data sources
 		String oldLexDSText = getLexicalTextualDS().getText();
@@ -464,6 +493,35 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
 		
 		// Now build the ref span and add ref-level annotations
+		createRefSpan(block.get(refMarker), refTokens, refAnnotationLines);
+	}
+
+	/**
+	 * Creates a span over tokens. This span is annotated
+	 * with all annotations from the {@code refAnnotationLines}
+	 * parameter and added to the reference layer.
+	 * <p>
+	 * Note that whether the span is build over tokens on
+	 * the lexical or morphological layer is defined by
+	 * {@link ToolboxTextImporterProperties#MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER}
+	 *
+	 * @param list
+	 * @param refTokens
+	 * @param refAnnotationLines
+	 */
+	private SSpan createRefSpan(List<String> list, Set<SToken> refTokens, HashMap<String, List<String>> refAnnotationLines) {
+		SSpan span = getGraph().createSpan(new ArrayList<>(refTokens));
+		for (Entry<String, List<String>> line : refAnnotationLines.entrySet()) {
+			StringBuilder sb = new StringBuilder();
+			for (String s : line.getValue())
+			{
+			    sb.append(s);
+			    sb.append(" ");
+			}
+			span.createAnnotation(SALT_NAMESPACE_TOOLBOX, line.getKey(), sb.toString().trim());
+		}
+		span.addLayer(layers.get(getProperties().getRefMarker()));
+		return span;
 	}
 
 	/**
@@ -490,7 +548,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		SToken token = getGraph().createToken(getMorphologicalTextualDS(), start, start + morpheme.length());
 		for (Entry<String, List<String>> annotationLine : morphAnnotationLines.entrySet()) {
 			try {
-			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(morphIndex));
+				token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(morphIndex));
 			}
 			catch (IndexOutOfBoundsException e) {
 				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refId + 
@@ -583,36 +641,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		getGraph().addLayer(layer);
 		layers.put(name, layer);
 	}
-
-//	/**
-//	 * TODO: Description
-//	 *
-//	 * @param dSStartIndex
-//	 * @param tokenLength
-//	 */
-//	private void createToken(int dSStartIndex, int tokenLength, int tlStartIndex, int timelineUnits, SLayer layer, STextualDS ds) {
-//		SToken token = SaltFactory.createSToken();
-//		graph.addNode(token);
-//		if (layer != null) {
-//			layer.addNode(token);
-//		}
-//
-//		// Create STextualRelation
-//		STextualRelation textRel = SaltFactory.createSTextualRelation();
-//		textRel.setSource(token);
-//		textRel.setTarget(ds);
-//		textRel.setStart(dSStartIndex);
-//		textRel.setEnd(dSStartIndex + tokenLength);
-//		graph.addRelation(textRel);
-//
-//		// Create STimelineRelation
-//		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
-//		timeRel.setSource(token);
-//		timeRel.setTarget(graph.getTimeline());
-//		timeRel.setStart(tlStartIndex);
-//		timeRel.setEnd(tlStartIndex + timelineUnits);
-//		graph.addRelation(timeRel);
-//	}
 
 	/**
 	 * @return the lexicalTextualDS

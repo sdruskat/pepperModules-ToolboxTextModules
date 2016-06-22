@@ -114,6 +114,12 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	private static final String PROP_FILE_EXTENSIONS = "fileExtensions";
 	
+	/**
+	 * Wether reference-level annotations should be mapped as a span onto tokens on the lexical layer.
+	 * {@code true} if so, and {@code false} if they should be mapped onto the morphological layer tokens.
+	 */
+	private static final String PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER = "mapRefAnnotationsToLexicalLayer";
+	
 	public ToolboxTextImporterProperties() {
 		addProperty(new PepperModuleProperty<>(PROP_LEX_MARKER, 
 				String.class, 
@@ -149,6 +155,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"The file extensions that corpus files can have as a comma-separated list.",
 				"txt,lbl",
 				true));
+		addProperty(new PepperModuleProperty<>(PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER, 
+				boolean.class,
+				"Wether reference-level annotations should be mapped as a span onto tokens on the lexical layer. \"true\" if so, and \"false\" if they should be mapped onto the morphological layer tokens.",
+				true,
+				true));
 	}
 	
 	// Getter methods for the different property values.
@@ -179,6 +190,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 
 	public String getFileExtensions() {
 		return (String) getProperty(PROP_FILE_EXTENSIONS).getValue();
+	}
+	
+	public boolean mapRefAnnotationsToLexicalLayer() {
+		return (boolean) getProperty(PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER).getValue();
 	}
 
 }
