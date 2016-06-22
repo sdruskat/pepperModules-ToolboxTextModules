@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1466608218144
+Bnd-LastModified: 1466611957869
 Build-Jdk: 1.7.0_101
 Built-By: stephan
 Bundle-Description: Provides shared POM-data.

@@ -478,7 +478,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			lexicalTextToken = lexicalTokens.get(lexIndex);
 		}
 		catch (IndexOutOfBoundsException e) {
-			throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + block.get(refMarker).toString() + "\"! There are only " + lexicalTokens.size() + " lexical items in the reference block, but the importer is trying to access item number " + (lexIndex + 1) + ".\n" + "This indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\n" + "Please fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
+			logger.error("\n\n#####\nAlignment problem in block \"{}\"! There are only {} lexical items in the reference block, but the importer is trying to access item number {}.\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n",
+					block.get(refMarker).toString(), lexicalTokens.size(), (lexIndex + 1), 
+					new PepperModuleException(null, e));
 		}
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 		SToken lexicalToken = createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken, refId);
@@ -551,12 +553,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(morphIndex));
 			}
 			catch (IndexOutOfBoundsException e) {
-				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refId + 
-						"\" with morpheme \'" + morpheme + 
-						"\' and its annotation on level \'" + annotationLine.getKey() + 
-						"\'!\nThere are only " + annotationLine.getValue().size() + 
-						" values on this line, whereas the importer is trying to access value number " + (morphIndex + 1) + "...\n" +
-						"As the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", e);
+				logger.error("\n\n#####\nAlignment problem in block \"{}\" with morpheme \'{}\' and its annotation on level \'{}\'!\nThere are only {} values on this line, whereas the importer is trying to access value number {}...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n",
+						refId, morpheme, annotationLine.getKey(), annotationLine.getValue().size(), (morphIndex + 1),
+						new PepperModuleException(null, e));
 			}
 		}
 		if (lastMorphToken != null) {
@@ -603,13 +602,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(lexIndex));
 			}
 			catch (IndexOutOfBoundsException e) {
-				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refId + 
-						"\" with lexical unit \'" + lexicalTextToken + 
-						"\' and its annotation on level \'" + annotationLine.getKey() + 
-						"\'!\nThere are only " + annotationLine.getValue().size() + 
-						" values on this line, whereas the importer is trying to access value number " + (lexIndex + 1) + "...\n" +
-						"As the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", e);
-			}
+				logger.error("\n\n#####\nAlignment problem in block \"{}\" with lexical unit \'{}\' and its annotation on level \'{}\'!\nThere are only {} values on this line, whereas the importer is trying to access value number {}...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n",
+						refId, lexicalTextToken, annotationLine.getKey(), annotationLine.getValue().size(), (lexIndex + 1), 
+						new PepperModuleException(null, e));}
 		}
 		if (lastLexToken != null) {
 			SOrderRelation rel = SaltFactory.createSOrderRelation();

@@ -156,7 +156,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"txt,lbl",
 				true));
 		addProperty(new PepperModuleProperty<>(PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER, 
-				boolean.class,
+				Boolean.class,
 				"Wether reference-level annotations should be mapped as a span onto tokens on the lexical layer. \"true\" if so, and \"false\" if they should be mapped onto the morphological layer tokens.",
 				true,
 				true));
@@ -192,8 +192,8 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return (String) getProperty(PROP_FILE_EXTENSIONS).getValue();
 	}
 	
-	public boolean mapRefAnnotationsToLexicalLayer() {
-		return (boolean) getProperty(PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER).getValue();
+	public Boolean mapRefAnnotationsToLexicalLayer() {
+		return (Boolean) getProperty(PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER).getValue();
 	}
 
 }
