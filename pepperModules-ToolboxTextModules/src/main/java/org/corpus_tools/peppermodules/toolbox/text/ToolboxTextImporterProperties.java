@@ -98,6 +98,18 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	private static final String PROP_MORPH_ANNOTATION_MARKERS = "morphologyAnnotationMarkers";
 	
 	/**
+	 * All Toolbox markers which precede lines with document-specific metadata, 
+	 * without the preceding backslashes, and as a comma-separated list. 
+	 */
+	private static final String PROP_DOCUMENT_METADATA_MARKERS = "documentMetaDataMarkers";
+	
+	/**
+	 * All Toolbox markers which precede lines with reference-specific metadata, 
+	 * without the preceding backslashes, and as a comma-separated list. 
+	 */
+	private static final String PROP_REF_METADATA_MARKERS = "refMetaDataMarkers";
+	
+	/**
 	 * The morpheme delimiters used in the Toolbox files as a comma-separated two-point list where
 	 * the first element is the <strong>affix</strong> delimiter, and the second element is the
 	 * <strong>clitics</strong> delimiter.
@@ -120,6 +132,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	private static final String PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER = "mapRefAnnotationsToLexicalLayer";
 	
+	
 	public ToolboxTextImporterProperties() {
 		addProperty(new PepperModuleProperty<>(PROP_LEX_MARKER, 
 				String.class, 
@@ -134,6 +147,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		addProperty(new PepperModuleProperty<>(PROP_LEX_ANNOTATION_MARKERS, 
 				String.class, 
 				"All Toolbox markers which precede lines with annotations of source text segments (usually lexical items), without the preceding backslashes, and as a comma-separated list.",
+				"",
 				false));
 		addProperty(new PepperModuleProperty<>(PROP_MORPH_ANNOTATION_MARKERS, 
 				String.class,
@@ -160,6 +174,14 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"Wether reference-level annotations should be mapped as a span onto tokens on the lexical layer. \"true\" if so, and \"false\" if they should be mapped onto the morphological layer tokens.",
 				true,
 				true));
+		addProperty(new PepperModuleProperty<>(PROP_DOCUMENT_METADATA_MARKERS, 
+				String.class,
+				"All Toolbox markers which precede lines with document-specific metadata, without the preceding backslashes, and as a comma-separated list.",
+				false));
+		addProperty(new PepperModuleProperty<>(PROP_REF_METADATA_MARKERS, 
+				String.class,
+				"All Toolbox markers which precede lines with reference-specific metadata, without the preceding backslashes, and as a comma-separated list.",
+				false));
 	}
 	
 	// Getter methods for the different property values.
@@ -194,6 +216,14 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	
 	public Boolean mapRefAnnotationsToLexicalLayer() {
 		return (Boolean) getProperty(PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER).getValue();
+	}
+	
+	public String getDocMetadataMarkers() {
+		return (String) getProperty(PROP_DOCUMENT_METADATA_MARKERS).getValue();
+	}
+	
+	public String getRefMetadataMarkers() {
+		return (String) getProperty(PROP_REF_METADATA_MARKERS).getValue();
 	}
 
 }
