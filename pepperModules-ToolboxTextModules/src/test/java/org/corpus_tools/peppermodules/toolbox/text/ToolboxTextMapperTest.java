@@ -20,13 +20,18 @@ package org.corpus_tools.peppermodules.toolbox.text;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
+import org.apache.commons.io.IOUtils;
+import org.corpus_tools.salt.SaltFactory;
+import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.STextualDS;
+import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,29 +52,54 @@ public class ToolboxTextMapperTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		setFixture(new ToolboxTextMapper());
-		getFixture().setProperties(new ToolboxTextImporterProperties());
+		ToolboxTextMapper mapper = new ToolboxTextMapper();
+		File file = new File(this.getClass().getClassLoader().getResource("test.txt").getFile());
+		String path = file.getAbsolutePath();
+		mapper.setResourceURI(URI.createFileURI(path));
+		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
+		mapper.setProperties(properties);
+		SDocument doc = SaltFactory.createSDocument();
+		mapper.setDocument(doc);
+		setFixture(mapper);
 	}
-
+	
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#processRefs(java.util.Map)}.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}.
 	 */
 	@Test
-	public void testProcessRefs() {
-		Map<String, List<String>> block = new HashMap<>();
-		block.put("ref", Arrays.asList(new String[]{"Ref"}));
-		block.put("tx", Arrays.asList(new String[]{"This", "is", "a", "birthday", "pony"}));
-		block.put("ta", Arrays.asList(new String[]{"Dies", "ist", "ein", "Geburtstag", "Pony"}));
-		block.put("mb", Arrays.asList(new String[]{"Th", "-is", "is", "a", "bi-", "rth-", "day", "po", "=ny"}));
-		block.put("ma", Arrays.asList(new String[]{"TH", "-IS", "BE", "DET", "BI-", "RTH-", "TEMP", "PO", "=CLIT"}));
-//		Map<String, Integer> result = getFixture().processRefs(block);
-//		assertEquals(Integer.valueOf(2), result.get("This"));
-//		assertEquals(Integer.valueOf(1), result.get("is"));
-//		assertEquals(Integer.valueOf(1), result.get("a"));
-//		assertEquals(Integer.valueOf(3), result.get("birthday"));
-//		assertEquals(Integer.valueOf(2), result.get("pony"));
+	public void testMapSDocument() {
+		getFixture().mapSDocument();
+		assertNotNull(getFixture().getDocument().getDocumentGraph());
+		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
+		assertTrue(graph == getFixture().getGraph());
+		assertEquals(3, graph.getLayers().size());
+		assertNotNull(graph.getLayerByName("ref"));
+		assertNotNull(graph.getLayerByName("tx"));
+		assertNotNull(graph.getLayerByName("mb"));
+		assertEquals(3, getFixture().getDocument().getMetaAnnotations().size());
+		assertNotNull(getFixture().getDocument().getMetaAnnotation("toolbox::_sh"));
+		assertNotNull(getFixture().getDocument().getMetaAnnotation("toolbox::id"));
+		assertNotNull(getFixture().getDocument().getMetaAnnotation("toolbox::info"));
+		// Textual DSs
+		assertEquals(2, graph.getTextualDSs().size());
+		for (STextualDS ds : graph.getTextualDSs()) {
+			assertNotNull(ds.getText());
+			assertTrue(ds.getText().length() > 0);
+			if (ds.getName().equals("lexical-ds")) {
+				assertEquals("Wort Kompositum Wort Dreifachwort Wort Wort Wort Doppelwort Doppelwortmitfreiemdash Wort", ds.getText());
+			}
+			else if (ds.getName().equals("morphology-ds")) {
+				assertEquals("m1 m2 -m3 m4 m5- m6= m7 m8 m9 m10 m11 -m12 m13 -m14 m15", ds.getText());
+			}
+			else {
+				fail("TextualDS with name other than \"mb\" or \"tx\" found: " + ds.getName());
+			}
+		}
+		// Tokens
+		// Timeline
+		// Annotations
 	}
-
+	
 	/**
 	 * @return the fixture
 	 */
@@ -83,5 +113,4 @@ public class ToolboxTextMapperTest {
 	private void setFixture(ToolboxTextMapper fixture) {
 		this.fixture = fixture;
 	}
-
 }
