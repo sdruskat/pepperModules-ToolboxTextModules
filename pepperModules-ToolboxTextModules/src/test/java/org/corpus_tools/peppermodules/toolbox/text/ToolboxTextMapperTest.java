@@ -25,24 +25,36 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.STextualDS;
+import org.corpus_tools.salt.common.SToken;
+import org.corpus_tools.salt.core.SLayer;
+import org.corpus_tools.salt.core.SNode;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * Unit tests for {@link ToolboxTextMapper}.
  *
  * @author Stephan Druskat <mail@sdruskat.net>
- *
  */
 public class ToolboxTextMapperTest {
-	
+
 	private ToolboxTextMapper fixture = null;
 
 	/**
@@ -62,12 +74,12 @@ public class ToolboxTextMapperTest {
 		mapper.setDocument(doc);
 		setFixture(mapper);
 	}
-	
+
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the setup of the document graph.
 	 */
 	@Test
-	public void testMapSDocument() {
+	public void testMapSDocumentSetup() {
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -80,7 +92,20 @@ public class ToolboxTextMapperTest {
 		assertNotNull(getFixture().getDocument().getMetaAnnotation("toolbox::_sh"));
 		assertNotNull(getFixture().getDocument().getMetaAnnotation("toolbox::id"));
 		assertNotNull(getFixture().getDocument().getMetaAnnotation("toolbox::info"));
-		// Textual DSs
+		assertEquals("v3.0 Test", getFixture().getDocument().getMetaAnnotation("toolbox::_sh").getValue());
+		assertEquals("Some Info", getFixture().getDocument().getMetaAnnotation("toolbox::info").getValue());
+		assertEquals("Some ID", getFixture().getDocument().getMetaAnnotation("toolbox::id").getValue());
+	}
+
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the data sources in the document graph.
+	 */
+	@Test
+	public void testMapSDocumentDS() {
+		getFixture().mapSDocument();
+		assertNotNull(getFixture().getDocument().getDocumentGraph());
+		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
+		assertTrue(graph == getFixture().getGraph());
 		assertEquals(2, graph.getTextualDSs().size());
 		for (STextualDS ds : graph.getTextualDSs()) {
 			assertNotNull(ds.getText());
@@ -95,11 +120,162 @@ public class ToolboxTextMapperTest {
 				fail("TextualDS with name other than \"mb\" or \"tx\" found: " + ds.getName());
 			}
 		}
-		// Tokens
-		// Timeline
-		// Annotations
 	}
-	
+
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the tokens in the document graph.
+	 */
+	@Test
+	public void testMapSDocumentTokens() {
+		getFixture().mapSDocument();
+		assertNotNull(getFixture().getDocument().getDocumentGraph());
+		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
+		assertTrue(graph == getFixture().getGraph());
+		List<SLayer> lexLayers = graph.getLayerByName("tx");
+		List<SLayer> morphLayers = graph.getLayerByName("mb");
+		assertEquals(1, lexLayers.size());
+		assertEquals(1, morphLayers.size());
+		List<SToken> lexTokens = new ArrayList<>();
+		List<SToken> morphTokens = new ArrayList<>();
+		for (SNode node : lexLayers.get(0).getNodes()) {
+			if (node instanceof SToken) {
+				lexTokens.add((SToken) node);
+			}
+		}
+		for (SNode node : morphLayers.get(0).getNodes()) {
+			if (node instanceof SToken) {
+				morphTokens.add((SToken) node);
+			}
+		}
+		String[] lexTokenTestSet = new String[] { "Wort", "Kompositum", "Wort", "Dreifachwort", "Wort", "Wort", "Wort", "Doppelwort", "Doppelwortmitfreiemdash", "Wort" };
+		List<SToken> sortedLexTokens = graph.getSortedTokenByText(lexTokens);
+		assertEquals(10, sortedLexTokens.size());
+		for (int i = 0; i < lexTokenTestSet.length; i++) {
+			assertEquals(lexTokenTestSet[i], graph.getText(sortedLexTokens.get(i)));
+		}
+		String[] morphTokenTestSet = new String[] { "m1", "m2", "-m3", "m4", "m5-", "m6=", "m7", "m8", "m9", "m10", "m11", "-m12", "m13", "-m14", "m15" };
+		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(lexTokens);
+		assertEquals(10, sortedMorphTokens.size());
+		for (int i = 0; i < morphTokenTestSet.length; i++) {
+			assertEquals(morphTokenTestSet[i], graph.getText(sortedMorphTokens.get(i)));
+		}
+	}
+
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the annotations in the document graph.
+	 */
+	@Test
+	public void testMapSDocumentAnnotations() {
+		getFixture().mapSDocument();
+		assertNotNull(getFixture().getDocument().getDocumentGraph());
+		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
+		assertTrue(graph == getFixture().getGraph());
+		List<SLayer> refLayers = graph.getLayerByName("ref");
+		assertEquals(1, refLayers.size());
+		List<SLayer> lexLayers = graph.getLayerByName("tx");
+		List<SLayer> morphLayers = graph.getLayerByName("mb");
+		assertEquals(1, lexLayers.size());
+		assertEquals(1, morphLayers.size());
+		List<String[]> refAnnoMap = new ArrayList<>();
+		List<String[]> lexAnnoMap = new ArrayList<>(10);
+		List<String[]> morphAnnoMap = new ArrayList<>(15);
+		List<SToken> lexTokens = new ArrayList<>();
+		List<SToken> morphTokens = new ArrayList<>();
+		for (SNode node : lexLayers.get(0).getNodes()) {
+			if (node instanceof SToken) {
+				lexTokens.add((SToken) node);
+			}
+		}
+		for (SNode node : morphLayers.get(0).getNodes()) {
+			if (node instanceof SToken) {
+				morphTokens.add((SToken) node);
+			}
+		}
+		// Lex annotations
+		lexAnnoMap.add(new String[]{"Wort", "Eins"});
+		lexAnnoMap.add(new String[]{"Kompositum", "Zwei"});
+		lexAnnoMap.add(new String[]{"Wort", "Drei"});
+		lexAnnoMap.add(new String[]{"Dreifachwort", "Vier"});
+		lexAnnoMap.add(new String[]{"Wort", "Fünf"});
+		lexAnnoMap.add(new String[]{"Wort", "Sechs"});
+		lexAnnoMap.add(new String[]{"Wort", "Sieben"});
+		lexAnnoMap.add(new String[]{"Doppelwort", "Acht"});
+		lexAnnoMap.add(new String[]{"Doppelwortmitfreiemdash", "Neun"});
+		lexAnnoMap.add(new String[]{"Wort", "Zehn"});
+		List<SToken> sortedLexTokens = graph.getSortedTokenByText(lexTokens);
+		assertEquals(10, sortedLexTokens.size());
+		for (int i = 0; i < sortedLexTokens.size(); i++) {
+			SToken token = sortedLexTokens.get(i);
+			String tokenText = graph.getText(token);
+			String annoText = (String) token.getAnnotation("toolbox", "ta").getValue();
+			assertEquals(lexAnnoMap.get(i)[0], tokenText);
+			assertEquals(lexAnnoMap.get(i)[1], annoText);
+		}
+			
+		// Morph annotations
+		morphAnnoMap.add(new String[]{"m1", "M1"});
+		morphAnnoMap.add(new String[]{"m1", "M2"});
+		morphAnnoMap.add(new String[]{"-m3", "M3"});
+		morphAnnoMap.add(new String[]{"m4", "M4"});
+		morphAnnoMap.add(new String[]{"m5-", "M5"});
+		morphAnnoMap.add(new String[]{"m6=", "M6"});
+		morphAnnoMap.add(new String[]{"m7", "M7"});
+		morphAnnoMap.add(new String[]{"m8", "M8"});
+		morphAnnoMap.add(new String[]{"m9", "M9"});
+		morphAnnoMap.add(new String[]{"m10", "M10"});
+		morphAnnoMap.add(new String[]{"m11", "M11"});
+		morphAnnoMap.add(new String[]{"-m12", "M12"});
+		morphAnnoMap.add(new String[]{"m13", "M13"});
+		morphAnnoMap.add(new String[]{"-m14", "M14"}); // From "-" + "m14"
+		morphAnnoMap.add(new String[]{"m15", "M15"});
+		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(lexTokens);
+		assertEquals(15, sortedMorphTokens.size());
+		for (int i = 0; i < sortedMorphTokens.size(); i++) {
+			SToken token = sortedMorphTokens.get(i);
+			String tokenText = graph.getText(token);
+			String annoText = (String) token.getAnnotation("toolbox", "ge").getValue();
+			assertEquals(lexAnnoMap.get(i)[0], tokenText);
+			assertEquals(lexAnnoMap.get(i)[1], annoText);
+		}
+	}
+
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the annotations in the document graph.
+	 */
+	@Test
+	public void testMapSDocumentTimeline() {
+		fail();
+	}
+
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the ref spans in the document graph.
+	 */
+	@Test
+	public void testMapSDocumentRefSpans() {
+		fail();
+	}
+
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the meta annotations in the document graph.
+	 */
+	@Test
+	public void testMapSDocumentMetaAnnotations() {
+//		getFixture().mapSDocument();
+//		assertNotNull(getFixture().getDocument().getDocumentGraph());
+//		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
+//		assertTrue(graph == getFixture().getGraph());
+//		List<SLayer> refLayers = graph.getLayerByName("ref");
+//		assertEquals(1, refLayers.size());
+//		List<SLayer> lexLayers = graph.getLayerByName("tx");
+//		List<SLayer> morphLayers = graph.getLayerByName("mb");
+//		assertEquals(1, lexLayers.size());
+//		assertEquals(1, morphLayers.size());
+//		Map<String, List<String>> refAnnoMap = new HashMap<>();
+//		Map<String, List<String>> lexAnnoMap = new HashMap<>();
+//		Map<String, List<String>> morphAnnoMap = new HashMap<>();
+		fail();
+	}
+
 	/**
 	 * @return the fixture
 	 */
