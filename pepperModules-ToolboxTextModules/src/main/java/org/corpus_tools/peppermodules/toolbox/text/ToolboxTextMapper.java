@@ -135,7 +135,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	
 	private SDocumentGraph graph = null;
 	
-	private int timelineIndex = -1;
+	private int lexTimelineIndex = 0;
+	private int morphTimelineIndex = 0;
 	private int lexDSIndex = 0;
 	private int morphDSIndex = 0;
 	
@@ -230,7 +231,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 					isHeaderBlockMapped = true;
 				}
 				else {
-//					mapRefToModel(block);
+					mapRefToModel(block);
 				}
 				block.clear();
 				// Add the ref marker to the new block!
@@ -242,7 +243,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		/*
 		 * Map ref block to model once, because we cannot hit a ref marker at the end of the list anymore to trigger a block mapping process.
 		 */
-//		mapRefToModel(block);
+		mapRefToModel(block);
 
 		return (DOCUMENT_STATUS.COMPLETED);
 	}
@@ -386,12 +387,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @return 
 	 */
 	private int mapRefToModel(Map<String, List<String>> block) {
-//		logger.info("     orig data source index for this block: " + dataSourceIndex);
-//		logger.info("\n\n+++++++++++++++++\n\n");
-//		for (Entry<String, List<String>> line : block.entrySet()) {
-//			logger.info(line.getKey() + ": " + line.getValue());
-//		}
-//		logger.info("\n\n+++++++++++++++++\n\n");
 		// Resolve properties
 		String refMarker = getProperties().getRefMarker();
 		logger.debug("Mapping ref block \"" + block.get(refMarker).toString() + "\".");
@@ -412,7 +407,32 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Get text tokens for lex and morph
 		List<String> lexicalTextTokens = block.get(lexMarker);
 		List<String> morphologicalTextTokens = block.get(morphMarker);
-		Set<SToken> refTokens = new HashSet<>();
+		// Sanitize detached morpheme delimiters if configured
+		if (getProperties().attachDetachedMorphemeDelimiter()) {
+			// Check if it is necessary to sanitize morphology tokens
+			if (morphologicalTextTokens.contains(cliticsDelimiter) || morphologicalTextTokens.contains(affixDelimiter)) {
+				ListIterator<String> iterator = morphologicalTextTokens.listIterator();
+				while (iterator.hasNext()) {
+					String token = (String) iterator.next();
+					if (token.equals(cliticsDelimiter) || token.equals(affixDelimiter)) {
+						if (getProperties().attachDetachedMorphemeDelimiterToSubsequentElement()) {
+							String nextToken = morphologicalTextTokens.get(iterator.nextIndex());
+							morphologicalTextTokens.set(iterator.nextIndex(), token + nextToken);
+							iterator.remove();
+						}
+						else {
+							String previousToken = morphologicalTextTokens.get(iterator.previousIndex());
+							morphologicalTextTokens.set(iterator.previousIndex(), previousToken + token);
+							iterator.remove();
+						}
+					}
+				}
+			}
+//			for (int i = 0; i < morphologicalTextTokens.size(); i++) {
+//				if (morphologicalTextTokens.get(index))
+//			}
+		}
+		Set<SToken> lexTokenSet = new HashSet<>();
 		
 		// Increment timeline
 		getGraph().getTimeline().increasePointOfTime(morphologicalTextTokens.size());
@@ -421,6 +441,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		HashMap<String, List<String>> lexAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> morphAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> refAnnotationLines = new HashMap<>();
+		HashMap<String, List<String>> refLine = new HashMap<>(1);
 		
 		// Build maps of annotation levels
 		Iterator<Entry<String, List<String>>> mapIterator = block.entrySet().iterator();
@@ -428,6 +449,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			Entry<String, List<String>> line = mapIterator.next();
 			String key = line.getKey();
 			if (key.equals(refMarker) || key.equals(morphMarker) || key.equals(lexMarker)) {
+				if (key.equals(refMarker)) {
+					refLine.put(key, line.getValue());
+				}
 				continue;
 			}
 			else if (lexAnnotationMarkers.contains(key)) {
@@ -442,84 +466,83 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 
 		// Build morphological and lexical tokens with annotations, and build data sources
-//		int morphCounter = 0;
-//		int lexIndex = -1;
-////		int morphTokenStart = 0;
+		int morphCounter = 0;
+		int lexIndex = -1;
+		Set<SToken> refTokens = new HashSet<>();
 //		int lexTokenStart = 0;
-//		SToken lastMorphToken = null;
-//		SToken lastLexToken = null;
-//		String lastMorpheme = null;
-//		int lexTimeLineIndex = 0;
-//		for (int morphIndex = 0; morphIndex < morphologicalTextTokens.size(); morphIndex++) {
-//			
-//			if (morphIndex > 0) {
-//				morphCounter++;
-//			}
-//			String morphemeTextToken = morphologicalTextTokens.get(morphIndex);
-//			if (isHead(morphemeTextToken, lastMorpheme) && lastMorpheme != null) {
-//				lexIndex++;
-//				String lexicalTextToken = null;
-//				try {
-//					lexicalTextToken  = lexicalTextTokens.get(lexIndex);
-//				}
-//				catch (IndexOutOfBoundsException e) {
-//					throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refMarker + 
-//							"\"! There are only " + lexicalTextTokens.size() + " lexical items in the reference block, but the importer is trying to access an item number " + 
-//							lexIndex + ".\n" + 
-//							"This indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\n" + 
-//							"Please fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
-//				}
-//				// Map
-//				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
-//				SToken lexToken = createLexicalToken(lexicalTextToken, lexTokenStart, morphCounter, lexIndex, lexAnnotationLines, lastLexToken, refId, lexTimeLineIndex);
-//				if (getProperties().mapRefAnnotationsToLexicalLayer()) {
-//					refTokens.add(lexToken);
-//				}
-//				lastLexToken = lexToken;
-//				
-//				// Prepare next iteration
+		SToken lastMorphToken = null;
+		SToken lastLexToken = null;
+		String lastMorpheme = null;
+//		int lexTimelineStart = 0;
+		// For all morpheme tokens in block:
+		for (int morphIndex = 0; morphIndex < morphologicalTextTokens.size(); morphIndex++) {
+			morphCounter++;
+			String morphemeTextToken = morphologicalTextTokens.get(morphIndex);
+			if (lastMorpheme != null && isHead(morphemeTextToken, lastMorpheme)) {
+				lexIndex++;
+				String lexicalTextToken = null;
+				try {
+					lexicalTextToken  = lexicalTextTokens.get(lexIndex);
+				}
+				catch (IndexOutOfBoundsException e) {
+					throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refMarker + 
+							"\"! There are only " + lexicalTextTokens.size() + " lexical items in the reference block, but the importer is trying to access an item number " + 
+							lexIndex + ".\n" + 
+							"This indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\n" + 
+							"Please fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
+				}
+				// Map
+				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
+				SToken lexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, lastLexToken);
+				if (getProperties().mapRefAnnotationsToLexicalLayer()) {
+					lexTokenSet.add(lexToken);
+				}
+				lastLexToken = lexToken;
+				
+				// Prepare next iteration
 //				lexTokenStart += lexicalTextToken.length() + 1; // 1 accounting for whitespace 
-//				morphCounter = 0;
-//				lexTimeLineIndex = timelineCounter + 1;
-//			}
-//			morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
+				morphCounter = 0;
+//				lexTimelineStart = timelineIndex + 1;
+			}
+			morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
 //			timelineCounter++;
-//			lastMorphToken = createMorphToken(morphemeTextToken, morphTokenStart, morphIndex, morphAnnotationLines, lastMorphToken, timelineCounter, refId);
-//			if (!getProperties().mapRefAnnotationsToLexicalLayer()) {
-//				refTokens.add(lastMorphToken);
-//			}
+			lastMorphToken = createMorphToken(morphemeTextToken, morphIndex, morphAnnotationLines, lastMorphToken);
+			if (!getProperties().mapRefAnnotationsToLexicalLayer()) {
+				refTokens.add(lastMorphToken);
+			}
 //			morphTokenStart += morphemeTextToken.length() + 1; // 1 accounting for whitespace
-//			lastMorpheme = morphemeTextToken;
-//		}
-//		// Finalize the timeline
-//		// Map the loop's final iteration results as it has ended.
-//		lexIndex++;
-//		String lexicalTextToken = null;
-//		try {
-//			lexicalTextToken = lexicalTextTokens.get(lexIndex);
-//		}
-//		catch (IndexOutOfBoundsException e) {
-//			logger.error("\n\n#####\nAlignment problem in block \"{}\"! There are only {} lexical items in the reference block, but the importer is trying to access item number {}.\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", block.get(refMarker).toString(), lexicalTextTokens.size(), (lexIndex + 1));
-//			throw new PepperModuleException(null, e);
-//		}
-//		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
-//		SToken lexicalToken = createLexicalToken(lexicalTextToken, lexTokenStart, (morphCounter + 1), lexIndex, lexAnnotationLines, lastLexToken, refId, lexTimeLineIndex);
-//		if (getProperties().mapRefAnnotationsToLexicalLayer()) {
-//			refTokens.add(lexicalToken);
-//		}
+			lastMorpheme = morphemeTextToken;
+		}
+		// Finalize the timeline
+		// Map the loop's final iteration results as it has ended.
+		lexIndex++;
+		String lexicalTextToken = null;
+//		System.err.println(lexIndex + " " + lexicalTextTokens);
+		try {
+			lexicalTextToken = lexicalTextTokens.get(lexIndex);
+//			System.err.println(lexIndex);
+		}
+		catch (IndexOutOfBoundsException e) {
+			logger.error("\n\n#####\nAlignment problem in block \"{}\"! There are only {} lexical items in the reference block, but the importer is trying to access item number {}.\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", block.get(refMarker).toString(), lexicalTextTokens.size(), (lexIndex + 1));
+			throw new PepperModuleException(null, e);
+		}
+		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
+		SToken lexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, lastLexToken);
+		if (getProperties().mapRefAnnotationsToLexicalLayer()) {
+			refTokens.add(lexToken);
+		}
 //		lexTokenStart += lexicalTextToken.length() + 1; // 1 accounting for whitespace
-//		
-//		// Add to data sources
-//		String oldLexDSText = getLexicalTextualDS().getText();
-//		getLexicalTextualDS().setText(oldLexDSText.concat(oldLexDSText.isEmpty() ? "" : " ").concat(lexDSBuilder.toString()));
-//		String oldMorphDSText = getMorphologicalTextualDS().getText();
-//		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
-//		
-//		// Now build the ref span and add ref-level annotations
-//		createRefSpan(block.get(refMarker), refTokens, refAnnotationLines);
-//		
-//		return lexTokenStart;
-		return -1;
+		
+		// Add to data sources
+		String oldLexDSText = getLexicalTextualDS().getText();
+		getLexicalTextualDS().setText(oldLexDSText.concat(oldLexDSText.isEmpty() ? "" : " ").concat(lexDSBuilder.toString()));
+		String oldMorphDSText = getMorphologicalTextualDS().getText();
+		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
+		
+		// Now build the ref span and add ref-level annotations
+//		createRefSpan(refLine, refTokens, refAnnotationLines);
+		
+		return -1; //lexTokenStart;
 	}
 
 	/**
@@ -535,17 +558,23 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param refTokens
 	 * @param refAnnotationLines
 	 */
-	private SSpan createRefSpan(List<String> list, Set<SToken> refTokens, HashMap<String, List<String>> refAnnotationLines) {
+	private SSpan createRefSpan(Map<String, List<String>> refLine, Set<SToken> refTokens, HashMap<String, List<String>> refAnnotationLines) {
 		SSpan span = getGraph().createSpan(new ArrayList<>(refTokens));
 		for (Entry<String, List<String>> line : refAnnotationLines.entrySet()) {
 			StringBuilder sb = new StringBuilder();
-			for (String s : line.getValue())
-			{
-			    sb.append(s);
-			    sb.append(" ");
+			for (String s : line.getValue()) {
+				sb.append(s);
+				sb.append(" ");
 			}
 			span.createAnnotation(SALT_NAMESPACE_TOOLBOX, line.getKey(), sb.toString().trim());
 		}
+		StringBuilder sb = new StringBuilder();
+		for (String s : refLine.get(getProperties().getRefMarker())) {
+			sb.append(s);
+			sb.append(" ");
+		}
+		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, getProperties().getRefMarker(), sb.toString().trim());
+		span.setName(sb.toString().trim());
 		span.addLayer(layers.get(getProperties().getRefMarker()));
 		return span;
 	}
@@ -570,14 +599,15 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param refId Can be used for error reporting
 	 * @return
 	 */
-	private SToken createMorphToken(String morpheme, int start, int morphIndex, HashMap<String,List<String>> morphAnnotationLines, SToken lastMorphToken, int timelineCounter, String refId) {
-		SToken token = getGraph().createToken(getMorphologicalTextualDS(), start, start + morpheme.length());
+	private SToken createMorphToken(String morpheme, int morphIndex, HashMap<String,List<String>> morphAnnotationLines, SToken lastMorphToken) {
+		SToken token = getGraph().createToken(getMorphologicalTextualDS(), morphDSIndex, morphDSIndex += morpheme.length());
+		morphDSIndex++; // Accounting for whitespace
 		for (Entry<String, List<String>> annotationLine : morphAnnotationLines.entrySet()) {
 			try {
-				token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(morphIndex));
+			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(morphIndex));
 			}
 			catch (IndexOutOfBoundsException e) {
-				logger.error("\n\n#####\nAlignment problem in block \"{}\" with morpheme \'{}\' and its annotation on level \'{}\'!\nThere are only {} values on this line, whereas the importer is trying to access value number {}...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", refId, morpheme, annotationLine.getKey(), annotationLine.getValue().size(), (morphIndex + 1));
+				logger.error("\n\n#####\nAlignment problem in block \"{}\" with morpheme \'{}\' and its annotation on level \'{}\'!\nThere are only {} values on this line, whereas the importer is trying to access value number {}...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", "REFID?", morpheme, annotationLine.getKey(), annotationLine.getValue().size(), (morphIndex + 1));
 				throw new PepperModuleException(null, e);
 			}
 		}
@@ -592,10 +622,15 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
 		timeRel.setSource(token);
 		timeRel.setTarget(getGraph().getTimeline());
-//		logger.info("MORPHOLOGICAL " + morpheme + ": " + timelineCounter + "-" + (timelineCounter+1));
-//		getGraph().getTimeline().increasePointOfTime();
-		timeRel.setStart(timelineCounter);
-		timeRel.setEnd(timelineCounter + 1);
+//		System.err.println("LEXICAL " + lexicalTextToken + ": " + lexTimelineIndex + "-" + (lexTimelineIndex+timelineUnits));
+//		System.err.println("lexToken " + graph.getText(token) + " length " + timelineUnits + " start " + lexTimelineIndex + " end " + (lexTimelineIndex + timelineUnits) + " diff " + ((lexTimelineIndex + timelineUnits) - lexTimelineIndex));
+		
+		timeRel.setStart(morphTimelineIndex);
+//		System.err.println("TOKEN " + token + ": " + lexTimelineIndex + "+" + timelineUnits + " -> ");
+		morphTimelineIndex += 1;
+		timeRel.setEnd(morphTimelineIndex);
+//		System.err.println("NEW TLI " + lexTimelineIndex);
+//		lexTimelineIndex++; // FIXME "Increase" timeline count
 		getGraph().addRelation(timeRel);
 		
 		token.addLayer(layers.get(getProperties().getMorphMarker()));
@@ -622,15 +657,17 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param timelineCounter 
 	 * @return
 	 */
-	private SToken createLexicalToken(String lexicalTextToken, int start, int timelineUnits, int lexIndex, HashMap<String,List<String>> lexAnnotationLines, SToken lastLexToken, String refId, int timelineCounter) {
+	private SToken createLexicalToken(String lexicalTextToken, int indexOfToken, int timelineUnits, HashMap<String,List<String>> lexAnnotationLines, SToken lastLexToken) {
+		
 //		logger.info("START " + start + " - " + (start+lexicalTextToken.length()));
-		SToken token = getGraph().createToken(getLexicalTextualDS(), start, start + lexicalTextToken.length());
+		SToken token = getGraph().createToken(getLexicalTextualDS(), lexDSIndex, lexDSIndex += lexicalTextToken.length());
+		lexDSIndex++; // Accounting for whitespace
 		for (Entry<String, List<String>> annotationLine : lexAnnotationLines.entrySet()) {
 			try {
-			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(lexIndex));
+			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(indexOfToken));
 			}
 			catch (IndexOutOfBoundsException e) {
-				logger.error("\n\n#####\nAlignment problem in block \"{}\" with lexical unit \'{}\' and its annotation on level \'{}\'!\nThere are only {} values on this line, whereas the importer is trying to access value number {}...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", refId, lexicalTextToken, annotationLine.getKey(), annotationLine.getValue().size(), (lexIndex + 1));
+				logger.error("\n\n#####\nAlignment problem in block \"{}\" with lexical unit \'{}\' and its annotation on level \'{}\'!\nThere are only {} values on this line, whereas the importer is trying to access value number {}...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", "REF ID?!?", lexicalTextToken, annotationLine.getKey(), annotationLine.getValue().size(), (indexOfToken + 1));
 				throw new PepperModuleException(null, e);
 			}
 		}
@@ -645,9 +682,15 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
 		timeRel.setSource(token);
 		timeRel.setTarget(getGraph().getTimeline());
-//		logger.info("LEXICAL " + lexicalTextToken + ": " + timelineCounter + "-" + (timelineCounter+timelineUnits));
-		timeRel.setStart(timelineCounter);
-		timeRel.setEnd(timelineCounter + timelineUnits);// + 1);
+//		System.err.println("LEXICAL " + lexicalTextToken + ": " + lexTimelineIndex + "-" + (lexTimelineIndex+timelineUnits));
+//		System.err.println("lexToken " + graph.getText(token) + " length " + timelineUnits + " start " + lexTimelineIndex + " end " + (lexTimelineIndex + timelineUnits) + " diff " + ((lexTimelineIndex + timelineUnits) - lexTimelineIndex));
+		
+		timeRel.setStart(lexTimelineIndex);
+//		System.err.println("TOKEN " + token + ": " + lexTimelineIndex + "+" + timelineUnits + " -> ");
+		lexTimelineIndex += timelineUnits;
+		timeRel.setEnd(lexTimelineIndex);
+//		System.err.println("NEW TLI " + lexTimelineIndex);
+//		lexTimelineIndex++; // FIXME "Increase" timeline count
 		getGraph().addRelation(timeRel);
 		
 		token.addLayer(layers.get(getProperties().getLexMarker()));

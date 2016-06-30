@@ -132,6 +132,15 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	private static final String PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER = "mapRefAnnotationsToLexicalLayer";
 	
+	/**
+	 * Wether detached delimiters (as in "item - item" or similar) should be attached to the previous or
+	 * subsequent item, as a two-item comma-separated , where the first item signifies whether the delimiter should
+	 * be attached (if <strong>true</strong> it will be attached), and the second item signifies 
+	 * whether the delimiter should be attached to the <strong>subsequent</strong> item (if <strong>true</strong>
+	 * it will be attached to the subsequent item, making the latter a suffix).
+	 */
+	private static final String PROP_ATTACH_DETACHED_MORPHEME_DELIMITER = "attachDetachedDelimiter";
+	
 	
 	public ToolboxTextImporterProperties() {
 		addProperty(new PepperModuleProperty<>(PROP_LEX_MARKER, 
@@ -182,6 +191,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				String.class,
 				"All Toolbox markers which precede lines with reference-specific metadata, without the preceding backslashes, and as a comma-separated list.",
 				false));
+		addProperty(new PepperModuleProperty<>(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, 
+				String.class,
+				"Wether detached delimiters (as in \"item - item\" or similar) should be attached to the previous or subsequent item, as a two-item array, where the first item signifies whether the delimiter should be attached (if true it will be attached), and the second item signifies whether the delimiter should be attached to the subsequent item (if true it will be attached to the subsequent item, making the latter a suffix).",
+				"true,true",
+				false));
 	}
 	
 	// Getter methods for the different property values.
@@ -224,6 +238,18 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	
 	public String getRefMetadataMarkers() {
 		return (String) getProperty(PROP_REF_METADATA_MARKERS).getValue();
+	}
+	
+	public Boolean attachDetachedMorphemeDelimiter() {
+		String value = getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString();
+		String[] split = value.trim().split("\\s*,\\s*");
+		return Boolean.valueOf(split[0]);
+	}
+	
+	public Boolean attachDetachedMorphemeDelimiterToSubsequentElement() {
+		String value = getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString();
+		String[] split = value.trim().split("\\s*,\\s*");
+		return Boolean.valueOf(split[1]);
 	}
 
 }
