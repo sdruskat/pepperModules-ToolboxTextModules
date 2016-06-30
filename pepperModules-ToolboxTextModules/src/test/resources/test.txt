@@ -1,0 +1,29 @@
+\_sh v3.0 Test
+\info Some Info
+
+\id Some ID
+
+\ref First sentence
+\met Some meta information about the first sentence
+\tx Wort Kompositum Wort
+\ta Eins Zwei Drei
+\mb m1 m2 -m3 m4
+\ge M1 M2 M3 M4
+\ll This is a reference level annotation!
+
+
+\ref Second sentence
+\met Some meta info about the second sentence
+\tx Dreifachwort Wort Wort Wort Doppelwort
+\ta Vier Fünf Sechs Sieben Acht
+\mb m5- m6= m7 m8 m9 m10 m11 -m12
+\ge M5 M6 M7 M8 M9 M10 M11 M12
+\ll This is yet another reference level annotation!
+
+\ref Third sentence
+\met Some meta info about the third sentence
+\tx Doppelwortmitfreiemdash Wort
+\ta Neun Zehn
+\mb m13 - m14 m15
+\ge M13 - M14 M15
+\ll This is a third reference level annotation!
