@@ -74,6 +74,7 @@ public class ToolboxTextMapperTest {
 		String path = file.getAbsolutePath();
 		mapper.setResourceURI(URI.createFileURI(path));
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		mapper.setProperties(properties);
 		SDocument doc = SaltFactory.createSDocument();
 		mapper.setDocument(doc);
@@ -169,7 +170,7 @@ public class ToolboxTextMapperTest {
 	/**
 	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the annotations in the document graph.
 	 */
-	@Test @Ignore
+	@Test
 	public void testMapSDocumentAnnotations() {
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
@@ -219,7 +220,7 @@ public class ToolboxTextMapperTest {
 			
 		// Morph annotations
 		morphAnnoMap.add(new String[]{"m1", "M1"});
-		morphAnnoMap.add(new String[]{"m1", "M2"});
+		morphAnnoMap.add(new String[]{"m2", "M2"});
 		morphAnnoMap.add(new String[]{"-m3", "M3"});
 		morphAnnoMap.add(new String[]{"m4", "M4"});
 		morphAnnoMap.add(new String[]{"m5-", "M5"});
@@ -231,16 +232,16 @@ public class ToolboxTextMapperTest {
 		morphAnnoMap.add(new String[]{"m11", "M11"});
 		morphAnnoMap.add(new String[]{"-m12", "M12"});
 		morphAnnoMap.add(new String[]{"m13", "M13"});
-		morphAnnoMap.add(new String[]{"-m14", "M14"}); // From "-" + "m14"
+		morphAnnoMap.add(new String[]{"-m14", "-M14"}); // From "-" + "m14"
 		morphAnnoMap.add(new String[]{"m15", "M15"});
-		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(lexTokens);
+		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(morphTokens);
 		assertEquals(15, sortedMorphTokens.size());
 		for (int i = 0; i < sortedMorphTokens.size(); i++) {
 			SToken token = sortedMorphTokens.get(i);
 			String tokenText = graph.getText(token);
 			String annoText = (String) token.getAnnotation("toolbox", "ge").getValue();
-			assertEquals(lexAnnoMap.get(i)[0], tokenText);
-			assertEquals(lexAnnoMap.get(i)[1], annoText);
+			assertEquals(morphAnnoMap.get(i)[0], tokenText);
+			assertEquals(morphAnnoMap.get(i)[1], annoText);
 		}
 	}
 

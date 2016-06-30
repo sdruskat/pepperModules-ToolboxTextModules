@@ -77,60 +77,60 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * The Toolbox marker that precedes lines with source text (usually "words"),
 	 * without the preceding backslash.
 	 */
-	private static final String PROP_LEX_MARKER = "lexicalMarker";
+	public static final String PROP_LEX_MARKER = "lexicalMarker";
 	
 	/**
 	 * The Toolbox marker that precedes lines with morphological information,
 	 * without the preceding backslash.
 	 */
-	private static final String PROP_MORPH_MARKER = "morphologyMarker";
+	public static final String PROP_MORPH_MARKER = "morphologyMarker";
 	
 	/**
 	 * All Toolbox markers which precede lines with annotations of source text segments (usually "words"),
 	 * without the preceding backslashes, and as a comma-separated list.
 	 */
-	private static final String PROP_LEX_ANNOTATION_MARKERS = "lexAnnotationMarkers";
+	public static final String PROP_LEX_ANNOTATION_MARKERS = "lexAnnotationMarkers";
 	
 	/**
 	 * All Toolbox markers which precede lines with annotations of morphemes,
 	 * without the preceding backslashes, and as a comma-separated list.
 	 */
-	private static final String PROP_MORPH_ANNOTATION_MARKERS = "morphologyAnnotationMarkers";
+	public static final String PROP_MORPH_ANNOTATION_MARKERS = "morphologyAnnotationMarkers";
 	
 	/**
 	 * All Toolbox markers which precede lines with document-specific metadata, 
 	 * without the preceding backslashes, and as a comma-separated list. 
 	 */
-	private static final String PROP_DOCUMENT_METADATA_MARKERS = "documentMetaDataMarkers";
+	public static final String PROP_DOCUMENT_METADATA_MARKERS = "documentMetaDataMarkers";
 	
 	/**
 	 * All Toolbox markers which precede lines with reference-specific metadata, 
 	 * without the preceding backslashes, and as a comma-separated list. 
 	 */
-	private static final String PROP_REF_METADATA_MARKERS = "refMetaDataMarkers";
+	public static final String PROP_REF_METADATA_MARKERS = "refMetaDataMarkers";
 	
 	/**
 	 * The morpheme delimiters used in the Toolbox files as a comma-separated two-point list where
 	 * the first element is the <strong>affix</strong> delimiter, and the second element is the
 	 * <strong>clitics</strong> delimiter.
 	 */
-	private static final String PROP_MORPHEME_DELIMITERS = "morphemeDelimiters";
+	public static final String PROP_MORPHEME_DELIMITERS = "morphemeDelimiters";
 	
 	/**
 	 * The marker used for references, i.e., usually "ref" or "id".
 	 */
-	private static final String PROP_REF_MARKER = "refMarker";
+	public static final String PROP_REF_MARKER = "refMarker";
 
 	/**
 	 * The file extensions that corpus files can have as a comma-separated list.
 	 */
-	private static final String PROP_FILE_EXTENSIONS = "fileExtensions";
+	public static final String PROP_FILE_EXTENSIONS = "fileExtensions";
 	
 	/**
 	 * Wether reference-level annotations should be mapped as a span onto tokens on the lexical layer.
 	 * {@code true} if so, and {@code false} if they should be mapped onto the morphological layer tokens.
 	 */
-	private static final String PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER = "mapRefAnnotationsToLexicalLayer";
+	public static final String PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER = "mapRefAnnotationsToLexicalLayer";
 	
 	/**
 	 * Wether detached delimiters (as in "item - item" or similar) should be attached to the previous or
@@ -139,7 +139,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * whether the delimiter should be attached to the <strong>subsequent</strong> item (if <strong>true</strong>
 	 * it will be attached to the subsequent item, making the latter a suffix).
 	 */
-	private static final String PROP_ATTACH_DETACHED_MORPHEME_DELIMITER = "attachDetachedDelimiter";
+	public static final String PROP_ATTACH_DETACHED_MORPHEME_DELIMITER = "attachDetachedDelimiter";
 	
 	
 	public ToolboxTextImporterProperties() {

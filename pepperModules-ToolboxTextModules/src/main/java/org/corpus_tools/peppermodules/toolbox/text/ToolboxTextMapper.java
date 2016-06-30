@@ -407,31 +407,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Get text tokens for lex and morph
 		List<String> lexicalTextTokens = block.get(lexMarker);
 		List<String> morphologicalTextTokens = block.get(morphMarker);
-		// Sanitize detached morpheme delimiters if configured
-		if (getProperties().attachDetachedMorphemeDelimiter()) {
-			// Check if it is necessary to sanitize morphology tokens
-			if (morphologicalTextTokens.contains(cliticsDelimiter) || morphologicalTextTokens.contains(affixDelimiter)) {
-				ListIterator<String> iterator = morphologicalTextTokens.listIterator();
-				while (iterator.hasNext()) {
-					String token = (String) iterator.next();
-					if (token.equals(cliticsDelimiter) || token.equals(affixDelimiter)) {
-						if (getProperties().attachDetachedMorphemeDelimiterToSubsequentElement()) {
-							String nextToken = morphologicalTextTokens.get(iterator.nextIndex());
-							morphologicalTextTokens.set(iterator.nextIndex(), token + nextToken);
-							iterator.remove();
-						}
-						else {
-							String previousToken = morphologicalTextTokens.get(iterator.previousIndex());
-							morphologicalTextTokens.set(iterator.previousIndex(), previousToken + token);
-							iterator.remove();
-						}
-					}
-				}
-			}
-//			for (int i = 0; i < morphologicalTextTokens.size(); i++) {
-//				if (morphologicalTextTokens.get(index))
-//			}
-		}
 		Set<SToken> lexTokenSet = new HashSet<>();
 		
 		// Increment timeline
@@ -463,6 +438,55 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			else {
 				refAnnotationLines.put(key, line.getValue());
 			}
+		}
+		// Sanitize detached morpheme delimiters if configured
+		if (getProperties().attachDetachedMorphemeDelimiter()) {
+			// Check if it is necessary to sanitize morphology tokens
+			if (morphologicalTextTokens.contains(cliticsDelimiter) || morphologicalTextTokens.contains(affixDelimiter)) {
+				ListIterator<String> iterator = morphologicalTextTokens.listIterator();
+				while (iterator.hasNext()) {
+					String token = (String) iterator.next();
+					if (token.equals(cliticsDelimiter) || token.equals(affixDelimiter)) {
+						if (getProperties().attachDetachedMorphemeDelimiterToSubsequentElement()) {
+							String nextToken = morphologicalTextTokens.get(iterator.nextIndex());
+							morphologicalTextTokens.set(iterator.nextIndex(), token + nextToken);
+							iterator.remove();
+						}
+						else {
+							String previousToken = morphologicalTextTokens.get(iterator.previousIndex());
+							morphologicalTextTokens.set(iterator.previousIndex(), previousToken + token);
+							iterator.remove();
+						}
+					}
+				}
+				/* 
+				 * Now sanitize all annotation lines as they should have the same detached delimiter
+				 * if the file is aligned correctly.
+				 */
+				for (Entry<String, List<String>> annotationLine : morphAnnotationLines.entrySet()) {
+					List<String> list = annotationLine.getValue();
+					iterator = list.listIterator();
+					while (iterator.hasNext()) {
+						String token = (String) iterator.next();
+						if (token.equals(cliticsDelimiter) || token.equals(affixDelimiter)) {
+							if (getProperties().attachDetachedMorphemeDelimiterToSubsequentElement()) {
+								String nextToken = list.get(iterator.nextIndex());
+								list.set(iterator.nextIndex(), token + nextToken);
+								iterator.remove();
+							}
+							else {
+								String previousToken = list.get(iterator.previousIndex());
+								list.set(iterator.previousIndex(), previousToken + token);
+								iterator.remove();
+							}
+						}
+					}
+				}
+
+			}
+//			for (int i = 0; i < morphologicalTextTokens.size(); i++) {
+//				if (morphologicalTextTokens.get(index))
+//			}
 		}
 
 		// Build morphological and lexical tokens with annotations, and build data sources
