@@ -729,7 +729,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		timeRel.setTarget(getGraph().getTimeline());
 		
 		timeRel.setStart(lexTimelineIndex);
-		System.err.println("            LEX TOKEN " + lexicalTextToken + ": " + timelineUnits);
 		lexTimelineIndex += timelineUnits;
 		timeRel.setEnd(lexTimelineIndex);
 		getGraph().addRelation(timeRel);
