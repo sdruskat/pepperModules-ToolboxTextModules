@@ -358,14 +358,14 @@ public class ToolboxTextMapperTest {
 	/**
 	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the annotations in the document graph.
 	 */
-	@Test @Ignore
+	@Test
 	public void testMapSDocumentTimeline() {
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 		STimeline timeline = getFixture().getDocument().getDocumentGraph().getTimeline();
 		assertNotNull(timeline);
 		assertNotNull(timeline.getEnd());
-		assertEquals(Integer.valueOf(15), timeline.getEnd());
+		assertEquals(Integer.valueOf(16), timeline.getEnd());
 		List<SToken> lexTokens = new ArrayList<>();
 		List<SToken> morphTokens = new ArrayList<>();
 		List<SLayer> lexLayers = graph.getLayerByName("tx");
@@ -389,6 +389,7 @@ public class ToolboxTextMapperTest {
 					STimelineRelation rel = (STimelineRelation) inRel;
 					int length = lexTokensNoOfMorphs[i];
 					assertEquals(length, rel.getEnd() - rel.getStart());
+					System.out.println("L" + i + ": " + rel.getStart() + "-" + rel.getEnd());
 				}
 			}	
 		}
@@ -397,6 +398,7 @@ public class ToolboxTextMapperTest {
 				if (inRel.getSource() == morphToken) {
 					STimelineRelation rel = (STimelineRelation) inRel;
 					assertEquals(1, rel.getEnd() - rel.getStart());
+					System.out.println("M: " + rel.getStart() + "-" + rel.getEnd());
 				}
 			}
 		}

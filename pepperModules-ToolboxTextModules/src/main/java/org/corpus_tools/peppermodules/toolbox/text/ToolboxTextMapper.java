@@ -509,12 +509,15 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		SToken lastLexToken = null;
 		String lastMorpheme = null;
 //		int lexTimelineStart = 0;
-		// For all morpheme tokens in block:
+		// TODO Figure out way to handle if first morpheme is head
 		for (int morphIndex = 0; morphIndex < morphologicalTextTokens.size(); morphIndex++) {
-			morphCounter++;
+//			morphCounter++;
 			String morphemeTextToken = morphologicalTextTokens.get(morphIndex);
+//			System.out.println(morphIndex + ": " + morphemeTextToken);
+//			System.out.println("    morph counter: " + morphCounter);
 			if (lastMorpheme != null && isHead(morphemeTextToken, lastMorpheme)) {
 				lexIndex++;
+//				System.out.println("        lex " + lexIndex + " morphCNTR " + morphCounter);
 				String lexicalTextToken = null;
 				try {
 					lexicalTextToken  = lexicalTextTokens.get(lexIndex);
@@ -526,6 +529,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 							"This indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\n" + 
 							"Please fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
 				}
+//				System.out.println("        lex token " + lexicalTextToken);
 				// Map
 				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 				SToken lexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, lastLexToken);
@@ -537,10 +541,11 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				// Prepare next iteration
 //				lexTokenStart += lexicalTextToken.length() + 1; // 1 accounting for whitespace 
 				morphCounter = 0;
+//				System.out.println("            morphcounter set to 0 " + morphCounter);
 //				lexTimelineStart = timelineIndex + 1;
 			}
 			morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
-//			timelineCounter++;
+			morphCounter++;
 			lastMorphToken = createMorphToken(morphemeTextToken, morphIndex, morphAnnotationLines, lastMorphToken);
 			if (!getProperties().mapRefAnnotationsToLexicalLayer()) {
 				refTokens.add(lastMorphToken);
@@ -551,6 +556,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Finalize the timeline
 		// Map the loop's final iteration results as it has ended.
 		lexIndex++;
+//		System.out.println("        lex " + lexIndex + " morphCNTR " + morphCounter);
 		String lexicalTextToken = null;
 		try {
 			lexicalTextToken = lexicalTextTokens.get(lexIndex);
@@ -559,6 +565,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			logger.error("\n\n#####\nAlignment problem in block \"{}\"! There are only {} lexical items in the reference block, but the importer is trying to access item number {}.\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", block.get(refMarker).toString(), lexicalTextTokens.size(), (lexIndex + 1));
 			throw new PepperModuleException("\n\n#####\nAlignment problem in block \""+block.get(refMarker).toString()+"\"! There are only "+lexicalTextTokens.size()+" lexical items in the reference block, but the importer is trying to access item number "+(lexIndex+1) + ".\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
 		}
+//		System.out.println("        lex token " + lexicalTextToken);
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 		SToken lexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, lastLexToken);
 		if (getProperties().mapRefAnnotationsToLexicalLayer()) {
@@ -692,7 +699,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		timeRel.setTarget(getGraph().getTimeline());
 		
 		timeRel.setStart(morphTimelineIndex);
+//		System.err.println("MORPH TOKEN " + morpheme + " starts timeline at " + morphTimelineIndex + "...");
 		morphTimelineIndex += 1;
+//		System.err.println("    ... and ends at " + morphTimelineIndex);
 		timeRel.setEnd(morphTimelineIndex);
 //		lexTimelineIndex++; // FIXME "Increase" timeline count
 		getGraph().addRelation(timeRel);
@@ -748,7 +757,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		timeRel.setTarget(getGraph().getTimeline());
 		
 		timeRel.setStart(lexTimelineIndex);
+		System.err.println("            LEX TOKEN " + lexicalTextToken + ": " + timelineUnits);
+//		System.err.println("LEX TOKEN " + lexicalTextToken + " starts timeline at " + lexTimelineIndex + "...");
 		lexTimelineIndex += timelineUnits;
+//		System.err.println("    ... and ends at " + lexTimelineIndex);
 		timeRel.setEnd(lexTimelineIndex);
 //		lexTimelineIndex++; // FIXME "Increase" timeline count
 		getGraph().addRelation(timeRel);
