@@ -58,6 +58,7 @@ import com.google.common.collect.Multimap;
  *
  * @author Stephan Druskat <mail@sdruskat.net>
  */
+// TODO FIXME: PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER TEST!
 public class ToolboxTextMapperTest {
 
 	private ToolboxTextMapper fixture = null;
@@ -75,6 +76,8 @@ public class ToolboxTextMapperTest {
 		mapper.setResourceURI(URI.createFileURI(path));
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_DOCUMENT_METADATA_MARKERS, "docmet");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_REF_METADATA_MARKERS, "met");
 		mapper.setProperties(properties);
 		SDocument doc = SaltFactory.createSDocument();
 		mapper.setDocument(doc);
@@ -94,13 +97,15 @@ public class ToolboxTextMapperTest {
 		assertNotNull(graph.getLayerByName("ref"));
 		assertNotNull(graph.getLayerByName("tx"));
 		assertNotNull(graph.getLayerByName("mb"));
-		assertEquals(3, getFixture().getDocument().getMetaAnnotations().size());
+		assertEquals(4, getFixture().getDocument().getMetaAnnotations().size());
 		assertNotNull(getFixture().getDocument().getMetaAnnotation("toolbox::_sh"));
 		assertNotNull(getFixture().getDocument().getMetaAnnotation("toolbox::id"));
 		assertNotNull(getFixture().getDocument().getMetaAnnotation("toolbox::info"));
+		assertNotNull(getFixture().getDocument().getMetaAnnotation("toolbox::docmet"));
 		assertEquals("v3.0 Test", getFixture().getDocument().getMetaAnnotation("toolbox::_sh").getValue());
 		assertEquals("Some Info", getFixture().getDocument().getMetaAnnotation("toolbox::info").getValue());
 		assertEquals("Some ID", getFixture().getDocument().getMetaAnnotation("toolbox::id").getValue());
+		assertEquals("Some randomly put document meta annotation", getFixture().getDocument().getMetaAnnotation("toolbox::docmet").getValue());
 	}
 
 	/**
@@ -422,17 +427,17 @@ public class ToolboxTextMapperTest {
 		assertEquals(3, graph.getSpans().size());
 		for (SSpan span : graph.getSpans()) {
 			if (span.getName().equals("First sentence")) {
-//				assertEquals(2, span.getAnnotations().size());
+				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is a reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("First sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Second sentence")) {
-//				assertEquals(2, span.getAnnotations().size());
+				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is yet another reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("Second sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Third sentence")) {
-//				assertEquals(2, span.getAnnotations().size());
+				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is a third reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("Third sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
@@ -445,7 +450,7 @@ public class ToolboxTextMapperTest {
 	/**
 	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the meta annotations in the document graph.
 	 */
-	@Test @Ignore
+	@Test
 	public void testMapSDocumentMetaAnnotations() {
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
