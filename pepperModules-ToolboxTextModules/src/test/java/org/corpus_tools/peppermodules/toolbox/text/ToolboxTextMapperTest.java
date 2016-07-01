@@ -36,7 +36,6 @@ import org.corpus_tools.salt.core.SNode;
 import org.corpus_tools.salt.core.SRelation;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -70,7 +69,8 @@ public class ToolboxTextMapperTest {
 	}
 
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the setup of the document graph.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the setup of the document graph.
 	 */
 	@Test
 	public void testMapSDocumentSetup() {
@@ -94,7 +94,8 @@ public class ToolboxTextMapperTest {
 	}
 
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the data sources in the document graph.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the data sources in the document graph.
 	 */
 	@Test
 	public void testMapSDocumentDS() {
@@ -119,7 +120,8 @@ public class ToolboxTextMapperTest {
 	}
 
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the data sources in the document graph.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the data sources in the document graph.
 	 */
 	@Test
 	public void testMapSDocumentDSSwappedDelimAttachment() {
@@ -148,7 +150,8 @@ public class ToolboxTextMapperTest {
 	}
 
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the tokens in the document graph.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the tokens in the document graph.
 	 */
 	@Test
 	public void testMapSDocumentTokens() {
@@ -187,7 +190,8 @@ public class ToolboxTextMapperTest {
 	}
 	
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the tokens in the document graph.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the tokens in the document graph.
 	 */
 	@Test
 	public void testMapSDocumentTokensWithSwappedDelimAttachment() {
@@ -230,7 +234,8 @@ public class ToolboxTextMapperTest {
 	}
 
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the annotations in the document graph.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the annotations in the document graph.
 	 */
 	@Test
 	public void testMapSDocumentAnnotations() {
@@ -293,7 +298,7 @@ public class ToolboxTextMapperTest {
 		morphAnnoMap.add(new String[]{"m11", "M11"});
 		morphAnnoMap.add(new String[]{"-m12", "M12"});
 		morphAnnoMap.add(new String[]{"m13", "M13"});
-		morphAnnoMap.add(new String[]{"-m14", "-M14"}); // From "-" + "m14"
+		morphAnnoMap.add(new String[]{"-m14", "-M14"});
 		morphAnnoMap.add(new String[]{"m15", "M15"});
 		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(morphTokens);
 		assertEquals(15, sortedMorphTokens.size());
@@ -304,11 +309,11 @@ public class ToolboxTextMapperTest {
 			assertEquals(morphAnnoMap.get(i)[0], tokenText);
 			assertEquals(morphAnnoMap.get(i)[1], annoText);
 		}
-		// Annotations on refs are already tested above, test only span meta refs here
 	}
 	
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the annotations in the document graph.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the annotations in the document graph.
 	 */
 	@Test
 	public void testMapSDocumentAnnotationsWithSwappedDelimAttachment() {
@@ -342,7 +347,7 @@ public class ToolboxTextMapperTest {
 		morphAnnoMap.add(new String[]{"m11", "M11"});
 		morphAnnoMap.add(new String[]{"-m12", "M12"});
 		morphAnnoMap.add(new String[]{"m13-", "M13-"});
-		morphAnnoMap.add(new String[]{"m14", "M14"}); // From "-" + "m14"
+		morphAnnoMap.add(new String[]{"m14", "M14"});
 		morphAnnoMap.add(new String[]{"m15", "M15"});
 		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(morphTokens);
 		assertEquals(15, sortedMorphTokens.size());
@@ -356,7 +361,8 @@ public class ToolboxTextMapperTest {
 	}
 
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the annotations in the document graph.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the annotations in the document graph.
 	 */
 	@Test
 	public void testMapSDocumentTimeline() {
@@ -389,7 +395,6 @@ public class ToolboxTextMapperTest {
 					STimelineRelation rel = (STimelineRelation) inRel;
 					int length = lexTokensNoOfMorphs[i];
 					assertEquals(length, rel.getEnd() - rel.getStart());
-					System.out.println("L" + i + ": " + rel.getStart() + "-" + rel.getEnd());
 				}
 			}	
 		}
@@ -398,14 +403,14 @@ public class ToolboxTextMapperTest {
 				if (inRel.getSource() == morphToken) {
 					STimelineRelation rel = (STimelineRelation) inRel;
 					assertEquals(1, rel.getEnd() - rel.getStart());
-					System.out.println("M: " + rel.getStart() + "-" + rel.getEnd());
 				}
 			}
 		}
 	}
 
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the ref spans in the document graph.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the ref spans in the document graph.
 	 */
 	@Test
 	public void testMapSDocumentRefSpans() {
@@ -438,7 +443,8 @@ public class ToolboxTextMapperTest {
 	}
 	
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the ref spans in the document graph.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the ref spans in the document graph.
 	 */
 	@Test
 	public void testMapSDocumentRefSpansOverMorphs() {
@@ -477,7 +483,8 @@ public class ToolboxTextMapperTest {
 	}
 
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. Tests the meta annotations in the document graph.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the meta annotations in the document graph.
 	 */
 	@Test
 	public void testMapSDocumentMetaAnnotations() {
