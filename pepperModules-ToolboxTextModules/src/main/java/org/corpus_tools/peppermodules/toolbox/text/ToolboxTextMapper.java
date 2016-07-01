@@ -453,8 +453,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 							iterator.remove();
 						}
 						else {
-							String previousToken = morphologicalTextTokens.get(iterator.previousIndex());
-							morphologicalTextTokens.set(iterator.previousIndex(), previousToken + token);
+							String previousToken = morphologicalTextTokens.get(iterator.previousIndex() - 1);
+							morphologicalTextTokens.set(iterator.previousIndex() -1, previousToken + token);
 							iterator.remove();
 						}
 					}
@@ -475,8 +475,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 								iterator.remove();
 							}
 							else {
-								String previousToken = list.get(iterator.previousIndex());
-								list.set(iterator.previousIndex(), previousToken + token);
+								String previousToken = list.get(iterator.previousIndex() -1);
+								list.set(iterator.previousIndex() -1, previousToken + token);
 								iterator.remove();
 							}
 						}
@@ -541,14 +541,12 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Map the loop's final iteration results as it has ended.
 		lexIndex++;
 		String lexicalTextToken = null;
-//		System.err.println(lexIndex + " " + lexicalTextTokens);
 		try {
 			lexicalTextToken = lexicalTextTokens.get(lexIndex);
-//			System.err.println(lexIndex);
 		}
 		catch (IndexOutOfBoundsException e) {
 			logger.error("\n\n#####\nAlignment problem in block \"{}\"! There are only {} lexical items in the reference block, but the importer is trying to access item number {}.\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", block.get(refMarker).toString(), lexicalTextTokens.size(), (lexIndex + 1));
-			throw new PepperModuleException(null, e);
+			throw new PepperModuleException("\n\n#####\nAlignment problem in block \""+block.get(refMarker).toString()+"\"! There are only "+lexicalTextTokens.size()+" lexical items in the reference block, but the importer is trying to access item number "+(lexIndex+1) + ".\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
 		}
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 		SToken lexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, lastLexToken);
@@ -564,7 +562,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
 		
 		// Now build the ref span and add ref-level annotations
-//		createRefSpan(refLine, refTokens, refAnnotationLines);
+		createRefSpan(refLine, refTokens, refAnnotationLines);
 		
 		return -1; //lexTokenStart;
 	}
@@ -646,14 +644,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
 		timeRel.setSource(token);
 		timeRel.setTarget(getGraph().getTimeline());
-//		System.err.println("LEXICAL " + lexicalTextToken + ": " + lexTimelineIndex + "-" + (lexTimelineIndex+timelineUnits));
-//		System.err.println("lexToken " + graph.getText(token) + " length " + timelineUnits + " start " + lexTimelineIndex + " end " + (lexTimelineIndex + timelineUnits) + " diff " + ((lexTimelineIndex + timelineUnits) - lexTimelineIndex));
 		
 		timeRel.setStart(morphTimelineIndex);
-//		System.err.println("TOKEN " + token + ": " + lexTimelineIndex + "+" + timelineUnits + " -> ");
 		morphTimelineIndex += 1;
 		timeRel.setEnd(morphTimelineIndex);
-//		System.err.println("NEW TLI " + lexTimelineIndex);
 //		lexTimelineIndex++; // FIXME "Increase" timeline count
 		getGraph().addRelation(timeRel);
 		
@@ -706,14 +700,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
 		timeRel.setSource(token);
 		timeRel.setTarget(getGraph().getTimeline());
-//		System.err.println("LEXICAL " + lexicalTextToken + ": " + lexTimelineIndex + "-" + (lexTimelineIndex+timelineUnits));
-//		System.err.println("lexToken " + graph.getText(token) + " length " + timelineUnits + " start " + lexTimelineIndex + " end " + (lexTimelineIndex + timelineUnits) + " diff " + ((lexTimelineIndex + timelineUnits) - lexTimelineIndex));
 		
 		timeRel.setStart(lexTimelineIndex);
-//		System.err.println("TOKEN " + token + ": " + lexTimelineIndex + "+" + timelineUnits + " -> ");
 		lexTimelineIndex += timelineUnits;
 		timeRel.setEnd(lexTimelineIndex);
-//		System.err.println("NEW TLI " + lexTimelineIndex);
 //		lexTimelineIndex++; // FIXME "Increase" timeline count
 		getGraph().addRelation(timeRel);
 		
