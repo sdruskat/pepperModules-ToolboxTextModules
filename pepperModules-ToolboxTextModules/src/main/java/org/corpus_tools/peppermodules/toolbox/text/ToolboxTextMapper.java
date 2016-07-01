@@ -399,6 +399,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		cliticsDelimiter = delimiters[1].trim();
 		Set<String> lexAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getLexAnnotationMarkers().split(commaDelimRegex)));
 		Set<String> morphAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getMorphAnnotationMarkers().split(commaDelimRegex)));
+		Set<String> documentMetaAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getDocMetadataMarkers().split(commaDelimRegex)));
+		Set<String> refMetaAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getRefMetadataMarkers().split(commaDelimRegex)));
 		
 		// Init String builders for STextualDSs
 		StringBuilder morphDSBuilder = new StringBuilder();
@@ -416,6 +418,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		HashMap<String, List<String>> lexAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> morphAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> refAnnotationLines = new HashMap<>();
+		HashMap<String, List<String>> docMetaAnnotationLines = new HashMap<>();
+		HashMap<String, List<String>> refMetaAnnotationLines = new HashMap<>();
+		
 		HashMap<String, List<String>> refLine = new HashMap<>(1);
 		
 		// Build maps of annotation levels
@@ -434,6 +439,12 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			}
 			else if (morphAnnotationMarkers.contains(key)) {
 				morphAnnotationLines.put(key, line.getValue());
+			}
+			else if (documentMetaAnnotationMarkers.contains(key)) {
+				docMetaAnnotationLines.put(key, line.getValue());
+			}
+			else if (refMetaAnnotationMarkers.contains(key)) {
+				refMetaAnnotationLines.put(key, line.getValue());
 			}
 			else {
 				refAnnotationLines.put(key, line.getValue());
@@ -519,7 +530,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 				SToken lexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, lastLexToken);
 				if (getProperties().mapRefAnnotationsToLexicalLayer()) {
-					lexTokenSet.add(lexToken);
+					refTokens.add(lexToken);
 				}
 				lastLexToken = lexToken;
 				
@@ -562,9 +573,35 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
 		
 		// Now build the ref span and add ref-level annotations
-		createRefSpan(refLine, refTokens, refAnnotationLines);
+		createRefSpan(refLine, refTokens, refAnnotationLines, refMetaAnnotationLines);
+		createDocumentMetaAnnotations(docMetaAnnotationLines);
 		
 		return -1; //lexTokenStart;
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param docMetaAnnotationLines
+	 */
+	private void createDocumentMetaAnnotations(HashMap<String, List<String>> docMetaAnnotationLines) {
+		SMetaAnnotation annotation;
+		for (Entry<String, List<String>> line : docMetaAnnotationLines.entrySet()) {
+			String marker = line.getKey();
+			String qualifiedId = SALT_NAMESPACE_TOOLBOX + "::" + marker;
+			StringBuilder builder = new StringBuilder();
+			for (String s : line.getValue()) {
+				builder.append(s);
+				builder.append(" ");
+			}
+			String value = builder.toString().trim();
+			if ((annotation = getDocument().getMetaAnnotation(qualifiedId)) != null) {
+				annotation.setValue(value);
+			}
+			else {
+				getDocument().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, marker, value);
+			}
+		}
 	}
 
 	/**
@@ -579,8 +616,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param list
 	 * @param refTokens
 	 * @param refAnnotationLines
+	 * @param refMetaAnnotationLines 
 	 */
-	private SSpan createRefSpan(Map<String, List<String>> refLine, Set<SToken> refTokens, HashMap<String, List<String>> refAnnotationLines) {
+	private SSpan createRefSpan(Map<String, List<String>> refLine, Set<SToken> refTokens, HashMap<String, List<String>> refAnnotationLines, HashMap<String,List<String>> refMetaAnnotationLines) {
 		SSpan span = getGraph().createSpan(new ArrayList<>(refTokens));
 		for (Entry<String, List<String>> line : refAnnotationLines.entrySet()) {
 			StringBuilder sb = new StringBuilder();
@@ -589,6 +627,14 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				sb.append(" ");
 			}
 			span.createAnnotation(SALT_NAMESPACE_TOOLBOX, line.getKey(), sb.toString().trim());
+		}
+		for (Entry<String, List<String>> line : refMetaAnnotationLines.entrySet()) {
+			StringBuilder sb = new StringBuilder();
+			for (String s : line.getValue()) {
+				sb.append(s);
+				sb.append(" ");
+			}
+			span.createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, line.getKey(), sb.toString().trim());
 		}
 		StringBuilder sb = new StringBuilder();
 		for (String s : refLine.get(getProperties().getRefMarker())) {
