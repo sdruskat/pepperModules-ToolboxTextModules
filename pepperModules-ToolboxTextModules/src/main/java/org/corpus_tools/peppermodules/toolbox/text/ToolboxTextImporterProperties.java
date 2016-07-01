@@ -156,7 +156,6 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		addProperty(new PepperModuleProperty<>(PROP_LEX_ANNOTATION_MARKERS, 
 				String.class, 
 				"All Toolbox markers which precede lines with annotations of source text segments (usually lexical items), without the preceding backslashes, and as a comma-separated list.",
-				"",
 				false));
 		addProperty(new PepperModuleProperty<>(PROP_MORPH_ANNOTATION_MARKERS, 
 				String.class,
@@ -186,12 +185,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		addProperty(new PepperModuleProperty<>(PROP_DOCUMENT_METADATA_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with document-specific metadata, without the preceding backslashes, and as a comma-separated list.",
-				"",
 				false));
 		addProperty(new PepperModuleProperty<>(PROP_REF_METADATA_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with reference-specific metadata, without the preceding backslashes, and as a comma-separated list.",
-				"",
 				false));
 		addProperty(new PepperModuleProperty<>(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, 
 				String.class,

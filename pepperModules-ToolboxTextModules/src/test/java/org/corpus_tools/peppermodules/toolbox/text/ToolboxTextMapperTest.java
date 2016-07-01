@@ -278,6 +278,7 @@ public class ToolboxTextMapperTest {
 		assertEquals(10, sortedLexTokens.size());
 		for (int i = 0; i < sortedLexTokens.size(); i++) {
 			SToken token = sortedLexTokens.get(i);
+			assertNotNull(token.getAnnotation("toolbox::ta"));
 			String tokenText = graph.getText(token);
 			String annoText = (String) token.getAnnotation("toolbox", "ta").getValue();
 			assertEquals(lexAnnoMap.get(i)[0], tokenText);
@@ -304,6 +305,7 @@ public class ToolboxTextMapperTest {
 		assertEquals(15, sortedMorphTokens.size());
 		for (int i = 0; i < sortedMorphTokens.size(); i++) {
 			SToken token = sortedMorphTokens.get(i);
+			assertNotNull(token.getAnnotation("toolbox::ge"));
 			String tokenText = graph.getText(token);
 			String annoText = (String) token.getAnnotation("toolbox", "ge").getValue();
 			assertEquals(morphAnnoMap.get(i)[0], tokenText);
@@ -500,6 +502,8 @@ public class ToolboxTextMapperTest {
 				assertEquals("Some meta info about the second sentence", span.getMetaAnnotation("toolbox::met").getValue().toString());
 			}
 			else if (span.getName().equals("Third sentence")) {
+				assertNull(span.getMetaAnnotation("toolbox::docmet"));
+				assertNull(span.getAnnotation("toolbox::docmet"));
 				assertEquals(1, span.getMetaAnnotations().size());
 				assertEquals("Some meta info about the third sentence", span.getMetaAnnotation("toolbox::met").getValue().toString());
 			}

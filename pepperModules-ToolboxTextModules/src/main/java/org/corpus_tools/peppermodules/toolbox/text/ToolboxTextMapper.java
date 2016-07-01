@@ -394,10 +394,19 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		String morphMarker = getProperties().getMorphMarker();
 		affixDelimiter = delimiters[0].trim();
 		cliticsDelimiter = delimiters[1].trim();
-		Set<String> lexAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getLexAnnotationMarkers().split(commaDelimRegex)));
+		Set<String> lexAnnotationMarkers = null;
+		if (hasLexAnnotationProperty()) {
+			lexAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getLexAnnotationMarkers().split(commaDelimRegex)));
+		}
 		Set<String> morphAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getMorphAnnotationMarkers().split(commaDelimRegex)));
-		Set<String> documentMetaAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getDocMetadataMarkers().split(commaDelimRegex)));
-		Set<String> refMetaAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getRefMetadataMarkers().split(commaDelimRegex)));
+		Set<String> documentMetaAnnotationMarkers = null;
+		if (hasDocMetadataProperty()) {
+			documentMetaAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getDocMetadataMarkers().split(commaDelimRegex)));
+		}
+		Set<String> refMetaAnnotationMarkers = null;
+		if (hasRefMetadataProperty()) {
+			refMetaAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getRefMetadataMarkers().split(commaDelimRegex)));
+		}
 		
 		// Init String builders for STextualDSs
 		StringBuilder morphDSBuilder = new StringBuilder();
@@ -430,16 +439,16 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				}
 				continue;
 			}
-			else if (lexAnnotationMarkers.contains(key)) {
+			else if (lexAnnotationMarkers != null && lexAnnotationMarkers.contains(key)) {
 				lexAnnotationLines.put(key, line.getValue());
 			}
 			else if (morphAnnotationMarkers.contains(key)) {
 				morphAnnotationLines.put(key, line.getValue());
 			}
-			else if (documentMetaAnnotationMarkers.contains(key)) {
+			else if (documentMetaAnnotationMarkers != null && documentMetaAnnotationMarkers.contains(key)) {
 				docMetaAnnotationLines.put(key, line.getValue());
 			}
-			else if (refMetaAnnotationMarkers.contains(key)) {
+			else if (refMetaAnnotationMarkers != null && refMetaAnnotationMarkers.contains(key)) {
 				refMetaAnnotationLines.put(key, line.getValue());
 			}
 			else {
@@ -798,6 +807,18 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 */
 	public void setGraph(SDocumentGraph graph) {
 		this.graph = graph;
+	}
+	
+	private boolean hasDocMetadataProperty() {
+		return (getProperties().getDocMetadataMarkers() != null);
+	}
+	
+	private boolean hasRefMetadataProperty() {
+		return (getProperties().getRefMetadataMarkers() != null);
+	}
+	
+	private boolean hasLexAnnotationProperty() {
+		return (getProperties().getLexAnnotationMarkers() != null);
 	}
 
 }
