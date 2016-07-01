@@ -20,20 +20,9 @@ package org.corpus_tools.peppermodules.toolbox.text;
 
 import static org.junit.Assert.*;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.io.IOUtils;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
@@ -42,7 +31,6 @@ import org.corpus_tools.salt.common.STextualDS;
 import org.corpus_tools.salt.common.STimeline;
 import org.corpus_tools.salt.common.STimelineRelation;
 import org.corpus_tools.salt.common.SToken;
-import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SNode;
 import org.corpus_tools.salt.core.SRelation;
@@ -51,15 +39,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
-
 /**
  * Unit tests for {@link ToolboxTextMapper}.
  *
  * @author Stephan Druskat <mail@sdruskat.net>
  */
-// TODO FIXME: PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER TEST!
 public class ToolboxTextMapperTest {
 
 	private ToolboxTextMapper fixture = null;
@@ -260,7 +244,6 @@ public class ToolboxTextMapperTest {
 		List<SLayer> morphLayers = graph.getLayerByName("mb");
 		assertEquals(1, lexLayers.size());
 		assertEquals(1, morphLayers.size());
-		List<String[]> refAnnoMap = new ArrayList<>(); // FIXME TODO
 		List<String[]> lexAnnoMap = new ArrayList<>(10);
 		List<String[]> morphAnnoMap = new ArrayList<>(15);
 		List<SToken> lexTokens = new ArrayList<>();
@@ -321,6 +304,7 @@ public class ToolboxTextMapperTest {
 			assertEquals(morphAnnoMap.get(i)[0], tokenText);
 			assertEquals(morphAnnoMap.get(i)[1], annoText);
 		}
+		// Annotations on refs are already tested above, test only span meta refs here
 	}
 	
 	/**
