@@ -41,6 +41,7 @@ import java.util.Set;
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.salt.SALT_TYPE;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SOrderRelation;
@@ -242,8 +243,20 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		 * Map ref block to model once, because we cannot hit a ref marker at the end of the list anymore to trigger a block mapping process.
 		 */
 		mapRefToModel(block);
-
+		
 		return (DOCUMENT_STATUS.COMPLETED);
+	}
+
+	/**
+	 * Creates and names an {@link SLayer} and puts it to the {@link #layers} {@link Map} under its name.
+	 * 
+	 * @param name
+	 */
+	private void createLayer(String name) {
+		SLayer layer = SaltFactory.createSLayer();
+		layer.setName(name);
+		getGraph().addLayer(layer);
+		layers.put(name, layer);
 	}
 
 	/**
@@ -514,6 +527,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		Set<SToken> refTokens = new HashSet<>();
 		SToken lastMorphToken = null;
 		SToken lastLexToken = null;
+		SSpan lastRefSpan = null;
 		String lastMorpheme = null;
 		for (int morphIndex = 0; morphIndex < morphologicalTextTokens.size(); morphIndex++) {
 			String morphemeTextToken = morphologicalTextTokens.get(morphIndex);
@@ -567,7 +581,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
 		
 		// Now build the ref span and add ref-level annotations
-		createRefSpan(refLine, refTokens, refAnnotationLines, refMetaAnnotationLines);
+		lastRefSpan = createRefSpan(refLine, refTokens, refAnnotationLines, refMetaAnnotationLines, lastRefSpan);
 		createDocumentMetaAnnotations(docMetaAnnotationLines);
 	}
 
@@ -610,7 +624,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param refAnnotationLines
 	 * @param refMetaAnnotationLines 
 	 */
-	private SSpan createRefSpan(Map<String, List<String>> refLine, Set<SToken> refTokens, HashMap<String, List<String>> refAnnotationLines, HashMap<String,List<String>> refMetaAnnotationLines) {
+	private SSpan createRefSpan(Map<String, List<String>> refLine, Set<SToken> refTokens, HashMap<String, List<String>> refAnnotationLines, HashMap<String,List<String>> refMetaAnnotationLines, SSpan lastRefSpan) {
 		SSpan span = getGraph().createSpan(new ArrayList<>(refTokens));
 		for (Entry<String, List<String>> line : refAnnotationLines.entrySet()) {
 			StringBuilder sb = new StringBuilder();
@@ -635,7 +649,18 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, getProperties().getRefMarker(), sb.toString().trim());
 		span.setName(sb.toString().trim());
+		
+		if (lastRefSpan != null) {
+			SOrderRelation rel = SaltFactory.createSOrderRelation();
+			rel.setSource(lastRefSpan);
+			rel.setTarget(span);
+			rel.setName("ref");
+			getGraph().addRelation(rel);
+		}
+		
 		span.addLayer(layers.get(getProperties().getRefMarker()));
+		span.addLayer(layers.get(getProperties().getLexMarker()));
+		span.addLayer(layers.get(getProperties().getMorphMarker()));
 		return span;
 	}
 
@@ -747,17 +772,17 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		return token;
 	}
 
-	/**
-	 * Creates and names an {@link SLayer} and puts it to the {@link #layers} {@link Map} under its name.
-	 * 
-	 * @param name
-	 */
-	private void createLayer(String name) {
-		SLayer layer = SaltFactory.createSLayer();
-		layer.setName(name);
-		getGraph().addLayer(layer);
-		layers.put(name, layer);
-	}
+//	/**
+//	 * Creates and names an {@link SLayer} and puts it to the {@link #layers} {@link Map} under its name.
+//	 * 
+//	 * @param name
+//	 */
+//	private void createLayer(String name) {
+//		SLayer layer = SaltFactory.createSLayer();
+//		layer.setName(name);
+//		getGraph().addLayer(layer);
+//		layers.put(name, layer);
+//	}
 
 	/**
 	 * @return the lexicalTextualDS
