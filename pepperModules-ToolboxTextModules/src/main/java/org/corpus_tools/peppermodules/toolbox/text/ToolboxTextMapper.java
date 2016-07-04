@@ -140,7 +140,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	private int lexDSIndex = 0;
 	private int morphDSIndex = 0;
 	
-
 	/**
 	 * Adds a single metadate to the corpus, namely the current date (no time).
 	 */
@@ -410,8 +409,12 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		String morphMarker = getProperties().getMorphMarker();
 		affixDelimiter = delimiters[0].trim();
 		cliticsDelimiter = delimiters[1].trim();
+		Set<String> unitRefAnnotationsMarkers = null;
+		if (hasUnitRefAnnotationProperty()) {
+			unitRefAnnotationsMarkers = new HashSet<>(Arrays.asList(getProperties().getUnitRefAnnotationMarkers().split(commaDelimRegex)));
+		}
 		Set<String> lexAnnotationMarkers = null;
-		if (hasLexAnnotationProperty()) {
+		if (hasLexAnnotationProperty()) { // FIXME: Implement so that all levels (but \tx???) can be empty
 			lexAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getLexAnnotationMarkers().split(commaDelimRegex)));
 		}
 		Set<String> morphAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getMorphAnnotationMarkers().split(commaDelimRegex)));
@@ -444,6 +447,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Init maps for annotation lines sorted by layer
 		HashMap<String, List<String>> lexAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> morphAnnotationLines = new HashMap<>();
+		HashMap<String, List<String>> unitRefableAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> refAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> docMetaAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> refMetaAnnotationLines = new HashMap<>();
@@ -473,7 +477,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			else if (refMetaAnnotationMarkers != null && refMetaAnnotationMarkers.contains(key)) {
 				refMetaAnnotationLines.put(key, line.getValue());
 			}
-			else {
+			else if (unitRefAnnotationsMarkers != null && unitRefAnnotationsMarkers.contains(key)) {
+				unitRefableAnnotationLines.put(key, line.getValue());
+			}
+			else { // "True" reference annotations, always on the whole reference
 				refAnnotationLines.put(key, line.getValue());
 			}
 		}
@@ -527,7 +534,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Build morphological and lexical tokens with annotations, and build data sources
 		int morphCounter = 0;
 		int lexIndex = -1;
-		Set<SToken> refTokens = new HashSet<>();
+		List<SToken> spanLexTokens = new ArrayList<>();
+		List<SToken> spanMorphTokens = new ArrayList<>();
 		SToken lastMorphToken = null;
 		SToken lastLexToken = null;
 		SSpan lastRefSpan = null;
@@ -550,7 +558,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				// Map
 				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 				SToken lexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, lastLexToken, refLine.values().toString());
-				refTokens.add(lexToken);
+				spanLexTokens.add(lexToken);
 				lastLexToken = lexToken;
 				
 				// Prepare next iteration
@@ -559,7 +567,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
 			morphCounter++;
 			lastMorphToken = createMorphToken(morphemeTextToken, morphIndex, morphAnnotationLines, lastMorphToken, refLine.values().toString());
-			refTokens.add(lastMorphToken);
+			spanMorphTokens.add(lastMorphToken);
 			lastMorpheme = morphemeTextToken;
 		}
 		// Finalize the timeline
@@ -575,7 +583,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 		SToken lexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, lastLexToken, refLine.values().toString());
-		refTokens.add(lexToken);
+		spanLexTokens.add(lexToken);
 		
 		// Add to data sources
 		String oldLexDSText = getLexicalTextualDS().getText();
@@ -583,8 +591,12 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		String oldMorphDSText = getMorphologicalTextualDS().getText();
 		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
 		
-		// Now build the ref span and add ref-level annotations
-		lastRefSpan = createRefSpan(refLine, refTokens, refAnnotationLines, refMetaAnnotationLines, lastRefSpan);
+		// Build the ref span and add ref-level annotations
+		lastRefSpan = createRefSpan(refLine, spanLexTokens, spanMorphTokens, refAnnotationLines, refMetaAnnotationLines, lastRefSpan);
+		
+		// Now that all tokens are there, build the unit ref spans and add unitref-level annotations
+		// TODO
+		
 		createDocumentMetaAnnotations(docMetaAnnotationLines);
 	}
 
@@ -624,15 +636,24 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * {@link ToolboxTextImporterProperties#MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER}
 	 *
 	 * @param list
-	 * @param refTokens
+	 * @param spanLexTokens
 	 * @param refAnnotationLines
 	 * @param refMetaAnnotationLines 
 	 */
-	private SSpan createRefSpan(Map<String, List<String>> refLine, Set<SToken> refTokens, HashMap<String, List<String>> refAnnotationLines, HashMap<String,List<String>> refMetaAnnotationLines, SSpan lastRefSpan) {
-		SSpan span = getGraph().createSpan(new ArrayList<>(refTokens));
+	private SSpan createRefSpan(Map<String, List<String>> refLine, List<SToken> spanLexTokens, List<SToken> spanMorphTokens, HashMap<String, List<String>> refAnnotationLines, HashMap<String,List<String>> refMetaAnnotationLines, SSpan lastRefSpan) {
+		List<SToken> orderedMorphTokens = null;
+		List<SToken> orderedLexTokens = null;
+		SSpan span = getGraph().createSpan(new ArrayList<>(spanLexTokens));
 		for (Entry<String, List<String>> line : refAnnotationLines.entrySet()) {
+			List<String> lineContents = line.getValue();
+			if (hasUnitRefMarkup(lineContents, orderedMorphTokens.size(), orderedLexTokens.size())) { // If line has unitref markup
+				orderedMorphTokens = getGraph().getSortedTokenByText(spanMorphTokens);
+				orderedLexTokens = getGraph().getSortedTokenByText(spanLexTokens);
+			}
+			// TODO Check if the line has unitref markup in the form of [lexMarker/morphMarker] [fromInt] [toInt] [...] 
+			
 			StringBuilder sb = new StringBuilder();
-			for (String s : line.getValue()) {
+			for (String s : lineContents) {
 				sb.append(s);
 				sb.append(" ");
 			}
@@ -666,6 +687,46 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		span.addLayer(layers.get(getProperties().getLexMarker()));
 		span.addLayer(layers.get(getProperties().getMorphMarker()));
 		return span;
+	}
+
+	/**
+	 * Tests whether the first 3 objects in the list are compatible to
+	 * unit ref markup, i.e., if the first object is a String equalling
+	 * either the morph or the lex marker, and if the second and third
+	 * object are parseable to {@link Integer}s, and if the second item
+	 * is not smaller than 0, and if the third item is not larger than 
+	 * the last index in the list of tokens for the marker.
+	 *
+	 * @param lineContents
+	 * @param numberOfLexemes 
+	 * @param numberOfMorphemes 
+	 * @return whether the first three objects in the first argument adhere to unit ref markup format
+	 */
+	private boolean hasUnitRefMarkup(List<String> lineContents, int numberOfMorphemes, int numberOfLexemes) {
+		String marker = lineContents.get(0);
+		if (!(marker.equals(getProperties().getLexMarker()) || marker.equals(getProperties().getMorphMarker()))) {
+			return false;
+		}
+		Integer from = null;
+		Integer to = null;
+		try {
+			from = Integer.valueOf(lineContents.get(1));
+			to = Integer.valueOf(lineContents.get(1));
+		}
+		catch (NumberFormatException e) {
+			return false;
+		}
+		if (marker.equals(getProperties().getLexMarker())) {
+			if (from < 0 || to > (numberOfLexemes - 1)) {
+				return false;
+			}
+		}
+		else {
+			if (from < 0 || to > (numberOfMorphemes - 1)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -836,6 +897,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	
 	private boolean hasLexAnnotationProperty() {
 		return (getProperties().getLexAnnotationMarkers() != null);
+	}
+	
+	private boolean hasUnitRefAnnotationProperty() {
+		return (getProperties().getUnitRefAnnotationMarkers() != null);
 	}
 
 }
