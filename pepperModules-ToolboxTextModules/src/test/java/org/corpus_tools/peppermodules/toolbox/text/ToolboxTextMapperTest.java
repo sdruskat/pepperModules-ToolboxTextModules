@@ -421,19 +421,19 @@ public class ToolboxTextMapperTest {
 		assertEquals(3, graph.getSpans().size());
 		for (SSpan span : graph.getSpans()) {
 			if (span.getName().equals("First sentence")) {
-				assertEquals(3, graph.getOverlappedTokens(span).size());
+				assertEquals(7, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is a reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("First sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Second sentence")) {
-				assertEquals(5, graph.getOverlappedTokens(span).size());
+				assertEquals(13, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is yet another reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("Second sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Third sentence")) {
-				assertEquals(2, graph.getOverlappedTokens(span).size());
+				assertEquals(5, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is a third reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("Third sentence", span.getAnnotation("toolbox::ref").getValue().toString());
@@ -444,46 +444,6 @@ public class ToolboxTextMapperTest {
 		}
 	}
 	
-	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
-	 * Tests the ref spans in the document graph.
-	 */
-	@Test
-	public void testMapSDocumentRefSpansOverMorphs() {
-		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER, "false");
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_REF_METADATA_MARKERS, "met");
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_DOCUMENT_METADATA_MARKERS, "docmet");
-		getFixture().setProperties(properties);
-		getFixture().mapSDocument();
-		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
-		assertEquals(3, graph.getSpans().size());
-		for (SSpan span : graph.getSpans()) {
-			if (span.getName().equals("First sentence")) {
-				assertEquals(4, graph.getOverlappedTokens(span).size());
-				assertEquals(2, span.getAnnotations().size());
-				assertEquals("This is a reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
-				assertEquals("First sentence", span.getAnnotation("toolbox::ref").getValue().toString());
-			}
-			else if (span.getName().equals("Second sentence")) {
-				assertEquals(8, graph.getOverlappedTokens(span).size());
-				assertEquals(2, span.getAnnotations().size());
-				assertEquals("This is yet another reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
-				assertEquals("Second sentence", span.getAnnotation("toolbox::ref").getValue().toString());
-			}
-			else if (span.getName().equals("Third sentence")) {
-				assertEquals(3, graph.getOverlappedTokens(span).size());
-				assertEquals(2, span.getAnnotations().size());
-				assertEquals("This is a third reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
-				assertEquals("Third sentence", span.getAnnotation("toolbox::ref").getValue().toString());
-			}
-			else {
-				fail("Found a ref that shouldn't be in the span list: " + span.getName());
-			}
-		}
-	}
-
 	/**
 	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
 	 * Tests the meta annotations in the document graph.

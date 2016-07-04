@@ -127,12 +127,6 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public static final String PROP_FILE_EXTENSIONS = "fileExtensions";
 	
 	/**
-	 * Wether reference-level annotations should be mapped as a span onto tokens on the lexical layer.
-	 * {@code true} if so, and {@code false} if they should be mapped onto the morphological layer tokens.
-	 */
-	public static final String PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER = "mapRefAnnotationsToLexicalLayer";
-	
-	/**
 	 * Wether detached delimiters (as in "item - item" or similar) should be attached to the previous or
 	 * subsequent item, as a two-item comma-separated , where the first item signifies whether the delimiter should
 	 * be attached (if <strong>true</strong> it will be attached), and the second item signifies 
@@ -152,7 +146,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				String.class, 
 				"The Toolbox marker that precedes lines with morphological information, without the preceding backslash.",
 				"mb",
-				true));
+				false));
 		addProperty(new PepperModuleProperty<>(PROP_LEX_ANNOTATION_MARKERS, 
 				String.class, 
 				"All Toolbox markers which precede lines with annotations of source text segments (usually lexical items), without the preceding backslashes, and as a comma-separated list.",
@@ -176,11 +170,6 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				String.class,
 				"The file extensions that corpus files can have as a comma-separated list.",
 				"txt,lbl",
-				true));
-		addProperty(new PepperModuleProperty<>(PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER, 
-				Boolean.class,
-				"Wether reference-level annotations should be mapped as a span onto tokens on the lexical layer. \"true\" if so, and \"false\" if they should be mapped onto the morphological layer tokens.",
-				true,
 				true));
 		addProperty(new PepperModuleProperty<>(PROP_DOCUMENT_METADATA_MARKERS, 
 				String.class,
@@ -225,10 +214,6 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 
 	public String getFileExtensions() {
 		return (String) getProperty(PROP_FILE_EXTENSIONS).getValue();
-	}
-	
-	public Boolean mapRefAnnotationsToLexicalLayer() {
-		return (Boolean) getProperty(PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER).getValue();
 	}
 	
 	public String getDocMetadataMarkers() {
