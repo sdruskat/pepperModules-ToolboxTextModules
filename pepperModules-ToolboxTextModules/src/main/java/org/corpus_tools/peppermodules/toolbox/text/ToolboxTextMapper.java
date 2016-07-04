@@ -41,7 +41,6 @@ import java.util.Set;
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
-import org.corpus_tools.salt.SALT_TYPE;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SOrderRelation;
@@ -167,7 +166,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	public DOCUMENT_STATUS mapSDocument() {
 		// Set up fields
 		getMorphologicalTextualDS().setText("");
-		getMorphologicalTextualDS().setName("morphology-ds"); // FIXME: Check whether ID or NAme, check useful name
+		getMorphologicalTextualDS().setName("morphology-ds");
 		getLexicalTextualDS().setText("");
 		getLexicalTextualDS().setName("lexical-ds");
 		String[] delimiters = getProperties().getMorphemeDelimiters().split("\\s*,\\s*");
@@ -260,7 +259,11 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
-	 * TODO: Description
+	 * Adds a line from a Toolbox file to a block, i.e., a data structure that maps
+	 * the line's marker to its content (a {@link List} of trimmed {@link String}s). 
+	 * If the marker exists, i.e., Toolbox has split up the content belonging to
+	 * that marker over more than one line in the files, the marker String itself 
+	 * is ignored and the contents are added to the already existing list of Strings. 
 	 *
 	 * @param block
 	 * @param line
@@ -586,7 +589,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
-	 * TODO: Description
+	 * Expects a list of lines, i.e., markers and contents belonging to that
+	 * marker, and from them creates meta annotations on the document itself.
 	 *
 	 * @param docMetaAnnotationLines
 	 */
@@ -771,18 +775,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		
 		return token;
 	}
-
-//	/**
-//	 * Creates and names an {@link SLayer} and puts it to the {@link #layers} {@link Map} under its name.
-//	 * 
-//	 * @param name
-//	 */
-//	private void createLayer(String name) {
-//		SLayer layer = SaltFactory.createSLayer();
-//		layer.setName(name);
-//		getGraph().addLayer(layer);
-//		layers.put(name, layer);
-//	}
 
 	/**
 	 * @return the lexicalTextualDS
