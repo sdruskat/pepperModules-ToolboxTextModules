@@ -36,6 +36,7 @@
 \mb m16 m17 m18
 \ge M16 M17 M18
 \ur mb 1 2 Unitref to morphemes m17 and m18 in a span
+\ll uref one
 
 \ref Unitref sentence TWO
 \met Sentence with a single global unitref (morph-level) from m20 to m23 (incl.) on \ur and \ur2
@@ -46,6 +47,7 @@
 \ge M19 M20 M21 M22 M23 M24
 \ur Unitref to morphemes m20-m23 in a span
 \ur2 2nd unitref to morphemes m20-m23 in a span
+\ll uref two
 
 \ref Unitref sentence THREE
 \met Sentence with two global unitrefs (morph-level) m26-m28 and m30-m31 on \ur
@@ -57,3 +59,4 @@
 \ge M25 M26 M27 M28 M29 M30 M31 M32
 \ur 1 Unitref m26-m28
 \ur 2 Unitref m30-m31
+\ll uref three
