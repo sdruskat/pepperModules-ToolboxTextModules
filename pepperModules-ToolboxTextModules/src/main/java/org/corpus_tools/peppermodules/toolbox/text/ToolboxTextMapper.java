@@ -641,9 +641,12 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param refMetaAnnotationLines 
 	 */
 	private SSpan createRefSpan(Map<String, List<String>> refLine, List<SToken> spanLexTokens, List<SToken> spanMorphTokens, HashMap<String, List<String>> refAnnotationLines, HashMap<String,List<String>> refMetaAnnotationLines, SSpan lastRefSpan) {
+		List<SToken> allTokens = new ArrayList<>();
+		allTokens.addAll(spanMorphTokens);
+		allTokens.addAll(spanLexTokens);
 		List<SToken> orderedMorphTokens = null;
 		List<SToken> orderedLexTokens = null;
-		SSpan span = getGraph().createSpan(new ArrayList<>(spanLexTokens));
+		SSpan span = getGraph().createSpan(new ArrayList<>(allTokens));
 		for (Entry<String, List<String>> line : refAnnotationLines.entrySet()) {
 			List<String> lineContents = line.getValue();
 			System.err.println(lineContents + ": " + hasUnitRefMarkup(lineContents, spanMorphTokens.size(), spanLexTokens.size()));
