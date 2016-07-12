@@ -548,6 +548,12 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentLineLevelUnitrefs() {
+		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_DOCUMENT_METADATA_MARKERS, "docmet");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_REF_METADATA_MARKERS, "met");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
+		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 		// TODO
