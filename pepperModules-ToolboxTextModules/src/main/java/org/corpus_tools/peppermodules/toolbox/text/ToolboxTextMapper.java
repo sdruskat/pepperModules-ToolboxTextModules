@@ -646,9 +646,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		SSpan span = getGraph().createSpan(new ArrayList<>(spanLexTokens));
 		for (Entry<String, List<String>> line : refAnnotationLines.entrySet()) {
 			List<String> lineContents = line.getValue();
-			System.err.println(line.getValue());
-			System.err.println(orderedMorphTokens);
-			System.err.println(orderedLexTokens);
 			if (hasUnitRefMarkup(lineContents, spanMorphTokens.size(), spanLexTokens.size())) { // If line has unitref markup
 				orderedMorphTokens = getGraph().getSortedTokenByText(spanMorphTokens);
 				orderedLexTokens = getGraph().getSortedTokenByText(spanLexTokens);
@@ -714,7 +711,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		Integer to = null;
 		try {
 			from = Integer.valueOf(lineContents.get(1));
-			to = Integer.valueOf(lineContents.get(1));
+			to = Integer.valueOf(lineContents.get(2));
 		}
 		catch (NumberFormatException e) {
 			return false;
