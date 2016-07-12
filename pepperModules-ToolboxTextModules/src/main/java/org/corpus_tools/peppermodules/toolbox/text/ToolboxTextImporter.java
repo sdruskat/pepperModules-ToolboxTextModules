@@ -105,7 +105,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	public ToolboxTextImporter() {
 		super();
 		setName("ToolboxTextImporter");
-		setVersion("0.0.1");
+		setVersion("1.0.0-SNAPSHOT");
 		setSupplierContact(URI.createURI("stephan.druskat@hu-berlin.de"));
 		setSupplierHomepage(URI.createURI("http://corpus-tools.org"));
 		setDesc("An importer for the text-based format written by SIL Toolbox (as opposed to the respective XML format).");

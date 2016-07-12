@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1467621883732
-Build-Jdk: 1.8.0_91
+Bnd-LastModified: 1468315561206
+Build-Jdk: 1.7.0_101
 Built-By: stephan
 Bundle-Description: Provides shared POM-data.
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
@@ -17,14 +17,13 @@ Export-Package: org.corpus_tools.peppermodules.toolbox.text;uses:="org.c
  .pepper.modules,org.corpus_tools.pepper.modules.exceptions,org.corpus_t
  ools.salt.common,org.corpus_tools.salt.core,org.corpus_tools.salt.graph
  ,org.eclipse.emf.common.util";version="1.0.0.SNAPSHOT"
-Import-Package: org.corpus_tools.pepper.common;version="[3.0,4)",org.cor
- pus_tools.pepper.impl;version="[3.0,4)",org.corpus_tools.pepper.modules
- ;version="[3.0,4)",org.corpus_tools.pepper.modules.exceptions;version="
- [3.0,4)",org.corpus_tools.salt;version="[3.0,4)",org.corpus_tools.salt.
- common;version="[3.0,4)",org.corpus_tools.salt.core;version="[3.0,4)",o
- rg.corpus_tools.salt.graph;version="[3.0,4)",org.corpus_tools.salt.util
- ;version="[3.0,4)",org.eclipse.emf.common.util,org.slf4j;version="[1.7,
- 2)"
+Import-Package: org.corpus_tools.pepper.common,org.corpus_tools.pepper.i
+ mpl,org.corpus_tools.pepper.modules,org.corpus_tools.pepper.modules.exc
+ eptions,org.corpus_tools.salt;version="[3.0,4)",org.corpus_tools.salt.c
+ ommon;version="[3.0,4)",org.corpus_tools.salt.core;version="[3.0,4)",or
+ g.corpus_tools.salt.graph;version="[3.0,4)",org.corpus_tools.salt.util;
+ version="[3.0,4)",org.eclipse.emf.common.util,org.slf4j;version="[1.7,2
+ )"
 META-INF: /home/stephan/git/hu-berlin-gitlab/toolbox-text-importer/peppe
  rModules-ToolboxTextModules/META-INF
 OSGI-INF: OSGI-INF

@@ -472,6 +472,17 @@ public class ToolboxTextMapperTest {
 			}
 		}
 	}
+	
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextMapper#mapSDocument()}. 
+	 * Tests the meta annotations in the document graph.
+	 */
+	@Test
+	public void testMapSDocumentLineLevelUnitrefs() {
+		getFixture().mapSDocument();
+		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
+		// TODO
+	}
 
 	/**
 	 * @return the fixture

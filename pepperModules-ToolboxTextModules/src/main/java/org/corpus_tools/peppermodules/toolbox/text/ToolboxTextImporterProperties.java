@@ -246,6 +246,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return Boolean.valueOf(split[1]);
 	}
 
+	
 	public String getUnitRefAnnotationMarkers() {
 		return (String) getProperty(PROP_UNIT_REF_ANNOTATIONS_MARKERS).getValue();
 	}
