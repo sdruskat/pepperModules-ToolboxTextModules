@@ -135,6 +135,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	
 	private SDocumentGraph graph = null;
 	
+	SToken lastMorphToken = null;
+	SToken lastLexToken = null;
+	
 	private int lexTimelineIndex = 0;
 	private int morphTimelineIndex = 0;
 	private int lexDSIndex = 0;
@@ -536,8 +539,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		int lexIndex = -1;
 		List<SToken> spanLexTokens = new ArrayList<>();
 		List<SToken> spanMorphTokens = new ArrayList<>();
-		SToken lastMorphToken = null;
-		SToken lastLexToken = null;
 		SSpan lastRefSpan = null;
 		String lastMorpheme = null;
 		for (int morphIndex = 0; morphIndex < morphologicalTextTokens.size(); morphIndex++) {
@@ -557,16 +558,15 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				}
 				// Map
 				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
-				SToken lexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, lastLexToken, refLine.values().toString());
-				spanLexTokens.add(lexToken);
-				lastLexToken = lexToken;
+				lastLexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, refLine.values().toString());
+				spanLexTokens.add(lastLexToken);
 				
 				// Prepare next iteration
 				morphCounter = 0;
 			}
 			morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
 			morphCounter++;
-			lastMorphToken = createMorphToken(morphemeTextToken, morphIndex, morphAnnotationLines, lastMorphToken, refLine.values().toString());
+			lastMorphToken = createMorphToken(morphemeTextToken, morphIndex, morphAnnotationLines, refLine.values().toString());
 			spanMorphTokens.add(lastMorphToken);
 			lastMorpheme = morphemeTextToken;
 		}
@@ -582,8 +582,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			throw new PepperModuleException("\n\n#####\nAlignment problem in block \""+block.get(refMarker).toString()+"\"! There are only "+lexicalTextTokens.size()+" lexical items in the reference block, but the importer is trying to access item number "+(lexIndex+1) + ".\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
 		}
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
-		SToken lexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, lastLexToken, refLine.values().toString());
-		spanLexTokens.add(lexToken);
+		lastLexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, refLine.values().toString());
+		spanLexTokens.add(lastLexToken);
 		
 		// Add to data sources
 		String oldLexDSText = getLexicalTextualDS().getText();
@@ -646,10 +646,11 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		allTokens.addAll(spanLexTokens);
 		List<SToken> orderedMorphTokens = null;
 		List<SToken> orderedLexTokens = null;
-		SSpan span = getGraph().createSpan(new ArrayList<>(allTokens));
+		SSpan span = null;
+		span = getGraph().createSpan(new ArrayList<>(spanMorphTokens)); // TODO Move to somewhere below where unitrefs aren't mapped co sunitrefs are only mapped onto morphs
+
 		for (Entry<String, List<String>> line : refAnnotationLines.entrySet()) {
 			List<String> lineContents = line.getValue();
-			System.err.println(lineContents + ": " + hasUnitRefMarkup(lineContents, spanMorphTokens.size(), spanLexTokens.size()));
 			if (hasUnitRefMarkup(lineContents, spanMorphTokens.size(), spanLexTokens.size())) { // If line has unitref markup
 				orderedMorphTokens = getGraph().getSortedTokenByText(spanMorphTokens);
 				orderedLexTokens = getGraph().getSortedTokenByText(spanLexTokens);
@@ -753,7 +754,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param refId Can be used for error reporting
 	 * @return
 	 */
-	private SToken createMorphToken(String morpheme, int morphIndex, HashMap<String,List<String>> morphAnnotationLines, SToken lastMorphToken, String refId) {
+	private SToken createMorphToken(String morpheme, int morphIndex, HashMap<String,List<String>> morphAnnotationLines, String refId) {
 		SToken token = getGraph().createToken(getMorphologicalTextualDS(), morphDSIndex, morphDSIndex += morpheme.length());
 		morphDSIndex++; // Accounting for whitespace
 		for (Entry<String, List<String>> annotationLine : morphAnnotationLines.entrySet()) {
@@ -806,7 +807,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param timelineCounter 
 	 * @return
 	 */
-	private SToken createLexicalToken(String lexicalTextToken, int indexOfToken, int timelineUnits, HashMap<String,List<String>> lexAnnotationLines, SToken lastLexToken, String refId) {
+	private SToken createLexicalToken(String lexicalTextToken, int indexOfToken, int timelineUnits, HashMap<String,List<String>> lexAnnotationLines, String refId) {
 		
 		SToken token = getGraph().createToken(getLexicalTextualDS(), lexDSIndex, lexDSIndex += lexicalTextToken.length());
 		lexDSIndex++; // Accounting for whitespace
