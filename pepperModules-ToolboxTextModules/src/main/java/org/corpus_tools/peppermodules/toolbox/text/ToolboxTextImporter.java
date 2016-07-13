@@ -502,6 +502,5 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	@Override
 	public void end(){
 	    super.end();
-	    getSaltProject().saveSaltProject(URI.createFileURI("/home/stephan/Dokumente/melatamp/daten/pre-project.OLD/Data/CorpusMavea/testSave/"));
 	}
 }

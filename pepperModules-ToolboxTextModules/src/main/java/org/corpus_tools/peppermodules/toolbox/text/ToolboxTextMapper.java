@@ -55,6 +55,11 @@ import org.eclipse.emf.common.util.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+
 /**
  * A mapper for the Toolbox text format.
  * <p>
@@ -219,7 +224,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 
 		// Go through the list and compile a list of tuples of marker and values
 		// Map the tuple list whenever you hit a ref marker
-		Map<String, List<String>> block = new HashMap<>();
+		ListMultimap<String, List<String>> block = ArrayListMultimap.create();
 		int lineListSize = lineList.size();
 		for (String line : lineList) {
 			if (!line.startsWith("\\" + getProperties().getRefMarker())) {
@@ -270,7 +275,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param block
 	 * @param line
 	 */
-	private void addLineToBlock(Map<String, List<String>> block, String line) {
+	private void addLineToBlock(ListMultimap<String, List<String>> block, String line) {
 		String[] markerAndValues = line.split("\\s+");
 		if (markerAndValues[0] == null) {
 			LinkedList<String> markerandValuesList = new LinkedList<String>(Arrays.asList(markerAndValues));
@@ -283,10 +288,18 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			valueList.add(markerAndValues[i]);
 		}
 		if (!block.containsKey(marker)) {
+			System.err.println(" New Marker found: " + marker + ": " + valueList);
 			block.put(marker, valueList);
 		}
 		else {
-			block.get(marker).addAll(valueList);
+			if (Arrays.asList(getProperties().getUnitRefAnnotationMarkers().split("\\s*,\\s*")).contains(marker)) {
+				System.err.println(" UNIT REF Marker exists: " + marker + ": " + valueList);
+				block.put(marker, valueList);
+				System.err.println("        NOW ITS " + block.get(marker).size());
+			}
+			else {
+				block.get(marker).get(0).addAll(valueList);
+			}
 		}
 	}
 
@@ -357,8 +370,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 *
 	 * @param block The header block to process
 	 */
-	private void mapHeaderToModel(Map<String, List<String>> block) {
-		for (Entry<String, List<String>> line : block.entrySet()) {
+	private void mapHeaderToModel(ListMultimap<String,List<String>> block) {
+		for (Entry<String, List<String>> line : block.entries()) {
 			String marker = line.getKey();
 			String qualifiedId = SALT_NAMESPACE_TOOLBOX + "::" + marker;
 			SMetaAnnotation annotation;
@@ -402,7 +415,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param block The reference block to process
 	 * @return 
 	 */
-	private void mapRefToModel(Map<String, List<String>> block) {
+	private void mapRefToModel(ListMultimap<String,List<String>> block) {
 		// Resolve properties
 		String refMarker = getProperties().getRefMarker();
 		logger.debug("Mapping ref block \"" + block.get(refMarker).toString() + "\".");
@@ -440,11 +453,11 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		Map<String, int[]> definedUnitRefs = new HashMap<>();
 		
 		// Get text tokens for lex and morph
-		List<String> lexicalTextTokens = block.get(lexMarker);
+		List<String> lexicalTextTokens = block.get(lexMarker).get(0);
 		if (lexicalTextTokens == null) {
 			throw new PepperModuleException("There is no lexical layer for this reference block. Aborting conversion. EVERY reference block must have a lexical layer.");
 		}
-		List<String> morphologicalTextTokens = block.get(morphMarker);
+		List<String> morphologicalTextTokens = block.get(morphMarker).get(0);
 		if (morphologicalTextTokens == null) {
 			throw new PepperModuleException("There is no morphological layer for this reference block. Aborting conversion. EVERY reference block must have a morphological layer.");
 		}
@@ -455,7 +468,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Init maps for annotation lines sorted by layer
 		HashMap<String, List<String>> lexAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> morphAnnotationLines = new HashMap<>();
-		HashMap<String, List<String>> unitRefAnnotationLines = new HashMap<>();
+		ListMultimap<String, List<String>> unitRefAnnotationLines = ArrayListMultimap.create();
 		HashMap<String, List<String>> refAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> docMetaAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> refMetaAnnotationLines = new HashMap<>();
@@ -463,7 +476,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		HashMap<String, List<String>> refLine = new HashMap<>(1);
 		
 		// Build maps of annotation levels
-		Iterator<Entry<String, List<String>>> mapIterator = block.entrySet().iterator();
+		Iterator<Entry<String, List<String>>> mapIterator = block.entries().iterator();
 		while (mapIterator.hasNext()) {
 			Entry<String, List<String>> line = mapIterator.next();
 			String key = line.getKey();
@@ -500,15 +513,18 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				refMetaAnnotationLines.put(key, line.getValue());
 			}
 			else if (unitRefAnnotationsMarkers != null && unitRefAnnotationsMarkers.contains(key)) {
-//				/* 
-//				 * It could be, however, that there are unitref-able lines which are annotations on the whole ref!
-//				 * I.e., when there is no unitref marker in the block, and the unitref-able line does not have
-//				 * unit ref markup. In this case, skip. 
-//				 */
-//				if (!hasDefinedUnitRefs && !hasUnitRefMarkup(line.getValue(), morphologicalTextTokens.size(), lexicalTextTokens.size())) {
-//					break;
-//				}
-				unitRefAnnotationLines.put(key, line.getValue());
+				/* 
+				 * It could be, however, that there are unitref-able lines which are annotations on the whole ref!
+				 * I.e., when there is no unitref marker in the block, and the unitref-able line does not have
+				 * unit ref markup. In this case, skip. 
+				 */
+				if (!hasDefinedUnitRefs && !hasUnitRefMarkup(line.getValue(), morphologicalTextTokens.size(), lexicalTextTokens.size())) {
+					break;
+				}
+				else {
+					System.err.println("BEFORE PUT " + line.getValue());
+					unitRefAnnotationLines.put(key, line.getValue());
+				}
 			}
 			else { // "True" reference annotations, always on the whole reference
 				refAnnotationLines.put(key, line.getValue());
@@ -619,10 +635,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		
 		// Build the general ref span and add ref-level annotations
 		createRefSpan(refLine, spanMorphTokens, spanLexTokens, refAnnotationLines, refMetaAnnotationLines);
-//		for (unitRefLine : unitRefAnnotationLines) {
-//			
-//		}
-//		createUnitRefSpans(getGraph().getSortedTokenByText(spanMorphTokens), unitRefAnnotationLines);
+		for (Entry<String, List<String>> unitRefLine : unitRefAnnotationLines.entries()) {
+			System.err.println(unitRefLine.getValue());
+			createUnitRefSpan(getGraph().getSortedTokenByText(spanMorphTokens), getGraph().getSortedTokenByText(spanLexTokens), unitRefLine, definedUnitRefs);
+		}
 //		
 //		// Now that all tokens are there, build the unit ref spans and add unitref-level annotations
 //		// TODO
@@ -634,11 +650,52 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * TODO: Description
 	 *
 	 * @param sortedMorphTokens
-	 * @param unitRefableAnnotationLines
+	 * @param unitRefLine
+	 * @return 
 	 */
-	private void createUnitRefSpans(List<SToken> sortedMorphTokens, HashMap<String, List<String>> unitRefableAnnotationLines) {
-//		for (line : )
+	private SSpan createUnitRefSpan(List<SToken> sortedMorphTokens, List<SToken> sortedLexTokens, Entry<String, List<String>> unitRefLine, Map<String, int[]> definedUnitRefs) {
+		List<SToken> targetedTokens = new ArrayList<>();
+		List<String> lineContents = unitRefLine.getValue();
+		if (hasUnitRefMarkup(lineContents, sortedMorphTokens.size(), sortedLexTokens.size())) { // If line has direct unitref markup
+			if (lineContents.get(0).equals(getProperties().getMorphMarker())) {
+				for (int i = Integer.valueOf(lineContents.get(1)); i < Integer.valueOf(lineContents.get(2)); i++) {
+					targetedTokens.add(sortedMorphTokens.get(i));
+				}
+			}
+			else if (lineContents.get(0).equals(getProperties().getLexMarker())){
+				for (int i = Integer.valueOf(lineContents.get(1)); i < Integer.valueOf(lineContents.get(2)) + 1; i++) {
+					targetedTokens.add(sortedLexTokens.get(i));
+				}
+			}
+		}
+		else if (definedUnitRefs.size() == 1) { // There is exactly one unit ref definition without a definitor 
+			for (int[] value : definedUnitRefs.values()) {
+				for (int i = value[0]; i < value[1] + 1; i++) {
+					targetedTokens.add(sortedMorphTokens.get(i));
+				}
+			}
+		}
+		else if (definedUnitRefs.get(lineContents.get(0)) != null && (getMorphologicalTextualDS().getText().startsWith(lineContents.get(1)) || getLexicalTextualDS().getText().startsWith(lineContents.get(1)))) { // Line has defined unit ref
+			int[] value = definedUnitRefs.get(lineContents.get(0));
+			for (int i = value[0]; i < value[1] + 1; i++) {
+				targetedTokens.add(sortedMorphTokens.get(i));
+			}
+		}
+		SSpan span = getGraph().createSpan(targetedTokens);
+		StringBuilder sb = new StringBuilder();
+		for (String s : lineContents) {
+			sb.append(s);
+			sb.append(" ");
+		}
+		String key = unitRefLine.getKey();
+		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, key, sb.toString().trim());
+		span.setName(sb.toString().trim());
 		
+		if (layers.get(key) == null) {
+			createLayer(key);
+		}
+		span.addLayer(layers.get(key));
+		return span;
 	}
 
 	/**

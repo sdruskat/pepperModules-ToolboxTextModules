@@ -81,7 +81,7 @@ public class ToolboxTextMapperTest {
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 		assertTrue(graph == getFixture().getGraph());
-		assertEquals(3, graph.getLayers().size());
+		assertEquals(5, graph.getLayers().size());
 		assertNotNull(graph.getLayerByName("ref"));
 		assertNotNull(graph.getLayerByName("tx"));
 		assertNotNull(graph.getLayerByName("mb"));
@@ -133,6 +133,7 @@ public class ToolboxTextMapperTest {
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
 		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
@@ -205,6 +206,7 @@ public class ToolboxTextMapperTest {
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
 		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
@@ -365,6 +367,7 @@ public class ToolboxTextMapperTest {
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
 		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -480,8 +483,7 @@ public class ToolboxTextMapperTest {
 		 
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
-//		assertEquals(11, graph.getSpans().size());
-		assertEquals(65, graph.getSpans().size()); // 59 extra for single-token spans
+		assertEquals(70, graph.getSpans().size()); // 59 extra for single-token spans FIXME
 		for (SSpan span : graph.getSpans()) {
 			if (span.getName().equals("First sentence")) {
 				assertEquals(4, graph.getOverlappedTokens(span).size());
@@ -519,40 +521,37 @@ public class ToolboxTextMapperTest {
 				assertEquals("Unitref sentence THREE", span.getAnnotation("toolbox::ref").getValue().toString());
 				assertEquals("uref three", span.getAnnotation("toolbox::ll").getValue().toString());
 			}
-//			else if (span.getName().equals("Unitref to morphemes m17 and m18 in a span")) {
-//				assertEquals(2, graph.getOverlappedTokens(span).size());
-//				assertEquals(1, span.getAnnotations().size());
-//				assertEquals("Unitref to morphemes m17 and m18 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
-//			}
-//			else if (span.getName().equals("Unitref to morphemes m20-m23 in a span")) {
-//				assertEquals(4, graph.getOverlappedTokens(span).size());
-//				assertEquals(1, span.getAnnotations().size());
-//				assertEquals("Unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
-//			}
-//			else if (span.getName().equals("2nd unitref to morphemes m20-m23 in a span")) {
-//				assertEquals(4, graph.getOverlappedTokens(span).size());
-//				assertEquals(1, span.getAnnotations().size());
-//				assertEquals("2nd unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur2").getValue().toString());
-//			}
-//			else if (span.getName().equals("Unitref m26-m28")) {
-//				assertEquals(3, graph.getOverlappedTokens(span).size());
-//				assertEquals(1, span.getAnnotations().size());
-//				assertEquals("Unitref m26-m28", span.getAnnotation("toolbox::ur").getValue().toString());
-//			}
-//			else if (span.getName().equals("Unitref m30-m31")) {
-//				assertEquals(2, graph.getOverlappedTokens(span).size());
-//				assertEquals(1, span.getAnnotations().size());
-//				assertEquals("Unitref m30-m31", span.getAnnotation("toolbox::ur").getValue().toString());
-//			}
-//			else {
-//				fail("Found a ref that shouldn't be in the span list: " + span.getName());
-//			}
-			System.err.println(">>> " + span.getName());
-			for (SToken tok : graph.getOverlappedTokens(span)) {
-				System.err.println("     " + graph.getText(tok));
+			else if (span.getName().equals("Unitref to morphemes m17 and m18 in a span")) {
+				assertEquals(2, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref to morphemes m17 and m18 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
 			}
-			for (SAnnotation anno : span.getAnnotations()) {
-				System.err.println("          " + anno);
+			else if (span.getName().equals("Unitref to morphemes m20-m23 in a span")) {
+				assertEquals(4, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
+			}
+			else if (span.getName().equals("2nd unitref to morphemes m20-m23 in a span")) {
+				assertEquals(4, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("2nd unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur2").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref m26-m28")) {
+				assertEquals(3, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref m26-m28", span.getAnnotation("toolbox::ur").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref m30-m31")) {
+				assertEquals(2, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref m30-m31", span.getAnnotation("toolbox::ur").getValue().toString());
+			}
+			// FIXME: Remove the following once the bug in the ANNIS Exporter is fixed!
+			else if (graph.getOverlappedTokens(span).size() == 1) {
+				// Do nothing
+			}
+			else {
+				fail("Found a ref that shouldn't be in the span list: \"" + span.getName() + "\"");
 			}
 		}
 	}
@@ -601,6 +600,13 @@ public class ToolboxTextMapperTest {
 			}
 			// FIXME: Remove the following once the bug in the ANNIS Exporter is fixed!
 			else if (graph.getOverlappedTokens(span).size() == 1) {
+				// Do nothing
+			}
+			else if (span.getName().equals("Unitref to morphemes m17 and m18 in a span") ||
+					span.getName().equals("Unitref to morphemes m20-m23 in a span") ||
+					span.getName().equals("2nd unitref to morphemes m20-m23 in a span") ||
+					span.getName().equals("Unitref m26-m28") ||
+					span.getName().equals("Unitref m30-m31") ) {
 				// Do nothing
 			}
 			else {
