@@ -245,6 +245,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		 */
 		mapRefToModel(block);
 		
+		VisJSVisualizer visJSVisualizer = new VisJSVisualizer().visualize(URI.createFileURI("\\"));
+		
 		return (DOCUMENT_STATUS.COMPLETED);
 	}
 
@@ -610,7 +612,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
 		
 		// Build the ref span and add ref-level annotations
-		lastRefSpan = createRefSpan(refLine, spanLexTokens, spanMorphTokens, refAnnotationLines, refMetaAnnotationLines, lastRefSpan, definedUnitRefs);
+		lastRefSpan = createRefSpan(refLine, spanLexTokens, spanMorphTokens, refAnnotationLines, refMetaAnnotationLines, lastRefSpan, unitRefableAnnotationLines, definedUnitRefs);
 		
 		// Now that all tokens are there, build the unit ref spans and add unitref-level annotations
 		// TODO
@@ -657,8 +659,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param spanLexTokens
 	 * @param refAnnotationLines
 	 * @param refMetaAnnotationLines 
+	 * @param unitRefableAnnotationLines 
 	 */
-	private SSpan createRefSpan(Map<String, List<String>> refLine, List<SToken> spanLexTokens, List<SToken> spanMorphTokens, Map<String, List<String>> refAnnotationLines, HashMap<String,List<String>> refMetaAnnotationLines, SSpan lastRefSpan, Map<String, int[]> definedUnitRefs) {
+	private SSpan createRefSpan(Map<String, List<String>> refLine, List<SToken> spanLexTokens, List<SToken> spanMorphTokens, Map<String, List<String>> refAnnotationLines, HashMap<String,List<String>> refMetaAnnotationLines, SSpan lastRefSpan, HashMap<String,List<String>> unitRefableAnnotationLines, Map<String, int[]> definedUnitRefs) {
 		List<SToken> orderedMorphTokens = getGraph().getSortedTokenByText(spanMorphTokens);
 		List<SToken> orderedLexTokens = getGraph().getSortedTokenByText(spanLexTokens);
 		List<SToken> targetTokens = new ArrayList<>();
@@ -667,35 +670,35 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 
 		for (Entry<String, List<String>> line : refAnnotationLines.entrySet()) {
 			List<String> lineContents = line.getValue();
-			if (hasUnitRefMarkup(lineContents, spanMorphTokens.size(), spanLexTokens.size())) { // If line has direct unitref markup
-				if (lineContents.get(0).equals(getProperties().getMorphMarker())) {
-					for (int i = Integer.valueOf(lineContents.get(1)); i < Integer.valueOf(lineContents.get(2)) + 1; i++) {
-						targetTokens.add(orderedMorphTokens.get(i));
-					}
-				}
-				else {
-					for (int i = Integer.valueOf(lineContents.get(1)); i < Integer.valueOf(lineContents.get(2)) + 1; i++) {
-						targetTokens.add(orderedLexTokens.get(i));
-					}
-				}
-			}
-			else if (definedUnitRefs.size() == 1) { // There is exactly one unit ref definition without a definitor 
-				for (int[] value : definedUnitRefs.values()) {
-					for (int i = value[0]; i < value[1] + 1; i++) {
-						targetTokens.add(orderedMorphTokens.get(i));
-					}
-				}
-			}
-			else if (definedUnitRefs.get(lineContents.get(0)) != null && (getMorphologicalTextualDS().getText().startsWith(lineContents.get(1)) || getLexicalTextualDS().getText().startsWith(lineContents.get(1)))) { // Line has defined unit ref
-				int[] value = definedUnitRefs.get(lineContents.get(0));
-				for (int i = value[0]; i < value[1] + 1; i++) {
-					targetTokens.add(orderedMorphTokens.get(i));
-				}
-			}
-			else { // No unit refs
+//			if (hasUnitRefMarkup(lineContents, spanMorphTokens.size(), spanLexTokens.size())) { // If line has direct unitref markup
+//				if (lineContents.get(0).equals(getProperties().getMorphMarker())) {
+//					for (int i = Integer.valueOf(lineContents.get(1)); i < Integer.valueOf(lineContents.get(2)) + 1; i++) {
+//						targetTokens.add(orderedMorphTokens.get(i));
+//					}
+//				}
+//				else {
+//					for (int i = Integer.valueOf(lineContents.get(1)); i < Integer.valueOf(lineContents.get(2)) + 1; i++) {
+//						targetTokens.add(orderedLexTokens.get(i));
+//					}
+//				}
+//			}
+////			else if (definedUnitRefs.size() == 1) { // There is exactly one unit ref definition without a definitor 
+////				for (int[] value : definedUnitRefs.values()) {
+////					for (int i = value[0]; i < value[1] + 1; i++) {
+////						targetTokens.add(orderedMorphTokens.get(i));
+////					}
+////				}
+////			}
+//			else if (definedUnitRefs.get(lineContents.get(0)) != null && (getMorphologicalTextualDS().getText().startsWith(lineContents.get(1)) || getLexicalTextualDS().getText().startsWith(lineContents.get(1)))) { // Line has defined unit ref
+//				int[] value = definedUnitRefs.get(lineContents.get(0));
+//				for (int i = value[0]; i < value[1] + 1; i++) {
+//					targetTokens.add(orderedMorphTokens.get(i));
+//				}
+//			}
+//			else { // No unit refs
 				targetTokens.addAll(orderedMorphTokens);
 				targetTokens.addAll(orderedLexTokens);
-			}
+//			}
 			span = getGraph().createSpan(targetTokens);
 			
 			StringBuilder sb = new StringBuilder();
