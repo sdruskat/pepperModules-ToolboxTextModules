@@ -31,6 +31,7 @@ import org.corpus_tools.salt.common.STextualDS;
 import org.corpus_tools.salt.common.STimeline;
 import org.corpus_tools.salt.common.STimelineRelation;
 import org.corpus_tools.salt.common.SToken;
+import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SNode;
 import org.corpus_tools.salt.core.SRelation;
@@ -75,7 +76,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentSetup() {
-		System.err.println(">>> " + Thread.currentThread().getStackTrace()[1].getMethodName());
+		 
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -101,7 +102,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentDS() {
-		System.err.println(">>> " + Thread.currentThread().getStackTrace()[1].getMethodName());
+		 
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -128,7 +129,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentDSSwappedDelimAttachment() {
-		System.err.println(">>> " + Thread.currentThread().getStackTrace()[1].getMethodName());
+		 
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
@@ -159,7 +160,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentTokens() {
-		System.err.println(">>> " + Thread.currentThread().getStackTrace()[1].getMethodName());
+		 
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -200,7 +201,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentTokensWithSwappedDelimAttachment() {
-		System.err.println(">>> " + Thread.currentThread().getStackTrace()[1].getMethodName());
+		 
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
@@ -245,7 +246,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentAnnotations() {
-		System.err.println(">>> " + Thread.currentThread().getStackTrace()[1].getMethodName());
+		 
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -360,7 +361,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentAnnotationsWithSwappedDelimAttachment() {
-		System.err.println(">>> " + Thread.currentThread().getStackTrace()[1].getMethodName());
+		 
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
@@ -427,7 +428,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentTimeline() {
-		System.err.println(">>> " + Thread.currentThread().getStackTrace()[1].getMethodName());
+		 
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 		STimeline timeline = getFixture().getDocument().getDocumentGraph().getTimeline();
@@ -476,7 +477,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentRefSpans() {
-		System.err.println(">>> " + Thread.currentThread().getStackTrace()[1].getMethodName());
+		 
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 //		assertEquals(11, graph.getSpans().size());
@@ -500,49 +501,52 @@ public class ToolboxTextMapperTest {
 				assertEquals("This is a third reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("Third sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
-//			else if (span.getName().equals("Unitref sentence ONE")) {
-//				assertEquals(3, graph.getOverlappedTokens(span).size());
-//				assertEquals(2, span.getAnnotations().size());
-//				assertEquals("Unitref sentence ONE", span.getAnnotation("toolbox::ref").getValue().toString());
-//				assertEquals("uref one", span.getAnnotation("toolbox::ll").getValue().toString());
-//			}
-//			else if (span.getName().equals("Unitref sentence TWO")) {
-//				assertEquals(6, graph.getOverlappedTokens(span).size());
-//				assertEquals(2, span.getAnnotations().size());
-//				assertEquals("Unitref sentence TWO", span.getAnnotation("toolbox::ref").getValue().toString());
-//				assertEquals("uref two", span.getAnnotation("toolbox::ll").getValue().toString());
-//			}
-//			else if (span.getName().equals("Unitref sentence THREE")) {
-//				assertEquals(8, graph.getOverlappedTokens(span).size());
-//				assertEquals(2, span.getAnnotations().size());
-//				assertEquals("Unitref sentence THREE", span.getAnnotation("toolbox::ref").getValue().toString());
-//				assertEquals("uref three", span.getAnnotation("toolbox::ll").getValue().toString());
-//			}
-//			else if (span.getName().equals("Unitref to morphemes m17 and m18 in a span")) {
-//				assertEquals(2, graph.getOverlappedTokens(span).size());
-//				assertEquals(1, span.getAnnotations().size());
-//				assertEquals("Unitref to morphemes m17 and m18 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
-//			}
-//			else if (span.getName().equals("Unitref to morphemes m20-m23 in a span")) {
-//				assertEquals(4, graph.getOverlappedTokens(span).size());
-//				assertEquals(1, span.getAnnotations().size());
-//				assertEquals("Unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
-//			}
-//			else if (span.getName().equals("2nd unitref to morphemes m20-m23 in a span")) {
-//				assertEquals(4, graph.getOverlappedTokens(span).size());
-//				assertEquals(1, span.getAnnotations().size());
-//				assertEquals("2nd unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur2").getValue().toString());
-//			}
-//			else if (span.getName().equals("Unitref m26-m28")) {
-//				assertEquals(3, graph.getOverlappedTokens(span).size());
-//				assertEquals(1, span.getAnnotations().size());
-//				assertEquals("Unitref m26-m28", span.getAnnotation("toolbox::ur").getValue().toString());
-//			}
-//			else if (span.getName().equals("Unitref m30-m31")) {
-//				assertEquals(2, graph.getOverlappedTokens(span).size());
-//				assertEquals(1, span.getAnnotations().size());
-//				assertEquals("Unitref m30-m31", span.getAnnotation("toolbox::ur").getValue().toString());
-//			}
+			else if (span.getName().equals("Unitref sentence ONE")) {
+				assertEquals(6, graph.getOverlappedTokens(span).size());
+				assertEquals(2, span.getAnnotations().size());
+				assertEquals("Unitref sentence ONE", span.getAnnotation("toolbox::ref").getValue().toString());
+				assertEquals("uref one", span.getAnnotation("toolbox::ll").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref sentence TWO")) {
+				for (SToken tok : graph.getOverlappedTokens(span)) {
+					System.err.println(graph.getText(tok));
+				}
+				assertEquals(12, graph.getOverlappedTokens(span).size());
+				assertEquals(2, span.getAnnotations().size());
+				assertEquals("Unitref sentence TWO", span.getAnnotation("toolbox::ref").getValue().toString());
+				assertEquals("uref two", span.getAnnotation("toolbox::ll").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref sentence THREE")) {
+				assertEquals(16, graph.getOverlappedTokens(span).size());
+				assertEquals(2, span.getAnnotations().size());
+				assertEquals("Unitref sentence THREE", span.getAnnotation("toolbox::ref").getValue().toString());
+				assertEquals("uref three", span.getAnnotation("toolbox::ll").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref to morphemes m17 and m18 in a span")) {
+				assertEquals(2, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref to morphemes m17 and m18 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref to morphemes m20-m23 in a span")) {
+				assertEquals(4, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
+			}
+			else if (span.getName().equals("2nd unitref to morphemes m20-m23 in a span")) {
+				assertEquals(4, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("2nd unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur2").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref m26-m28")) {
+				assertEquals(3, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref m26-m28", span.getAnnotation("toolbox::ur").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref m30-m31")) {
+				assertEquals(2, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref m30-m31", span.getAnnotation("toolbox::ur").getValue().toString());
+			}
 			else {
 				fail("Found a ref that shouldn't be in the span list: " + span.getName());
 			}
@@ -555,7 +559,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentMetaAnnotations() {
-		System.err.println(">>> " + Thread.currentThread().getStackTrace()[1].getMethodName());
+
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 		for (SSpan span : graph.getSpans()) {

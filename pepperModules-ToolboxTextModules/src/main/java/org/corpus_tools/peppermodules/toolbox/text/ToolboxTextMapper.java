@@ -410,6 +410,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		String[] delimiters = getProperties().getMorphemeDelimiters().split(commaDelimRegex);
 		String lexMarker = getProperties().getLexMarker();
 		String morphMarker = getProperties().getMorphMarker();
+		String unitRefDefMarker = getProperties().getUnitRefDefinitionMarker();
 		affixDelimiter = delimiters[0].trim();
 		cliticsDelimiter = delimiters[1].trim();
 		Set<String> unitRefAnnotationsMarkers = null;
@@ -433,6 +434,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Init String builders for STextualDSs
 		StringBuilder morphDSBuilder = new StringBuilder();
 		StringBuilder lexDSBuilder = new StringBuilder();
+		
+		// Init unit refs
+		Map<String, int[]> definedUnitRefs = new HashMap<>();
 		
 		// Get text tokens for lex and morph
 		List<String> lexicalTextTokens = block.get(lexMarker);
@@ -467,6 +471,20 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 					refLine.put(key, line.getValue());
 				}
 				continue;
+			}
+			else if (key.equals(unitRefDefMarker)) {
+				try {
+					if (line.getValue().size() == 2) {// undefined definitor
+						definedUnitRefs.put("", new int[] {Integer.valueOf(line.getValue().get(0)), Integer.valueOf(line.getValue().get(1))});
+					}
+					else {
+						definedUnitRefs.put(line.getValue().get(0), new int[] {Integer.valueOf(line.getValue().get(1)), Integer.valueOf(line.getValue().get(2))});
+					}
+					continue;
+				}
+				catch (NumberFormatException e) {
+					logger.error("The range of the unit ref definition {} is in the wrong format! Please format unit ref definitions as follows: \"\\{}\" <Definition name (String)> <Range from (Integer)> <Range to (Integer)>.", key, e);
+				}
 			}
 			else if (lexAnnotationMarkers != null && lexAnnotationMarkers.contains(key)) {
 				lexAnnotationLines.put(key, line.getValue());
@@ -592,7 +610,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
 		
 		// Build the ref span and add ref-level annotations
-		lastRefSpan = createRefSpan(refLine, spanLexTokens, spanMorphTokens, refAnnotationLines, refMetaAnnotationLines, lastRefSpan);
+		lastRefSpan = createRefSpan(refLine, spanLexTokens, spanMorphTokens, refAnnotationLines, refMetaAnnotationLines, lastRefSpan, definedUnitRefs);
 		
 		// Now that all tokens are there, build the unit ref spans and add unitref-level annotations
 		// TODO
@@ -640,22 +658,45 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param refAnnotationLines
 	 * @param refMetaAnnotationLines 
 	 */
-	private SSpan createRefSpan(Map<String, List<String>> refLine, List<SToken> spanLexTokens, List<SToken> spanMorphTokens, HashMap<String, List<String>> refAnnotationLines, HashMap<String,List<String>> refMetaAnnotationLines, SSpan lastRefSpan) {
-		List<SToken> allTokens = new ArrayList<>();
-		allTokens.addAll(spanMorphTokens);
-		allTokens.addAll(spanLexTokens);
-		List<SToken> orderedMorphTokens = null;
-		List<SToken> orderedLexTokens = null;
+	private SSpan createRefSpan(Map<String, List<String>> refLine, List<SToken> spanLexTokens, List<SToken> spanMorphTokens, Map<String, List<String>> refAnnotationLines, HashMap<String,List<String>> refMetaAnnotationLines, SSpan lastRefSpan, Map<String, int[]> definedUnitRefs) {
+		List<SToken> orderedMorphTokens = getGraph().getSortedTokenByText(spanMorphTokens);
+		List<SToken> orderedLexTokens = getGraph().getSortedTokenByText(spanLexTokens);
+		List<SToken> targetTokens = new ArrayList<>();
 		SSpan span = null;
-		span = getGraph().createSpan(new ArrayList<>(spanMorphTokens)); // TODO Move to somewhere below where unitrefs aren't mapped co sunitrefs are only mapped onto morphs
+//		span = getGraph().createSpan(new ArrayList<>(allTokens)); // TODO Move to somewhere below where unitrefs aren't mapped co sunitrefs are only mapped onto morphs
 
 		for (Entry<String, List<String>> line : refAnnotationLines.entrySet()) {
 			List<String> lineContents = line.getValue();
-			if (hasUnitRefMarkup(lineContents, spanMorphTokens.size(), spanLexTokens.size())) { // If line has unitref markup
-				orderedMorphTokens = getGraph().getSortedTokenByText(spanMorphTokens);
-				orderedLexTokens = getGraph().getSortedTokenByText(spanLexTokens);
+			if (hasUnitRefMarkup(lineContents, spanMorphTokens.size(), spanLexTokens.size())) { // If line has direct unitref markup
+				if (lineContents.get(0).equals(getProperties().getMorphMarker())) {
+					for (int i = Integer.valueOf(lineContents.get(1)); i < Integer.valueOf(lineContents.get(2)) + 1; i++) {
+						targetTokens.add(orderedMorphTokens.get(i));
+					}
+				}
+				else {
+					for (int i = Integer.valueOf(lineContents.get(1)); i < Integer.valueOf(lineContents.get(2)) + 1; i++) {
+						targetTokens.add(orderedLexTokens.get(i));
+					}
+				}
 			}
-			// TODO Check if the line has unitref markup in the form of [lexMarker/morphMarker] [fromInt] [toInt] [...] 
+			else if (definedUnitRefs.size() == 1) { // There is exactly one unit ref definition without a definitor 
+				for (int[] value : definedUnitRefs.values()) {
+					for (int i = value[0]; i < value[1] + 1; i++) {
+						targetTokens.add(orderedMorphTokens.get(i));
+					}
+				}
+			}
+			else if (definedUnitRefs.get(lineContents.get(0)) != null && (getMorphologicalTextualDS().getText().startsWith(lineContents.get(1)) || getLexicalTextualDS().getText().startsWith(lineContents.get(1)))) { // Line has defined unit ref
+				int[] value = definedUnitRefs.get(lineContents.get(0));
+				for (int i = value[0]; i < value[1] + 1; i++) {
+					targetTokens.add(orderedMorphTokens.get(i));
+				}
+			}
+			else { // No unit refs
+				targetTokens.addAll(orderedMorphTokens);
+				targetTokens.addAll(orderedLexTokens);
+			}
+			span = getGraph().createSpan(targetTokens);
 			
 			StringBuilder sb = new StringBuilder();
 			for (String s : lineContents) {
