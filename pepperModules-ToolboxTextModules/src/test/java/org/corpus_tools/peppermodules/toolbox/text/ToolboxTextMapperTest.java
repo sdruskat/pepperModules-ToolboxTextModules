@@ -481,43 +481,40 @@ public class ToolboxTextMapperTest {
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 //		assertEquals(11, graph.getSpans().size());
-		assertEquals(6, graph.getSpans().size());
+		assertEquals(65, graph.getSpans().size()); // 59 extra for single-token spans
 		for (SSpan span : graph.getSpans()) {
 			if (span.getName().equals("First sentence")) {
-				assertEquals(7, graph.getOverlappedTokens(span).size());
+				assertEquals(4, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is a reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("First sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Second sentence")) {
-				assertEquals(13, graph.getOverlappedTokens(span).size());
+				assertEquals(8, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is yet another reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("Second sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Third sentence")) {
-				assertEquals(5, graph.getOverlappedTokens(span).size());
+				assertEquals(3, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is a third reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("Third sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Unitref sentence ONE")) {
-				assertEquals(6, graph.getOverlappedTokens(span).size());
+				assertEquals(3, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("Unitref sentence ONE", span.getAnnotation("toolbox::ref").getValue().toString());
 				assertEquals("uref one", span.getAnnotation("toolbox::ll").getValue().toString());
 			}
 			else if (span.getName().equals("Unitref sentence TWO")) {
-				for (SToken tok : graph.getOverlappedTokens(span)) {
-					System.err.println(graph.getText(tok));
-				}
-				assertEquals(12, graph.getOverlappedTokens(span).size());
+				assertEquals(6, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("Unitref sentence TWO", span.getAnnotation("toolbox::ref").getValue().toString());
 				assertEquals("uref two", span.getAnnotation("toolbox::ll").getValue().toString());
 			}
 			else if (span.getName().equals("Unitref sentence THREE")) {
-				assertEquals(16, graph.getOverlappedTokens(span).size());
+				assertEquals(8, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("Unitref sentence THREE", span.getAnnotation("toolbox::ref").getValue().toString());
 				assertEquals("uref three", span.getAnnotation("toolbox::ll").getValue().toString());
@@ -601,6 +598,10 @@ public class ToolboxTextMapperTest {
 				assertNull(span.getAnnotation("toolbox::docmet"));
 				assertEquals(1, span.getMetaAnnotations().size());
 				assertEquals("Sentence with two global unitrefs (morph-level) m26-m28 and m30-m31 on \\ur", span.getMetaAnnotation("toolbox::met").getValue().toString());
+			}
+			// FIXME: Remove the following once the bug in the ANNIS Exporter is fixed!
+			else if (graph.getOverlappedTokens(span).size() == 1) {
+				// Do nothing
 			}
 			else {
 				fail("Found a ref that shouldn't be in the span list: " + span.getName());
