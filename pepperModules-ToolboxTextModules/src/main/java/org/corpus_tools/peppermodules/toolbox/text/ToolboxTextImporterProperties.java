@@ -130,7 +130,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * All Toolbox markers which precede lines with annotations that can potentially span
 	 * subranges of the complete morphological data source.
 	 */
-	public static final String PROP_UNIT_REF_ANNOTATIONS_MARKERS = "unitRefAnnotationsMarkers";
+	public static final String PROP_UNIT_REF_ANNOTATIONS_MARKERS = "unitRefAnnotationMarkers";
 	
 	/**
 	 * The marker used to define unit refs.

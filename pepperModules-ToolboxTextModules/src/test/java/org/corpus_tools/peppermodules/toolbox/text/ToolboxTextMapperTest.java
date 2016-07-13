@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.*; 
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,7 +31,6 @@ import org.corpus_tools.salt.common.STextualDS;
 import org.corpus_tools.salt.common.STimeline;
 import org.corpus_tools.salt.common.STimelineRelation;
 import org.corpus_tools.salt.common.SToken;
-import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SNode;
 import org.corpus_tools.salt.core.SRelation;
@@ -479,69 +478,83 @@ public class ToolboxTextMapperTest {
 	 * Tests the ref spans in the document graph.
 	 */
 	@Test
-	public void testMapSDocumentRefSpans() {
-		 
+	public void testMapSDocumentRefSpatns() {
+		int touchedSpanCounter = 0;
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 		assertEquals(70, graph.getSpans().size()); // 59 extra for single-token spans FIXME
 		for (SSpan span : graph.getSpans()) {
 			if (span.getName().equals("First sentence")) {
+				touchedSpanCounter++;
 				assertEquals(4, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is a reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("First sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Second sentence")) {
+				touchedSpanCounter++;
 				assertEquals(8, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is yet another reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("Second sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Third sentence")) {
+				touchedSpanCounter++;
 				assertEquals(3, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is a third reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("Third sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Unitref sentence ONE")) {
+				touchedSpanCounter++;
 				assertEquals(3, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("Unitref sentence ONE", span.getAnnotation("toolbox::ref").getValue().toString());
 				assertEquals("uref one", span.getAnnotation("toolbox::ll").getValue().toString());
 			}
 			else if (span.getName().equals("Unitref sentence TWO")) {
+				touchedSpanCounter++;
 				assertEquals(6, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("Unitref sentence TWO", span.getAnnotation("toolbox::ref").getValue().toString());
 				assertEquals("uref two", span.getAnnotation("toolbox::ll").getValue().toString());
 			}
 			else if (span.getName().equals("Unitref sentence THREE")) {
+				touchedSpanCounter++;
 				assertEquals(8, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("Unitref sentence THREE", span.getAnnotation("toolbox::ref").getValue().toString());
 				assertEquals("uref three", span.getAnnotation("toolbox::ll").getValue().toString());
 			}
 			else if (span.getName().equals("Unitref to morphemes m17 and m18 in a span")) {
+				touchedSpanCounter++;
 				assertEquals(2, graph.getOverlappedTokens(span).size());
+				List<SToken> sortedTokenByText = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
+				assertEquals("M17", sortedTokenByText.get(0).getAnnotation("toolbox::ge").getValue());
+				assertEquals("M18", sortedTokenByText.get(1).getAnnotation("toolbox::ge").getValue());
 				assertEquals(1, span.getAnnotations().size());
 				assertEquals("Unitref to morphemes m17 and m18 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
 			}
 			else if (span.getName().equals("Unitref to morphemes m20-m23 in a span")) {
+				touchedSpanCounter++;
 				assertEquals(4, graph.getOverlappedTokens(span).size());
 				assertEquals(1, span.getAnnotations().size());
 				assertEquals("Unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
 			}
 			else if (span.getName().equals("2nd unitref to morphemes m20-m23 in a span")) {
+				touchedSpanCounter++;
 				assertEquals(4, graph.getOverlappedTokens(span).size());
 				assertEquals(1, span.getAnnotations().size());
 				assertEquals("2nd unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur2").getValue().toString());
 			}
 			else if (span.getName().equals("Unitref m26-m28")) {
+				touchedSpanCounter++;
 				assertEquals(3, graph.getOverlappedTokens(span).size());
 				assertEquals(1, span.getAnnotations().size());
 				assertEquals("Unitref m26-m28", span.getAnnotation("toolbox::ur").getValue().toString());
 			}
 			else if (span.getName().equals("Unitref m30-m31")) {
+				touchedSpanCounter++;
 				assertEquals(2, graph.getOverlappedTokens(span).size());
 				assertEquals(1, span.getAnnotations().size());
 				assertEquals("Unitref m30-m31", span.getAnnotation("toolbox::ur").getValue().toString());
@@ -554,6 +567,8 @@ public class ToolboxTextMapperTest {
 				fail("Found a span that shouldn't be in the span list: \"" + span.getName() + "\"");
 			}
 		}
+		// Make sure we've hit all the spans we wanted to hit
+		assertEquals(11, touchedSpanCounter);
 	}
 	
 	/**
