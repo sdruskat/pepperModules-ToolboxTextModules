@@ -80,7 +80,7 @@ public class ToolboxTextMapperTest {
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 		assertTrue(graph == getFixture().getGraph());
-		assertEquals(5, graph.getLayers().size());
+		assertEquals(3, graph.getLayers().size());
 		assertNotNull(graph.getLayerByName("ref"));
 		assertNotNull(graph.getLayerByName("tx"));
 		assertNotNull(graph.getLayerByName("mb"));

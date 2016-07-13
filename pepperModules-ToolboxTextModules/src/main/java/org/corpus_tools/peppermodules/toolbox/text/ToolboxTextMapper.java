@@ -688,11 +688,14 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		String key = unitRefLine.getKey();
 		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, key, sb.toString().trim());
 		span.setName(sb.toString().trim());
-		
-		if (layers.get(key) == null) {
-			createLayer(key);
-		}
-		span.addLayer(layers.get(key));
+
+		// TODO Check whether we really want all the spans in the same layer!
+//		if (layers.get(key) == null) {
+//			createLayer(key);
+//		}
+//		span.addLayer(layers.get(key));
+		span.addLayer(layers.get(getProperties().getRefMarker()));
+
 		return span;
 	}
 
