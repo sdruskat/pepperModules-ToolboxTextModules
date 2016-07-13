@@ -551,7 +551,7 @@ public class ToolboxTextMapperTest {
 				// Do nothing
 			}
 			else {
-				fail("Found a ref that shouldn't be in the span list: \"" + span.getName() + "\"");
+				fail("Found a span that shouldn't be in the span list: \"" + span.getName() + "\"");
 			}
 		}
 	}

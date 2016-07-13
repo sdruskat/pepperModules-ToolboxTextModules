@@ -288,14 +288,14 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			valueList.add(markerAndValues[i]);
 		}
 		if (!block.containsKey(marker)) {
-			System.err.println(" New Marker found: " + marker + ": " + valueList);
 			block.put(marker, valueList);
 		}
 		else {
 			if (Arrays.asList(getProperties().getUnitRefAnnotationMarkers().split("\\s*,\\s*")).contains(marker)) {
-				System.err.println(" UNIT REF Marker exists: " + marker + ": " + valueList);
 				block.put(marker, valueList);
-				System.err.println("        NOW ITS " + block.get(marker).size());
+			}
+			else if (getProperties().getUnitRefDefinitionMarker().equals(marker)) {
+				block.put(marker, valueList);
 			}
 			else {
 				block.get(marker).get(0).addAll(valueList);
@@ -479,6 +479,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		Iterator<Entry<String, List<String>>> mapIterator = block.entries().iterator();
 		while (mapIterator.hasNext()) {
 			Entry<String, List<String>> line = mapIterator.next();
+			System.out.println(line.getValue());
 			String key = line.getKey();
 			if (key.equals(refMarker) || key.equals(morphMarker) || key.equals(lexMarker)) {
 				if (key.equals(refMarker)) {
@@ -489,9 +490,11 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			else if (key.equals(unitRefDefMarker)) {
 				try {
 					if (line.getValue().size() == 2) {// undefined definitor
+						System.out.println("UNDEFINED? " + line.getValue());
 						definedUnitRefs.put("", new int[] {Integer.valueOf(line.getValue().get(0)), Integer.valueOf(line.getValue().get(1))});
 					}
 					else {
+						System.out.println("DEFINED !!! " + line.getValue());
 						definedUnitRefs.put(line.getValue().get(0), new int[] {Integer.valueOf(line.getValue().get(1)), Integer.valueOf(line.getValue().get(2))});
 					}
 					continue;
@@ -522,7 +525,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 					break;
 				}
 				else {
-					System.err.println("BEFORE PUT " + line.getValue());
 					unitRefAnnotationLines.put(key, line.getValue());
 				}
 			}
@@ -636,7 +638,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Build the general ref span and add ref-level annotations
 		createRefSpan(refLine, spanMorphTokens, spanLexTokens, refAnnotationLines, refMetaAnnotationLines);
 		for (Entry<String, List<String>> unitRefLine : unitRefAnnotationLines.entries()) {
-			System.err.println(unitRefLine.getValue());
 			createUnitRefSpan(getGraph().getSortedTokenByText(spanMorphTokens), getGraph().getSortedTokenByText(spanLexTokens), unitRefLine, definedUnitRefs);
 		}
 //		
@@ -658,36 +659,50 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		List<String> lineContents = unitRefLine.getValue();
 		if (hasUnitRefMarkup(lineContents, sortedMorphTokens.size(), sortedLexTokens.size())) { // If line has direct unitref markup
 			if (lineContents.get(0).equals(getProperties().getMorphMarker())) {
-				for (int i = Integer.valueOf(lineContents.get(1)); i < Integer.valueOf(lineContents.get(2)); i++) {
+				for (int i = Integer.parseInt(lineContents.get(1)); i < Integer.parseInt(lineContents.get(2)); i++) {
 					targetedTokens.add(sortedMorphTokens.get(i));
 				}
+				lineContents.remove(0);
+				lineContents.remove(1);
+				lineContents.remove(2);
 			}
-			else if (lineContents.get(0).equals(getProperties().getLexMarker())){
-				for (int i = Integer.valueOf(lineContents.get(1)); i < Integer.valueOf(lineContents.get(2)) + 1; i++) {
+			else if (lineContents.get(0).equals(getProperties().getLexMarker())){ // Line has defined unit ref
+				for (int i = Integer.parseInt(lineContents.get(1)); i < Integer.parseInt(lineContents.get(2)) + 1; i++) {
 					targetedTokens.add(sortedLexTokens.get(i));
 				}
+				lineContents.remove(0);
+				lineContents.remove(1);
+				lineContents.remove(2);
 			}
 		}
-		else if (definedUnitRefs.size() == 1) { // There is exactly one unit ref definition without a definitor 
+		else if (definedUnitRefs.size() == 1) { // There is exactly one unit ref definition without a definitor
+			System.err.println("no definition " + lineContents);
 			for (int[] value : definedUnitRefs.values()) {
 				for (int i = value[0]; i < value[1] + 1; i++) {
 					targetedTokens.add(sortedMorphTokens.get(i));
 				}
 			}
 		}
-		else if (definedUnitRefs.get(lineContents.get(0)) != null && (getMorphologicalTextualDS().getText().startsWith(lineContents.get(1)) || getLexicalTextualDS().getText().startsWith(lineContents.get(1)))) { // Line has defined unit ref
+		else {//if (definedUnitRefs.get(lineContents.get(0)) != null && (getMorphologicalTextualDS().getText().startsWith(lineContents.get(0)) || getLexicalTextualDS().getText().startsWith(lineContents.get(0)))) { // Line has defined unit ref
+			System.err.println("YES defo " + lineContents);
 			int[] value = definedUnitRefs.get(lineContents.get(0));
 			for (int i = value[0]; i < value[1] + 1; i++) {
 				targetedTokens.add(sortedMorphTokens.get(i));
 			}
+			lineContents.remove(0);
 		}
+		System.out.println("\n\n---------------------- \n" + lineContents + "\n" +targetedTokens + "\n--------\n\n");
 		SSpan span = getGraph().createSpan(targetedTokens);
 		StringBuilder sb = new StringBuilder();
+		System.err.println("                      >>>>>>>>>>>>>>>>>> contentes before write " + lineContents);
 		for (String s : lineContents) {
 			sb.append(s);
 			sb.append(" ");
 		}
 		String key = unitRefLine.getKey();
+		System.err.println(span);
+		System.err.println(key);
+		System.err.println(sb);
 		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, key, sb.toString().trim());
 		span.setName(sb.toString().trim());
 		
