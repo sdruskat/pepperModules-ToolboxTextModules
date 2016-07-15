@@ -18,29 +18,16 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
-import org.corpus_tools.pepper.common.PepperConfiguration;
 import org.corpus_tools.pepper.impl.PepperImporterImpl;
-import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.PepperImporter;
 import org.corpus_tools.pepper.modules.PepperMapper;
 import org.corpus_tools.pepper.modules.PepperModule;
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleNotReadyException;
-import org.corpus_tools.salt.SALT_TYPE;
-import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SCorpus;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
-import org.corpus_tools.salt.common.SPointingRelation;
-import org.corpus_tools.salt.common.SSpan;
-import org.corpus_tools.salt.common.SStructure;
-import org.corpus_tools.salt.common.STextualDS;
-import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.graph.Identifier;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.service.component.annotations.Component;
@@ -105,7 +92,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	public ToolboxTextImporter() {
 		super();
 		setName("ToolboxTextImporter");
-		setVersion("0.0.1");
+		setVersion("1.0.0-SNAPSHOT");
 		setSupplierContact(URI.createURI("stephan.druskat@hu-berlin.de"));
 		setSupplierHomepage(URI.createURI("http://corpus-tools.org"));
 		setDesc("An importer for the text-based format written by SIL Toolbox (as opposed to the respective XML format).");
@@ -502,6 +489,5 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	@Override
 	public void end(){
 	    super.end();
-	    getSaltProject().saveSaltProject(URI.createFileURI("/home/stephan/Dokumente/melatamp/daten/pre-project.OLD/Data/CorpusMavea/testSave/"));
 	}
 }

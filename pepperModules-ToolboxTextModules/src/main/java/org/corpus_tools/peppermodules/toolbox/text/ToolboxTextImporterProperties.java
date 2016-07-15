@@ -127,6 +127,17 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public static final String PROP_FILE_EXTENSIONS = "fileExtensions";
 	
 	/**
+	 * All Toolbox markers which precede lines with annotations that can potentially span
+	 * subranges of the complete morphological data source.
+	 */
+	public static final String PROP_UNIT_REF_ANNOTATIONS_MARKERS = "unitRefAnnotationMarkers";
+	
+	/**
+	 * The marker used to define unit refs.
+	 */
+	public static final String PROP_UNIT_REF_DEFINITION_MARKER = "unitRefDefinitionMarker";
+	
+	/**
 	 * Wether detached delimiters (as in "item - item" or similar) should be attached to the previous or
 	 * subsequent item, as a two-item comma-separated , where the first item signifies whether the delimiter should
 	 * be attached (if <strong>true</strong> it will be attached), and the second item signifies 
@@ -184,6 +195,15 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"Wether detached delimiters (as in \"item - item\" or similar) should be attached to the previous or subsequent item, as a two-item array, where the first item signifies whether the delimiter should be attached (if true it will be attached), and the second item signifies whether the delimiter should be attached to the subsequent item (if true it will be attached to the subsequent item, making the latter a suffix).",
 				"true,true",
 				false));
+		addProperty(new PepperModuleProperty<>(PROP_UNIT_REF_ANNOTATIONS_MARKERS, 
+				String.class,
+				"All Toolbox markers which precede lines with annotations that can potentially span subranges of the complete morphological data source.",
+				false));
+		addProperty(new PepperModuleProperty<>(PROP_UNIT_REF_DEFINITION_MARKER, 
+				String.class,
+				"The marker used to define unit refs.",
+				"unitref",
+				false));
 	}
 	
 	// Getter methods for the different property values.
@@ -234,6 +254,14 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		String value = getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString();
 		String[] split = value.trim().split("\\s*,\\s*");
 		return Boolean.valueOf(split[1]);
+	}
+
+	public String getUnitRefAnnotationMarkers() {
+		return (String) getProperty(PROP_UNIT_REF_ANNOTATIONS_MARKERS).getValue();
+	}
+	
+	public String getUnitRefDefinitionMarker() {
+		return (String) getProperty(PROP_UNIT_REF_DEFINITION_MARKER).getValue();
 	}
 
 }

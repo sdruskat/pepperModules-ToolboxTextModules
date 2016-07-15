@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.*; 
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,6 +62,7 @@ public class ToolboxTextMapperTest {
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_DOCUMENT_METADATA_MARKERS, "docmet");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_REF_METADATA_MARKERS, "met");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
 		mapper.setProperties(properties);
 		SDocument doc = SaltFactory.createSDocument();
 		mapper.setDocument(doc);
@@ -74,6 +75,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentSetup() {
+		 
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -99,6 +101,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentDS() {
+		 
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -108,10 +111,10 @@ public class ToolboxTextMapperTest {
 			assertNotNull(ds.getText());
 			assertTrue(ds.getText().length() > 0);
 			if (ds.getName().equals("lexical-ds")) {
-				assertEquals("Wort Kompositum Wort Dreifachwort Wort Wort Wort Doppelwort Doppelwortmitfreiemdash Wort", ds.getText());
+				assertEquals("Wort Kompositum Wort Dreifachwort Wort Wort Wort Doppelwort Doppelwortmitfreiemdash Wort Unitref sentence one Unitref sentence two with one-to-four ref Unitref with some random text just like that", ds.getText());
 			}
 			else if (ds.getName().equals("morphology-ds")) {
-				assertEquals("m1 m2 -m3 m4 m5- m6= m7 m8 m9 m10 m11 -m12 m13 -m14 m15", ds.getText());
+				assertEquals("m1 m2 -m3 m4 m5- m6= m7 m8 m9 m10 m11 -m12 m13 -m14 m15 m16 m17 m18 m19 m20 m21 m22 m23 m24 m25 m26 m27 m28 m29 m30 m31 m32", ds.getText());
 			}
 			else {
 				fail("TextualDS with name other than \"mb\" or \"tx\" found: " + ds.getName());
@@ -125,9 +128,11 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentDSSwappedDelimAttachment() {
+		 
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
 		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
@@ -138,10 +143,10 @@ public class ToolboxTextMapperTest {
 			assertNotNull(ds.getText());
 			assertTrue(ds.getText().length() > 0);
 			if (ds.getName().equals("lexical-ds")) {
-				assertEquals("Wort Kompositum Wort Dreifachwort Wort Wort Wort Doppelwort Doppelwortmitfreiemdash Wort", ds.getText());
+				assertEquals("Wort Kompositum Wort Dreifachwort Wort Wort Wort Doppelwort Doppelwortmitfreiemdash Wort Unitref sentence one Unitref sentence two with one-to-four ref Unitref with some random text just like that", ds.getText());
 			}
 			else if (ds.getName().equals("morphology-ds")) {
-				assertEquals("m1 m2 -m3 m4 m5- m6= m7 m8 m9 m10 m11 -m12 m13- m14 m15", ds.getText());
+				assertEquals("m1 m2 -m3 m4 m5- m6= m7 m8 m9 m10 m11 -m12 m13- m14 m15 m16 m17 m18 m19 m20 m21 m22 m23 m24 m25 m26 m27 m28 m29 m30 m31 m32", ds.getText());
 			}
 			else {
 				fail("TextualDS with name other than \"mb\" or \"tx\" found: " + ds.getName());
@@ -155,6 +160,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentTokens() {
+		 
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -177,13 +183,13 @@ public class ToolboxTextMapperTest {
 		}
 		String[] lexTokenTestSet = new String[] { "Wort", "Kompositum", "Wort", "Dreifachwort", "Wort", "Wort", "Wort", "Doppelwort", "Doppelwortmitfreiemdash", "Wort" };
 		List<SToken> sortedLexTokens = graph.getSortedTokenByText(lexTokens);
-		assertEquals(10, sortedLexTokens.size());
+		assertEquals(27, sortedLexTokens.size());
 		for (int i = 0; i < lexTokenTestSet.length; i++) {
 			assertEquals(lexTokenTestSet[i], graph.getText(sortedLexTokens.get(i)));
 		}
 		String[] morphTokenTestSet = new String[] { "m1", "m2", "-m3", "m4", "m5-", "m6=", "m7", "m8", "m9", "m10", "m11", "-m12", "m13", "-m14", "m15" };
 		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(morphTokens);
-		assertEquals(15, sortedMorphTokens.size());
+		assertEquals(32, sortedMorphTokens.size());
 		for (int i = 0; i < morphTokenTestSet.length; i++) {
 			assertEquals(morphTokenTestSet[i], graph.getText(sortedMorphTokens.get(i)));
 		}
@@ -195,9 +201,11 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentTokensWithSwappedDelimAttachment() {
+		 
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
 		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
@@ -221,13 +229,13 @@ public class ToolboxTextMapperTest {
 		}
 		String[] lexTokenTestSet = new String[] { "Wort", "Kompositum", "Wort", "Dreifachwort", "Wort", "Wort", "Wort", "Doppelwort", "Doppelwortmitfreiemdash", "Wort" };
 		List<SToken> sortedLexTokens = graph.getSortedTokenByText(lexTokens);
-		assertEquals(10, sortedLexTokens.size());
+		assertEquals(27, sortedLexTokens.size());
 		for (int i = 0; i < lexTokenTestSet.length; i++) {
 			assertEquals(lexTokenTestSet[i], graph.getText(sortedLexTokens.get(i)));
 		}
 		String[] morphTokenTestSet = new String[] { "m1", "m2", "-m3", "m4", "m5-", "m6=", "m7", "m8", "m9", "m10", "m11", "-m12", "m13-", "m14", "m15" };
 		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(morphTokens);
-		assertEquals(15, sortedMorphTokens.size());
+		assertEquals(32, sortedMorphTokens.size());
 		for (int i = 0; i < morphTokenTestSet.length; i++) {
 			assertEquals(morphTokenTestSet[i], graph.getText(sortedMorphTokens.get(i)));
 		}
@@ -239,6 +247,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentAnnotations() {
+		 
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -274,8 +283,25 @@ public class ToolboxTextMapperTest {
 		lexAnnoMap.add(new String[]{"Doppelwort", "Acht"});
 		lexAnnoMap.add(new String[]{"Doppelwortmitfreiemdash", "Neun"});
 		lexAnnoMap.add(new String[]{"Wort", "Zehn"});
+		lexAnnoMap.add(new String[]{"Unitref", "Elf"});
+		lexAnnoMap.add(new String[]{"sentence", "Zwölf"});
+		lexAnnoMap.add(new String[]{"one", "Dreizehn"});
+		lexAnnoMap.add(new String[]{"Unitref", "Vierzehn"});
+		lexAnnoMap.add(new String[]{"sentence", "Fünfzehn"});
+		lexAnnoMap.add(new String[]{"two", "Sechzehn"});
+		lexAnnoMap.add(new String[]{"with", "Siebzehn"});
+		lexAnnoMap.add(new String[]{"one-to-four", "Achtzehn"});
+		lexAnnoMap.add(new String[]{"ref", "Neunzehn"});
+		lexAnnoMap.add(new String[]{"Unitref", "Zwanzig"});
+		lexAnnoMap.add(new String[]{"with", "Einundzwanzig"});
+		lexAnnoMap.add(new String[]{"some", "Zweiundzwanzig"});
+		lexAnnoMap.add(new String[]{"random", "Dreiundzwanzig"});
+		lexAnnoMap.add(new String[]{"text", "Vierundzwanzig"});
+		lexAnnoMap.add(new String[]{"just", "Fünfundzwanzig"});
+		lexAnnoMap.add(new String[]{"like", "Sechsundzwanzig"});
+		lexAnnoMap.add(new String[]{"that", "Siebenundzwanzig"});
 		List<SToken> sortedLexTokens = graph.getSortedTokenByText(lexTokens);
-		assertEquals(10, sortedLexTokens.size());
+		assertEquals(27, sortedLexTokens.size());
 		for (int i = 0; i < sortedLexTokens.size(); i++) {
 			SToken token = sortedLexTokens.get(i);
 			assertNotNull(token.getAnnotation("toolbox::ta"));
@@ -301,8 +327,25 @@ public class ToolboxTextMapperTest {
 		morphAnnoMap.add(new String[]{"m13", "M13"});
 		morphAnnoMap.add(new String[]{"-m14", "-M14"});
 		morphAnnoMap.add(new String[]{"m15", "M15"});
+		morphAnnoMap.add(new String[]{"m16", "M16"});
+		morphAnnoMap.add(new String[]{"m17", "M17"});
+		morphAnnoMap.add(new String[]{"m18", "M18"});
+		morphAnnoMap.add(new String[]{"m19", "M19"});
+		morphAnnoMap.add(new String[]{"m20", "M20"});
+		morphAnnoMap.add(new String[]{"m21", "M21"});
+		morphAnnoMap.add(new String[]{"m22", "M22"});
+		morphAnnoMap.add(new String[]{"m23", "M23"});
+		morphAnnoMap.add(new String[]{"m24", "M24"});
+		morphAnnoMap.add(new String[]{"m25", "M25"});
+		morphAnnoMap.add(new String[]{"m26", "M26"});
+		morphAnnoMap.add(new String[]{"m27", "M27"});
+		morphAnnoMap.add(new String[]{"m28", "M28"});
+		morphAnnoMap.add(new String[]{"m29", "M29"});
+		morphAnnoMap.add(new String[]{"m30", "M30"});
+		morphAnnoMap.add(new String[]{"m31", "M31"});
+		morphAnnoMap.add(new String[]{"m32", "M32"});
 		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(morphTokens);
-		assertEquals(15, sortedMorphTokens.size());
+		assertEquals(32, sortedMorphTokens.size());
 		for (int i = 0; i < sortedMorphTokens.size(); i++) {
 			SToken token = sortedMorphTokens.get(i);
 			assertNotNull(token.getAnnotation("toolbox::ge"));
@@ -319,9 +362,11 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentAnnotationsWithSwappedDelimAttachment() {
+		 
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
 		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -351,8 +396,25 @@ public class ToolboxTextMapperTest {
 		morphAnnoMap.add(new String[]{"m13-", "M13-"});
 		morphAnnoMap.add(new String[]{"m14", "M14"});
 		morphAnnoMap.add(new String[]{"m15", "M15"});
+		morphAnnoMap.add(new String[]{"m16", "M16"});
+		morphAnnoMap.add(new String[]{"m17", "M17"});
+		morphAnnoMap.add(new String[]{"m18", "M18"});
+		morphAnnoMap.add(new String[]{"m19", "M19"});
+		morphAnnoMap.add(new String[]{"m20", "M20"});
+		morphAnnoMap.add(new String[]{"m21", "M21"});
+		morphAnnoMap.add(new String[]{"m22", "M22"});
+		morphAnnoMap.add(new String[]{"m23", "M23"});
+		morphAnnoMap.add(new String[]{"m24", "M24"});
+		morphAnnoMap.add(new String[]{"m25", "M25"});
+		morphAnnoMap.add(new String[]{"m26", "M26"});
+		morphAnnoMap.add(new String[]{"m27", "M27"});
+		morphAnnoMap.add(new String[]{"m28", "M28"});
+		morphAnnoMap.add(new String[]{"m29", "M29"});
+		morphAnnoMap.add(new String[]{"m30", "M30"});
+		morphAnnoMap.add(new String[]{"m31", "M31"});
+		morphAnnoMap.add(new String[]{"m32", "M32"});
 		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(morphTokens);
-		assertEquals(15, sortedMorphTokens.size());
+		assertEquals(32, sortedMorphTokens.size());
 		for (int i = 0; i < sortedMorphTokens.size(); i++) {
 			SToken token = sortedMorphTokens.get(i);
 			String tokenText = graph.getText(token);
@@ -368,17 +430,18 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentTimeline() {
+		 
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 		STimeline timeline = getFixture().getDocument().getDocumentGraph().getTimeline();
 		assertNotNull(timeline);
 		assertNotNull(timeline.getEnd());
-		assertEquals(Integer.valueOf(16), timeline.getEnd());
+		assertEquals(Integer.valueOf(33), timeline.getEnd());
 		List<SToken> lexTokens = new ArrayList<>();
 		List<SToken> morphTokens = new ArrayList<>();
 		List<SLayer> lexLayers = graph.getLayerByName("tx");
 		List<SLayer> morphLayers = graph.getLayerByName("mb");
-		int[] lexTokensNoOfMorphs = new int[] {1, 2, 1, 3, 1, 1, 1, 2, 2, 1};
+		int[] lexTokensNoOfMorphs = new int[] {1, 2, 1, 3, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 		for (SNode node : lexLayers.get(0).getNodes()) {
 			if (node instanceof SToken) {
 				lexTokens.add((SToken) node);
@@ -415,33 +478,97 @@ public class ToolboxTextMapperTest {
 	 * Tests the ref spans in the document graph.
 	 */
 	@Test
-	public void testMapSDocumentRefSpans() {
+	public void testMapSDocumentRefSpatns() {
+		int touchedSpanCounter = 0;
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
-		assertEquals(3, graph.getSpans().size());
+		assertEquals(70, graph.getSpans().size()); // 59 extra for single-token spans FIXME
 		for (SSpan span : graph.getSpans()) {
 			if (span.getName().equals("First sentence")) {
-				assertEquals(7, graph.getOverlappedTokens(span).size());
+				touchedSpanCounter++;
+				assertEquals(4, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is a reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("First sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Second sentence")) {
-				assertEquals(13, graph.getOverlappedTokens(span).size());
+				touchedSpanCounter++;
+				assertEquals(8, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is yet another reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("Second sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
 			else if (span.getName().equals("Third sentence")) {
-				assertEquals(5, graph.getOverlappedTokens(span).size());
+				touchedSpanCounter++;
+				assertEquals(3, graph.getOverlappedTokens(span).size());
 				assertEquals(2, span.getAnnotations().size());
 				assertEquals("This is a third reference level annotation!", span.getAnnotation("toolbox::ll").getValue().toString());
 				assertEquals("Third sentence", span.getAnnotation("toolbox::ref").getValue().toString());
 			}
+			else if (span.getName().equals("Unitref sentence ONE")) {
+				touchedSpanCounter++;
+				assertEquals(3, graph.getOverlappedTokens(span).size());
+				assertEquals(2, span.getAnnotations().size());
+				assertEquals("Unitref sentence ONE", span.getAnnotation("toolbox::ref").getValue().toString());
+				assertEquals("uref one", span.getAnnotation("toolbox::ll").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref sentence TWO")) {
+				touchedSpanCounter++;
+				assertEquals(6, graph.getOverlappedTokens(span).size());
+				assertEquals(2, span.getAnnotations().size());
+				assertEquals("Unitref sentence TWO", span.getAnnotation("toolbox::ref").getValue().toString());
+				assertEquals("uref two", span.getAnnotation("toolbox::ll").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref sentence THREE")) {
+				touchedSpanCounter++;
+				assertEquals(8, graph.getOverlappedTokens(span).size());
+				assertEquals(2, span.getAnnotations().size());
+				assertEquals("Unitref sentence THREE", span.getAnnotation("toolbox::ref").getValue().toString());
+				assertEquals("uref three", span.getAnnotation("toolbox::ll").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref to morphemes m17 and m18 in a span")) {
+				touchedSpanCounter++;
+				assertEquals(2, graph.getOverlappedTokens(span).size());
+				List<SToken> sortedTokenByText = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
+				assertEquals("M17", sortedTokenByText.get(0).getAnnotation("toolbox::ge").getValue());
+				assertEquals("M18", sortedTokenByText.get(1).getAnnotation("toolbox::ge").getValue());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref to morphemes m17 and m18 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref to morphemes m20-m23 in a span")) {
+				touchedSpanCounter++;
+				assertEquals(4, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur").getValue().toString());
+			}
+			else if (span.getName().equals("2nd unitref to morphemes m20-m23 in a span")) {
+				touchedSpanCounter++;
+				assertEquals(4, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("2nd unitref to morphemes m20-m23 in a span", span.getAnnotation("toolbox::ur2").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref m26-m28")) {
+				touchedSpanCounter++;
+				assertEquals(3, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref m26-m28", span.getAnnotation("toolbox::ur").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref m30-m31")) {
+				touchedSpanCounter++;
+				assertEquals(2, graph.getOverlappedTokens(span).size());
+				assertEquals(1, span.getAnnotations().size());
+				assertEquals("Unitref m30-m31", span.getAnnotation("toolbox::ur").getValue().toString());
+			}
+			// FIXME: Remove the following once the bug in the ANNIS Exporter is fixed!
+			else if (graph.getOverlappedTokens(span).size() == 1) {
+				// Do nothing
+			}
 			else {
-				fail("Found a ref that shouldn't be in the span list: " + span.getName());
+				fail("Found a span that shouldn't be in the span list: \"" + span.getName() + "\"");
 			}
 		}
+		// Make sure we've hit all the spans we wanted to hit
+		assertEquals(11, touchedSpanCounter);
 	}
 	
 	/**
@@ -450,6 +577,7 @@ public class ToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSDocumentMetaAnnotations() {
+
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 		for (SSpan span : graph.getSpans()) {
@@ -467,12 +595,41 @@ public class ToolboxTextMapperTest {
 				assertEquals(1, span.getMetaAnnotations().size());
 				assertEquals("Some meta info about the third sentence", span.getMetaAnnotation("toolbox::met").getValue().toString());
 			}
+			else if (span.getName().equals("Unitref sentence ONE")) {
+				assertNull(span.getMetaAnnotation("toolbox::docmet"));
+				assertNull(span.getAnnotation("toolbox::docmet"));
+				assertEquals(1, span.getMetaAnnotations().size());
+				assertEquals("A sentence with a line-level unitref", span.getMetaAnnotation("toolbox::met").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref sentence TWO")) {
+				assertNull(span.getMetaAnnotation("toolbox::docmet"));
+				assertNull(span.getAnnotation("toolbox::docmet"));
+				assertEquals(1, span.getMetaAnnotations().size());
+				assertEquals("Sentence with a single global unitref (morph-level) from m20 to m23 (incl.) on \\ur and \\ur2", span.getMetaAnnotation("toolbox::met").getValue().toString());
+			}
+			else if (span.getName().equals("Unitref sentence THREE")) {
+				assertNull(span.getMetaAnnotation("toolbox::docmet"));
+				assertNull(span.getAnnotation("toolbox::docmet"));
+				assertEquals(1, span.getMetaAnnotations().size());
+				assertEquals("Sentence with two global unitrefs (morph-level) m26-m28 and m30-m31 on \\ur", span.getMetaAnnotation("toolbox::met").getValue().toString());
+			}
+			// FIXME: Remove the following once the bug in the ANNIS Exporter is fixed!
+			else if (graph.getOverlappedTokens(span).size() == 1) {
+				// Do nothing
+			}
+			else if (span.getName().equals("Unitref to morphemes m17 and m18 in a span") ||
+					span.getName().equals("Unitref to morphemes m20-m23 in a span") ||
+					span.getName().equals("2nd unitref to morphemes m20-m23 in a span") ||
+					span.getName().equals("Unitref m26-m28") ||
+					span.getName().equals("Unitref m30-m31") ) {
+				// Do nothing
+			}
 			else {
 				fail("Found a ref that shouldn't be in the span list: " + span.getName());
 			}
 		}
 	}
-
+	
 	/**
 	 * @return the fixture
 	 */
@@ -486,4 +643,5 @@ public class ToolboxTextMapperTest {
 	private void setFixture(ToolboxTextMapper fixture) {
 		this.fixture = fixture;
 	}
+	
 }
