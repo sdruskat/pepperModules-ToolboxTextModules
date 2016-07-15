@@ -229,7 +229,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				addLineToBlock(block, line);
 			}
 			else { // Hit a ref marker
-				if (getProperties().getFixAlignment()) {
+				if (getProperties().fixAlignment()) {
 					fixAlignment(block);
 				}
 				if (!isHeaderBlockMapped) { // First hit of ref marker, i.e., block must be header block
@@ -252,6 +252,16 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		mapRefToModel(block);
 		
 		return (DOCUMENT_STATUS.COMPLETED);
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param block
+	 */
+	private ListMultimap<String, List<String>> fixAlignment(ListMultimap<String, List<String>> block) {
+		String fixString = getProperties().getFixAlignmentString();
+		return block;
 	}
 
 	/**
@@ -620,7 +630,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			lexicalTextToken = lexicalTextTokens.get(lexIndex);
 		}
 		catch (IndexOutOfBoundsException e) {
-			logger.error("\n\n#####\nAlignment problem in block \"{}\"! There are only {} lexical items in the reference block, but the importer is trying to access item number {}.\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", block.get(refMarker).toString(), lexicalTextTokens.size(), (lexIndex + 1));
+			logger.error("\n\n???????   E R R O R   ???????\n\n#####\nAlignment problem in block \"{}\"! There are only {} lexical items in the reference block, but the importer is trying to access item number {}.\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", block.get(refMarker).toString(), lexicalTextTokens.size(), (lexIndex + 1));
 			throw new PepperModuleException("\n\n#####\nAlignment problem in block \""+block.get(refMarker).toString()+"\"! There are only "+lexicalTextTokens.size()+" lexical items in the reference block, but the importer is trying to access item number "+(lexIndex+1) + ".\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
 		}
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
