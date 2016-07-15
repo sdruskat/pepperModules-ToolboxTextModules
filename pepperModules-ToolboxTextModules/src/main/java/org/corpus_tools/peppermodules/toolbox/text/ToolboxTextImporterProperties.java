@@ -146,63 +146,87 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	public static final String PROP_ATTACH_DETACHED_MORPHEME_DELIMITER = "attachDetachedDelimiter";
 	
+	/**
+	 * Whether the importer should fix broken alignment in cases where the number of annotations
+	 * is smaller than the number of tokens. If this is not set to true, the importer will throw
+	 * errors whenever it encounters broken alignments.
+	 */
+	public static final String PROP_FIX_ALIGNMENT = "fixAlignment";
+	
+	/**
+	 * The {@link String} that will be used to flag misalignment. This will be attached <em>n</em>
+	 * times to the end of the line which includes the misalignment, where <em>n</em> is
+	 * the number of missing items. 
+	 */
+	public static final String PROP_FIX_ALIGNMENT_STRING = "fixAlignmentString";
+	
 	
 	public ToolboxTextImporterProperties() {
-		addProperty(new PepperModuleProperty<>(PROP_LEX_MARKER, 
+		addProperty(new PepperModuleProperty<String>(PROP_LEX_MARKER, 
 				String.class, 
 				"The Toolbox marker that precedes lines with source text (usually lexical items), without the preceding backslash.", 
 				"tx",
 				true));
-		addProperty(new PepperModuleProperty<>(PROP_MORPH_MARKER, 
+		addProperty(new PepperModuleProperty<String>(PROP_MORPH_MARKER, 
 				String.class, 
 				"The Toolbox marker that precedes lines with morphological information, without the preceding backslash.",
 				"mb",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_LEX_ANNOTATION_MARKERS, 
+		addProperty(new PepperModuleProperty<String>(PROP_LEX_ANNOTATION_MARKERS, 
 				String.class, 
 				"All Toolbox markers which precede lines with annotations of source text segments (usually lexical items), without the preceding backslashes, and as a comma-separated list.",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_MORPH_ANNOTATION_MARKERS, 
+		addProperty(new PepperModuleProperty<String>(PROP_MORPH_ANNOTATION_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with annotations of morphemes, without the preceding backslashes, and as a comma-separated list.",
 				"ge,ps",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_MORPHEME_DELIMITERS, 
+		addProperty(new PepperModuleProperty<String>(PROP_MORPHEME_DELIMITERS, 
 				String.class,
 				"The morpheme delimiters used in the Toolbox files as a comma-separated two-point list where the first element is the affix delimiter, and the second element is the clitics delimiter.",
 				"-,=",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_REF_MARKER, 
+		addProperty(new PepperModuleProperty<String>(PROP_REF_MARKER, 
 				String.class,
 				"The marker used for references, i.e., usually \"ref\" or \"id\".",
 				"ref",
 				true));
-		addProperty(new PepperModuleProperty<>(PROP_FILE_EXTENSIONS, 
+		addProperty(new PepperModuleProperty<String>(PROP_FILE_EXTENSIONS, 
 				String.class,
 				"The file extensions that corpus files can have as a comma-separated list.",
 				"txt,lbl",
 				true));
-		addProperty(new PepperModuleProperty<>(PROP_DOCUMENT_METADATA_MARKERS, 
+		addProperty(new PepperModuleProperty<String>(PROP_DOCUMENT_METADATA_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with document-specific metadata, without the preceding backslashes, and as a comma-separated list.",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_REF_METADATA_MARKERS, 
+		addProperty(new PepperModuleProperty<String>(PROP_REF_METADATA_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with reference-specific metadata, without the preceding backslashes, and as a comma-separated list.",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, 
+		addProperty(new PepperModuleProperty<String>(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, 
 				String.class,
 				"Wether detached delimiters (as in \"item - item\" or similar) should be attached to the previous or subsequent item, as a two-item array, where the first item signifies whether the delimiter should be attached (if true it will be attached), and the second item signifies whether the delimiter should be attached to the subsequent item (if true it will be attached to the subsequent item, making the latter a suffix).",
 				"true,true",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_UNIT_REF_ANNOTATIONS_MARKERS, 
+		addProperty(new PepperModuleProperty<String>(PROP_UNIT_REF_ANNOTATIONS_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with annotations that can potentially span subranges of the complete morphological data source.",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_UNIT_REF_DEFINITION_MARKER, 
+		addProperty(new PepperModuleProperty<String>(PROP_UNIT_REF_DEFINITION_MARKER, 
 				String.class,
 				"The marker used to define unit refs.",
 				"unitref",
+				false));
+		addProperty(new PepperModuleProperty<Boolean>(PROP_FIX_ALIGNMENT, 
+				Boolean.class,
+				"Whether the importer should fix broken alignment in cases where the number of annotations is smaller than the number of tokens. If this is not set to true, the importer will throw errors whenever it encounters broken alignments.",
+				false,
+				false));
+		addProperty(new PepperModuleProperty<String>(PROP_FIX_ALIGNMENT_STRING, 
+				String.class,
+				"The {@link String} that will be used to flag misalignment. This will be attached n times to the end of the line which includes the misalignment, where n is the number of missing items.",
+				"BROKEN_ALIGNMENT",
 				false));
 	}
 	
@@ -262,6 +286,14 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	
 	public String getUnitRefDefinitionMarker() {
 		return (String) getProperty(PROP_UNIT_REF_DEFINITION_MARKER).getValue();
+	}
+	
+	public Boolean fixAlignment() {
+		return (Boolean) getProperty(PROP_FIX_ALIGNMENT).getValue();
+	}
+	
+	public String getFixAlignmentString() {
+		return (String) getProperty(PROP_FIX_ALIGNMENT_STRING).getValue();
 	}
 
 }
