@@ -229,6 +229,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				addLineToBlock(block, line);
 			}
 			else { // Hit a ref marker
+				if (getProperties().getFixAlignment()) {
+					fixAlignment(block);
+				}
 				if (!isHeaderBlockMapped) { // First hit of ref marker, i.e., block must be header block
 					mapHeaderToModel(block);
 					isHeaderBlockMapped = true;
