@@ -232,11 +232,11 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				if (!isHeaderBlockMapped) { // First hit of ref marker, i.e., block must be header block
 					mapHeaderToModel(block);
 					isHeaderBlockMapped = true;
-					addProgress((1d / lineListSize) * 100d);
+					addProgress((double) (block.size() / lineListSize) * 100);
 				}
 				else {
 					mapRefToModel(block);
-					addProgress((1d / lineListSize) * 100d);
+					addProgress((double) (block.size() / lineListSize) * 100);
 				}
 				block.clear();
 				// Add the ref marker to the new block!
@@ -247,7 +247,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		 * Map ref block to model once, because we cannot hit a ref marker at the end of the list anymore to trigger a block mapping process.
 		 */
 		mapRefToModel(block);
-		addProgress((1d / lineListSize) * 100d);
+		addProgress((double) (block.size() / lineListSize) * 100);
 
 		return (DOCUMENT_STATUS.COMPLETED);
 	}
@@ -290,7 +290,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			block.put(marker, valueList);
 		}
 		else {
-			if (Arrays.asList(getProperties().getUnitRefAnnotationMarkers().split("\\s*,\\s*")).contains(marker)) {
+			if (getProperties().getUnitRefAnnotationMarkers() != null && Arrays.asList(getProperties().getUnitRefAnnotationMarkers().split("\\s*,\\s*")).contains(marker)) {
 				block.put(marker, valueList);
 			}
 			else if (getProperties().getUnitRefDefinitionMarker().equals(marker)) {
@@ -452,11 +452,23 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		Map<String, int[]> definedUnitRefs = new HashMap<>();
 		
 		// Get text tokens for lex and morph
-		List<String> lexicalTextTokens = block.get(lexMarker).get(0);
+		List<String> lexicalTextTokens = null;
+		try {
+			lexicalTextTokens = block.get(lexMarker).get(0);
+		}
+		catch (IndexOutOfBoundsException e) {
+			throw new PepperModuleException("This block does not contain a line with lexical items! Perhaps you have not defined the lexical marker (default: \\tx)?");
+		}
 		if (lexicalTextTokens == null) {
 			throw new PepperModuleException("There is no lexical layer for this reference block. Aborting conversion. EVERY reference block must have a lexical layer.");
 		}
-		List<String> morphologicalTextTokens = block.get(morphMarker).get(0);
+		List<String> morphologicalTextTokens = null;
+		try {
+			morphologicalTextTokens = block.get(morphMarker).get(0);
+		}
+		catch (IndexOutOfBoundsException e) {
+			throw new PepperModuleException("This block does not contain a line with morphological items! Perhaps you have not defined the morphological marker (default: \\mb)?");
+		}
 		if (morphologicalTextTokens == null) {
 			throw new PepperModuleException("There is no morphological layer for this reference block. Aborting conversion. EVERY reference block must have a morphological layer.");
 		}
