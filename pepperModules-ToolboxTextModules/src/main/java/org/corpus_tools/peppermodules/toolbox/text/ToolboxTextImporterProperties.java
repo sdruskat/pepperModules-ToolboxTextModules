@@ -130,7 +130,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * All Toolbox markers which precede lines with annotations that can potentially span
 	 * subranges of the complete morphological data source.
 	 */
-	public static final String PROP_UNIT_REF_ANNOTATIONS_MARKERS = "unitRefAnnotationMarkers";
+	public static final String PROP_UNIT_REF_ANNOTATION_MARKERS = "unitRefAnnotationMarkers";
 	
 	/**
 	 * The marker used to define unit refs.
@@ -214,7 +214,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"Wether detached delimiters (as in \"item - item\" or similar) should be attached to the previous or subsequent item, as a two-item array, where the first item signifies whether the delimiter should be attached (if true it will be attached), and the second item signifies whether the delimiter should be attached to the subsequent item (if true it will be attached to the subsequent item, making the latter a suffix).",
 				"true,true",
 				false));
-		addProperty(new PepperModuleProperty<String>(PROP_UNIT_REF_ANNOTATIONS_MARKERS, 
+		addProperty(new PepperModuleProperty<String>(PROP_UNIT_REF_ANNOTATION_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with annotations that can potentially span subranges of the complete morphological data source.",
 				false));
@@ -292,7 +292,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	}
 
 	public String getUnitRefAnnotationMarkers() {
-		return (String) getProperty(PROP_UNIT_REF_ANNOTATIONS_MARKERS).getValue();
+		return (String) getProperty(PROP_UNIT_REF_ANNOTATION_MARKERS).getValue();
 	}
 	
 	public String getUnitRefDefinitionMarker() {

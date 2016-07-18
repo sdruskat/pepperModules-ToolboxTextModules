@@ -62,7 +62,7 @@ public class ToolboxTextMapperTest {
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_DOCUMENT_METADATA_MARKERS, "docmet");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_REF_METADATA_MARKERS, "met");
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATION_MARKERS, "ur,ur2");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ALIGNMENT, true);
 		mapper.setProperties(properties);
 		SDocument doc = SaltFactory.createSDocument();
@@ -133,7 +133,7 @@ public class ToolboxTextMapperTest {
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATION_MARKERS, "ur,ur2");
 		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
@@ -206,7 +206,7 @@ public class ToolboxTextMapperTest {
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATION_MARKERS, "ur,ur2");
 		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
@@ -367,7 +367,7 @@ public class ToolboxTextMapperTest {
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATION_MARKERS, "ur,ur2");
 		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
