@@ -589,8 +589,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				if (getProperties().fixAlignment()) {
 					if (lexIndex >= lexicalTextTokens.size()) {
 						lexicalTextTokens.add(lexIndex, getProperties().getFixAlignmentString());
-						for (List<String> line : lexAnnotationLines.values()) {
-							line.add(getProperties().getFixAlignmentString());
+						logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the line + \"" + lexicalTextTokens + "\".");
+						for (Entry<String, List<String>> line : lexAnnotationLines.entrySet()) {
+							line.getValue().add(getProperties().getFixAlignmentString());
+							logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the annotation line + \"" + line.getKey() + "\".");
 						}
 					}
 				}
@@ -620,6 +622,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				// Last morpheme reached, but the next lexIndex is still smaller than the number of lexical tokens 
 				if (getProperties().fixAlignment()) {
 					morphologicalTextTokens.add(getProperties().getFixAlignmentString());
+					logger.info("Fixed broken alignment between lexical items and morphological items. Added to the line of morphological items to match the number of lexical items by appending the alignment warning string \"" + getProperties().getFixAlignmentString() + "\".");
 				}
 				else {
 					if (!getProperties().ignoreMissingMorphemes()) {
@@ -641,8 +644,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			if (getProperties().fixAlignment()) {
 				if (lexIndex >= lexicalTextTokens.size()) {
 					lexicalTextTokens.add(lexIndex, getProperties().getFixAlignmentString());
-					for (List<String> line : lexAnnotationLines.values()) {
-						line.add(getProperties().getFixAlignmentString());
+					logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the line + \"" + lexicalTextTokens + "\".");
+					for (Entry<String, List<String>> line : lexAnnotationLines.entrySet()) {
+						line.getValue().add(getProperties().getFixAlignmentString());
+						logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the annotation line + \"" + line.getKey() + "\".");
 					}
 				}
 			}
@@ -874,6 +879,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			if (getProperties().fixAlignment()) {
 				if (morphIndex >= annotationLine.getValue().size()) {
 					annotationLine.getValue().add(getProperties().getFixAlignmentString());
+					logger.info("Fixed broken alignment between morphological tokens and their annotations by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the annotation line + \"" + annotationLine.getKey() + "\".");
 				}
 			}
 			try {
@@ -944,6 +950,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			if (getProperties().fixAlignment()) {
 				if (lexIndex >= annotationLine.getValue().size()) {
 					annotationLine.getValue().add(getProperties().getFixAlignmentString());
+					logger.info("Fixed broken alignment between morphological tokens and their annotations by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the annotation line + \"" + annotationLine.getKey() + "\".");
 				}
 			}
 			try {

@@ -479,7 +479,7 @@ public class ToolboxTextMapperTest {
 	 * Tests the ref spans in the document graph.
 	 */
 	@Test
-	public void testMapSDocumentRefSpatns() {
+	public void testMapSDocumentRefSpans() {
 		int touchedSpanCounter = 0;
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
