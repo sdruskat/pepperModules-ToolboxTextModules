@@ -63,6 +63,7 @@ public class ToolboxTextMapperTest {
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_DOCUMENT_METADATA_MARKERS, "docmet");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_REF_METADATA_MARKERS, "met");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATIONS_MARKERS, "ur,ur2");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ALIGNMENT, true);
 		mapper.setProperties(properties);
 		SDocument doc = SaltFactory.createSDocument();
 		mapper.setDocument(doc);
