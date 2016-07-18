@@ -160,6 +160,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	public static final String PROP_FIX_ALIGNMENT_STRING = "fixAlignmentString";
 	
+	/**
+	 * Whether to ignore lexical items which miss a morphological representation.
+	 */
+	public static final String PROP_IGNORE_MISSING_MORPHEMES = "ignoreMissingMorphemes";
+	
 	
 	public ToolboxTextImporterProperties() {
 		addProperty(new PepperModuleProperty<String>(PROP_LEX_MARKER, 
@@ -228,6 +233,12 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"The {@link String} that will be used to flag misalignment. This will be attached n times to the end of the line which includes the misalignment, where n is the number of missing items.",
 				"BROKEN_ALIGNMENT",
 				false));
+		addProperty(new PepperModuleProperty<Boolean>(PROP_IGNORE_MISSING_MORPHEMES, 
+				Boolean.class,
+				"Whether to ignore lexical items which miss a morphological representation.",
+				false,
+				false));
+		
 	}
 	
 	// Getter methods for the different property values.
@@ -295,5 +306,9 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public String getFixAlignmentString() {
 		return (String) getProperty(PROP_FIX_ALIGNMENT_STRING).getValue();
 	}
-
+	
+	public Boolean ignoreMissingMorphemes() {
+		return (Boolean) getProperty(PROP_IGNORE_MISSING_MORPHEMES).getValue();
+	}
+	
 }
