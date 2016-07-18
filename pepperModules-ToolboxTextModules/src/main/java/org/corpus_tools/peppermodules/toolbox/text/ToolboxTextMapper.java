@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.sound.sampled.Line;
+
 import java.util.Set;
 
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
@@ -229,38 +232,59 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				addLineToBlock(block, line);
 			}
 			else { // Hit a ref marker
-				if (getProperties().fixAlignment()) {
-					fixAlignment(block);
-				}
 				if (!isHeaderBlockMapped) { // First hit of ref marker, i.e., block must be header block
 					mapHeaderToModel(block);
 					isHeaderBlockMapped = true;
+					addProgress((1d / lineListSize) * 100d);
 				}
 				else {
 					mapRefToModel(block);
+					addProgress((1d / lineListSize) * 100d);
 				}
 				block.clear();
 				// Add the ref marker to the new block!
 				addLineToBlock(block, line);
-				
 			}
-			addProgress(((double) 1) / lineListSize);
 		}
 		/*
 		 * Map ref block to model once, because we cannot hit a ref marker at the end of the list anymore to trigger a block mapping process.
 		 */
 		mapRefToModel(block);
-		
+		addProgress(1d / lineListSize);
+
 		return (DOCUMENT_STATUS.COMPLETED);
 	}
 
 	/**
-	 * TODO: Description
+	 * Fixes broken alignments in block, i.e., for lines which should
+	 * have at least n items, but miss items, append a "fix String" to
+	 * the end of the line until the correct number is met. 
 	 *
 	 * @param block
 	 */
 	private ListMultimap<String, List<String>> fixAlignment(ListMultimap<String, List<String>> block) {
+		System.err.println("FIXING!");
 		String fixString = getProperties().getFixAlignmentString();
+		/*
+		 * Four misalignment problem areas exist:
+		 * - Too many morpheme "words" for lexical items
+		 * - Not enough morpheme "words" for lexical items
+		 * - Not enough annotations for lexical items
+		 * - Not enough annotations for morphological items
+		 * Deal with them all!
+		 */
+		// Too many morpheme "words" for lexical items:
+		int diff = block.get(getProperties().getMorphMarker()).get(0).size() - block.get(getProperties().getLexMarker()).get(0).size();
+		System.err.println("DIF  " + diff);
+		if ((diff = (block.get(getProperties().getMorphMarker()).size() - block.get(getProperties().getLexMarker()).size())) < 0) {
+			for (int i = 0; i < diff; i++) {
+				for (List<String> lexLine : block.get(getProperties().getLexMarker())) {
+					System.err.println(lexLine);
+					lexLine.add(fixString);
+					System.err.println(lexLine);
+				}
+			}
+		}
 		return block;
 	}
 
@@ -586,7 +610,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 
 			}
 		}
-
+		
 		// Build morphological and lexical tokens with annotations, and build data sources
 		int morphCounter = 0;
 		int lexIndex = -1;
@@ -598,16 +622,18 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			if (lastMorpheme != null && isHead(morphemeTextToken, lastMorpheme)) {
 				lexIndex++;
 				String lexicalTextToken = null;
+				if (getProperties().fixAlignment()) {
+					if (lexIndex >= lexicalTextTokens.size()) {
+						lexicalTextTokens.add(lexIndex, getProperties().getFixAlignmentString());
+					}
+				}
 				try {
-					lexicalTextToken  = lexicalTextTokens.get(lexIndex);
+					lexicalTextToken = lexicalTextTokens.get(lexIndex);
 				}
-				catch (IndexOutOfBoundsException e) {
-					throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refMarker + 
-							"\"! There are only " + lexicalTextTokens.size() + " lexical items in the reference block, but the importer is trying to access an item number " + 
-							lexIndex + ".\n" + 
-							"This indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\n" + 
-							"Please fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
+				catch (Exception e) {
+					throw new PepperModuleException("\n\n#####\nAlignment problem in block \""+block.get(refMarker).toString()+"\"! There are only "+lexicalTextTokens.size()+" lexical items in the reference block, but the importer is trying to access item number "+(lexIndex+1) + ".\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
 				}
+
 				// Map
 				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 				lastLexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, refLine.values().toString());
@@ -615,24 +641,41 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				
 				// Prepare next iteration
 				morphCounter = 0;
+				
 			}
 			morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
 			morphCounter++;
 			lastMorphToken = createMorphToken(morphemeTextToken, morphIndex, morphAnnotationLines, refLine.values().toString());
 			spanMorphTokens.add(lastMorphToken);
 			lastMorpheme = morphemeTextToken;
+			// Check if there are lexical tokens without morphological counterparts
+			if (morphIndex == morphologicalTextTokens.size() - 1 && lexIndex + 1 < lexicalTextTokens.size() - 1) { 
+				// Last morpheme reached, but the next lexIndex is still smaller than the number of lexical tokens 
+				if (getProperties().fixAlignment()) {
+					morphologicalTextTokens.add(getProperties().getFixAlignmentString());
+				}
+				else {
+					throw new PepperModuleException("There are lexical items without morphological counterparts, i.e., not all lexical items have been annotated for morphology. The importer is not set to ignore this. Please annotate the morphology for block \"" + block.get(refMarker) + "\".");
+				}
+			}
+
 		}
 		// Finalize the timeline
 		// Map the loop's final iteration results as it has ended.
 		lexIndex++;
 		String lexicalTextToken = null;
+		if (getProperties().fixAlignment()) {
+			if (lexIndex >= lexicalTextTokens.size()) {
+				lexicalTextTokens.add(lexIndex, getProperties().getFixAlignmentString());
+			}
+		}
 		try {
 			lexicalTextToken = lexicalTextTokens.get(lexIndex);
 		}
-		catch (IndexOutOfBoundsException e) {
-			logger.error("\n\n???????   E R R O R   ???????\n\n#####\nAlignment problem in block \"{}\"! There are only {} lexical items in the reference block, but the importer is trying to access item number {}.\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", block.get(refMarker).toString(), lexicalTextTokens.size(), (lexIndex + 1));
+		catch (Exception e) {
 			throw new PepperModuleException("\n\n#####\nAlignment problem in block \""+block.get(refMarker).toString()+"\"! There are only "+lexicalTextTokens.size()+" lexical items in the reference block, but the importer is trying to access item number "+(lexIndex+1) + ".\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
 		}
+
 		lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 		lastLexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, refLine.values().toString());
 		spanLexTokens.add(lastLexToken);
@@ -654,6 +697,39 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 //		
 		createDocumentMetaAnnotations(docMetaAnnotationLines);
 	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param refMarker
+	 * @param lexicalTextTokens
+	 * @param lexIndex
+	 * @param lexicalTextToken
+	 * @return
+	 * @throws PepperModuleException
+	 */
+//	private String getLexicalTextToken(String refMarker, List<String> lexicalTextTokens, int lexIndex, String lexicalTextToken) throws PepperModuleException {
+//		boolean repeatAccess = false;
+//		do {
+//			try {
+//				lexicalTextToken  = lexicalTextTokens.get(lexIndex);
+//				System.err.println(lexicalTextToken);
+//			}
+//			catch (IndexOutOfBoundsException e) {
+//				System.err.println("FIX? " + getProperties().fixAlignment());
+//				if (getProperties().fixAlignment()) {
+//					System.err.println("FIXING lex!");
+//					lexicalTextTokens.add(lexIndex, getProperties().getFixAlignmentString());
+//					repeatAccess = true;
+//				}
+//				else {
+//					throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refMarker + "\"! There are only " + lexicalTextTokens.size() + " lexical items in the reference block, but the importer is trying to access an item number " + lexIndex + ".\n" + "This indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\n" + "Please fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
+//				}
+//			}
+//		}
+//		while (repeatAccess);
+//		return lexicalTextToken;
+//	}
 
 	/**
 	 * TODO: Description
@@ -858,8 +934,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(morphIndex));
 			}
 			catch (IndexOutOfBoundsException e) {
-				logger.error("\n\n#####\nAlignment problem in block \"{}\" with morpheme \'{}\' and its annotation on level \'{}\'!\nThere are only {} values on this line, whereas the importer is trying to access value number {}...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", refId, morpheme, annotationLine.getKey(), annotationLine.getValue().size(), (morphIndex + 1));
-				throw new PepperModuleException("Conversion aborted, please have a look at the log file in the directory where the Pepper runnable is located. The file is called \"pepper_out.txt\".", e);
+				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" +refId + "\" with morpheme \'" + morpheme + "\' and its annotation on level \'" + annotationLine.getKey() + "\'!\nThere are only " + annotationLine.getValue().size() + " values on this line, whereas the importer is trying to access value number " + (morphIndex + 1) + "...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", e);
 			}
 		}
 		
@@ -925,8 +1000,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(indexOfToken));
 			}
 			catch (IndexOutOfBoundsException e) {
-				logger.error("\n\n#####\nAlignment problem in block \"{}\" with lexical unit \'{}\' and its annotation on level \'{}\'!\nThere are only {} values on this line, whereas the importer is trying to access value number {}...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", refId, lexicalTextToken, annotationLine.getKey(), annotationLine.getValue().size(), (indexOfToken + 1));
-				throw new PepperModuleException(null, e);
+				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refId + "\" with lexical unit \'" + lexicalTextToken + "\' and its annotation on level \'" + annotationLine.getKey() + "\'!\nThere are only " + annotationLine.getValue().size() + " values on this line, whereas the importer is trying to access value number " + (indexOfToken + 1) + "...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", e);
 			}
 		}
 		if (lastLexToken != null) {
