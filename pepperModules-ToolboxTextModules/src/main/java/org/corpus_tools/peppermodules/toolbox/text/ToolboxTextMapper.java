@@ -457,7 +457,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			lexicalTextTokens = block.get(lexMarker).get(0);
 		}
 		catch (IndexOutOfBoundsException e) {
-			throw new PepperModuleException("This block does not contain a line with lexical items! Perhaps you have not defined the lexical marker (default: \\tx)?");
+			throw new PepperModuleException("This block (\"" + block.get(refMarker) + "\") does not contain a line with lexical items! Perhaps you have not defined the lexical marker (default: \\tx)?");
 		}
 		if (lexicalTextTokens == null) {
 			throw new PepperModuleException("There is no lexical layer for this reference block. Aborting conversion. EVERY reference block must have a lexical layer.");
@@ -467,7 +467,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			morphologicalTextTokens = block.get(morphMarker).get(0);
 		}
 		catch (IndexOutOfBoundsException e) {
-			throw new PepperModuleException("This block does not contain a line with morphological items! Perhaps you have not defined the morphological marker (default: \\mb)?");
+			throw new PepperModuleException("This block (\"" + block.get(refMarker) + "\") does not contain a line with morphological items! Perhaps you have not defined the morphological marker (default: \\mb)?");
 		}
 		if (morphologicalTextTokens == null) {
 			throw new PepperModuleException("There is no morphological layer for this reference block. Aborting conversion. EVERY reference block must have a morphological layer.");
@@ -601,10 +601,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				if (getProperties().fixAlignment()) {
 					if (lexIndex >= lexicalTextTokens.size()) {
 						lexicalTextTokens.add(lexIndex, getProperties().getFixAlignmentString());
-						logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the line + \"" + lexicalTextTokens + "\".");
+						logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the line \"" + lexicalTextTokens + "\".");
 						for (Entry<String, List<String>> line : lexAnnotationLines.entrySet()) {
 							line.getValue().add(getProperties().getFixAlignmentString());
-							logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the annotation line + \"" + line.getKey() + "\".");
+							logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the annotation line \"" + line.getKey() + "\".");
 						}
 					}
 				}
