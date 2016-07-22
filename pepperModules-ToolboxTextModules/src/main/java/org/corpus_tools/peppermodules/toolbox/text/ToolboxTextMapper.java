@@ -238,18 +238,14 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 					}
 					else { // HIT a ref
 						if (!idBlock.isHeaderMapped() && !block.isEmpty()) { // I.e., first ref in ID
-							System.err.println("    Hit first REF in ID, setting id annos to id object");
 							idBlock.setId(idMarker, "\\" + idMarker + " " + resolveListToString(block.get(idMarker).get(0)));
 							idBlock.setIdAnnotations(convertIdHeader(block));
 							idBlock.setHeaderMapped(true);
-							System.err.println("    " + idBlock.getIdAnnotations());
 							block.clear();
 							addLineToBlock(block, line);
 						}
 						else { // I.e., not first REF in ID
-							System.err.println("    !!! Hit second or further ref in ID bock, adding ref before to block");
 							idBlock.getRefs().add(mapRefToModel(block));
-							System.err.println("     ??? " + idBlock.getRefs());
 							block.clear();
 							addLineToBlock(block, line);
 						}
@@ -257,7 +253,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				}
 				else { // Hit an ID
 					if (!isHeaderBlockMapped) {
-						System.err.println("MAPPING HEADER BLOCK " + block + "\n\n");
 						mapHeaderToModel(block);
 						isHeaderBlockMapped = true;
 						block.clear();
@@ -334,7 +329,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param idBlock
 	 */
 	private void mapIdToModel(ToolboxIdBlock idBlock) {
-		System.err.println("    >>> MAPPING ID TO MODEL:\n    " + idBlock.getId() + "\n      " + idBlock.getIdAnnotations() + "\n      " + idBlock.getRefs() + "\n      -----------\n");
 		SSpan span = null;
 		List<SToken> tokens = new ArrayList<>();
 		for (SSpan refSpan : idBlock.getRefs()) {
@@ -486,7 +480,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param block The header block to process
 	 */
 	private void mapHeaderToModel(ListMultimap<String,List<String>> block) {
-		System.err.println("MAPPING HEADER BLOCK:\n" + block + "\n--------\n");
 		for (Entry<String, List<String>> line : block.entries()) {
 			String marker = line.getKey();
 			String qualifiedId = SALT_NAMESPACE_TOOLBOX + "::" + marker;
