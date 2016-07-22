@@ -110,6 +110,11 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * Whether the header block of the file has already been mapped.
 	 */
 	private boolean isHeaderBlockMapped = false;
+	
+	/**
+	 * Whether the header block of the ID section has already been mapped.
+	 */
+	private boolean isIdHeaderMapped = false;
 
 	/**
 	 * The textual data source containing the lexical source text of the whole document.
@@ -224,32 +229,112 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Map the tuple list whenever you hit a ref marker
 		ListMultimap<String, List<String>> block = ArrayListMultimap.create();
 		int lineListSize = lineList.size();
+		ToolboxIdBlock idBlock = new ToolboxIdBlock();
 		for (String line : lineList) {
-			if (!line.startsWith("\\" + getProperties().getRefMarker())) {
-				addLineToBlock(block, line);
-			}
-			else { // Hit a ref marker
-				if (!isHeaderBlockMapped) { // First hit of ref marker, i.e., block must be header block
-					mapHeaderToModel(block);
-					isHeaderBlockMapped = true;
-					addProgress((double) (block.size() / lineListSize) * 100);
+			if (getProperties().hasIds()) {
+				if (!line.startsWith("\\" + getProperties().getIdMarker())) {
+					// FIXME Duplicate adding of line!
+					addLineToBlock(block, line);
+					if (!line.startsWith("\\" + getProperties().getRefMarker())) {
+						addLineToBlock(block, line);
+					}
+					else { // Hit a ref marker
+						System.err.println("HIT REF MARKER");
+						if (!isIdHeaderMapped) { // First hit of ref marker, i.e., block must be header block
+							idBlock.setIdAnnotations(convertIdHeader(block));
+							isIdHeaderMapped = true;
+							addProgress((double) (block.size() / lineListSize) * 100);
+						}
+						else {
+							idBlock.getRefs().add(mapRefToModel(block));
+							addProgress((double) (block.size() / lineListSize) * 100);
+						}
+						block.clear();
+						// Add the ref marker to the new block!
+						addLineToBlock(block, line);
+					}
 				}
-				else {
-					mapRefToModel(block);
-					addProgress((double) (block.size() / lineListSize) * 100);
+				else { // Hit an ID
+					System.err.println("HIT ID");
+					if (!isHeaderBlockMapped) { // First hit of id marker, i.e., block must be header block
+						mapHeaderToModel(block);
+						isHeaderBlockMapped = true;
+						addProgress((double) (block.size() / lineListSize) * 100);
+					}
+					else {
+						mapIdToModel(idBlock);
+						isIdHeaderMapped = false;
+						idBlock.reset();
+						idBlock.setId(getProperties().getIdMarker(), line);
+					}
 				}
-				block.clear();
-				// Add the ref marker to the new block!
-				addLineToBlock(block, line);
 			}
+			else { // No IDs
+				if (!line.startsWith("\\" + getProperties().getRefMarker())) {
+					addLineToBlock(block, line);
+				}
+				else { // Hit a ref marker
+					if (!isHeaderBlockMapped) { // First hit of ref marker, i.e., block must be header block
+						mapHeaderToModel(block);
+						isHeaderBlockMapped = true;
+						addProgress((double) (block.size() / lineListSize) * 100);
+					}
+					else {
+						mapRefToModel(block);
+						addProgress((double) (block.size() / lineListSize) * 100);
+					}
+					block.clear();
+					// Add the ref marker to the new block!
+					addLineToBlock(block, line);
+				}
+			}
+			mapRefToModel(block);
+			addProgress((double) (block.size() / lineListSize) * 100);
 		}
 		/*
 		 * Map ref block to model once, because we cannot hit a ref marker at the end of the list anymore to trigger a block mapping process.
 		 */
-		mapRefToModel(block);
-		addProgress((double) (block.size() / lineListSize) * 100);
 
 		return (DOCUMENT_STATUS.COMPLETED);
+	}
+
+	/**
+	 * Creates a span for an IdBlock, spanning those tokens
+	 * which are spanned by the IdBlock's refs.
+	 *
+	 * @param idBlock
+	 */
+	private void mapIdToModel(ToolboxIdBlock idBlock) {
+		SSpan span = null;
+		List<SToken> tokens = new ArrayList<>();
+		for (SSpan refSpan : idBlock.getRefs()) {
+			tokens.addAll(getGraph().getOverlappedTokens(refSpan));
+		}
+		span = getGraph().createSpan(tokens);
+		span.setName(idBlock.getId());
+		for (Entry<String, String> line : idBlock.getIdAnnotations().entrySet()) {
+			span.createAnnotation(SALT_NAMESPACE_TOOLBOX, line.getKey(), line.getValue());
+		}
+		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, getProperties().getIdMarker(), idBlock.getId());
+		span.addLayer(layers.get(getProperties().getIdMarker()));
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param block
+	 * @return
+	 */
+	private Map<String, String> convertIdHeader(ListMultimap<String, List<String>> block) {
+		Map<String, String> IdAnnotations = new HashMap<>();
+		for (Entry<String, List<String>> line : block.entries()) {
+			StringBuilder sb = new StringBuilder();
+			for (String string : line.getValue()) {
+				sb.append(string);
+			}
+			IdAnnotations.put(line.getKey(), sb.toString().trim());
+		}
+		return IdAnnotations;
 	}
 
 	/**
@@ -411,10 +496,11 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	/**
 	 * Maps a reference block onto the Salt model, i.e., adding its marker lines as tokens, spans, and annotations to the document graph.
 	 *
-	 * @param block The reference block to process
+	 * @param block The reference block to proces
+	 * s
 	 * @return 
 	 */
-	private void mapRefToModel(ListMultimap<String,List<String>> block) {
+	private SSpan mapRefToModel(ListMultimap<String,List<String>> block) {
 		// Resolve properties
 		String refMarker = getProperties().getRefMarker();
 		logger.debug("Mapping ref block \"" + block.get(refMarker).toString() + "\".");
@@ -453,6 +539,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		
 		// Get text tokens for lex and morph
 		List<String> lexicalTextTokens = null;
+		System.err.println(block.entries());
 		try {
 			lexicalTextTokens = block.get(lexMarker).get(0);
 		}
@@ -682,12 +769,13 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
 		
 		// Build the general ref span and add ref-level annotations
-		createRefSpan(refLine, spanMorphTokens, spanLexTokens, refAnnotationLines, refMetaAnnotationLines);
+		SSpan ref = createRefSpan(refLine, spanMorphTokens, spanLexTokens, refAnnotationLines, refMetaAnnotationLines);
 		for (Entry<String, List<String>> unitRefLine : unitRefAnnotationLines.entries()) {
 			createUnitRefSpan(getGraph().getSortedTokenByText(spanMorphTokens), getGraph().getSortedTokenByText(spanLexTokens), unitRefLine, definedUnitRefs);
 		}
 
 		createDocumentMetaAnnotations(docMetaAnnotationLines);
+		return ref;
 	}
 
 	/**

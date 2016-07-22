@@ -78,6 +78,13 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * without the preceding backslash.
 	 */
 	public static final String PROP_LEX_MARKER = "lexicalMarker";
+
+	/**
+	 * The Toolbox marker that precedes lines with IDs,
+	 * without the preceding backslash.
+	 */
+	public static final String PROP_ID_MARKER = "idMarker";
+
 	
 	/**
 	 * The Toolbox marker that precedes lines with morphological information,
@@ -164,6 +171,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * Whether to ignore lexical items which miss a morphological representation.
 	 */
 	public static final String PROP_IGNORE_MISSING_MORPHEMES = "ignoreMissingMorphemes";
+
+	/**
+	 * Whether a Toolbox file contains IDs, usually marked with \id, for structuring files.
+	 */
+	public static final String PROP_HAS_IDS = "hasIds";
 	
 	
 	public ToolboxTextImporterProperties() {
@@ -176,6 +188,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				String.class, 
 				"The Toolbox marker that precedes lines with morphological information, without the preceding backslash.",
 				"mb",
+				false));
+		addProperty(new PepperModuleProperty<String>(PROP_ID_MARKER, 
+				String.class, 
+				"The Toolbox marker that precedes lines with IDs, without the preceding backslash.",
+				"id",
 				false));
 		addProperty(new PepperModuleProperty<String>(PROP_LEX_ANNOTATION_MARKERS, 
 				String.class, 
@@ -238,13 +255,21 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"Whether to ignore lexical items which miss a morphological representation.",
 				false,
 				false));
-		
+		addProperty(new PepperModuleProperty<Boolean>(PROP_HAS_IDS,
+				Boolean.class,
+				"Whether a Toolbox file contains IDs, usually marked with \\id, for structuring files.",
+				true,
+				true));
 	}
 	
 	// Getter methods for the different property values.
 	
 	public String getLexMarker() {
 		return (String) getProperty(PROP_LEX_MARKER).getValue();
+	}
+	
+	public String getIdMarker() {
+		return (String) getProperty(PROP_ID_MARKER).getValue();
 	}
 	
 	public String getMorphMarker() {
@@ -309,6 +334,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	
 	public Boolean ignoreMissingMorphemes() {
 		return (Boolean) getProperty(PROP_IGNORE_MISSING_MORPHEMES).getValue();
+	}
+	
+	public Boolean hasIds() {
+		return (Boolean) getProperty(PROP_HAS_IDS).getValue();
 	}
 	
 }

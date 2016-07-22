@@ -64,6 +64,7 @@ public class ToolboxTextMapperTest {
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_REF_METADATA_MARKERS, "met");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATION_MARKERS, "ur,ur2");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ALIGNMENT, true);
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_HAS_IDS, false);
 		mapper.setProperties(properties);
 		SDocument doc = SaltFactory.createSDocument();
 		mapper.setDocument(doc);
@@ -130,11 +131,8 @@ public class ToolboxTextMapperTest {
 	@Test
 	public void testMapSDocumentDSSwappedDelimAttachment() {
 		 
-		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
+		ToolboxTextImporterProperties properties = getFixture().getProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATION_MARKERS, "ur,ur2");
-		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph2 = getFixture().getDocument().getDocumentGraph();
@@ -203,11 +201,8 @@ public class ToolboxTextMapperTest {
 	@Test
 	public void testMapSDocumentTokensWithSwappedDelimAttachment() {
 		 
-		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
+		ToolboxTextImporterProperties properties = getFixture().getProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATION_MARKERS, "ur,ur2");
-		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
@@ -364,11 +359,8 @@ public class ToolboxTextMapperTest {
 	@Test
 	public void testMapSDocumentAnnotationsWithSwappedDelimAttachment() {
 		 
-		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
+		ToolboxTextImporterProperties properties = getFixture().getProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
-		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_UNIT_REF_ANNOTATION_MARKERS, "ur,ur2");
-		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 		assertTrue(graph == getFixture().getGraph());
