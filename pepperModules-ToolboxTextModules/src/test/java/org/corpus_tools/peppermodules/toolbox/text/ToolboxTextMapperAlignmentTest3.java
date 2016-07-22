@@ -60,6 +60,7 @@ public class ToolboxTextMapperAlignmentTest3 {
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ALIGNMENT, false);
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_IGNORE_MISSING_MORPHEMES, true);
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_HAS_IDS, false);
 		mapper.setProperties(properties);
 		SDocument doc = SaltFactory.createSDocument();
 		mapper.setDocument(doc);
