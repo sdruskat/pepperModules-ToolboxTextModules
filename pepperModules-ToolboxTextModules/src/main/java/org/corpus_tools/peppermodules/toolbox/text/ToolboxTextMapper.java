@@ -171,9 +171,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	public DOCUMENT_STATUS mapSDocument() {
 		// Set up fields
 		getMorphologicalTextualDS().setText("");
-		getMorphologicalTextualDS().setName("morphology-ds");
+		getMorphologicalTextualDS().setName(getProperties().getMorphMarker());
 		getLexicalTextualDS().setText("");
-		getLexicalTextualDS().setName("lexical-ds");
+		getLexicalTextualDS().setName(getProperties().getLexMarker());
 		String[] delimiters = getProperties().getMorphemeDelimiters().split("\\s*,\\s*");
 		affixDelimiter = delimiters[0].trim();
 		cliticsDelimiter = delimiters[1].trim();
@@ -855,6 +855,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			rel.setSource(lastMorphToken);
 			rel.setTarget(token);
 			rel.setName("morph");
+			rel.setType(getMorphologicalTextualDS().getName());
 			getGraph().addRelation(rel);
 		}
 		
@@ -920,6 +921,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			rel.setSource(lastLexToken);
 			rel.setTarget(token);
 			rel.setName("lex");
+			rel.setType(getLexicalTextualDS().getName());
 			getGraph().addRelation(rel);
 		}
 		
