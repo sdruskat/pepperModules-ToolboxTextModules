@@ -180,7 +180,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		affixDelimiter = delimiters[0].trim();
 		cliticsDelimiter = delimiters[1].trim();
 		String morphMarker = getProperties().getMorphMarker();
-		String refMarker = getProperties().getRefMarker();
 		String lexMarker = getProperties().getLexMarker();
 		
 		getDocument().setDocumentGraph(SaltFactory.createSDocumentGraph());
@@ -230,7 +229,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		if (getProperties().hasIds()) {
 			String idMarker = getProperties().getIdMarker();
 			createLayer(idMarker);
-//##############################################################
 			for (String line : lineList) {
 				if (!line.startsWith("\\" + idMarker + " ")) {
 					if (!line.startsWith("\\" + getProperties().getRefMarker() + " ")) {
@@ -271,10 +269,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			mapIdToModel(idBlock);
 			block.clear();
 			idBlock.reset();
-			
-//##############################################################
-			
-			
 		}
 		else {
 			for (String line : lineList) {	
@@ -339,7 +333,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		for (Entry<String, String> line : idBlock.getIdAnnotations().entrySet()) {
 			span.createAnnotation(SALT_NAMESPACE_TOOLBOX, line.getKey(), line.getValue());
 		}
-//		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, getProperties().getIdMarker(), idBlock.getId());
 		span.addLayer(layers.get(IMPORTER_NAME));
 	}
 
