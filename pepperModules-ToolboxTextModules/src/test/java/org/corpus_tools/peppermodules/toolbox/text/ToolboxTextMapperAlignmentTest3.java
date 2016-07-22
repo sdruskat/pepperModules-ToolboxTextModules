@@ -96,6 +96,7 @@ public class ToolboxTextMapperAlignmentTest3 {
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ALIGNMENT, true);
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_IGNORE_MISSING_MORPHEMES, true);
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_HAS_IDS, false);
 		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 		SDocumentGraph graph = getFixture().getGraph();

@@ -57,6 +57,7 @@ public class ToolboxTextMapperAlignmentTest4 {
 		mapper.setResourceURI(URI.createFileURI(path));
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ALIGNMENT, true);
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_HAS_IDS, false);
 		mapper.setProperties(properties);
 		SDocument doc = SaltFactory.createSDocument();
 		mapper.setDocument(doc);
@@ -67,6 +68,7 @@ public class ToolboxTextMapperAlignmentTest4 {
 	public void testException() {
 		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ALIGNMENT, false);
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_HAS_IDS, false);
 		getFixture().setProperties(properties);
 		getFixture().mapSDocument();
 	}
