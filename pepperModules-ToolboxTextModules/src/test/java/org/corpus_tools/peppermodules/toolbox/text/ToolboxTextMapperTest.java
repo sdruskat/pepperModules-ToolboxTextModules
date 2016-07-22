@@ -250,7 +250,7 @@ public class ToolboxTextMapperTest {
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
 		assertTrue(graph == getFixture().getGraph());
-		List<SLayer> refLayers = graph.getLayerByName("ref");
+		List<SLayer> refLayers = graph.getLayerByName("toolbox-text-importer");
 		assertEquals(1, refLayers.size());
 		List<SLayer> lexLayers = graph.getLayerByName("tx");
 		List<SLayer> morphLayers = graph.getLayerByName("mb");

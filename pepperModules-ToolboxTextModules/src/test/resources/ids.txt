@@ -1,5 +1,5 @@
 \_sh v3.0 Test
-\info Some Info
+\info Some info
 
 \id ID1
 \idinfo Info on ID1

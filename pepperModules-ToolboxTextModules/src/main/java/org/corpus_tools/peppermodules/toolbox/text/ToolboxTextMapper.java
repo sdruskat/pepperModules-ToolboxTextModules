@@ -106,16 +106,13 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 
 	private static final String SALT_NAMESPACE_TOOLBOX = "toolbox";
 
+	private static final String IMPORTER_NAME = "toolbox-text-importer";
+
 	/**
 	 * Whether the header block of the file has already been mapped.
 	 */
 	private boolean isHeaderBlockMapped = false;
 	
-	/**
-	 * Whether the header block of the ID section has already been mapped.
-	 */
-	private boolean isIdHeaderMapped = false;
-
 	/**
 	 * The textual data source containing the lexical source text of the whole document.
 	 */
@@ -199,7 +196,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		// Set up layers
 		createLayer(morphMarker);
 		createLayer(lexMarker);
-		createLayer(refMarker);
+		createLayer(IMPORTER_NAME);
 
 		logger.debug("Importing the file {}.", resource);
 
@@ -230,45 +227,63 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		ListMultimap<String, List<String>> block = ArrayListMultimap.create();
 		int lineListSize = lineList.size();
 		ToolboxIdBlock idBlock = new ToolboxIdBlock();
-		for (String line : lineList) {
-			if (getProperties().hasIds()) {
-				System.err.println("WHY AM I HITTING THIS BLOCK???");
-//				if (!line.startsWith("\\" + getProperties().getIdMarker())) {
-//					if (!line.startsWith("\\" + getProperties().getRefMarker())) {
-//						addLineToBlock(block, line);
-//					}
-//					else { // Hit a ref marker
-//						if (!isIdHeaderMapped) { // First hit of ref marker, i.e., block must be header block
-//							idBlock.setIdAnnotations(convertIdHeader(block));
-//							isIdHeaderMapped = true;
-//							addProgress((double) (block.size() / lineListSize) * 100);
-//						}
-//						else {
-//							idBlock.getRefs().add(mapRefToModel(block));
-//							addProgress((double) (block.size() / lineListSize) * 100);
-//						}
-//						block.clear();
-//						// Add the ref marker to the new block!
-//						addLineToBlock(block, line);
-//					}
-//				}
-//				else { // Hit an ID
-//					System.err.println("HIT ID");
-//					if (!isHeaderBlockMapped) { // First hit of id marker, i.e., block must be header block
-//						mapHeaderToModel(block);
-//						isHeaderBlockMapped = true;
-//						addProgress((double) (block.size() / lineListSize) * 100);
-//					}
-//					else {
-//						mapIdToModel(idBlock);
-//						isIdHeaderMapped = false;
-//						idBlock.reset();
-//						idBlock.setId(getProperties().getIdMarker(), line);
-//					}
-//				}
+		if (getProperties().hasIds()) {
+			String idMarker = getProperties().getIdMarker();
+			createLayer(idMarker);
+//##############################################################
+			for (String line : lineList) {
+				if (!line.startsWith("\\" + idMarker + " ")) {
+					if (!line.startsWith("\\" + getProperties().getRefMarker() + " ")) {
+						addLineToBlock(block, line);
+					}
+					else { // HIT a ref
+						if (!idBlock.isHeaderMapped() && !block.isEmpty()) { // I.e., first ref in ID
+							System.err.println("    Hit first REF in ID, setting id annos to id object");
+							idBlock.setId(idMarker, "\\" + idMarker + " " + resolveListToString(block.get(idMarker).get(0)));
+							idBlock.setIdAnnotations(convertIdHeader(block));
+							idBlock.setHeaderMapped(true);
+							System.err.println("    " + idBlock.getIdAnnotations());
+							block.clear();
+							addLineToBlock(block, line);
+						}
+						else { // I.e., not first REF in ID
+							System.err.println("    !!! Hit second or further ref in ID bock, adding ref before to block");
+							idBlock.getRefs().add(mapRefToModel(block));
+							System.err.println("     ??? " + idBlock.getRefs());
+							block.clear();
+							addLineToBlock(block, line);
+						}
+					}
+				}
+				else { // Hit an ID
+					if (!isHeaderBlockMapped) {
+						System.err.println("MAPPING HEADER BLOCK " + block + "\n\n");
+						mapHeaderToModel(block);
+						isHeaderBlockMapped = true;
+						block.clear();
+						addLineToBlock(block, line); // ID Line from first ID
+					}
+					else {
+						idBlock.getRefs().add(mapRefToModel(block));
+						mapIdToModel(idBlock);
+						block.clear();
+						idBlock.reset();
+						addLineToBlock(block, line);
+					}
+				}
 			}
-			else { // No IDs
-				if (!line.startsWith("\\" + getProperties().getRefMarker())) {
+			idBlock.getRefs().add(mapRefToModel(block));
+			mapIdToModel(idBlock);
+			block.clear();
+			idBlock.reset();
+			
+//##############################################################
+			
+			
+		}
+		else {
+			for (String line : lineList) {	
+				if (!line.startsWith("\\" + getProperties().getRefMarker() + " ")) {
 					addLineToBlock(block, line);
 				}
 				else { // Hit a ref marker
@@ -289,11 +304,27 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			mapRefToModel(block);
 			addProgress((double) (block.size() / lineListSize) * 100);
 		}
+		
 		/*
 		 * Map ref block to model once, because we cannot hit a ref marker at the end of the list anymore to trigger a block mapping process.
 		 */
 
 		return (DOCUMENT_STATUS.COMPLETED);
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param list
+	 * @return
+	 */
+	private String resolveListToString(List<String> list) {
+		StringBuilder sb = new StringBuilder();
+		for (String string : list) {
+			sb.append(string);
+			sb.append(" ");
+		}
+		return sb.toString().trim();
 	}
 
 	/**
@@ -303,6 +334,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param idBlock
 	 */
 	private void mapIdToModel(ToolboxIdBlock idBlock) {
+		System.err.println("    >>> MAPPING ID TO MODEL:\n    " + idBlock.getId() + "\n      " + idBlock.getIdAnnotations() + "\n      " + idBlock.getRefs() + "\n      -----------\n");
 		SSpan span = null;
 		List<SToken> tokens = new ArrayList<>();
 		for (SSpan refSpan : idBlock.getRefs()) {
@@ -313,8 +345,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		for (Entry<String, String> line : idBlock.getIdAnnotations().entrySet()) {
 			span.createAnnotation(SALT_NAMESPACE_TOOLBOX, line.getKey(), line.getValue());
 		}
-		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, getProperties().getIdMarker(), idBlock.getId());
-		span.addLayer(layers.get(getProperties().getIdMarker()));
+//		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, getProperties().getIdMarker(), idBlock.getId());
+		span.addLayer(layers.get(IMPORTER_NAME));
 	}
 
 	/**
@@ -329,6 +361,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			StringBuilder sb = new StringBuilder();
 			for (String string : line.getValue()) {
 				sb.append(string);
+				sb.append(" ");
 			}
 			IdAnnotations.put(line.getKey(), sb.toString().trim());
 		}
@@ -453,6 +486,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param block The header block to process
 	 */
 	private void mapHeaderToModel(ListMultimap<String,List<String>> block) {
+		System.err.println("MAPPING HEADER BLOCK:\n" + block + "\n--------\n");
 		for (Entry<String, List<String>> line : block.entries()) {
 			String marker = line.getKey();
 			String qualifiedId = SALT_NAMESPACE_TOOLBOX + "::" + marker;
@@ -537,7 +571,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		
 		// Get text tokens for lex and morph
 		List<String> lexicalTextTokens = null;
-		System.err.println(block.entries());
 		try {
 			lexicalTextTokens = block.get(lexMarker).get(0);
 		}
@@ -828,7 +861,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 //			createLayer(key);
 //		}
 //		span.addLayer(layers.get(key));
-		span.addLayer(layers.get(getProperties().getRefMarker()));
+		span.addLayer(layers.get(IMPORTER_NAME));
 
 		return span;
 	}
@@ -906,7 +939,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, getProperties().getRefMarker(), sb.toString().trim());
 		span.setName(sb.toString().trim());
 		
-		span.addLayer(layers.get(getProperties().getRefMarker()));
+		span.addLayer(layers.get(IMPORTER_NAME));
 		return span;
 	}
 
@@ -1015,7 +1048,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		 * are only displayed, when they are "in" a
 		 * span, therefore, create a dummy span for each token.
 		 */
-		getGraph().createSpan(token).addLayer(layers.get(getProperties().getRefMarker()));
+		getGraph().createSpan(token).addLayer(layers.get(IMPORTER_NAME));
 		// ############ FIXME ###############
 
 		
@@ -1086,7 +1119,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		 * are only displayed, when they are "in" a
 		 * span, therefore, create a dummy span for each token.
 		 */
-		getGraph().createSpan(token).addLayer(layers.get(getProperties().getRefMarker()));
+		getGraph().createSpan(token).addLayer(layers.get(IMPORTER_NAME));
 		// ############ FIXME ###############
 		
 		return token;

@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import static org.junit.Assert.*; 
+import static org.junit.Assert.*;  
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,7 +30,6 @@ import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.SSpanningRelation;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SLayer;
-import org.corpus_tools.salt.core.SNamedElement;
 import org.corpus_tools.salt.core.SNode;
 import org.corpus_tools.salt.core.SRelation;
 import org.eclipse.emf.common.util.URI;
@@ -65,6 +64,7 @@ public class ToolboxTextMapperIdTest {
 		setFixture(mapper);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void testIDs() {
 		getFixture().mapSDocument();
@@ -76,15 +76,14 @@ public class ToolboxTextMapperIdTest {
 				tokenList.add((SToken) node);
 			}
 		}
-		List<SToken> sortedTokens = graph.getSortedTokenByText(tokenList);
-		SLayer idLayer = graph.getLayerByName(getFixture().getProperties().getIdMarker()).get(0);
+		SLayer idLayer = graph.getLayerByName("toolbox-text-importer").get(0);
 		List<SSpan> idSpans = new ArrayList<>();
 		for (SNode node : idLayer.getNodes()) {
 			if (node instanceof SSpan) {
 				idSpans.add((SSpan) node);
 			}
 		}
-		assertEquals(3, idSpans.size());
+		assertEquals(21, idSpans.size());
 		for (SSpan span : idSpans) {
 			if (span.getName().equals("ID1")) {
 				for (SRelation rel : graph.getOutRelations(span.getId())) {
@@ -119,7 +118,7 @@ public class ToolboxTextMapperIdTest {
 	@Test
 	public void testMeta() {
 		getFixture().mapSDocument();
-		assertEquals("Some info", getFixture().getDocument().getMetaAnnotation("toolbox::info"));
+		assertEquals("Some info", getFixture().getDocument().getMetaAnnotation("toolbox::info").getValue());
 	}
 
 	/**

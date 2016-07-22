@@ -38,10 +38,13 @@ public class ToolboxIdBlock {
 	private Map<String, String> idAnnotations = new HashMap<>();
 	private Set<SSpan> refs = new HashSet<>();
 	private String id = null;
+	private boolean isHeaderMapped = false;
 	
 	public boolean reset() {
 		getIdAnnotations().clear();
 		getRefs().clear();
+		id = null;
+		setHeaderMapped(false);
 		return getIdAnnotations().isEmpty() && getRefs().isEmpty();
 	}
 
@@ -86,6 +89,20 @@ public class ToolboxIdBlock {
 	public void setId(String marker, String rawId) {
 		String id = rawId.split("\\s*\\\\" + marker + "\\s*")[1].trim();
 		this.id = id;
+	}
+
+	/**
+	 * @return the isHeaderMapped
+	 */
+	public boolean isHeaderMapped() {
+		return isHeaderMapped;
+	}
+
+	/**
+	 * @param isHeaderMapped the isHeaderMapped to set
+	 */
+	public void setHeaderMapped(boolean isHeaderMapped) {
+		this.isHeaderMapped = isHeaderMapped;
 	}
 
 }
