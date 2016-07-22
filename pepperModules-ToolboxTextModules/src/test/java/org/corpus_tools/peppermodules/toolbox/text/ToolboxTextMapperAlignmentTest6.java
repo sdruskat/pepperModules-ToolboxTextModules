@@ -58,6 +58,7 @@ public class ToolboxTextMapperAlignmentTest6 {
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ALIGNMENT, true);
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ALIGNMENT_STRING, "BIRTHDAY_PONY");
+		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_HAS_IDS, false);
 		mapper.setProperties(properties);
 		SDocument doc = SaltFactory.createSDocument();
 		mapper.setDocument(doc);

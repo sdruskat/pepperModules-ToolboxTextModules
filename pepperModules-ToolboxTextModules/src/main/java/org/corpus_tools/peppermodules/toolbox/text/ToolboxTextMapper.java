@@ -232,42 +232,40 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		ToolboxIdBlock idBlock = new ToolboxIdBlock();
 		for (String line : lineList) {
 			if (getProperties().hasIds()) {
-				if (!line.startsWith("\\" + getProperties().getIdMarker())) {
-					// FIXME Duplicate adding of line!
-					addLineToBlock(block, line);
-					if (!line.startsWith("\\" + getProperties().getRefMarker())) {
-						addLineToBlock(block, line);
-					}
-					else { // Hit a ref marker
-						System.err.println("HIT REF MARKER");
-						if (!isIdHeaderMapped) { // First hit of ref marker, i.e., block must be header block
-							idBlock.setIdAnnotations(convertIdHeader(block));
-							isIdHeaderMapped = true;
-							addProgress((double) (block.size() / lineListSize) * 100);
-						}
-						else {
-							idBlock.getRefs().add(mapRefToModel(block));
-							addProgress((double) (block.size() / lineListSize) * 100);
-						}
-						block.clear();
-						// Add the ref marker to the new block!
-						addLineToBlock(block, line);
-					}
-				}
-				else { // Hit an ID
-					System.err.println("HIT ID");
-					if (!isHeaderBlockMapped) { // First hit of id marker, i.e., block must be header block
-						mapHeaderToModel(block);
-						isHeaderBlockMapped = true;
-						addProgress((double) (block.size() / lineListSize) * 100);
-					}
-					else {
-						mapIdToModel(idBlock);
-						isIdHeaderMapped = false;
-						idBlock.reset();
-						idBlock.setId(getProperties().getIdMarker(), line);
-					}
-				}
+				System.err.println("WHY AM I HITTING THIS BLOCK???");
+//				if (!line.startsWith("\\" + getProperties().getIdMarker())) {
+//					if (!line.startsWith("\\" + getProperties().getRefMarker())) {
+//						addLineToBlock(block, line);
+//					}
+//					else { // Hit a ref marker
+//						if (!isIdHeaderMapped) { // First hit of ref marker, i.e., block must be header block
+//							idBlock.setIdAnnotations(convertIdHeader(block));
+//							isIdHeaderMapped = true;
+//							addProgress((double) (block.size() / lineListSize) * 100);
+//						}
+//						else {
+//							idBlock.getRefs().add(mapRefToModel(block));
+//							addProgress((double) (block.size() / lineListSize) * 100);
+//						}
+//						block.clear();
+//						// Add the ref marker to the new block!
+//						addLineToBlock(block, line);
+//					}
+//				}
+//				else { // Hit an ID
+//					System.err.println("HIT ID");
+//					if (!isHeaderBlockMapped) { // First hit of id marker, i.e., block must be header block
+//						mapHeaderToModel(block);
+//						isHeaderBlockMapped = true;
+//						addProgress((double) (block.size() / lineListSize) * 100);
+//					}
+//					else {
+//						mapIdToModel(idBlock);
+//						isIdHeaderMapped = false;
+//						idBlock.reset();
+//						idBlock.setId(getProperties().getIdMarker(), line);
+//					}
+//				}
 			}
 			else { // No IDs
 				if (!line.startsWith("\\" + getProperties().getRefMarker())) {

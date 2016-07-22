@@ -133,6 +133,7 @@ public class ToolboxTextMapperTest {
 		 
 		ToolboxTextImporterProperties properties = getFixture().getProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
+		System.err.println("HAS IDS? " + getFixture().getProperties().hasIds());
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph2 = getFixture().getDocument().getDocumentGraph();
@@ -203,6 +204,7 @@ public class ToolboxTextMapperTest {
 		 
 		ToolboxTextImporterProperties properties = getFixture().getProperties();
 		properties.setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true,false");
+		System.err.println("HAS IDS? " + getFixture().getProperties().hasIds());
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
 		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
