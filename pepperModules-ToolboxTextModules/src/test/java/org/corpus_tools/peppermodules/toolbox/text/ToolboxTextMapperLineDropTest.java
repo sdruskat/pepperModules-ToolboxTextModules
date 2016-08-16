@@ -138,6 +138,47 @@ public class ToolboxTextMapperLineDropTest {
 	}
 	
 	@Test
+	public void testCustomPlaceholder() {
+		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER, "DRAGONAUT");
+		getFixture().mapSDocument();
+		assertNotNull(getFixture().getDocument().getDocumentGraph());
+		SDocumentGraph graph = getFixture().getDocument().getDocumentGraph();
+		assertTrue(graph == getFixture().getGraph());
+		List<SLayer> lexLayers = graph.getLayerByName("tx");
+		List<SLayer> morphLayers = graph.getLayerByName("mb");
+		assertEquals(1, lexLayers.size());
+		assertEquals(1, morphLayers.size());
+		List<SToken> lexTokens = new ArrayList<>();
+		List<SToken> morphTokens = new ArrayList<>();
+		for (SNode node : lexLayers.get(0).getNodes()) {
+			if (node instanceof SToken) {
+				lexTokens.add((SToken) node);
+			}
+		}
+		for (SNode node : morphLayers.get(0).getNodes()) {
+			if (node instanceof SToken) {
+				morphTokens.add((SToken) node);
+			}
+		}
+		String[] lexTokenTestSet = new String[] { "Wort1", "Wort2", "Wort3", "Wort4", "Wort5", };
+		List<SToken> sortedLexTokens = graph.getSortedTokenByText(lexTokens);
+		assertEquals(5, sortedLexTokens.size());
+		for (int i = 0; i < lexTokenTestSet.length; i++) {
+			assertEquals(lexTokenTestSet[i], graph.getText(sortedLexTokens.get(i)));
+		}
+		String[] morphTokenTestSet = new String[] { "m1", "DRAGONAUT", "m2", "DRAGONAUT", "m4"};
+		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(morphTokens);
+		for (SToken token : sortedMorphTokens) {
+			System.err.println("#" + graph.getText(token) + "#");
+		}
+		assertEquals(5, sortedMorphTokens.size());
+		for (int i = 0; i < morphTokenTestSet.length; i++) {
+			assertEquals(morphTokenTestSet[i].trim(), graph.getText(sortedMorphTokens.get(i)).trim());
+		}
+		assertEquals("m1 DRAGONAUT m2 DRAGONAUT m4", graph.getTextualDSs().get(0).getText());
+	}
+	
+	@Test
 	public void testMapSDocumentTokens() {
 		getFixture().mapSDocument();
 		assertNotNull(getFixture().getDocument().getDocumentGraph());
