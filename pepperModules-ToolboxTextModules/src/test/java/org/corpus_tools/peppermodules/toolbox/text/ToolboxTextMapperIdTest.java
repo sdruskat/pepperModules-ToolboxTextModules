@@ -63,7 +63,6 @@ public class ToolboxTextMapperIdTest {
 		setFixture(mapper);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Test
 	public void testIDs() {
 		getFixture().mapSDocument();

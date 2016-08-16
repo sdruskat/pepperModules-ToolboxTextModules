@@ -64,7 +64,6 @@ public class ToolboxTextMapperDropRefWithoutLexTest {
 		setFixture(mapper);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Test
 	public void testDropRef() {
 		getFixture().mapSDocument();

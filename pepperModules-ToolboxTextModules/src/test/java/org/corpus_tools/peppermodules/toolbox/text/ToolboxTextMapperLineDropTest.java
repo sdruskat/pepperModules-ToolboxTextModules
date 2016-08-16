@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
@@ -29,11 +30,9 @@ import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SSpan;
-import org.corpus_tools.salt.common.SSpanningRelation;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SNode;
-import org.corpus_tools.salt.core.SRelation;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +66,6 @@ public class ToolboxTextMapperLineDropTest {
 		setFixture(mapper);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Test
 	public void testDropLines() {
 		getFixture().mapSDocument();
@@ -89,42 +87,29 @@ public class ToolboxTextMapperLineDropTest {
 		assertEquals(18, idSpans.size());
 		for (SSpan span : idSpans) {
 			if (span.getName().equals("ID1")) {
-				for (SRelation rel : graph.getOutRelations(span.getId())) {
-					if (rel instanceof SSpanningRelation && rel.getTarget() instanceof SSpan) {
-						SSpan target = (SSpan) rel.getTarget();
-						assertTrue(target.getName().equals("REF1") || target.getName().equals("REF2"));
-						if (target.getName().equals("REF1")) {
-							assertEquals("m1", target.getAnnotation("toolbox::mb"));
-						}
-						else {
-							assertNull(target.getAnnotation("toolbox::mb"));
-						}
-					}
+				List<String> overlappedTokens = new ArrayList<>(Arrays.asList("m1", "***"));
+				List<SToken> sortedTokens = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
+				assertEquals(2, sortedTokens.size());
+				for (int i = 0; i < graph.getOverlappedTokens(span).size(); i++) {
+					assertEquals(overlappedTokens.get(i), graph.getText(sortedTokens.get(i)));
 				}
 				assertEquals("Info on ID1", span.getAnnotation("toolbox::idinfo").getValue());
 			}
 			else if (span.getName().equals("ID2")) {
-				for (SRelation rel : graph.getOutRelations(span.getId())) {
-					if (rel instanceof SSpanningRelation && rel.getTarget() instanceof SSpan) {
-						SSpan target = (SSpan) rel.getTarget();
-						assertFalse(target.getName().equals("REF4"));
-						assertTrue(target.getName().equals("REF3"));
-					}
+				List<String> overlappedTokens = new ArrayList<>(Arrays.asList("m2"));
+				List<SToken> sortedTokens = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
+				assertEquals(1, sortedTokens.size());
+				for (int i = 0; i < graph.getOverlappedTokens(span).size(); i++) {
+					assertEquals(overlappedTokens.get(i), graph.getText(sortedTokens.get(i)));
 				}
 				assertEquals("Info on ID2", span.getAnnotation("toolbox::idinfo").getValue());
 			}
 			else if (span.getName().equals("ID3")) {
-				for (SRelation rel : graph.getOutRelations(span.getId())) {
-					if (rel instanceof SSpanningRelation && rel.getTarget() instanceof SSpan) {
-						SSpan target = (SSpan) rel.getTarget();
-						assertTrue(target.getName().equals("REF5") || target.getName().equals("REF6"));
-						if (target.getName().equals("REF6")) {
-							assertEquals("m1", target.getAnnotation("toolbox::mb"));
-						}
-						else {
-							assertNull(target.getAnnotation("toolbox::mb"));
-						}
-					}
+				List<String> overlappedTokens = new ArrayList<>(Arrays.asList("***", "m4"));
+				List<SToken> sortedTokens = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
+				assertEquals(2, sortedTokens.size());
+				for (int i = 0; i < graph.getOverlappedTokens(span).size(); i++) {
+					assertEquals(overlappedTokens.get(i), graph.getText(sortedTokens.get(i)));
 				}
 				assertEquals("Info on ID3", span.getAnnotation("toolbox::idinfo").getValue());
 			}
