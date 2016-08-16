@@ -20,8 +20,8 @@
 \mb m3
 
 \ref REF4
-\tx Wort4
-\mb m4
+\tx 
+\mb mx
 
 \id ID3
 \idinfo Info on ID3

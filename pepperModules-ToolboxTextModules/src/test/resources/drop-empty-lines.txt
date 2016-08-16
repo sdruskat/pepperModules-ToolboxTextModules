@@ -10,26 +10,26 @@
 
 \ref REF2
 \tx Wort2
-\mb m2
+\mb
 
 \id ID2
 \idinfo Info on ID2
 
 \ref REF3
 \tx Wort3
-\mb m3
+\mb m2
 
 \ref REF4
-\tx Wort4
-\mb m4
+\tx 
+\mb mx
 
 \id ID3
 \idinfo Info on ID3
 
 \ref REF5
-\tx Wort5
-\mb m5
+\tx Wort4
+\mb
 
 \ref REF6
-\tx Wort6
-\mb m6
+\tx Wort5
+\mb m4

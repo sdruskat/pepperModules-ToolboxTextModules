@@ -177,6 +177,16 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	public static final String PROP_HAS_IDS = "hasIds";
 	
+	/**
+	 * Whether to replace missing morphological items with a placeholder string.
+	 */
+	public static final String PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS = "substituteMissingMorphologicalItems";
+	
+	/**
+	 * A custom placeholder string substituting missing morphological items.
+	 */
+	public static final String PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER = "missingMorphologicalItemsPlaceholder";
+	
 	
 	public ToolboxTextImporterProperties() {
 		addProperty(new PepperModuleProperty<String>(PROP_LEX_MARKER, 
@@ -260,6 +270,16 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"Whether a Toolbox file contains IDs, usually marked with \\id, for structuring files.",
 				true,
 				true));
+		addProperty(new PepperModuleProperty<Boolean>(PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS,
+				Boolean.class,
+				"Whether to replace missing morphological items with a placeholder string.",
+				true,
+				true));
+		addProperty(new PepperModuleProperty<String>(PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER,
+				String.class,
+				"A custom placeholder string substituting missing morphological items.",
+				"***",
+				false));
 	}
 	
 	// Getter methods for the different property values.
@@ -338,6 +358,14 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	
 	public Boolean hasIds() {
 		return (Boolean) getProperty(PROP_HAS_IDS).getValue();
+	}
+
+	public boolean getSubstituteMissingMorpologicalItems() {
+		return (Boolean) getProperty(PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS).getValue();
+	}
+	
+	public String getMissingMorphologicalItemsPlaceholder() {
+		return (String) getProperty(PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER).getValue();
 	}
 	
 }

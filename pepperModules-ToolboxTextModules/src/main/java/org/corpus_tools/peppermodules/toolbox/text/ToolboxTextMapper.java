@@ -243,7 +243,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 							addLineToBlock(block, line);
 						}
 						else { // I.e., not first REF in ID
-							idBlock.getRefs().add(mapRefToModel(block));
+							SSpan span = mapRefToModel(block);
+							if (span != null) {
+								idBlock.getRefs().add(span);
+							}
 							block.clear();
 							addLineToBlock(block, line);
 						}
@@ -257,7 +260,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 						addLineToBlock(block, line); // ID Line from first ID
 					}
 					else {
-						idBlock.getRefs().add(mapRefToModel(block));
+						SSpan span = mapRefToModel(block);
+						if (span != null) {
+							idBlock.getRefs().add(span);
+						}
 						mapIdToModel(idBlock);
 						block.clear();
 						idBlock.reset();
@@ -265,7 +271,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 					}
 				}
 			}
-			idBlock.getRefs().add(mapRefToModel(block));
+			SSpan span = mapRefToModel(block);
+			if (span != null) {
+				idBlock.getRefs().add(span);
+			}
 			mapIdToModel(idBlock);
 			block.clear();
 			idBlock.reset();
@@ -372,7 +381,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * the line's marker to its content (a {@link List} of trimmed {@link String}s). 
 	 * If the marker exists, i.e., Toolbox has split up the content belonging to
 	 * that marker over more than one line in the files, the marker String itself 
-	 * is ignored and the contents are added to the already existing list of Strings. 
+	 * is ignored and the contents are added to the already existing list of Strings.
+	 * If there is a marker without content, the line is dropped completely. 
 	 *
 	 * @param block
 	 * @param line
@@ -386,6 +396,11 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 		String marker = markerAndValues[0].substring(1, markerAndValues[0].length());
 		ArrayList<String> valueList = new ArrayList<>();
+		if (marker.equals(getProperties().getMorphMarker()) && markerAndValues.length == 1) {
+			if (!getProperties().getSubstituteMissingMorpologicalItems()) {
+				throw new PepperModuleException("There are no morphological items for reference \"" + block.get(getProperties().getRefMarker()) + "\", and the subsitution of missing morphological items by a placeholder is switched off.");
+			}
+		}
 		for (int i = 1; i < markerAndValues.length; i++) {
 			valueList.add(markerAndValues[i]);
 		}
@@ -519,6 +534,21 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @return 
 	 */
 	private SSpan mapRefToModel(ListMultimap<String,List<String>> block) {
+		// TODO Re-implement catching empty lex lines before block is mapped for better performance 
+		List<List<String>> lexLine = block.get(getProperties().getLexMarker());
+		if (lexLine.size() == 1 && lexLine.get(0).isEmpty()) {
+			logger.info("Dropping reference " + block.get(getProperties().getRefMarker()) + " because it does not contain any lexical information with marker " + getProperties().getLexMarker() + "!");
+			return null;
+		}
+		// Fix missing morphological items where needed
+		if (block.get(getProperties().getMorphMarker()).get(0).size() == 0) {
+			if (getProperties().getSubstituteMissingMorpologicalItems()) {
+				for (int i = 0; i < block.get(getProperties().getLexMarker()).get(0).size() - 1; i++) {
+					block.get(getProperties().getMorphMarker()).get(0).add(getProperties().getMissingMorphologicalItemsPlaceholder() + " ");
+				}
+				block.get(getProperties().getMorphMarker()).get(0).add(getProperties().getMissingMorphologicalItemsPlaceholder());
+			}
+		}
 		// Resolve properties
 		String refMarker = getProperties().getRefMarker();
 		logger.debug("Mapping ref block \"" + block.get(refMarker).toString() + "\".");
