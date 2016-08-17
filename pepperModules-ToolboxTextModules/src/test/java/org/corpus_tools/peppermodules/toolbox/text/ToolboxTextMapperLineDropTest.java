@@ -153,14 +153,11 @@ public class ToolboxTextMapperLineDropTest {
 		}
 		String[] morphTokenTestSet = new String[] { "m1", "DRAGONAUT", "m2", "DRAGONAUT", "m4"};
 		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(morphTokens);
-		for (SToken token : sortedMorphTokens) {
-			System.err.println("#" + graph.getText(token) + "#");
-		}
 		assertEquals(5, sortedMorphTokens.size());
 		for (int i = 0; i < morphTokenTestSet.length; i++) {
 			assertEquals(morphTokenTestSet[i].trim(), graph.getText(sortedMorphTokens.get(i)).trim());
 		}
-		assertEquals("m1 DRAGONAUT m2 DRAGONAUT m4", graph.getTextualDSs().get(0).getText());
+		assertEquals("m1 DRAGONAUT m2 DRAGONAUT m4", graph.getTextualDSs().get(1).getText());
 	}
 	
 	@Test
@@ -193,14 +190,11 @@ public class ToolboxTextMapperLineDropTest {
 		}
 		String[] morphTokenTestSet = new String[] { "m1", "***", "m2", "***", "m4"};
 		List<SToken> sortedMorphTokens = graph.getSortedTokenByText(morphTokens);
-		for (SToken token : sortedMorphTokens) {
-			System.err.println("#" + graph.getText(token) + "#");
-		}
 		assertEquals(5, sortedMorphTokens.size());
 		for (int i = 0; i < morphTokenTestSet.length; i++) {
 			assertEquals(morphTokenTestSet[i].trim(), graph.getText(sortedMorphTokens.get(i)).trim());
 		}
-		assertEquals("m1 *** m2 *** m4", graph.getTextualDSs().get(0).getText());
+		assertEquals("m1 *** m2 *** m4", graph.getTextualDSs().get(1).getText());
 	}
 	
 	@Test
