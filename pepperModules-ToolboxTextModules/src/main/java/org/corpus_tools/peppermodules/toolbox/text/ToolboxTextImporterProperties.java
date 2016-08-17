@@ -262,7 +262,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				false));
 		addProperty(new PepperModuleProperty<String>(PROP_FIX_ALIGNMENT_STRING, 
 				String.class,
-				"The {@link String} that will be used to flag misalignment. This will be attached n times to the end of the line which includes the misalignment, where n is the number of missing items.",
+				"The string that will be used to flag misalignment. This will be attached n times to the end of the line which includes the misalignment, where n is the number of missing items.",
 				"BROKEN_ALIGNMENT",
 				false));
 		addProperty(new PepperModuleProperty<Boolean>(PROP_IGNORE_MISSING_MORPHEMES, 
