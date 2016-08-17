@@ -187,6 +187,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	public static final String PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER = "missingMorphologicalItemsPlaceholder";
 	
+	/**
+	 * Whether the data contains morphological annotations.
+	 */
+	public static final String PROP_CONTAINS_MORPHOLOGY = "containsMorphology";
+	
 	
 	public ToolboxTextImporterProperties() {
 		addProperty(new PepperModuleProperty<String>(PROP_LEX_MARKER, 
@@ -280,6 +285,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"A custom placeholder string substituting missing morphological items.",
 				"***",
 				false));
+		addProperty(new PepperModuleProperty<Boolean>(PROP_CONTAINS_MORPHOLOGY,
+				Boolean.class,
+				"Whether the data contains morphological annotations.",
+				true,
+				true));
 	}
 	
 	// Getter methods for the different property values.
@@ -362,6 +372,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 
 	public boolean getSubstituteMissingMorpologicalItems() {
 		return (Boolean) getProperty(PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS).getValue();
+	}
+	
+	public boolean containsMorphology() {
+		return (Boolean) getProperty(PROP_CONTAINS_MORPHOLOGY).getValue();
 	}
 	
 	public String getMissingMorphologicalItemsPlaceholder() {

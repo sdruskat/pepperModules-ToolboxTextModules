@@ -1,0 +1,35 @@
+\_sh v3.0 Test
+\info Some info
+
+\id ID1
+\idinfo Info on ID1
+
+\ref REF1
+\tx Wort1
+\ft m1
+
+\ref REF2
+\tx Wort2
+\ft m2
+
+\id ID2
+\idinfo Info on ID2
+
+\ref REF3
+\tx Wort3
+\ft m3
+
+\ref REF4
+\tx Wort4
+\ft m4
+
+\id ID3
+\idinfo Info on ID3
+
+\ref REF5
+\tx Wort5
+\ft m5
+
+\ref REF6
+\tx Wort6
+\ft m6

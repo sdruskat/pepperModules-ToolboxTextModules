@@ -61,40 +61,19 @@ import com.google.common.collect.ListMultimap;
 /**
  * A mapper for the Toolbox text format.
  * <p>
- * The mapping works as follows. The Toolbox file is read line by line, 
- * cleaned up and compiled into a map mapping Toolbox markers to lists 
- * of "values", i.e., the remainder of the marker line (and subsequent 
- * unmarked non-empty lines).
+ * The mapping works as follows. The Toolbox file is read line by line, cleaned up and compiled into a map mapping Toolbox markers to lists of "values", i.e., the remainder of the marker line (and subsequent unmarked non-empty lines).
  * <p>
- * This list is iterated and all lines belonging to a "block" - i.e., 
- * all lines following a reference marker, including the line with the 
- * reference marker itself - are subsequently mapped onto the Salt document graph.
+ * This list is iterated and all lines belonging to a "block" - i.e., all lines following a reference marker, including the line with the reference marker itself - are subsequently mapped onto the Salt document graph.
  * <p>
- * One special case is the lines before the first reference marker, 
- * which are assumed to belong to the "header". These lines are mapped 
- * onto meta annotations on the document itself.
+ * One special case is the lines before the first reference marker, which are assumed to belong to the "header". These lines are mapped onto meta annotations on the document itself.
  * <p>
- * The marked lines following a reference marker are mapped onto the 
- * Salt document graph as follows. The values from the lexical and 
- * morphology markers (as defined by 
- * {@link ToolboxTextImporterProperties#PROP_LEX_MARKER} and
- * {@link ToolboxTextImporterProperties#PROP_MORPH_MARKER}) are used 
- * as two separate tokenizations on two separate {@link STextualDS}s, 
- * which are synchronized via a {@link STimeline}. The tokens are 
- * subsequently annotated with the values
- * from the text annotations markers (as defined by 
- * {@link ToolboxTextImporterProperties#PROP_LEX_ANNOTATION_MARKERS}) 
- * and the morphology annotation markers (as defined by 
- * {@link ToolboxTextImporterProperties#PROP_MORPH_ANNOTATION_MARKERS})
- * respectively. (<strong>NOTE:</strong>It is assumed that the number 
- * of annotations always matches the number of tokens per reference!).
+ * The marked lines following a reference marker are mapped onto the Salt document graph as follows. The values from the lexical and morphology markers (as defined by {@link ToolboxTextImporterProperties#PROP_LEX_MARKER} and
+ * {@link ToolboxTextImporterProperties#PROP_MORPH_MARKER}) are used as two separate tokenizations on two separate {@link STextualDS}s, which are synchronized via a {@link STimeline}. The tokens are subsequently annotated with the values
+ * from the text annotations markers (as defined by {@link ToolboxTextImporterProperties#PROP_LEX_ANNOTATION_MARKERS}) and the morphology annotation markers (as defined by {@link ToolboxTextImporterProperties#PROP_MORPH_ANNOTATION_MARKERS})
+ * respectively. (<strong>NOTE:</strong>It is assumed that the number of annotations always matches the number of tokens per reference!).
  * <p>
- * The reference marker itself is modeled as a span over those  
- * marker tokens of the reference which are defined by 
- * {@link ToolboxTextImporterProperties#PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER}.
- * All markers <em>not</em> belonging to either a lexical or 
- * a morphological annotation layer are assumed to be reference level 
- * annotations and are as such modeled as annotations on the reference span.
+ * The reference marker itself is modeled as a span over those marker tokens of the reference which are defined by {@link ToolboxTextImporterProperties#PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER}. All markers <em>not</em> belonging to either
+ * a lexical or a morphological annotation layer are assumed to be reference level annotations and are as such modeled as annotations on the reference span.
  *
  * @author Stephan Druskat <mail@sdruskat.net>
  */
@@ -112,7 +91,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * Whether the header block of the file has already been mapped.
 	 */
 	private boolean isHeaderBlockMapped = false;
-	
+
 	/**
 	 * The textual data source containing the lexical source text of the whole document.
 	 */
@@ -122,6 +101,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * The textual data source containing the "morphological source text", i.e., the concatenated morpheme-based morphological units.
 	 */
 	private final STextualDS morphologicalTextualDS = SaltFactory.createSTextualDS();
+
+	private boolean containsMorphology;
 
 	/**
 	 * The affix delimiter as defined in the property {@link ToolboxTextImporterProperties#PROP_MORPHEME_DELIMITERS}.
@@ -137,17 +118,17 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * Maps marker {@link String}s to {@link SLayer}s belonging to that marker.
 	 */
 	private Map<String, SLayer> layers = new HashMap<>();
-	
+
 	private SDocumentGraph graph = null;
-	
+
 	SToken lastMorphToken = null;
 	SToken lastLexToken = null;
-	
+
 	private int lexTimelineIndex = 0;
 	private int morphTimelineIndex = 0;
 	private int lexDSIndex = 0;
 	private int morphDSIndex = 0;
-	
+
 	/**
 	 * Adds a single metadate to the corpus, namely the current date (no time).
 	 */
@@ -172,6 +153,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
 		// Set up fields
+		containsMorphology = getProperties().containsMorphology();
 		getMorphologicalTextualDS().setText("");
 		getMorphologicalTextualDS().setName(getProperties().getMorphMarker());
 		getLexicalTextualDS().setText("");
@@ -179,21 +161,25 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		String[] delimiters = getProperties().getMorphemeDelimiters().split("\\s*,\\s*");
 		affixDelimiter = delimiters[0].trim();
 		cliticsDelimiter = delimiters[1].trim();
-		String morphMarker = getProperties().getMorphMarker();
+		String morphMarker = null;
 		String lexMarker = getProperties().getLexMarker();
-		
+
 		getDocument().setDocumentGraph(SaltFactory.createSDocumentGraph());
 		setGraph(getDocument().getDocumentGraph());
 		getGraph().createTimeline();
 
-		getGraph().addNode(getMorphologicalTextualDS());
 		getGraph().addNode(getLexicalTextualDS());
 
 		URI resource = getResourceURI();
 		File file = null;
 
-		// Set up layers
-		createLayer(morphMarker);
+		// Set up morphology-related stuff as necessary
+		if (containsMorphology) {
+			morphMarker = getProperties().getMorphMarker();
+			getGraph().addNode(getMorphologicalTextualDS());
+			createLayer(morphMarker);
+		}
+
 		createLayer(lexMarker);
 		createLayer(IMPORTER_NAME);
 
@@ -280,7 +266,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			idBlock.reset();
 		}
 		else {
-			for (String line : lineList) {	
+			for (String line : lineList) {
 				if (!line.startsWith("\\" + getProperties().getRefMarker() + " ")) {
 					addLineToBlock(block, line);
 				}
@@ -302,7 +288,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			mapRefToModel(block);
 			addProgress((double) (block.size() / lineListSize) * 100);
 		}
-		
+
 		/*
 		 * Map ref block to model once, because we cannot hit a ref marker at the end of the list anymore to trigger a block mapping process.
 		 */
@@ -326,8 +312,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
-	 * Creates a span for an IdBlock, spanning those tokens
-	 * which are spanned by the IdBlock's refs.
+	 * Creates a span for an IdBlock, spanning those tokens which are spanned by the IdBlock's refs.
 	 *
 	 * @param idBlock
 	 */
@@ -377,12 +362,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
-	 * Adds a line from a Toolbox file to a block, i.e., a data structure that maps
-	 * the line's marker to its content (a {@link List} of trimmed {@link String}s). 
-	 * If the marker exists, i.e., Toolbox has split up the content belonging to
-	 * that marker over more than one line in the files, the marker String itself 
-	 * is ignored and the contents are added to the already existing list of Strings.
-	 * If there is a marker without content, the line is dropped completely. 
+	 * Adds a line from a Toolbox file to a block, i.e., a data structure that maps the line's marker to its content (a {@link List} of trimmed {@link String}s). If the marker exists, i.e., Toolbox has split up the content belonging to that
+	 * marker over more than one line in the files, the marker String itself is ignored and the contents are added to the already existing list of Strings. If there is a marker without content, the line is dropped completely.
 	 *
 	 * @param block
 	 * @param line
@@ -487,7 +468,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 *
 	 * @param block The header block to process
 	 */
-	private void mapHeaderToModel(ListMultimap<String,List<String>> block) {
+	private void mapHeaderToModel(ListMultimap<String, List<String>> block) {
 		for (Entry<String, List<String>> line : block.entries()) {
 			String marker = line.getKey();
 			String qualifiedId = SALT_NAMESPACE_TOOLBOX + "::" + marker;
@@ -508,10 +489,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
-	 * Returns whether a morpheme (the current morpheme) is the
-	 * head morpheme. This is detected solely on the basis of
-	 * notation, i.e. a "head morpheme" in the meaning used here
-	 * is a morpheme which is neither an affix or a clitic.
+	 * Returns whether a morpheme (the current morpheme) is the head morpheme. This is detected solely on the basis of notation, i.e. a "head morpheme" in the meaning used here is a morpheme which is neither an affix or a clitic.
 	 *
 	 * @param currentMorpheme
 	 * @param lastMorpheme
@@ -529,24 +507,30 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	/**
 	 * Maps a reference block onto the Salt model, i.e., adding its marker lines as tokens, spans, and annotations to the document graph.
 	 *
-	 * @param block The reference block to proces
-	 * s
-	 * @return 
+	 * @param block The reference block to proces s
+	 * @return
 	 */
-	private SSpan mapRefToModel(ListMultimap<String,List<String>> block) {
-		// TODO Re-implement catching empty lex lines before block is mapped for better performance 
+	private SSpan mapRefToModel(ListMultimap<String, List<String>> block) {
+		// TODO Re-implement catching empty lex lines before block is mapped for better performance
 		List<List<String>> lexLine = block.get(getProperties().getLexMarker());
 		if (lexLine.size() == 1 && lexLine.get(0).isEmpty()) {
 			logger.info("Dropping reference " + block.get(getProperties().getRefMarker()) + " because it does not contain any lexical information with marker " + getProperties().getLexMarker() + "!");
 			return null;
 		}
-		// Fix missing morphological items where needed
-		if (block.get(getProperties().getMorphMarker()).get(0).size() == 0) {
-			if (getProperties().getSubstituteMissingMorpologicalItems()) {
-				for (int i = 0; i < block.get(getProperties().getLexMarker()).get(0).size() - 1; i++) {
-					block.get(getProperties().getMorphMarker()).get(0).add(getProperties().getMissingMorphologicalItemsPlaceholder() + " ");
+		// Fix missing morphological items where needed, if there is morphology
+		if (containsMorphology) {
+			try {
+			if (block.get(getProperties().getMorphMarker()).get(0).size() == 0) {
+				if (getProperties().getSubstituteMissingMorpologicalItems()) {
+					for (int i = 0; i < block.get(getProperties().getLexMarker()).get(0).size() - 1; i++) {
+						block.get(getProperties().getMorphMarker()).get(0).add(getProperties().getMissingMorphologicalItemsPlaceholder() + " ");
+					}
+					block.get(getProperties().getMorphMarker()).get(0).add(getProperties().getMissingMorphologicalItemsPlaceholder());
 				}
-				block.get(getProperties().getMorphMarker()).get(0).add(getProperties().getMissingMorphologicalItemsPlaceholder());
+			}
+			}
+			catch (IndexOutOfBoundsException e) {
+				throw new PepperModuleException("The reference \"" + block.get(getProperties().getRefMarker()) + "\" does not seem to contain any morphological items, although the parameter \"" + getProperties().getProperty(ToolboxTextImporterProperties.PROP_CONTAINS_MORPHOLOGY).getName() + "\" is set to true! Either add morphological annotation for this reference, with the marker \"" + getProperties().getMorphMarker() + "\", or set the property to false.", e);
 			}
 		}
 		// Resolve properties
@@ -568,7 +552,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		if (hasLexAnnotationProperty()) { // FIXME: Implement so that all levels (but \tx???) can be empty
 			lexAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getLexAnnotationMarkers().split(commaDelimRegex)));
 		}
-		Set<String> morphAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getMorphAnnotationMarkers().split(commaDelimRegex)));
+		Set<String> morphAnnotationMarkers = null;
+		if (containsMorphology) {
+			 morphAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getMorphAnnotationMarkers().split(commaDelimRegex)));
+		}
 		Set<String> documentMetaAnnotationMarkers = null;
 		if (hasDocMetadataProperty()) {
 			documentMetaAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getDocMetadataMarkers().split(commaDelimRegex)));
@@ -577,14 +564,14 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		if (hasRefMetadataProperty()) {
 			refMetaAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getRefMetadataMarkers().split(commaDelimRegex)));
 		}
-		
+
 		// Init String builders for STextualDSs
 		StringBuilder morphDSBuilder = new StringBuilder();
 		StringBuilder lexDSBuilder = new StringBuilder();
-		
+
 		// Init unit refs
 		Map<String, int[]> definedUnitRefs = new HashMap<>();
-		
+
 		// Get text tokens for lex and morph
 		List<String> lexicalTextTokens = null;
 		try {
@@ -596,20 +583,23 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		if (lexicalTextTokens == null) {
 			throw new PepperModuleException("There is no lexical layer for this reference block. Aborting conversion. EVERY reference block must have a lexical layer.");
 		}
+		
 		List<String> morphologicalTextTokens = null;
-		try {
-			morphologicalTextTokens = block.get(morphMarker).get(0);
+		if (containsMorphology) {
+			try {
+				morphologicalTextTokens = block.get(morphMarker).get(0);
+			}
+			catch (IndexOutOfBoundsException e) {
+				throw new PepperModuleException("This block (\"" + block.get(refMarker) + "\") does not contain a line with morphological items! Perhaps you have not defined the morphological marker (default: \\mb)?");
+			}
+			if (morphologicalTextTokens == null) {
+				throw new PepperModuleException("There is no morphological layer for this reference block. Aborting conversion. EVERY reference block must have a morphological layer.");
+			}
+	
+			// Increment timeline
+			getGraph().getTimeline().increasePointOfTime(morphologicalTextTokens.size());
 		}
-		catch (IndexOutOfBoundsException e) {
-			throw new PepperModuleException("This block (\"" + block.get(refMarker) + "\") does not contain a line with morphological items! Perhaps you have not defined the morphological marker (default: \\mb)?");
-		}
-		if (morphologicalTextTokens == null) {
-			throw new PepperModuleException("There is no morphological layer for this reference block. Aborting conversion. EVERY reference block must have a morphological layer.");
-		}
-		
-		// Increment timeline
-		getGraph().getTimeline().increasePointOfTime(morphologicalTextTokens.size());
-		
+
 		// Init maps for annotation lines sorted by layer
 		HashMap<String, List<String>> lexAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> morphAnnotationLines = new HashMap<>();
@@ -617,9 +607,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		HashMap<String, List<String>> refAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> docMetaAnnotationLines = new HashMap<>();
 		HashMap<String, List<String>> refMetaAnnotationLines = new HashMap<>();
-		
+
 		HashMap<String, List<String>> refLine = new HashMap<>(1);
-		
+
 		// Build maps of annotation levels
 		Iterator<Entry<String, List<String>>> mapIterator = block.entries().iterator();
 		while (mapIterator.hasNext()) {
@@ -634,10 +624,10 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			else if (key.equals(unitRefDefMarker)) {
 				try {
 					if (line.getValue().size() == 2) {// undefined definitor
-						definedUnitRefs.put("", new int[] {Integer.valueOf(line.getValue().get(0)), Integer.valueOf(line.getValue().get(1))});
+						definedUnitRefs.put("", new int[] { Integer.valueOf(line.getValue().get(0)), Integer.valueOf(line.getValue().get(1)) });
 					}
 					else {
-						definedUnitRefs.put(line.getValue().get(0), new int[] {Integer.valueOf(line.getValue().get(1)), Integer.valueOf(line.getValue().get(2))});
+						definedUnitRefs.put(line.getValue().get(0), new int[] { Integer.valueOf(line.getValue().get(1)), Integer.valueOf(line.getValue().get(2)) });
 					}
 					continue;
 				}
@@ -648,7 +638,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			else if (lexAnnotationMarkers != null && lexAnnotationMarkers.contains(key)) {
 				lexAnnotationLines.put(key, line.getValue());
 			}
-			else if (morphAnnotationMarkers.contains(key)) {
+			else if (containsMorphology && morphAnnotationMarkers.contains(key)) {
 				morphAnnotationLines.put(key, line.getValue());
 			}
 			else if (documentMetaAnnotationMarkers != null && documentMetaAnnotationMarkers.contains(key)) {
@@ -658,10 +648,9 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				refMetaAnnotationLines.put(key, line.getValue());
 			}
 			else if (unitRefAnnotationsMarkers != null && unitRefAnnotationsMarkers.contains(key)) {
-				/* 
-				 * It could be, however, that there are unitref-able lines which are annotations on the whole ref!
-				 * I.e., when there is no unitref marker in the block, and the unitref-able line does not have
-				 * unit ref markup. In this case, skip. 
+				/*
+				 * It could be, however, that there are unitref-able lines which are annotations on the whole ref! I.e., when there is no unitref marker in the block, and the unitref-able line does not have unit ref markup. In this case,
+				 * skip.
 				 */
 				if (!hasDefinedUnitRefs && !hasUnitRefMarkup(line.getValue(), morphologicalTextTokens.size(), lexicalTextTokens.size())) {
 					break;
@@ -674,8 +663,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				refAnnotationLines.put(key, line.getValue());
 			}
 		}
-		// Sanitize detached morpheme delimiters if configured
-		if (getProperties().attachDetachedMorphemeDelimiter()) {
+		// Sanitize detached morpheme delimiters if configured & if morphology exists
+		if (containsMorphology && getProperties().attachDetachedMorphemeDelimiter()) {
 			// Check if it is necessary to sanitize morphology tokens
 			if (morphologicalTextTokens.contains(cliticsDelimiter) || morphologicalTextTokens.contains(affixDelimiter)) {
 				ListIterator<String> iterator = morphologicalTextTokens.listIterator();
@@ -689,14 +678,13 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 						}
 						else {
 							String previousToken = morphologicalTextTokens.get(iterator.previousIndex() - 1);
-							morphologicalTextTokens.set(iterator.previousIndex() -1, previousToken + token);
+							morphologicalTextTokens.set(iterator.previousIndex() - 1, previousToken + token);
 							iterator.remove();
 						}
 					}
 				}
-				/* 
-				 * Now sanitize all annotation lines as they should have the same detached delimiter
-				 * if the file is aligned correctly.
+				/*
+				 * Now sanitize all annotation lines as they should have the same detached delimiter if the file is aligned correctly.
 				 */
 				for (Entry<String, List<String>> annotationLine : morphAnnotationLines.entrySet()) {
 					List<String> list = annotationLine.getValue();
@@ -710,8 +698,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 								iterator.remove();
 							}
 							else {
-								String previousToken = list.get(iterator.previousIndex() -1);
-								list.set(iterator.previousIndex() -1, previousToken + token);
+								String previousToken = list.get(iterator.previousIndex() - 1);
+								list.set(iterator.previousIndex() - 1, previousToken + token);
 								iterator.remove();
 							}
 						}
@@ -720,25 +708,93 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 
 			}
 		}
-		
+
 		// Build morphological and lexical tokens with annotations, and build data sources
 		int morphCounter = 0;
 		int lexIndex = -1;
 		List<SToken> spanMorphTokens = new ArrayList<>();
 		List<SToken> spanLexTokens = new ArrayList<>();
 		String lastMorpheme = null;
-		for (int morphIndex = 0; morphIndex < morphologicalTextTokens.size(); morphIndex++) {
-			String morphemeTextToken = morphologicalTextTokens.get(morphIndex);
-			if (lastMorpheme != null && isHead(morphemeTextToken, lastMorpheme)) {
+		if (containsMorphology) {
+			for (int morphIndex = 0; morphIndex < morphologicalTextTokens.size(); morphIndex++) {
+				String morphemeTextToken = morphologicalTextTokens.get(morphIndex);
+				if (lastMorpheme != null && isHead(morphemeTextToken, lastMorpheme)) {
+					lexIndex++;
+					String lexicalTextToken = null;
+					if (getProperties().fixAlignment()) {
+						if (lexIndex >= lexicalTextTokens.size()) {
+							lexicalTextTokens.add(lexIndex, getProperties().getFixAlignmentString());
+							logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the line \"" + lexicalTextTokens + "\".");
+							for (Entry<String, List<String>> line : lexAnnotationLines.entrySet()) {
+								line.getValue().add(getProperties().getFixAlignmentString());
+								logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the annotation line \"" + line.getKey() + "\".");
+							}
+						}
+					}
+					try {
+						lexicalTextToken = lexicalTextTokens.get(lexIndex);
+					}
+					catch (Exception e) {
+						throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + block.get(refMarker).toString() + "\"! There are only " + lexicalTextTokens.size() + " lexical items in the reference block, but the importer is trying to access item number " + (lexIndex + 1) + ".\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
+					}
+
+					// Map
+					lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
+					lastLexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, refLine.values().toString());
+					spanLexTokens.add(lastLexToken);
+
+					// Prepare next iteration
+					morphCounter = 0;
+
+				}
+				morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
+				morphCounter++;
+				lastMorphToken = createMorphToken(morphemeTextToken, morphIndex, morphAnnotationLines, refLine.values().toString());
+				spanMorphTokens.add(lastMorphToken);
+				lastMorpheme = morphemeTextToken;
+				// Check if there are lexical tokens without morphological counterparts
+				if (morphIndex == morphologicalTextTokens.size() - 1 && lexIndex + 1 < lexicalTextTokens.size() - 1) {
+					// Last morpheme reached, but the next lexIndex is still smaller than the number of lexical tokens
+					if (getProperties().fixAlignment()) {
+						morphologicalTextTokens.add(getProperties().getFixAlignmentString());
+						logger.info("Fixed broken alignment between lexical items and morphological items. Added to the line of morphological items to match the number of lexical items by appending the alignment warning string \"" + getProperties().getFixAlignmentString() + "\".");
+					}
+					else {
+						if (!getProperties().ignoreMissingMorphemes()) {
+							throw new PepperModuleException("There are lexical items without morphological counterparts, i.e., not all lexical items have been annotated for morphology. The importer is not set to ignore this. Please annotate the morphology for block \"" + block.get(refMarker) + "\".");
+						}
+					}
+				}
+
+			}
+		}
+		else {
+			for (int i = 0; i < lexicalTextTokens.size(); i++) {
+				lexIndex++;
+				String lexicalTextToken = null;
+				lexicalTextToken = lexicalTextTokens.get(lexIndex);
+				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
+				lastLexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, refLine.values().toString());
+				spanLexTokens.add(lastLexToken);
+			}
+		}
+		// Finalize the timeline
+		// Map the loop's final iteration results as it has ended.
+		if (containsMorphology) {
+			int iterationsForMissingLexItems = 1;
+			if (getProperties().ignoreMissingMorphemes()) {
+				iterationsForMissingLexItems = lexicalTextTokens.size() - (lexIndex + 1);
+			}
+			for (int i = 0; i < iterationsForMissingLexItems; i++) {
 				lexIndex++;
 				String lexicalTextToken = null;
 				if (getProperties().fixAlignment()) {
 					if (lexIndex >= lexicalTextTokens.size()) {
 						lexicalTextTokens.add(lexIndex, getProperties().getFixAlignmentString());
-						logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the line \"" + lexicalTextTokens + "\".");
+						logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the line + \"" + lexicalTextTokens + "\".");
 						for (Entry<String, List<String>> line : lexAnnotationLines.entrySet()) {
 							line.getValue().add(getProperties().getFixAlignmentString());
-							logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the annotation line \"" + line.getKey() + "\".");
+							logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the annotation line + \"" + line.getKey() + "\".");
 						}
 					}
 				}
@@ -746,67 +802,16 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 					lexicalTextToken = lexicalTextTokens.get(lexIndex);
 				}
 				catch (Exception e) {
-					throw new PepperModuleException("\n\n#####\nAlignment problem in block \""+block.get(refMarker).toString()+"\"! There are only "+lexicalTextTokens.size()+" lexical items in the reference block, but the importer is trying to access item number "+(lexIndex+1) + ".\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
+					throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + block.get(refMarker).toString() + "\"! There are only " + lexicalTextTokens.size() + " lexical items in the reference block, but the importer is trying to access item number " + (lexIndex + 1) + ".\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
 				}
 
-				// Map
 				lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
 				lastLexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, refLine.values().toString());
 				spanLexTokens.add(lastLexToken);
-				
-				// Prepare next iteration
-				morphCounter = 0;
-				
 			}
-			morphDSBuilder.append(morphDSBuilder.length() > 0 ? " " : "").append(morphemeTextToken);
-			morphCounter++;
-			lastMorphToken = createMorphToken(morphemeTextToken, morphIndex, morphAnnotationLines, refLine.values().toString());
-			spanMorphTokens.add(lastMorphToken);
-			lastMorpheme = morphemeTextToken;
-			// Check if there are lexical tokens without morphological counterparts
-			if (morphIndex == morphologicalTextTokens.size() - 1 && lexIndex + 1 < lexicalTextTokens.size() - 1) { 
-				// Last morpheme reached, but the next lexIndex is still smaller than the number of lexical tokens 
-				if (getProperties().fixAlignment()) {
-					morphologicalTextTokens.add(getProperties().getFixAlignmentString());
-					logger.info("Fixed broken alignment between lexical items and morphological items. Added to the line of morphological items to match the number of lexical items by appending the alignment warning string \"" + getProperties().getFixAlignmentString() + "\".");
-				}
-				else {
-					if (!getProperties().ignoreMissingMorphemes()) {
-						throw new PepperModuleException("There are lexical items without morphological counterparts, i.e., not all lexical items have been annotated for morphology. The importer is not set to ignore this. Please annotate the morphology for block \"" + block.get(refMarker) + "\".");
-					}
-				}
-			}
-
 		}
-		// Finalize the timeline
-		// Map the loop's final iteration results as it has ended.
-		int iterationsForMissingLexItems = 1;
-		if (getProperties().ignoreMissingMorphemes()) {
-			iterationsForMissingLexItems = lexicalTextTokens.size() - (lexIndex + 1);
-		}
-		for (int i = 0; i < iterationsForMissingLexItems; i++) {
-			lexIndex++;
-			String lexicalTextToken = null;
-			if (getProperties().fixAlignment()) {
-				if (lexIndex >= lexicalTextTokens.size()) {
-					lexicalTextTokens.add(lexIndex, getProperties().getFixAlignmentString());
-					logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the line + \"" + lexicalTextTokens + "\".");
-					for (Entry<String, List<String>> line : lexAnnotationLines.entrySet()) {
-						line.getValue().add(getProperties().getFixAlignmentString());
-						logger.info("Fixed broken alignment for missing lexical token by adding the alignment warning string \"" + getProperties().getFixAlignmentString() + "\" to the annotation line + \"" + line.getKey() + "\".");
-					}
-				}
-			}
-			try {
-				lexicalTextToken = lexicalTextTokens.get(lexIndex);
-			}
-			catch (Exception e) {
-				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + block.get(refMarker).toString() + "\"! There are only " + lexicalTextTokens.size() + " lexical items in the reference block, but the importer is trying to access item number " + (lexIndex + 1) + ".\nThis indicates an issue with the alignment, i.e., for n lexical units there are at least n+1 morphological units, of which each should represent exactly one lexical unit.\nPlease fix the alignment between lexical and morphological lines in this block!\n#####\n\nStack trace:\n", e);
-			}
-	
-			lexDSBuilder.append(lexDSBuilder.length() > 0 ? " " : "").append(lexicalTextToken);
-			lastLexToken = createLexicalToken(lexicalTextToken, lexIndex, morphCounter, lexAnnotationLines, refLine.values().toString());
-			spanLexTokens.add(lastLexToken);
+		else {
+			
 		}
 
 		// Add to data sources
@@ -814,7 +819,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		getLexicalTextualDS().setText(oldLexDSText.concat(oldLexDSText.isEmpty() ? "" : " ").concat(lexDSBuilder.toString()));
 		String oldMorphDSText = getMorphologicalTextualDS().getText();
 		getMorphologicalTextualDS().setText(oldMorphDSText.concat(oldMorphDSText.isEmpty() ? "" : " ").concat(morphDSBuilder.toString()));
-		
+
 		// Build the general ref span and add ref-level annotations
 		SSpan ref = createRefSpan(refLine, spanMorphTokens, spanLexTokens, refAnnotationLines, refMetaAnnotationLines);
 		for (Entry<String, List<String>> unitRefLine : unitRefAnnotationLines.entries()) {
@@ -830,7 +835,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 *
 	 * @param sortedMorphTokens
 	 * @param unitRefLine
-	 * @return 
+	 * @return
 	 */
 	private SSpan createUnitRefSpan(List<SToken> sortedMorphTokens, List<SToken> sortedLexTokens, Entry<String, List<String>> unitRefLine, Map<String, int[]> definedUnitRefs) {
 		List<SToken> targetedTokens = new ArrayList<>();
@@ -841,7 +846,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 					targetedTokens.add(sortedMorphTokens.get(i));
 				}
 			}
-			else if (lineContents.get(0).equals(getProperties().getLexMarker())){ // Line has defined unit ref
+			else if (lineContents.get(0).equals(getProperties().getLexMarker())) { // Line has defined unit ref
 				for (int i = Integer.parseInt(lineContents.get(1)); i < Integer.parseInt(lineContents.get(2)) + 1; i++) {
 					targetedTokens.add(sortedLexTokens.get(i));
 				}
@@ -855,7 +860,8 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				}
 			}
 		}
-		else {//if (definedUnitRefs.get(lineContents.get(0)) != null && (getMorphologicalTextualDS().getText().startsWith(lineContents.get(0)) || getLexicalTextualDS().getText().startsWith(lineContents.get(0)))) { // Line has defined unit ref
+		else {// if (definedUnitRefs.get(lineContents.get(0)) != null && (getMorphologicalTextualDS().getText().startsWith(lineContents.get(0)) || getLexicalTextualDS().getText().startsWith(lineContents.get(0)))) { // Line has defined unit
+				// ref
 			int[] value = definedUnitRefs.get(lineContents.get(0));
 			for (int i = value[0]; i < value[1] + 1; i++) {
 				targetedTokens.add(sortedMorphTokens.get(i));
@@ -873,18 +879,17 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		span.setName(sb.toString().trim());
 
 		// TODO Check whether we really want all the spans in the same layer!
-//		if (layers.get(key) == null) {
-//			createLayer(key);
-//		}
-//		span.addLayer(layers.get(key));
+		// if (layers.get(key) == null) {
+		// createLayer(key);
+		// }
+		// span.addLayer(layers.get(key));
 		span.addLayer(layers.get(IMPORTER_NAME));
 
 		return span;
 	}
 
 	/**
-	 * Expects a list of lines, i.e., markers and contents belonging to that
-	 * marker, and from them creates meta annotations on the document itself.
+	 * Expects a list of lines, i.e., markers and contents belonging to that marker, and from them creates meta annotations on the document itself.
 	 *
 	 * @param docMetaAnnotationLines
 	 */
@@ -909,19 +914,16 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
-	 * Creates a span over tokens. This span is annotated
-	 * with all annotations from the {@code refAnnotationLines}
-	 * parameter and added to the reference layer.
+	 * Creates a span over tokens. This span is annotated with all annotations from the {@code refAnnotationLines} parameter and added to the reference layer.
 	 * <p>
-	 * Note that spans are <strong>always</strong> built over
-	 * morphological tokens!
+	 * Note that spans are <strong>always</strong> built over morphological tokens!
 	 *
 	 * @param refLine
 	 * @param spanMorphTokens
 	 * @param refAnnotationLines
-	 * @param refMetaAnnotationLines 
+	 * @param refMetaAnnotationLines
 	 */
-	private SSpan createRefSpan(Map<String, List<String>> refLine, List<SToken> spanMorphTokens, List<SToken> spanLexTokens, Map<String, List<String>> refAnnotationLines, HashMap<String,List<String>> refMetaAnnotationLines) {
+	private SSpan createRefSpan(Map<String, List<String>> refLine, List<SToken> spanMorphTokens, List<SToken> spanLexTokens, Map<String, List<String>> refAnnotationLines, HashMap<String, List<String>> refMetaAnnotationLines) {
 		SSpan span = null;
 		if (spanMorphTokens.size() > 0) {
 			span = getGraph().createSpan(spanMorphTokens);
@@ -954,22 +956,18 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 		}
 		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, getProperties().getRefMarker(), sb.toString().trim());
 		span.setName(sb.toString().trim());
-		
+
 		span.addLayer(layers.get(IMPORTER_NAME));
 		return span;
 	}
 
 	/**
-	 * Tests whether the first 3 objects in the list are compatible to <strong>free</strong>
-	 * unit ref markup, i.e., if the first object is a String equalling
-	 * either the morph or the lex marker, and if the second and third
-	 * object are parseable to {@link Integer}s, and if the second item
-	 * is not smaller than 0, and if the third item is not larger than 
-	 * the last index in the list of tokens for the marker.
+	 * Tests whether the first 3 objects in the list are compatible to <strong>free</strong> unit ref markup, i.e., if the first object is a String equalling either the morph or the lex marker, and if the second and third object are
+	 * parseable to {@link Integer}s, and if the second item is not smaller than 0, and if the third item is not larger than the last index in the list of tokens for the marker.
 	 *
 	 * @param lineContents
-	 * @param numberOfLexemes 
-	 * @param numberOfMorphemes 
+	 * @param numberOfLexemes
+	 * @param numberOfMorphemes
 	 * @return whether the first three objects in the first argument adhere to unit ref markup format
 	 */
 	private boolean hasUnitRefMarkup(List<String> lineContents, int numberOfMorphemes, int numberOfLexemes) {
@@ -1000,14 +998,11 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	}
 
 	/**
- 	 * Creates a morphological token in the Salt graph.
+	 * Creates a morphological token in the Salt graph.
 	 * <p>
-	 * More precisely, creates a token in this document's
-	 * {@link SDocumentGraph} on the data source object
-	 * defined by {@link #morphologicalTextualDS},<br>then creates
-	 * an order relation from the last token (if it exists)
-	 * to this token,<br>then links the token to exactly
-	 * one step on the timeline (i.e., e.g., [7,8]),<br>
+	 * More precisely, creates a token in this document's {@link SDocumentGraph} on the data source object defined by {@link #morphologicalTextualDS},<br>
+	 * then creates an order relation from the last token (if it exists) to this token,<br>
+	 * then links the token to exactly one step on the timeline (i.e., e.g., [7,8]),<br>
 	 * then adds the token to the morphological layer.
 	 *
 	 * @param morpheme
@@ -1019,7 +1014,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param refId Can be used for error reporting
 	 * @return
 	 */
-	private SToken createMorphToken(String morpheme, int morphIndex, HashMap<String,List<String>> morphAnnotationLines, String refId) {
+	private SToken createMorphToken(String morpheme, int morphIndex, HashMap<String, List<String>> morphAnnotationLines, String refId) {
 		SToken token = getGraph().createToken(getMorphologicalTextualDS(), morphDSIndex, morphDSIndex += morpheme.length());
 		morphDSIndex++; // Accounting for whitespace
 		for (Entry<String, List<String>> annotationLine : morphAnnotationLines.entrySet()) {
@@ -1036,7 +1031,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refId + "\" with morpheme \'" + morpheme + "\' and its annotation on level \'" + annotationLine.getKey() + "\'!\nThere are only " + annotationLine.getValue().size() + " values on this line, whereas the importer is trying to access value number " + (morphIndex + 1) + "...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", e);
 			}
 		}
-		
+
 		if (lastMorphToken != null) {
 			SOrderRelation rel = SaltFactory.createSOrderRelation();
 			rel.setSource(lastMorphToken);
@@ -1045,40 +1040,33 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			rel.setType(getMorphologicalTextualDS().getName());
 			getGraph().addRelation(rel);
 		}
-		
+
 		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
 		timeRel.setSource(token);
 		timeRel.setTarget(getGraph().getTimeline());
-		
+
 		timeRel.setStart(morphTimelineIndex);
 		morphTimelineIndex += 1;
 		timeRel.setEnd(morphTimelineIndex);
 		getGraph().addRelation(timeRel);
-		
+
 		token.addLayer(layers.get(getProperties().getMorphMarker()));
-		
+
 		/*
-		 * ############# FIXME ###############
-		 * Du to a bug in the ANNISExporter, with
-		 * multiple segmentations, token annotations
-		 * are only displayed, when they are "in" a
-		 * span, therefore, create a dummy span for each token.
+		 * ############# FIXME ############### Du to a bug in the ANNISExporter, with multiple segmentations, token annotations are only displayed, when they are "in" a span, therefore, create a dummy span for each token.
 		 */
 		getGraph().createSpan(token).addLayer(layers.get(IMPORTER_NAME));
 		// ############ FIXME ###############
 
-		
 		return token;
 	}
 
 	/**
- 	 * Creates a lexical token in the Salt graph.
+	 * Creates a lexical token in the Salt graph.
 	 * <p>
-	 * More precisely, creates a token in this document's
-	 * {@link SDocumentGraph} on the data source object
-	 * defined by {@link #lexicalTextualDS},<br>then creates
-	 * an order relation from the last token (if it exists)
-	 * to this token,<br>then links the token to the number of index spans on the timeline as defined by the {@code timelineUnits} parameter,<br>
+	 * More precisely, creates a token in this document's {@link SDocumentGraph} on the data source object defined by {@link #lexicalTextualDS},<br>
+	 * then creates an order relation from the last token (if it exists) to this token,<br>
+	 * then links the token to the number of index spans on the timeline as defined by the {@code timelineUnits} parameter,<br>
 	 * then adds the token to the lexical layer.
 	 *
 	 * @param lexicalTextToken
@@ -1086,12 +1074,12 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	 * @param timelineUnits
 	 * @param lexIndex
 	 * @param lexAnnotationLines
-	 * @param lastLexToken 
-	 * @param timelineCounter 
+	 * @param lastLexToken
+	 * @param timelineCounter
 	 * @return
 	 */
-	private SToken createLexicalToken(String lexicalTextToken, int lexIndex, int timelineUnits, HashMap<String,List<String>> lexAnnotationLines, String refId) {
-		
+	private SToken createLexicalToken(String lexicalTextToken, int lexIndex, int timelineUnits, HashMap<String, List<String>> lexAnnotationLines, String refId) {
+
 		SToken token = getGraph().createToken(getLexicalTextualDS(), lexDSIndex, lexDSIndex += lexicalTextToken.length());
 		lexDSIndex++; // Accounting for whitespace
 		for (Entry<String, List<String>> annotationLine : lexAnnotationLines.entrySet()) {
@@ -1102,7 +1090,7 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				}
 			}
 			try {
-			token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(lexIndex));
+				token.createAnnotation(SALT_NAMESPACE_TOOLBOX, annotationLine.getKey(), annotationLine.getValue().get(lexIndex));
 			}
 			catch (IndexOutOfBoundsException e) {
 				throw new PepperModuleException("\n\n#####\nAlignment problem in block \"" + refId + "\" with lexical unit \'" + lexicalTextToken + "\' and its annotation on level \'" + annotationLine.getKey() + "\'!\nThere are only " + annotationLine.getValue().size() + " values on this line, whereas the importer is trying to access value number " + (lexIndex + 1) + "...\nAs the importer does not allow null elements for annotations, please fix the annotations and/or their alignment in this block!\n#####\n\nStack trace:\n", e);
@@ -1116,28 +1104,24 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			rel.setType(getLexicalTextualDS().getName());
 			getGraph().addRelation(rel);
 		}
-		
+
 		STimelineRelation timeRel = SaltFactory.createSTimelineRelation();
 		timeRel.setSource(token);
 		timeRel.setTarget(getGraph().getTimeline());
-		
+
 		timeRel.setStart(lexTimelineIndex);
 		lexTimelineIndex += timelineUnits;
 		timeRel.setEnd(lexTimelineIndex);
 		getGraph().addRelation(timeRel);
-		
+
 		token.addLayer(layers.get(getProperties().getLexMarker()));
-		
+
 		/*
-		 * ############# FIXME ###############
-		 * Du to a bug in the ANNISExporter, with
-		 * multiple segmentations, token annotations
-		 * are only displayed, when they are "in" a
-		 * span, therefore, create a dummy span for each token.
+		 * ############# FIXME ############### Du to a bug in the ANNISExporter, with multiple segmentations, token annotations are only displayed, when they are "in" a span, therefore, create a dummy span for each token.
 		 */
 		getGraph().createSpan(token).addLayer(layers.get(IMPORTER_NAME));
 		// ############ FIXME ###############
-		
+
 		return token;
 	}
 
@@ -1190,19 +1174,19 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 	public void setGraph(SDocumentGraph graph) {
 		this.graph = graph;
 	}
-	
+
 	private boolean hasDocMetadataProperty() {
 		return (getProperties().getDocMetadataMarkers() != null);
 	}
-	
+
 	private boolean hasRefMetadataProperty() {
 		return (getProperties().getRefMetadataMarkers() != null);
 	}
-	
+
 	private boolean hasLexAnnotationProperty() {
 		return (getProperties().getLexAnnotationMarkers() != null);
 	}
-	
+
 	private boolean hasUnitRefAnnotationProperty() {
 		return (getProperties().getUnitRefAnnotationMarkers() != null);
 	}
