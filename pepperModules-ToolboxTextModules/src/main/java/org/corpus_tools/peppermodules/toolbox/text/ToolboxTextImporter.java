@@ -181,12 +181,17 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 */
 	public PepperMapper createPepperMapper(Identifier identifier) {
 		ToolboxTextMapper mapper = new ToolboxTextMapper();
-		if (identifier.getIdentifiableElement() != null && identifier.getIdentifiableElement() instanceof SDocument) {
-			URI resource = getIdentifier2ResourceTable().get(identifier);
-			mapper.setResourceURI(resource);
+		if (identifier != null) {
+			if (identifier.getIdentifiableElement() != null && identifier.getIdentifiableElement() instanceof SDocument) {
+				URI resource = getIdentifier2ResourceTable().get(identifier);
+				mapper.setResourceURI(resource);
+			}
+			else {
+				throw new PepperModuleException("Identifiable element of identifier \"" + identifier + "\" is either null or not an instance of SDocument!");
+			}
 		}
 		else {
-			logger.debug("Identifier \"{}\" is either null or not an instance of SDocument!", identifier);
+			throw new PepperModuleException("Identifier is null!");
 		}
 		return (mapper);
 	}
