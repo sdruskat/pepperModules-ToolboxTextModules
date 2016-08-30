@@ -192,6 +192,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	public static final String PROP_CONTAINS_MORPHOLOGY = "containsMorphology";
 	
+	/**
+	 * Whether \ids from within a single file should be split up into separate documents.
+	 */
+	public static final String PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS = "splitIdsToDocuments";
+	
 	
 	public ToolboxTextImporterProperties() {
 		addProperty(new PepperModuleProperty<String>(PROP_LEX_MARKER, 
@@ -290,6 +295,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"Whether the data contains morphological annotations.",
 				true,
 				true));
+		addProperty(new PepperModuleProperty<Boolean>(PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS,
+				Boolean.class,
+				"Whether \\ids from within a single file should be split up into separate documents.",
+				true,
+				true));
 	}
 	
 	// Getter methods for the different property values.
@@ -380,6 +390,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	
 	public String getMissingMorphologicalItemsPlaceholder() {
 		return (String) getProperty(PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER).getValue();
+	}
+	
+	public boolean splitIdsToDocuments() {
+		return (Boolean) getProperty(PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS).getValue();
 	}
 	
 }
