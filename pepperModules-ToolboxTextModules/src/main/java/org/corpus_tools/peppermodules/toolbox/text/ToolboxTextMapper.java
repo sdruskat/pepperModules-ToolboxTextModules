@@ -323,6 +323,14 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 			tokens.addAll(getGraph().getOverlappedTokens(refSpan));
 		}
 		span = getGraph().createSpan(tokens);
+		if (span == null) {
+			/* FIXME! If \id isn't followed right by \ref but by other markers, the importer assumes
+			 * that there are no tokens spanned here at all! This is of course wrong! It should instead
+			 * pick up the markers as annotations to the \id!
+			 */
+			logger.info("Encountered an \\id not followed directly by a \\ref! Dropping \\id, but this is a bug! ID: " + idBlock.getId());
+			return;
+		}
 		span.setName(idBlock.getId());
 		for (Entry<String, String> line : idBlock.getIdAnnotations().entrySet()) {
 			span.createAnnotation(SALT_NAMESPACE_TOOLBOX, line.getKey(), line.getValue());
