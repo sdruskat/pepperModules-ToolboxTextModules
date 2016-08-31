@@ -22,16 +22,14 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Set;
-
+import java.util.Map;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.salt.common.SCorpus;
 import org.corpus_tools.salt.common.SCorpusGraph;
+import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.graph.Identifier;
 import org.eclipse.emf.common.util.URI;
 import org.slf4j.Logger;
@@ -53,6 +51,9 @@ public class ToolboxTextIdFinder {
 	private final LinkedHashMap<Identifier, URI> resourceMap = new LinkedHashMap<>();
 	private final String idMarker;
 	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextIdFinder.class);
+	private int genericDocumentNameCount = 0;
+	private final Map<Identifier, Long> offsetMap = new HashMap<>();
+	private ResourceHeaderend resourceHeader = null;
 	
 	/**
 	 * @param corpusFile
@@ -71,12 +72,12 @@ public class ToolboxTextIdFinder {
 	 * TODO: Description
 	 */
 	public void parse() {
-		Set<Long> offsetSet = new HashSet<>();
 		// Get the char-based length of the \id marker
 		int idMarkerLength = idMarker.length();
 		// Use a CIS to memorize position, and put a buffered FIS inside (buffered for performance reasons)
 		try (CountingInputStream str = new CountingInputStream(new BufferedInputStream(new FileInputStream(corpusFile)))) {
 			int b;
+			boolean isFirstIdOffsetWritten = false;
 			while ((b = str.read()) > 0) {
 				if (b == '\\') {
 					// Remember the actual pointer position
@@ -87,8 +88,28 @@ public class ToolboxTextIdFinder {
 						b = str.read();
 						bos.write(b);
 					}
+					// If an \id marker is actually found, use the trimmed rest of the line as name for the newly created SDocument
 					if (bos.toString().equals(idMarker)) {
-						offsetSet.add(offset);
+						// If the first \id offset isn't recorded as end offset for the header yet, do so
+						if (!isFirstIdOffsetWritten) {
+							isFirstIdOffsetWritten = true;
+							resourceHeader = new ResourceHeaderend(URI.createFileURI(corpusFile.getAbsolutePath()), offset);
+						}
+						// Read the full rest of the \id line to gain a name for the document
+						StringBuilder sb = new StringBuilder();
+						char c;
+						while ((c = (char) str.read()) != '\n') {
+							sb.append(c);
+						}
+						String idName = sb.toString().trim();
+						if (idName == null || idName.isEmpty()) {
+							logger.warn("The \\id line starting at byte offset " + str.getCount() + " is empty. The document will be given a generic name!");
+							idName = "Document " + genericDocumentNameCount++;
+						}
+						SDocument doc = corpusGraph.createDocument(parent, idName);
+						// Save all the important stuff for re-use in the importer
+						resourceMap.put(doc.getIdentifier(), URI.createFileURI(corpusFile.getAbsolutePath()));
+						offsetMap.put(doc.getIdentifier(), offset);
 					}
 				}
 			}
@@ -96,29 +117,59 @@ public class ToolboxTextIdFinder {
 		catch (IOException e) {
 			throw new PepperModuleException("Cannot read file " + corpusFile.getName() + "!");
 		}
-		for (Long offset : offsetSet) {
-			try (BufferedInputStream bis2 = new BufferedInputStream(new FileInputStream(corpusFile))) {
-				bis2.skip(offset);
-				StringBuilder sb = new StringBuilder();
-				char c;
-				while ((c = (char) bis2.read()) != '\n') {
-					sb.append(c);
-				}
-				logger.info(sb.toString());
-			}
-			catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
 	}
 
 	/**
 	 * @return the resourceMap
 	 */
-	private LinkedHashMap<Identifier, URI> getResourceMap() {
+	protected LinkedHashMap<Identifier, URI> getResourceMap() {
 		return resourceMap;
 	}
 
+	/**
+	 * @return the offsetMap
+	 */
+	protected Map<Identifier, Long> getOffsetMap() {
+		return offsetMap;
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @return
+	 */
+	public ResourceHeaderend getResourceHeader() {
+		return resourceHeader;
+	}
+	
+	/**
+	 * TODO Description
+	 *
+	 * @author Stephan Druskat <mail@sdruskat.net>
+	 *
+	 */
+	protected class ResourceHeaderend {
+		private URI resource = null;
+		private Long headerEnd = null;
+
+		protected ResourceHeaderend(URI resource, Long headerEnd) {
+			this.resource = resource;
+			this.headerEnd = headerEnd;
+		}
+
+		/**
+		 * @return the resource
+		 */
+		public URI getResource() {
+			return resource;
+		}
+
+		/**
+		 * @return the headerEnd
+		 */
+		public Long getHeader() {
+			return headerEnd;
+		}
+	}
+	
 }

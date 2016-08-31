@@ -19,6 +19,10 @@
 package org.corpus_tools.peppermodules.toolbox.text;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.corpus_tools.pepper.impl.PepperImporterImpl;
 import org.corpus_tools.pepper.modules.PepperImporter;
 import org.corpus_tools.pepper.modules.PepperMapper;
@@ -79,9 +83,13 @@ import org.slf4j.LoggerFactory;
  * @author Stephan Druskat
  */
 @Component(name = "ToolboxTextImporterComponent", factory = "PepperImporterComponentFactory")
-public class ToolboxTextImporter extends PepperImporterImpl implements PepperImporter{
+public class ToolboxTextImporter extends PepperImporterImpl implements PepperImporter {
 	/** this is a logger, for recording messages during program process, like debug messages**/
 	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextImporter.class);
+	
+	private final Map<Identifier, Long> offsetMap = new HashMap<>();
+
+	private final Map<URI, Long> headerMap = new HashMap<>();
 
 	/**
 	 * <strong>OVERRIDE THIS METHOD FOR CUSTOMIZATION</strong> <br/>
@@ -123,6 +131,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	public void importCorpusStructure(SCorpusGraph sCorpusGraph) throws PepperModuleException {
 		if (((ToolboxTextImporterProperties) getProperties()).splitIdsToDocuments()) {
 			// Parse the file and create one document per \id section.
+			this.setCorpusGraph(sCorpusGraph);
 			URI fileURI = getCorpusDesc().getCorpusPath();
 			File corpusFile = new File(fileURI.toFileString());
 			importIdBasedCorpusStructure(sCorpusGraph, null, corpusFile);
@@ -151,12 +160,13 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			// Create a corpus for the file
 	        SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFile.getName());
 	        getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), URI.createFileURI(corpusFile.getAbsolutePath()));
-	        
 	        // Create documents for \ids in file
 	        ToolboxTextIdFinder finder = new ToolboxTextIdFinder(corpusFile, corpusGraph, subCorpus, ((ToolboxTextImporterProperties) getProperties()).getIdMarker());
 	        finder.parse();
-//	        localResourceMap = finder.getResourceMap();
-//	        getIdentifier2ResourceTable().putAll(localResourceMap);
+	        LinkedHashMap<Identifier, URI> localResourceMap = finder.getResourceMap();
+	        getIdentifier2ResourceTable().putAll(localResourceMap);
+	        offsetMap.putAll(finder.getOffsetMap());
+	        headerMap.put(finder.getResourceHeader().getResource(), finder.getResourceHeader().getHeader());
 		}
 	}
 	
@@ -172,10 +182,10 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 * {@link SDocument} object or an {@link SCorpus} object of the mapper
 	 * should be initialized differently. <br/>
 	 * Just to show how the creation of such a mapper works, we here create a
-	 * sample mapper of type {@link ToolboxTextMapper}, which only produces a fixed
-	 * document-structure in method {@link ToolboxTextMapper#mapSDocument()} and
+	 * sample mapper of type {@link MonolithicToolboxTextMapper}, which only produces a fixed
+	 * document-structure in method {@link MonolithicToolboxTextMapper#mapSDocument()} and
 	 * enhances the corpora for further meta-annotations in the method
-	 * {@link ToolboxTextMapper#mapSCorpus()}. <br/>
+	 * {@link MonolithicToolboxTextMapper#mapSCorpus()}. <br/>
 	 * If your mapper needs to have set variables, this is the place to do it.
 	 * 
 	 * @param identifier
@@ -184,19 +194,23 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 * @return {@link PepperMapper} object to do the mapping task for object
 	 *         connected to given {@link Identifier}
 	 */
+	@Override
 	public PepperMapper createPepperMapper(Identifier identifier) {
-		ToolboxTextMapper mapper = new ToolboxTextMapper();
-		if (identifier != null) {
-			if (identifier.getIdentifiableElement() != null && identifier.getIdentifiableElement() instanceof SDocument) {
-				URI resource = getIdentifier2ResourceTable().get(identifier);
-				mapper.setResourceURI(resource);
+		PepperMapper mapper = null;
+		if (((ToolboxTextImporterProperties) getProperties()).splitIdsToDocuments()) {
+			if (identifier.getIdentifiableElement() instanceof SCorpus) {
+				mapper = new IdBasedToolboxTextMapper(0L, headerMap.get(getIdentifier2ResourceTable().get(identifier)));
 			}
 			else {
-				throw new PepperModuleException("Identifiable element of identifier \"" + identifier + "\" is either null or not an instance of SDocument!");
+				mapper = new IdBasedToolboxTextMapper(offsetMap.get(identifier));
 			}
+			URI resource = getIdentifier2ResourceTable().get(identifier);
+			mapper.setResourceURI(resource);
 		}
 		else {
-			throw new PepperModuleException("Identifier is null!");
+			mapper = new MonolithicToolboxTextMapper();
+			URI resource = getIdentifier2ResourceTable().get(identifier);
+			mapper.setResourceURI(resource);
 		}
 		return (mapper);
 	}
@@ -240,8 +254,4 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		return (super.isReadyToStart());
 	}
 	
-	@Override
-	public void end(){
-	    super.end();
-	}
 }

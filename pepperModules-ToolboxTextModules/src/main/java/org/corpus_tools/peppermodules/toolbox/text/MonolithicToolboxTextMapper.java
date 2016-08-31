@@ -20,7 +20,6 @@ package org.corpus_tools.peppermodules.toolbox.text;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -77,9 +76,9 @@ import com.google.common.collect.ListMultimap;
  *
  * @author Stephan Druskat <mail@sdruskat.net>
  */
-public class ToolboxTextMapper extends PepperMapperImpl {
+public class MonolithicToolboxTextMapper extends PepperMapperImpl {
 
-	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextMapper.class);
+	private static final Logger logger = LoggerFactory.getLogger(MonolithicToolboxTextMapper.class);
 
 	private static final String DATE_LAST_MAPPING = "date-last-mapping";
 
@@ -430,9 +429,6 @@ public class ToolboxTextMapper extends PepperMapperImpl {
 				}
 				line = br.readLine();
 			}
-		}
-		catch (FileNotFoundException e) {
-			throw new PepperModuleException(this, "Cannot read file '" + getResourceURI() + "', because of nested exception: ", e);
 		}
 		catch (IOException e) {
 			throw new PepperModuleException(this, "Cannot read file '" + getResourceURI() + "', because of nested exception: ", e);
