@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
+import java.io.File;
 import org.corpus_tools.pepper.impl.PepperImporterImpl;
 import org.corpus_tools.pepper.modules.PepperImporter;
 import org.corpus_tools.pepper.modules.PepperMapper;
@@ -114,47 +115,51 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 * mechanism can be configured. To adapt the default behavior to your needs,
 	 * we recommend, to take a look into the 'Developer's Guide for Pepper
 	 * modules', you will find on
-	 * <a href="https://u.hu-berlin.de/saltnpepper/">https
-	 * ://u.hu-berlin.de/saltnpepper/</a>. <br/>
-	 * Just to show the creation of a corpus-structure for our sample purpose,
-	 * we here create a simple corpus-structure manually. The simple contains a
-	 * root-corpus <i>c1</i> having two sub-corpora <i>c2</i> and <i>c3</i>.
-	 * Each sub-corpus contains two documents <i>d1</i> and <i>d2</i> for
-	 * <i>d3</i> and <i>d4</i> and <i>c1</i> for <i>c3</i>.
-	 * 
-	 * <pre>
-	 *       c1
-	 *    /      \
-	 *   c2      c3
-	 *  /  \    /  \
-	 * d1  d2  d3  d4
-	 * </pre>
-	 * 
-	 * The URIs of the corpora and documents would be:
-	 * <ul>
-	 * <li>salt:/c1</li>
-	 * <li>salt:/c1/c2</li>
-	 * <li>salt:/c1/c2/d1</li>
-	 * <li>salt:/c1/c2/d2</li>
-	 * <li>salt:/c1/c3</li>
-	 * <li>salt:/c1/c3/d3</li>
-	 * <li>salt:/c1/c3/d4</li>
-	 * </ul>
 	 * 
 	 * @param corpusGraph
 	 *            the CorpusGraph object, which has to be filled.
 	 */
 	@Override
 	public void importCorpusStructure(SCorpusGraph sCorpusGraph) throws PepperModuleException {
-		/**
-		 * TODO this implementation is just a showcase, in production you might
-		 * want to use the default. If yes, uncomment the following line and
-		 * delete the rest of the implementation, or delete the entire method to
-		 * trigger the default method.
-		 */
-		 super.importCorpusStructure(sCorpusGraph);
+		if (((ToolboxTextImporterProperties) getProperties()).splitIdsToDocuments()) {
+			// Parse the file and create one document per \id section.
+			URI fileURI = getCorpusDesc().getCorpusPath();
+			File corpusFile = new File(fileURI.toFileString());
+			importIdBasedCorpusStructure(sCorpusGraph, null, corpusFile);
+		}
+		else {
+			// Use default corpus structure (dir/file-based).
+			super.importCorpusStructure(sCorpusGraph);
+		}
 	}
 
+	/**
+	 * TODO: Description
+	 *
+	 * @param sCorpusGraph
+	 * @param corpusFile
+	 */
+	private void importIdBasedCorpusStructure(SCorpusGraph corpusGraph, SCorpus parent, File corpusFile) {
+		if (corpusFile.isDirectory()) {
+			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFile.getName());
+			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), URI.createFileURI(corpusFile.getAbsolutePath()));
+			for (File child : corpusFile.listFiles()) {
+				importIdBasedCorpusStructure(corpusGraph, subCorpus, child);
+			}
+		}
+		else if (corpusFile.isFile()) {
+			// Create a corpus for the file
+	        SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFile.getName());
+	        getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), URI.createFileURI(corpusFile.getAbsolutePath()));
+	        
+	        // Create documents for \ids in file
+	        ToolboxTextIdFinder finder = new ToolboxTextIdFinder(corpusFile, corpusGraph, subCorpus, ((ToolboxTextImporterProperties) getProperties()).getIdMarker());
+	        finder.parse();
+//	        localResourceMap = finder.getResourceMap();
+//	        getIdentifier2ResourceTable().putAll(localResourceMap);
+		}
+	}
+	
 	/**
 	 * <strong>OVERRIDE THIS METHOD FOR CUSTOMIZATION</strong> <br/>
 	 * This method creates a customized {@link PepperMapper} object and returns
