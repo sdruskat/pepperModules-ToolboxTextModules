@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.corpus_tools.pepper.impl.PepperImporterImpl;
 import org.corpus_tools.pepper.modules.PepperImporter;
@@ -197,19 +198,17 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	@Override
 	public PepperMapper createPepperMapper(Identifier identifier) {
 		PepperMapper mapper = null;
+		URI resource = getIdentifier2ResourceTable().get(identifier);
 		if (((ToolboxTextImporterProperties) getProperties()).splitIdsToDocuments()) {
 			if (identifier.getIdentifiableElement() instanceof SCorpus) {
-				mapper = new IdBasedToolboxTextMapper(0L, headerMap.get(getIdentifier2ResourceTable().get(identifier)));
+				mapper = new IdBasedToolboxTextMapper(0L, headerMap.get(getIdentifier2ResourceTable().get(identifier)), resource);
 			}
 			else {
-				mapper = new IdBasedToolboxTextMapper(offsetMap.get(identifier));
+				mapper = new IdBasedToolboxTextMapper(offsetMap.get(identifier), resource);
 			}
-			URI resource = getIdentifier2ResourceTable().get(identifier);
-			mapper.setResourceURI(resource);
 		}
 		else {
 			mapper = new MonolithicToolboxTextMapper();
-			URI resource = getIdentifier2ResourceTable().get(identifier);
 			mapper.setResourceURI(resource);
 		}
 		return (mapper);

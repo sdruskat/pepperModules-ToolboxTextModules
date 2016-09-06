@@ -75,7 +75,8 @@ public class ToolboxTextIdFinder {
 		// Get the char-based length of the \id marker
 		int idMarkerLength = idMarker.length();
 		// Use a CIS to memorize position, and put a buffered FIS inside (buffered for performance reasons)
-		try (CountingInputStream str = new CountingInputStream(new BufferedInputStream(new FileInputStream(corpusFile)))) {
+		try (CountingInputStream str = new CountingInputStream(new BufferedInputStream(new FileInputStream(corpusFile))); 
+				ByteArrayOutputStream bos = new ByteArrayOutputStream(idMarkerLength)) {
 			int b;
 			boolean isFirstIdOffsetWritten = false;
 			while ((b = str.read()) > 0) {
@@ -83,7 +84,6 @@ public class ToolboxTextIdFinder {
 					// Remember the actual pointer position
 					long offset = str.getCount() - 1;
 					// Start putting the next idMarkerLength bytes into a byte array and compare with idMarker
-					ByteArrayOutputStream bos = new ByteArrayOutputStream(idMarkerLength);
 					for (int i = 0; i < idMarkerLength; i++) {
 						b = str.read();
 						bos.write(b);
@@ -111,6 +111,7 @@ public class ToolboxTextIdFinder {
 						resourceMap.put(doc.getIdentifier(), URI.createFileURI(corpusFile.getAbsolutePath()));
 						offsetMap.put(doc.getIdentifier(), offset);
 					}
+					bos.reset();
 				}
 			}
 		}
