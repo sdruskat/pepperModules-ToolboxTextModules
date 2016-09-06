@@ -45,7 +45,7 @@ import org.junit.Test;
  */
 public class ToolboxTextMapperNoMorphologyTest {
 	
-	private ToolboxTextMapper fixture = null;
+	private MonolithicToolboxTextMapper fixture = null;
 
 	/**
 	 * Set up the fixture.
@@ -54,7 +54,7 @@ public class ToolboxTextMapperNoMorphologyTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		ToolboxTextMapper mapper = new ToolboxTextMapper();
+		MonolithicToolboxTextMapper mapper = new MonolithicToolboxTextMapper();
 		File file = new File(this.getClass().getClassLoader().getResource("no-morphology.txt").getFile());
 		String path = file.getAbsolutePath();
 		mapper.setResourceURI(URI.createFileURI(path));
@@ -155,14 +155,14 @@ public class ToolboxTextMapperNoMorphologyTest {
 	/**
 	 * @return the fixture
 	 */
-	private ToolboxTextMapper getFixture() {
+	private MonolithicToolboxTextMapper getFixture() {
 		return fixture;
 	}
 
 	/**
 	 * @param fixture the fixture to set
 	 */
-	private void setFixture(ToolboxTextMapper fixture) {
+	private void setFixture(MonolithicToolboxTextMapper fixture) {
 		this.fixture = fixture;
 	}
 

@@ -41,7 +41,7 @@ import org.junit.Test;
  */
 public class ToolboxTextMapperAlignmentTest6 {
 	
-	private ToolboxTextMapper fixture = null;
+	private MonolithicToolboxTextMapper fixture = null;
 
 	/**
 	 * Set up the fixture.
@@ -50,7 +50,7 @@ public class ToolboxTextMapperAlignmentTest6 {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		ToolboxTextMapper mapper = new ToolboxTextMapper();
+		MonolithicToolboxTextMapper mapper = new MonolithicToolboxTextMapper();
 		File file = new File(this.getClass().getClassLoader().getResource("alignment-more-morph-than-lex-custom-string.txt").getFile());
 		String path = file.getAbsolutePath();
 		mapper.setResourceURI(URI.createFileURI(path));
@@ -83,14 +83,14 @@ public class ToolboxTextMapperAlignmentTest6 {
 	/**
 	 * @return the fixture
 	 */
-	private ToolboxTextMapper getFixture() {
+	private MonolithicToolboxTextMapper getFixture() {
 		return fixture;
 	}
 
 	/**
 	 * @param fixture the fixture to set
 	 */
-	private void setFixture(ToolboxTextMapper fixture) {
+	private void setFixture(MonolithicToolboxTextMapper fixture) {
 		this.fixture = fixture;
 	}
 

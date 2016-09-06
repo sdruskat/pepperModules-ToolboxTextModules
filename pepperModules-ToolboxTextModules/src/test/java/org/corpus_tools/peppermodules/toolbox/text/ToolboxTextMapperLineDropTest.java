@@ -45,7 +45,7 @@ import org.junit.Test;
  */
 public class ToolboxTextMapperLineDropTest {
 	
-	private ToolboxTextMapper fixture = null;
+	private MonolithicToolboxTextMapper fixture = null;
 
 	/**
 	 * Set up the fixture.
@@ -54,7 +54,7 @@ public class ToolboxTextMapperLineDropTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		ToolboxTextMapper mapper = new ToolboxTextMapper();
+		MonolithicToolboxTextMapper mapper = new MonolithicToolboxTextMapper();
 		File file = new File(this.getClass().getClassLoader().getResource("drop-empty-lines.txt").getFile());
 		String path = file.getAbsolutePath();
 		mapper.setResourceURI(URI.createFileURI(path));
@@ -206,14 +206,14 @@ public class ToolboxTextMapperLineDropTest {
 	/**
 	 * @return the fixture
 	 */
-	private ToolboxTextMapper getFixture() {
+	private MonolithicToolboxTextMapper getFixture() {
 		return fixture;
 	}
 
 	/**
 	 * @param fixture the fixture to set
 	 */
-	private void setFixture(ToolboxTextMapper fixture) {
+	private void setFixture(MonolithicToolboxTextMapper fixture) {
 		this.fixture = fixture;
 	}
 
