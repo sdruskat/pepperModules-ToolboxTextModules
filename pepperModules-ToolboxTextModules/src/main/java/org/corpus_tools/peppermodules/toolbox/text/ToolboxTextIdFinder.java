@@ -97,6 +97,7 @@ public class ToolboxTextIdFinder {
 							logger.warn("The \\id line starting at byte offset " + str.getCount() + " is empty. The document will be given a generic name!");
 							idName = "Document " + genericDocumentNameCount++;
 						}
+						// Put the extracted info into the map that will be returned
 						idNameOffsetMap.put(idName, offset);
 					}
 					bos.reset();
