@@ -24,10 +24,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
-import org.corpus_tools.salt.graph.Identifier;
 import org.eclipse.emf.common.util.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.io.CountingInputStream;
 
 /**
- * TODO Description
+ * A parser that finds the header section and byte offsets for \id markers in a Toolbox text file.
  *
  * @author Stephan Druskat <mail@sdruskat.net>
  *
@@ -43,12 +41,10 @@ import com.google.common.io.CountingInputStream;
 public class ToolboxTextIdFinder {
 	
 	private final File corpusFile;
-	private final LinkedHashMap<Identifier, URI> resourceMap = new LinkedHashMap<>();
 	private final String idMarker;
 	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextIdFinder.class);
 	private int genericDocumentNameCount = 0;
-	private final Map<Identifier, Long> offsetMap = new HashMap<>();
-	private ResourceHeaderend resourceHeader = null;
+	private ResourceHeaderEnd resourceHeader = null;
 	
 	/**
 	 * @param corpusFile
@@ -62,7 +58,8 @@ public class ToolboxTextIdFinder {
 	}
 
 	/**
-	 * TODO: Description
+	 * Parses a Toolbox text file, setting the instances {@link #resourceHeader} field
+	 * in the process and returning a map, mapping contents of \id lines to byte offsets.
 	 */
 	public Map<String, Long> parse() {
 		Map<String, Long> idNameOffsetMap = new HashMap<>();
@@ -87,7 +84,7 @@ public class ToolboxTextIdFinder {
 						// If the first \id offset isn't recorded as end offset for the header yet, do so
 						if (!isFirstIdOffsetWritten) {
 							isFirstIdOffsetWritten = true;
-							resourceHeader = new ResourceHeaderend(URI.createFileURI(corpusFile.getAbsolutePath()), offset);
+							resourceHeader = new ResourceHeaderEnd(URI.createFileURI(corpusFile.getAbsolutePath()), offset);
 						}
 						// Read the full rest of the \id line to gain a name for the document
 						StringBuilder sb = new StringBuilder();
@@ -112,40 +109,23 @@ public class ToolboxTextIdFinder {
 		return idNameOffsetMap;
 	}
 
-	/**
-	 * @return the resourceMap
-	 */
-	protected LinkedHashMap<Identifier, URI> getResourceMap() {
-		return resourceMap;
-	}
-
-	/**
-	 * @return the offsetMap
-	 */
-	protected Map<Identifier, Long> getOffsetMap() {
-		return offsetMap;
-	}
-
-	/**
-	 * TODO: Description
-	 *
-	 * @return
-	 */
-	public ResourceHeaderend getResourceHeader() {
+	public ResourceHeaderEnd getResourceHeader() {
 		return resourceHeader;
 	}
 	
 	/**
-	 * TODO Description
+	 * A bean providing a URI for a Toolbox text file in the local file system
+	 * as well as a byte offset of type {@link Long} that points at the end
+	 * of the header section of the file.
 	 *
 	 * @author Stephan Druskat <mail@sdruskat.net>
 	 *
 	 */
-	protected class ResourceHeaderend {
+	protected class ResourceHeaderEnd {
 		private URI resource = null;
 		private Long headerEnd = null;
 
-		protected ResourceHeaderend(URI resource, Long headerEnd) {
+		protected ResourceHeaderEnd(URI resource, Long headerEnd) {
 			this.resource = resource;
 			this.headerEnd = headerEnd;
 		}
