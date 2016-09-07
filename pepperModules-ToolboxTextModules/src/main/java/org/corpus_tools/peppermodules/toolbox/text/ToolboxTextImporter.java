@@ -18,9 +18,8 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import java.io.File;
+import java.io.File; 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -158,16 +157,19 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			}
 		}
 		else if (corpusFile.isFile()) {
+			URI corpusFileURI = URI.createFileURI(corpusFile.getAbsolutePath());
 			// Create a corpus for the file
 	        SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFile.getName());
 	        getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), URI.createFileURI(corpusFile.getAbsolutePath()));
 	        // Create documents for \ids in file
-	        ToolboxTextIdFinder finder = new ToolboxTextIdFinder(corpusFile, corpusGraph, subCorpus, ((ToolboxTextImporterProperties) getProperties()).getIdMarker());
-	        finder.parse();
-	        LinkedHashMap<Identifier, URI> localResourceMap = finder.getResourceMap();
-	        getIdentifier2ResourceTable().putAll(localResourceMap);
-	        offsetMap.putAll(finder.getOffsetMap());
-	        headerMap.put(finder.getResourceHeader().getResource(), finder.getResourceHeader().getHeader());
+	        ToolboxTextIdFinder finder = new ToolboxTextIdFinder(corpusFile, ((ToolboxTextImporterProperties) getProperties()).getIdMarker());
+	        Map<String, Long> idNameOffsetMap = finder.parse();
+	        for (Entry<String, Long> entry : idNameOffsetMap.entrySet()) {
+	        	SDocument doc = corpusGraph.createDocument(subCorpus, entry.getKey());
+	        	getIdentifier2ResourceTable().put(doc.getIdentifier(), corpusFileURI);
+	        	offsetMap.put(doc.getIdentifier(), entry.getValue());
+	        }
+	        headerMap.put(finder.getResourceHeader().getResource(), finder.getResourceHeader().getHeaderEndOffset());
 		}
 	}
 	

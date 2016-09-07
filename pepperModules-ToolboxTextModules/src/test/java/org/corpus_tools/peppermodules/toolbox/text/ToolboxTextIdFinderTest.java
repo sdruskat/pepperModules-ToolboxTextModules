@@ -6,10 +6,7 @@ package org.corpus_tools.peppermodules.toolbox.text;
 import static org.junit.Assert.*;
 
 import java.io.File;
-
-import org.corpus_tools.salt.SaltFactory;
-import org.corpus_tools.salt.common.SCorpus;
-import org.corpus_tools.salt.common.SCorpusGraph;
+import java.util.Map;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,10 +28,8 @@ public class ToolboxTextIdFinderTest {
 	@Before
 	public void setUp() throws Exception {
 		corpusFile = new File(this.getClass().getClassLoader().getResource("ids.txt").getFile());
-		SCorpusGraph corpusGraph = SaltFactory.createSCorpusGraph();
-		SCorpus subCorpus = SaltFactory.createSCorpus();
 		String idMarker = "id";
-		ToolboxTextIdFinder finder = new ToolboxTextIdFinder(corpusFile, corpusGraph, subCorpus, idMarker);
+		ToolboxTextIdFinder finder = new ToolboxTextIdFinder(corpusFile, idMarker);
 		setFixture(finder);
 	}
 
@@ -43,7 +38,14 @@ public class ToolboxTextIdFinderTest {
 	 */
 	@Test
 	public void testParse() {
-		getFixture().parse();
+		Map<String, Long> map = getFixture().parse();
+		assertEquals(3, map.entrySet().size());
+		assertTrue(map.containsKey("ID1"));
+		assertTrue(map.containsKey("ID2"));
+		assertTrue(map.containsKey("ID3"));
+		assertEquals(Long.valueOf("32"), Long.valueOf(map.get("ID1")));
+		assertEquals(Long.valueOf("117"), Long.valueOf(map.get("ID2")));
+		assertEquals(Long.valueOf("202"), Long.valueOf(map.get("ID3")));
 	}
 
 	/**
@@ -52,7 +54,6 @@ public class ToolboxTextIdFinderTest {
 	@Test
 	public void testGetResourceHeader() {
 		getFixture().parse();
-		System.err.println(getFixture().getResourceHeader());
 		assertEquals(URI.createFileURI(corpusFile.getAbsolutePath()), getFixture().getResourceHeader().getResource());
 	}
 

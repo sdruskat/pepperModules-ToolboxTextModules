@@ -55,8 +55,6 @@ public class IdBasedToolboxTextMapperTest {
 		assertEquals("v3.0 Test", getFixture().getCorpus().getMetaAnnotation("toolbox::_sh").getValue());
 		assertNotNull(getFixture().getCorpus().getMetaAnnotation("toolbox::info"));
 		assertEquals("Some info", getFixture().getCorpus().getMetaAnnotation("toolbox::info").getValue());
-		
-		
 	}
 
 	/**

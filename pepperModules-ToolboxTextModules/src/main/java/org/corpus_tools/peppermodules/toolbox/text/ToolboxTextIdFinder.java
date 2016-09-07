@@ -27,9 +27,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
-import org.corpus_tools.salt.common.SCorpus;
-import org.corpus_tools.salt.common.SCorpusGraph;
-import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.graph.Identifier;
 import org.eclipse.emf.common.util.URI;
 import org.slf4j.Logger;
@@ -46,8 +43,6 @@ import com.google.common.io.CountingInputStream;
 public class ToolboxTextIdFinder {
 	
 	private final File corpusFile;
-	private final SCorpusGraph corpusGraph;
-	private final SCorpus parent;
 	private final LinkedHashMap<Identifier, URI> resourceMap = new LinkedHashMap<>();
 	private final String idMarker;
 	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextIdFinder.class);
@@ -61,17 +56,16 @@ public class ToolboxTextIdFinder {
 	 * @param subCorpus
 	 * @param idMarker 
 	 */
-	public ToolboxTextIdFinder(File corpusFile, SCorpusGraph corpusGraph, SCorpus subCorpus, String idMarker) {
+	public ToolboxTextIdFinder(File corpusFile, String idMarker) {
 		this.corpusFile = corpusFile;
-		this.corpusGraph = corpusGraph;
-		this.parent = subCorpus;
 		this.idMarker = idMarker;
 	}
 
 	/**
 	 * TODO: Description
 	 */
-	public void parse() {
+	public Map<String, Long> parse() {
+		Map<String, Long> idNameOffsetMap = new HashMap<>();
 		// Get the char-based length of the \id marker
 		int idMarkerLength = idMarker.length();
 		// Use a CIS to memorize position, and put a buffered FIS inside (buffered for performance reasons)
@@ -84,12 +78,12 @@ public class ToolboxTextIdFinder {
 					// Remember the actual pointer position
 					long offset = str.getCount() - 1;
 					// Start putting the next idMarkerLength bytes into a byte array and compare with idMarker
-					for (int i = 0; i < idMarkerLength; i++) {
+					for (int i = 0; i < idMarkerLength + 1; i++) {
 						b = str.read();
 						bos.write(b);
 					}
 					// If an \id marker is actually found, use the trimmed rest of the line as name for the newly created SDocument
-					if (bos.toString().equals(idMarker)) {
+					if (bos.toString().equals(idMarker + ' ')) {
 						// If the first \id offset isn't recorded as end offset for the header yet, do so
 						if (!isFirstIdOffsetWritten) {
 							isFirstIdOffsetWritten = true;
@@ -106,10 +100,7 @@ public class ToolboxTextIdFinder {
 							logger.warn("The \\id line starting at byte offset " + str.getCount() + " is empty. The document will be given a generic name!");
 							idName = "Document " + genericDocumentNameCount++;
 						}
-						SDocument doc = corpusGraph.createDocument(parent, idName);
-						// Save all the important stuff for re-use in the importer
-						resourceMap.put(doc.getIdentifier(), URI.createFileURI(corpusFile.getAbsolutePath()));
-						offsetMap.put(doc.getIdentifier(), offset);
+						idNameOffsetMap.put(idName, offset);
 					}
 					bos.reset();
 				}
@@ -118,6 +109,7 @@ public class ToolboxTextIdFinder {
 		catch (IOException e) {
 			throw new PepperModuleException("Cannot read file " + corpusFile.getName() + "!");
 		}
+		return idNameOffsetMap;
 	}
 
 	/**
@@ -168,7 +160,7 @@ public class ToolboxTextIdFinder {
 		/**
 		 * @return the headerEnd
 		 */
-		public Long getHeader() {
+		public Long getHeaderEndOffset() {
 			return headerEnd;
 		}
 	}

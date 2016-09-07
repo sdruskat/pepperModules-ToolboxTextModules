@@ -20,11 +20,14 @@ package org.corpus_tools.peppermodules.toolbox.text;
 
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter;
 import org.corpus_tools.salt.SaltFactory;
+import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.graph.Identifier;
+import org.eclipse.emf.common.util.URI;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.common.FormatDesc;
 import org.corpus_tools.pepper.modules.PepperMapper;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
@@ -45,9 +48,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		importer.setProperties(new ToolboxTextImporterProperties());
 		setFixture(importer);
 
-		FormatDesc formatDef = new FormatDesc();
-		formatDef.setFormatName("toolbox-text");
-		formatDef.setFormatVersion("3.0");
+		FormatDesc formatDef = new FormatDesc().setFormatName("toolbox-text").setFormatVersion("3.0");
 		this.supportedFormatsCheck.add(formatDef);
 	}
 
@@ -77,6 +78,14 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	
 	@Test
 	public void testCreatePepperMapperInstanceOf() {
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(this.getClass().getClassLoader().getResource("ids.txt").getFile())));
+		getFixture().getCorpusDesc().getFormatDesc().setFormatName("toolbox-text").setFormatVersion("3.0");
+		SCorpusGraph importedSCorpusGraph = SaltFactory.createSCorpusGraph();
+		getFixture().getSaltProject().addCorpusGraph(importedSCorpusGraph);
+
+		// run your Pepper module
+		start();
+
 		PepperMapper mapper = getFixture().createPepperMapper(SaltFactory.createIdentifier(SaltFactory.createSDocument(), "Document"));
 		assertNotNull(mapper);
 		assertTrue(mapper instanceof PepperMapper);
