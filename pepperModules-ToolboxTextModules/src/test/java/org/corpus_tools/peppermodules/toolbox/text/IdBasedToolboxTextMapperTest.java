@@ -8,6 +8,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 
 import org.corpus_tools.salt.SaltFactory;
+import org.corpus_tools.salt.common.SCorpus;
 import org.corpus_tools.salt.common.SDocument;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
@@ -30,7 +31,7 @@ public class IdBasedToolboxTextMapperTest {
 	public void setUp() throws Exception {
 		File file = new File(this.getClass().getClassLoader().getResource("ids.txt").getFile());
 		String path = file.getAbsolutePath();
-		IdBasedToolboxTextMapper mapper = new IdBasedToolboxTextMapper(33L, 33L, URI.createFileURI(path));
+		IdBasedToolboxTextMapper mapper = new IdBasedToolboxTextMapper(33L, URI.createFileURI(path));
 		SDocument doc = SaltFactory.createSDocument();
 		mapper.setDocument(doc);
 		setFixture(mapper);
@@ -49,6 +50,9 @@ public class IdBasedToolboxTextMapperTest {
 	 */
 	@Test
 	public void testMapSCorpus() {
+		SCorpus c = SaltFactory.createSCorpus();
+		SaltFactory.createIdentifier(c, "corpus");
+		getFixture().setCorpus(c);
 		getFixture().mapSCorpus();
 		assertEquals(2, getFixture().getCorpus().getMetaAnnotations().size());
 		assertNotNull(getFixture().getCorpus().getMetaAnnotation("toolbox::_sh"));

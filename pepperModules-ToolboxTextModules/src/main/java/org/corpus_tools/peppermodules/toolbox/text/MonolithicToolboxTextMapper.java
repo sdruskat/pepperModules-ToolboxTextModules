@@ -38,7 +38,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
-import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocumentGraph;
@@ -76,15 +75,11 @@ import com.google.common.collect.ListMultimap;
  *
  * @author Stephan Druskat <mail@sdruskat.net>
  */
-public class MonolithicToolboxTextMapper extends PepperMapperImpl {
+public class MonolithicToolboxTextMapper extends AbstractToolboxTextMapper {
 
 	private static final Logger logger = LoggerFactory.getLogger(MonolithicToolboxTextMapper.class);
 
 	private static final String DATE_LAST_MAPPING = "date-last-mapping";
-
-	private static final String SALT_NAMESPACE_TOOLBOX = "toolbox";
-
-	private static final String IMPORTER_NAME = "toolbox-text-importer";
 
 	/**
 	 * Whether the header block of the file has already been mapped.

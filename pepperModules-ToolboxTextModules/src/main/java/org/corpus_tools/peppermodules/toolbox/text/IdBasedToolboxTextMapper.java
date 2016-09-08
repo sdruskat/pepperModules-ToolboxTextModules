@@ -18,23 +18,20 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedInputStream; 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
-import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.salt.common.SCorpus;
+import org.corpus_tools.salt.common.SDocument;
 import org.eclipse.emf.common.util.URI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.io.CountingInputStream;
 
 /**
@@ -43,32 +40,51 @@ import com.google.common.io.CountingInputStream;
  * @author Stephan Druskat <mail@sdruskat.net>
  *
  */
-public class IdBasedToolboxTextMapper extends PepperMapperImpl {
+public class IdBasedToolboxTextMapper extends AbstractToolboxTextMapper {
 	
-	private static final Logger logger = LoggerFactory.getLogger(IdBasedToolboxTextMapper.class);
-
 	private final Long headerEnd;
 	private final Long offset;
 	private final File corpusFile;
-	
-	private static final String SALT_NAMESPACE_TOOLBOX = "toolbox";
+	private final Long nextOffset;
 	
 	/**
-	 * @param long1
-	 * @param string
+	 * Private constructor setting fields.
+	 * 
+	 * @param offset
+	 * @param headerEnd
+	 * @param resourceURI
+	 * @param nextOffset
 	 */
-	public IdBasedToolboxTextMapper(Long offset, Long headerEnd, URI resourceURI) {
+	private IdBasedToolboxTextMapper(Long offset, Long headerEnd, URI resourceURI, Long nextOffset) {
 		this.offset = offset;
+		this.nextOffset = nextOffset;
 		this.headerEnd = headerEnd;
 		this.setResourceURI(resourceURI);
 		corpusFile = new File(resourceURI.toFileString());
 	}
 	
 	/**
+	 * Constructor for {@link SDocument}s, which takes parameters for the
+	 * offset, the resource's {@link URI} and the offset of the next
+	 * section to be mapped onto an {@link SDocument}.
+	 * 
 	 * @param offset
+	 * @param resourceURI
+	 * @param nextOffset
 	 */
-	public IdBasedToolboxTextMapper(Long offset, URI resourceURI) {
-		this(offset, null, resourceURI);
+	public IdBasedToolboxTextMapper(Long offset, URI resourceURI, Long nextOffset) {
+		this(offset, null, resourceURI, nextOffset);
+	}
+
+	/**
+	 * Constructor for {@link SCorpus}, which takes parameters for the
+	 * header end offset and the reource's {@link URI}.
+	 * 
+	 * @param headerEnd
+	 * @param resource
+	 */
+	public IdBasedToolboxTextMapper(Long headerEnd, URI resource) {
+		this(0l, headerEnd, resource, null);
 	}
 
 	/* (non-Javadoc)
@@ -114,17 +130,30 @@ public class IdBasedToolboxTextMapper extends PepperMapperImpl {
 	
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
-		try (BufferedInputStream str = new BufferedInputStream(new FileInputStream(corpusFile));
+		// Compile a list of lines in the section of the file that is delimited by offset and next offset
+		List<String> lines = new ArrayList<>();
+		try (CountingInputStream str = new CountingInputStream(new BufferedInputStream(new FileInputStream(corpusFile)));
 				ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 			str.skip(offset);
 			int b;
-			while ((b = str.read()) > 0) {
-				System.err.println((char) b);
+			while (str.getCount() < nextOffset) {
+				b = str.read();
+				if ((char) b != '\n') {
+					bos.write(b);
+				}
+				else {
+					lines.add(bos.toString().trim());
+					bos.reset();
+				}
 			}
 		}
 		catch (IOException e) {
 			throw new PepperModuleException("Cannot read corpus file " + corpusFile.getAbsolutePath() + "!", e);
 		}
+		
+		// Drop empty lines
+		lines.removeAll(Arrays.asList("", null));
+		
 		return (DOCUMENT_STATUS.COMPLETED);
 	}
 
