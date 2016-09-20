@@ -18,7 +18,19 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+
+import com.google.common.io.CountingInputStream;
 
 /**
  * TODO Description
@@ -33,6 +45,8 @@ public class ToolboxTextSegmentationParser {
 	private final String refMarker;
 	private final int idMarkerLength;
 	private final int refMarkerLength;
+	private final List<Long> idOffsets = new ArrayList<>();
+	private final Map<Long, List<Long>> refMap = new HashMap<>();
 
 	public ToolboxTextSegmentationParser(File corpusFile, String idMarker, String refMarker) {
 		this.file = corpusFile;
@@ -46,7 +60,56 @@ public class ToolboxTextSegmentationParser {
 	 * 
 	 */
 	public void parse() {
-		
+		try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file)));
+				ByteArrayOutputStream idBos = new ByteArrayOutputStream(idMarkerLength);
+				ByteArrayOutputStream refBos = new ByteArrayOutputStream(idMarkerLength)) {
+			int currentByte;
+			int longerMarkerLength = idMarkerLength >= refMarkerLength ? idMarkerLength : refMarkerLength;
+			long currentIdOffset = -1;
+			while ((currentByte = stream.read()) > 0) {
+				long currentOffset = stream.getCount() - 1;
+				if (currentByte == '\\') {
+					for (int i = 0; i < longerMarkerLength + 1; i++) {
+						currentByte = stream.read();
+						if (i <= idMarkerLength) {
+							idBos.write(currentByte);
+						}
+						if (i <= refMarkerLength) {
+							refBos.write(currentByte);
+						}
+					}
+					// If an \id marker is actually found, use the trimmed rest of the line as name for the newly created SDocument
+					if (idBos.toString().equals(idMarker + ' ')) {
+						currentIdOffset = currentOffset;
+						idOffsets.add(currentIdOffset);
+						refMap.put(currentIdOffset, new ArrayList<Long>());
+					}
+					else if (refBos.toString().equals(refMarker + ' ')) {
+						refMap.get(currentIdOffset).add(currentOffset);
+					}
+					idBos.reset();
+					refBos.reset();
+				}
+				
+			}
+			
+		} catch (IOException e) {
+			throw new PepperModuleException("Could not read corpus file " + file.getAbsolutePath(), e);
+		}
+	}
+
+	/**
+	 * @return the refMap
+	 */
+	Map<Long, List<Long>> getRefMap() {
+		return refMap;
+	}
+
+	/**
+	 * @return the idOffsets
+	 */
+	List<Long> getIdOffsets() {
+		return idOffsets;
 	}
 
 }

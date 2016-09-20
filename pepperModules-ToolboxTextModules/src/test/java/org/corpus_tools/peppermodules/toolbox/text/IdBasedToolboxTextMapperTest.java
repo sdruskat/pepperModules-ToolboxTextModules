@@ -10,8 +10,10 @@ import java.io.File;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SCorpus;
 import org.corpus_tools.salt.common.SDocument;
+import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -43,6 +45,7 @@ public class IdBasedToolboxTextMapperTest {
 	@Test
 	public void testMapSDocument() {
 		getFixture().mapSDocument();
+		
 	}
 
 	/**
