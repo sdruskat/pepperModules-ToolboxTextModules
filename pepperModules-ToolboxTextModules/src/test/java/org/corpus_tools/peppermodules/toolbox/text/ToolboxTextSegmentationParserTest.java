@@ -60,6 +60,21 @@ public class ToolboxTextSegmentationParserTest {
 	}
 
 	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextSegmentationParser#parse()}.
+	 */
+	@Test
+	public void testParseDocWithoutIds() {
+		File file = new File(this.getClass().getClassLoader().getResource("no-ids.txt").getFile());
+		ToolboxTextSegmentationParser parser = new ToolboxTextSegmentationParser(file, "id", "ref");
+		setFixture(parser);
+		getFixture().parse();
+		assertNotNull(getFixture().getIdOffsets());
+		assertNotNull(getFixture().getRefMap());
+		assertEquals(0, getFixture().getIdOffsets().size());
+		assertArrayEquals(new Long[] {32L, 60L, 88L, 116L, 144L, 172L}, getFixture().getRefMap().get(-1L).toArray(new Long[6]));
+	}
+
+	/**
 	 * @return the fixture
 	 */
 	private ToolboxTextSegmentationParser getFixture() {

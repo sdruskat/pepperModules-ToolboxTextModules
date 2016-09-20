@@ -85,14 +85,18 @@ public class ToolboxTextSegmentationParser {
 						refMap.put(currentIdOffset, new ArrayList<Long>());
 					}
 					else if (refBos.toString().equals(refMarker + ' ')) {
-						refMap.get(currentIdOffset).add(currentOffset);
+						if (refMap.get(currentIdOffset) == null) {
+							refMap.put(-1L, new ArrayList<Long>());
+							refMap.get(-1L).add(currentOffset);
+						}
+						else {
+							refMap.get(currentIdOffset).add(currentOffset);
+						}
 					}
 					idBos.reset();
 					refBos.reset();
 				}
-				
 			}
-			
 		} catch (IOException e) {
 			throw new PepperModuleException("Could not read corpus file " + file.getAbsolutePath(), e);
 		}
