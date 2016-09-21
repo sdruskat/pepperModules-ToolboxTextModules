@@ -47,6 +47,8 @@ public class ToolboxTextSegmentationParserTest {
 
 	/**
 	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextSegmentationParser#parse()}.
+	 * 
+	 * Tests against a default minimum example, where a Toolbox file has a header, and 3 \ids with 2 \refs each.
 	 */
 	@Test
 	public void testParse() {
@@ -62,6 +64,8 @@ public class ToolboxTextSegmentationParserTest {
 
 	/**
 	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextSegmentationParser#parse()}.
+	 * 
+	 * Tests against a minimum example, where there are no \ids and 6 \refs.
 	 */
 	@Test
 	public void testParseDocWithoutIds() {
@@ -77,6 +81,8 @@ public class ToolboxTextSegmentationParserTest {
 	
 	/**
 	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextSegmentationParser#parse()}.
+	 * 
+	 * Tests against a minimum example, where there is only 1 \id containing 6 \refs.
 	 */
 	@Test
 	public void testParseDocWithOneId() {
@@ -92,6 +98,10 @@ public class ToolboxTextSegmentationParserTest {
 	
 	/**
 	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextSegmentationParser#parse()}.
+	 * 
+	 * Tests against a minimum example, where there are 2 \refs before the first \id (i.e., sentences belonging to no
+	 * document), and 1 \id in the middle of the file without any \refs before the next \id (i.e., an empty document), 
+	 * and 1 \id at the very end of the file without any following \refs (ie., another empty document).
 	 */
 	@Test
 	public void testParseDocWithIdAndRefOrphans() {
