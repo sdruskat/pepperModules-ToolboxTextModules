@@ -78,7 +78,6 @@ public class ToolboxTextSegmentationParser {
 							refBos.write(currentByte);
 						}
 					}
-					// If an \id marker is actually found, use the trimmed rest of the line as name for the newly created SDocument
 					if (idBos.toString().equals(idMarker + ' ')) {
 						currentIdOffset = currentOffset;
 						idOffsets.add(currentIdOffset);

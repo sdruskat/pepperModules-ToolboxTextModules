@@ -73,6 +73,21 @@ public class ToolboxTextSegmentationParserTest {
 		assertEquals(0, getFixture().getIdOffsets().size());
 		assertArrayEquals(new Long[] {32L, 60L, 88L, 116L, 144L, 172L}, getFixture().getRefMap().get(-1L).toArray(new Long[6]));
 	}
+	
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextSegmentationParser#parse()}.
+	 */
+	@Test
+	public void testParseDocWithOneId() {
+		File file = new File(this.getClass().getClassLoader().getResource("one-id.txt").getFile());
+		ToolboxTextSegmentationParser parser = new ToolboxTextSegmentationParser(file, "id", "ref");
+		setFixture(parser);
+		getFixture().parse();
+		assertNotNull(getFixture().getIdOffsets());
+		assertNotNull(getFixture().getRefMap());
+		assertEquals(1, getFixture().getIdOffsets().size());
+		assertArrayEquals(new Long[] {61L, 89L, 117L, 145L, 173L, 201L}, getFixture().getRefMap().get(32L).toArray(new Long[6]));
+	}
 
 	/**
 	 * @return the fixture
