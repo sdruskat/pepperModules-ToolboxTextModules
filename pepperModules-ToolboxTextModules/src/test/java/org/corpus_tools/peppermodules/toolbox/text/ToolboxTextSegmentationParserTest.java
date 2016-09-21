@@ -53,6 +53,7 @@ public class ToolboxTextSegmentationParserTest {
 		getFixture().parse();
 		assertNotNull(getFixture().getIdOffsets());
 		assertNotNull(getFixture().getRefMap());
+		assertEquals(3, getFixture().getIdOffsets().size());
 		assertArrayEquals(new Long[] {32L, 117L, 202L}, getFixture().getIdOffsets().toArray(new Long[getFixture().getIdOffsets().size()]));
 		assertArrayEquals(new Long[] {61L, 89L}, getFixture().getRefMap().get(32L).toArray(new Long[2]));
 		assertArrayEquals(new Long[] {146L, 174L}, getFixture().getRefMap().get(117L).toArray(new Long[2]));
@@ -88,7 +89,29 @@ public class ToolboxTextSegmentationParserTest {
 		assertEquals(1, getFixture().getIdOffsets().size());
 		assertArrayEquals(new Long[] {61L, 89L, 117L, 145L, 173L, 201L}, getFixture().getRefMap().get(32L).toArray(new Long[6]));
 	}
-
+	
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextSegmentationParser#parse()}.
+	 */
+	@Test
+	public void testParseDocWithIdAndRefOrphans() {
+		File file = new File(this.getClass().getClassLoader().getResource("orphan-ids-and-refs.txt").getFile());
+		ToolboxTextSegmentationParser parser = new ToolboxTextSegmentationParser(file, "id", "ref");
+		setFixture(parser);
+		getFixture().parse();
+		assertNotNull(getFixture().getIdOffsets());
+		assertNotNull(getFixture().getRefMap());
+		assertEquals(5, getFixture().getIdOffsets().size());
+		assertEquals(6, getFixture().getRefMap().size());
+		assertArrayEquals(new Long[] {100L, 185L, 270L, 305L, 390L}, getFixture().getIdOffsets().toArray(new Long[getFixture().getIdOffsets().size()]));
+		assertArrayEquals(new Long[] {32L, 66L}, getFixture().getRefMap().get(-1L).toArray(new Long[2]));
+		assertArrayEquals(new Long[] {129L, 157L}, getFixture().getRefMap().get(100L).toArray(new Long[2]));
+		assertArrayEquals(new Long[] {214L, 242L}, getFixture().getRefMap().get(185L).toArray(new Long[2]));
+		assertTrue(getFixture().getRefMap().get(270L).isEmpty());
+		assertArrayEquals(new Long[] {334L, 362L}, getFixture().getRefMap().get(305L).toArray(new Long[2]));
+		assertTrue(getFixture().getRefMap().get(390L).isEmpty());
+	}
+	
 	/**
 	 * @return the fixture
 	 */
