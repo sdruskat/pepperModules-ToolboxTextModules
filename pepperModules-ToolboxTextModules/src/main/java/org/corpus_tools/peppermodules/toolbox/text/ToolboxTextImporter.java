@@ -18,14 +18,12 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import java.io.File;
+import java.io.File; 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.corpus_tools.pepper.impl.PepperImporterImpl;
 import org.corpus_tools.pepper.modules.PepperImporter;
 import org.corpus_tools.pepper.modules.PepperMapper;
@@ -35,7 +33,6 @@ import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleNotReadyException;
 import org.corpus_tools.salt.common.SCorpus;
 import org.corpus_tools.salt.common.SCorpusGraph;
-import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.graph.Identifier;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.service.component.annotations.Component;
@@ -54,9 +51,12 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	private final Map<URI, Long> headerMap = new HashMap<>();
 
 	private List<Long> sortedOffsets = new ArrayList<>();
+	
+	private StringBuilder warningBuilder = new StringBuilder();
 
 	public ToolboxTextImporter() {
 		super();
+		logger.warn("Starting toolbox text module");
 		setName("ToolboxTextImporter");
 		setVersion("1.0.0-SNAPSHOT");
 		setSupplierContact(URI.createURI("stephan.druskat@hu-berlin.de"));
@@ -102,6 +102,28 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	        
 	        // Parse file
 	        ToolboxTextSegmentationParser parser = new ToolboxTextSegmentationParser(corpusFile, getProperties().getIdMarker(), getProperties().getRefMarker());
+	        parser.parse();
+	        
+	        // Do some sanity checks on the documents, and write irregularities to log
+	        if (parser.getIdOffsets().isEmpty() && parser.getRefMap().size() == 1 && parser.getRefMap().containsKey(-1L)) {
+	        	// Corpus has no documents, i.e., build a corpus with exactly one document
+	        }
+	        else {
+	        	// Corpus has documents
+	        	if (!parser.getIdOffsets().isEmpty() && parser.getRefMap().isEmpty()) {
+	        		// Corpus has only empty \ids, so log a warning
+	        	}
+	        	if (parser.getRefMap().containsKey(-1L)) {
+	        		// There are \refs that are not attached to an \id, so log a warning and drop them
+	        		List<Long> orphanRefOffsets = parser.getRefMap().get(-1L);
+//	        		warnAboutOrphanRefs(orphanRefOffsets);
+	        		parser.getRefMap().remove(-1L);
+	        		if (parser.getRefMap().isEmpty()) {
+	        			throw new PepperModuleException("There are neither \\id nor \\ref marked sections in the file " + corpusFile.getAbsolutePath() + "! Aborting import.");
+	        		}
+	        	}
+	        	
+	        }
 	        
 	        /* 
 	         * TODO

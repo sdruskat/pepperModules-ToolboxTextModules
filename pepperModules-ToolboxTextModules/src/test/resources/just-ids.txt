@@ -1,0 +1,11 @@
+\_sh v3.0 Test
+\info Some info
+
+\id ID1
+\idinfo Info on ID1
+
+\id ID2
+\idinfo Info on ID2
+
+\id ID3
+\idinfo Info on ID3

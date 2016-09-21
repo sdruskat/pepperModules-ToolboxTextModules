@@ -21,6 +21,7 @@ package org.corpus_tools.peppermodules.toolbox.text;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +76,7 @@ public class ToolboxTextSegmentationParserTest {
 		getFixture().parse();
 		assertNotNull(getFixture().getIdOffsets());
 		assertNotNull(getFixture().getRefMap());
-		assertEquals(0, getFixture().getIdOffsets().size());
+		assertTrue(getFixture().getIdOffsets().isEmpty());
 		assertArrayEquals(new Long[] {32L, 60L, 88L, 116L, 144L, 172L}, getFixture().getRefMap().get(-1L).toArray(new Long[6]));
 	}
 	
@@ -120,6 +121,25 @@ public class ToolboxTextSegmentationParserTest {
 		assertTrue(getFixture().getRefMap().get(270L).isEmpty());
 		assertArrayEquals(new Long[] {334L, 362L}, getFixture().getRefMap().get(305L).toArray(new Long[2]));
 		assertTrue(getFixture().getRefMap().get(390L).isEmpty());
+	}
+	
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextSegmentationParser#parse()}.
+	 * 
+	 * Tests against a minimum example, where there are only 3 \ids containing 0 \refs.
+	 */
+	@Test
+	public void testParseDocWithJustIds() {
+		File file = new File(this.getClass().getClassLoader().getResource("just-ids.txt").getFile());
+		ToolboxTextSegmentationParser parser = new ToolboxTextSegmentationParser(file, "id", "ref");
+		setFixture(parser);
+		getFixture().parse();
+		assertNotNull(getFixture().getIdOffsets());
+		assertNotNull(getFixture().getRefMap());
+		assertEquals(3, getFixture().getIdOffsets().size());
+		for (List<Long> refs : getFixture().getRefMap().values()) {
+			assertTrue(refs.isEmpty());
+		}
 	}
 	
 	/**

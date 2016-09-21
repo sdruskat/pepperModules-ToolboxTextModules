@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CountingInputStream;
 
@@ -39,6 +41,8 @@ import com.google.common.io.CountingInputStream;
  *
  */
 public class ToolboxTextSegmentationParser {
+	
+	Logger logger = LoggerFactory.getLogger(ToolboxTextSegmentationParser.class);
 
 	private final File file;
 	private final String idMarker;
@@ -60,6 +64,7 @@ public class ToolboxTextSegmentationParser {
 	 * 
 	 */
 	public void parse() {
+		logger.warn("Parsing");
 		try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file)));
 				ByteArrayOutputStream idBos = new ByteArrayOutputStream(idMarkerLength);
 				ByteArrayOutputStream refBos = new ByteArrayOutputStream(idMarkerLength)) {
