@@ -64,7 +64,6 @@ public class ToolboxTextSegmentationParser {
 	 * 
 	 */
 	public void parse() {
-		logger.warn("Parsing");
 		try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file)));
 				ByteArrayOutputStream idBos = new ByteArrayOutputStream(idMarkerLength);
 				ByteArrayOutputStream refBos = new ByteArrayOutputStream(idMarkerLength)) {

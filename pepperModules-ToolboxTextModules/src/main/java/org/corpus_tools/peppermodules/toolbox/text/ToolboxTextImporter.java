@@ -18,7 +18,13 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import java.io.File; 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -103,26 +109,37 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	        // Parse file
 	        ToolboxTextSegmentationParser parser = new ToolboxTextSegmentationParser(corpusFile, getProperties().getIdMarker(), getProperties().getRefMarker());
 	        parser.parse();
-	        
+	        List<Long> idOffsets = parser.getIdOffsets();
+	        Map<Long, List<Long>> refMap = parser.getRefMap();
 	        // Do some sanity checks on the documents, and write irregularities to log
-	        if (parser.getIdOffsets().isEmpty() && parser.getRefMap().size() == 1 && parser.getRefMap().containsKey(-1L)) {
-	        	// Corpus has no documents, i.e., build a corpus with exactly one document
+	        if (idOffsets.isEmpty()) {
+	        	// Corpus has no \ids
+	        	if (refMap.isEmpty()) {
+	        		// Corpus also has no \refs
+	        		throw new PepperModuleException("The corpus file " + corpusFile.getAbsolutePath() + " contains neither \\ids nor \\refs. Aborting import!");
+	        	}
+	        	else {
+	        		// Corpus has no \ids but \refs, so create it with a single document containing all refs
+	        		// TODO
+	        	}
 	        }
 	        else {
-	        	// Corpus has documents
-	        	if (!parser.getIdOffsets().isEmpty() && parser.getRefMap().isEmpty()) {
-	        		// Corpus has only empty \ids, so log a warning
+	        	// Corpus has \ids
+	        	if (refMap.isEmpty()) {
+	        		// Corpus has only empty \ids, so log a warning but create the empty documents
+	        		logger.warn("The corpus file " + corpusFile.getAbsolutePath() + " contains \\ids, but neither of them contain \\refs. Will create empty documents with only metadata.");
+	        		// TODO
 	        	}
-	        	if (parser.getRefMap().containsKey(-1L)) {
+	        	if (refMap.containsKey(-1L)) {
 	        		// There are \refs that are not attached to an \id, so log a warning and drop them
-	        		List<Long> orphanRefOffsets = parser.getRefMap().get(-1L);
-//	        		warnAboutOrphanRefs(orphanRefOffsets);
-	        		parser.getRefMap().remove(-1L);
-	        		if (parser.getRefMap().isEmpty()) {
-	        			throw new PepperModuleException("There are neither \\id nor \\ref marked sections in the file " + corpusFile.getAbsolutePath() + "! Aborting import.");
-	        		}
+	        		List<Long> orphanRefOffsets = refMap.get(-1L);
+	        		warnAboutOrphanRefs(orphanRefOffsets, corpusFile);
+	        		refMap.remove(-1L);
+					if (refMap.isEmpty()) {
+						throw new PepperModuleException("There are neither \\id nor \\ref marked sections in the file "
+								+ corpusFile.getAbsolutePath() + "! Aborting import.");
+					}
 	        	}
-	        	
 	        }
 	        
 	        /* 
@@ -150,8 +167,6 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		}
 	}
 
-
-	
 	@Override
 	public PepperMapper createPepperMapper(Identifier identifier) {
 		Collections.sort(sortedOffsets);
@@ -231,6 +246,44 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	@Override
 	public ToolboxTextImporterProperties getProperties() {
 		return (ToolboxTextImporterProperties) super.getProperties();
+	}
+
+
+	/**
+	 * TODO: // Build orphan refs, log.warn about them and drop them
+	 *
+	 * @param orphanRefOffsets
+	 */
+	private void warnAboutOrphanRefs(List<Long> orphanRefOffsets, File file) {
+		StringBuilder warningBuilder = new StringBuilder("====================================================\n================= W A R N I N G ! ==================\n====================================================\n\nFound \\refs that do not belong to any \\ids!\n"
+				+ "The following orphaned \\refs will not be processed:\n\n");
+		for (Long orphanRefOffset : orphanRefOffsets) {
+			int offsetIndex = orphanRefOffsets.indexOf(orphanRefOffset);
+			Long nextOffset = null;
+			if (orphanRefOffsets.size() == offsetIndex + 1) {
+				// offsetIndex is the last index in the list, so leave nextOffset == null
+			}
+			else {
+				nextOffset = orphanRefOffsets.get(offsetIndex + 1);
+			}
+			try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+				if (nextOffset != null) {
+					// Read until the next offset
+					byte[] buf = new byte[nextOffset.intValue() - orphanRefOffset.intValue()];
+					raf.seek(orphanRefOffset);
+					raf.readFully(buf);
+					String readRef = new String(buf, StandardCharsets.UTF_8);
+					warningBuilder.append(readRef + "====================================================\n");
+				}
+				else {
+					System.err.println("NEXT OFFSET IS NULL");
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		logger.warn(warningBuilder.toString());
 	}
 	
 }
