@@ -6,8 +6,8 @@
 \mb m1
 
 \ref ORPHANREF2
-\tx Wort1
-\mb m1
+\tx WortOR2
+\mb mOR2
 
 \id ID1
 \idinfo Info on ID1
