@@ -115,8 +115,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			parser.parse();
 			List<Long> idOffsets = parser.getIdOffsets();
 			Map<Long, List<Long>> refMap = parser.getRefMap();
-			// Do some sanity checks on the documents, and write irregularities
-			// to log
+			// Do some sanity checks on the documents, and write irregularities to log
 			if (idOffsets.isEmpty()) {
 				// Corpus has no \ids
 				if (refMap.isEmpty()) {
@@ -133,13 +132,11 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			else {
 				// Corpus has \ids
 				if (refMap.isEmpty()) {
-					// Corpus has only empty \ids, so log a warning but create
-					// the empty documents
+					// Corpus has only empty \ids, so log a warning but create the empty documents
 					logger.warn("The corpus file " + corpusFile.getAbsolutePath()
-							+ " contains \\ids, but neither of them contain \\refs. Will create empty documents with only metadata.");
-					// TODO
+							+ " contains \\ids, but none of them contain \\refs. Will create empty documents with only metadata.");
 				}
-				if (refMap.containsKey(-1L)) {
+				else if (refMap.containsKey(-1L)) {
 					// There are \refs that are not attached to an \id, so log a
 					// warning and drop them
 					List<Long> orphanRefOffsets = refMap.get(-1L);
@@ -151,10 +148,6 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 					}
 				}
 			}
-
-			/*
-			 * TODO - Parse header - Parse ids - Parse refs
-			 */
 		}
 		// // Create documents for \ids in file
 		// ToolboxTextIdFinder finder = new ToolboxTextIdFinder(corpusFile,
@@ -251,8 +244,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 */
 	@Override
 	public boolean isReadyToStart() throws PepperModuleNotReadyException {
-		for (String fileExtension : ((String) ((ToolboxTextImporterProperties) getProperties()).getFileExtensions())
-				.split("\\s*,\\s*")) {
+		for (String fileExtension : ((String) ((ToolboxTextImporterProperties) getProperties()).getFileExtensions()).split("\\s*,\\s*")) {
 			getDocumentEndings().add(fileExtension);
 		}
 		return (super.isReadyToStart());
@@ -264,7 +256,12 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	}
 
 	/**
-	 * TODO: // Build orphan refs, log.warn about them and drop them
+	 * Extracts orphaned \refs by streaming the input file from offset to
+	 * offset for recorded \ref orphans taken from the parameter list
+	 * (or the next \id or EOF in case of the
+	 * last orphaned \ref offset in the list), and building them into a
+	 * string that will be logged at level warn (which in Pepper versions >= 3.1
+	 * will append a separate file containing war-level logs only).
 	 *
 	 * @param orphanRefOffsets
 	 */
@@ -280,15 +277,14 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			int offsetIndex = orphanRefOffsets.indexOf(orphanRefOffset);
 			Long nextOffset = null;
 			if (orphanRefOffsets.size() == offsetIndex + 1) {
-				// offsetIndex is the last index in the list, so leave
-				// nextOffset == null
+				// offsetIndex is the last index in the list, so leave nextOffset == null
 			} 
 			else {
 				nextOffset = orphanRefOffsets.get(offsetIndex + 1);
 			}
 			try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 				if (nextOffset != null) {
-					// Read until the next offset
+					// Read until the next offset and append text to warning message
 					byte[] buf = new byte[nextOffset.intValue() - orphanRefOffset.intValue()];
 					raf.seek(orphanRefOffset);
 					raf.readFully(buf);
@@ -296,14 +292,15 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 					warningBuilder.append(readRef + "====================================================\n");
 				} 
 				else {
-					// Read until the next instance of \id (or EOF)
+					// Read until the next instance of \id (or EOF) and append text to warning message
 					raf.seek(orphanRefOffset);
 					String line, marker;
 					while ((line = raf.readLine()) != null) {
 						if (!line.trim().isEmpty()) {
-							// Extract the marker from the line
+							// Extract the marker from the line and check whether it is an \id marker
 							marker = line.split("\\s+")[0].trim().substring(1);
 							if (!(marker.equals(getProperties().getIdMarker()))) {
+								// Append line to warning message
 								warningBuilder.append(line + "\n");
 							} 
 							else {
@@ -316,6 +313,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 				throw new PepperModuleException("Could not read file " + file.getAbsolutePath() + "!", e);
 			}
 		}
+		// Log warning
 		logger.warn(warningBuilder.toString()
 				+ "====================================================\n====================================================\n====================================================\n");
 	}
