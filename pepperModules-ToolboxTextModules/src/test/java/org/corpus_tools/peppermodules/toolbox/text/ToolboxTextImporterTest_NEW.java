@@ -18,23 +18,21 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.common.FormatDesc;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.pepper.testFramework.PepperImporterTest;
-import org.corpus_tools.salt.SaltFactory;
-import org.corpus_tools.salt.common.SCorpusGraph;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * TODO Description
+ * Unit tests for {@link ToolboxTextImporter}.
  *
  * @author Stephan Druskat
  *
@@ -49,7 +47,7 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 		this.setFixture(new ToolboxTextImporter());
 		this.supportedFormatsCheck.add(new FormatDesc().setFormatName("toolbox-text").setFormatVersion("3.0"));
 		this.getFixture().getCorpusDesc().getFormatDesc().setFormatName("toolbox-text").setFormatVersion("3.0");
-		SCorpusGraph importedSCorpusGraph = getFixture().getSaltProject().createCorpusGraph();
+		getFixture().getSaltProject().createCorpusGraph();
 	}
 
 	/**
@@ -64,15 +62,6 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 	/**
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
-	 */
-	@Test
-	public void testImportCorpusStructure() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextSegmentationParser#parse()}.
 	 * 
 	 * Tests against a minimum example, where there are 0 \ids and 0 \refs,
 	 * i.e., an empty corpus.
@@ -85,7 +74,37 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 	
 	/**
 	 * Test method for
-	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextSegmentationParser#parse()}.
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there are 0 \ids and n \refs,
+	 * i.e., what will become a single corpus with a single document.
+	 */
+	@Test
+	public void testParseMonolithicDocument() {
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("no-ids.txt"))));
+		start();
+		assertEquals((Long) 32L, getFixture().getHeaderEndOffset());
+		assertTrue(getFixture().isMonolithic());
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there are 0 \ids and n \refs,
+	 * i.e., what will become a single corpus with a single document.
+	 */
+	@Test
+	public void testParseStandardDocument() {
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("ids.txt"))));
+		start();
+		assertEquals((Long) 32L, getFixture().getHeaderEndOffset());
+		assertFalse(getFixture().isMonolithic());
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
 	 * Tests against a minimum example, where there are 0 \ids and 0 \refs,
 	 * i.e., an empty corpus.
@@ -106,7 +125,13 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 	 */
 	@Test
 	public void testGetProperties() {
-		fail("Not yet implemented"); // TODO
+		assertTrue(getFixture().getProperties() instanceof ToolboxTextImporterProperties);
 	}
+	
+	@Override
+	public ToolboxTextImporter getFixture() {
+		return (ToolboxTextImporter) super.getFixture();
+	}
+	
 
 }

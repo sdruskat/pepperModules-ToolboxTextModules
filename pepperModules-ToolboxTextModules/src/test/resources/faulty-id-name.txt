@@ -1,15 +1,7 @@
 \_sh v3.0 Test
 \info Some info
 
-\ref ORPHANREF1
-\tx Wort1
-\mb m1
-
-\ref ORPHANREF2
-\tx Wort1
-\mb m1
-
-\id ID1
+\id
 \idinfo Info on ID1
 
 \ref REF1
@@ -31,9 +23,6 @@
 \tx Wort4
 \mb m4
 
-\id ORPHANID1
-\idinfo Info on ID3
-
 \id ID3
 \idinfo Info on ID3
 
@@ -44,6 +33,3 @@
 \ref REF6
 \tx Wort6
 \mb m6
-
-\id ORPHANID2
-\idinfo Info on ID3

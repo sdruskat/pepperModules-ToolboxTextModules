@@ -22,11 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.corpus_tools.pepper.impl.PepperImporterImpl;
 import org.corpus_tools.pepper.modules.PepperImporter;
 import org.corpus_tools.pepper.modules.PepperMapper;
@@ -36,6 +34,7 @@ import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleNotReadyException;
 import org.corpus_tools.salt.common.SCorpus;
 import org.corpus_tools.salt.common.SCorpusGraph;
+import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.graph.Identifier;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.service.component.annotations.Component;
@@ -51,13 +50,13 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 **/
 	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextImporter.class);
 
-	private final Map<Identifier, Long> offsetMap = new HashMap<>();
+	private List<Long> idOffsets;
 
-	private final Map<URI, Long> headerMap = new HashMap<>();
+	private Map<Long, List<Long>> refMap;
 
-	private List<Long> sortedOffsets = new ArrayList<>();
+	private Long headerEndOffset;
 
-	private StringBuilder warningBuilder = new StringBuilder();
+	private boolean monolithic = false;
 
 	public ToolboxTextImporter() {
 		super();
@@ -94,62 +93,62 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 
 		if (corpusFile.isDirectory()) {
 			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFile.getName());
-			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(),
-					URI.createFileURI(corpusFile.getAbsolutePath()));
+			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), URI.createFileURI(corpusFile.getAbsolutePath()));
 			for (File child : corpusFile.listFiles()) {
 				importCorpusStructure(corpusGraph, subCorpus, child);
 			}
-		} 
-		else if (corpusFile.isFile()) {
-			URI corpusFileURI = URI.createFileURI(corpusFile.getAbsolutePath());
-			Long fileLength = corpusFile.length();
-
+		} else if (corpusFile.isFile()) {
 			// Create a corpus for the file
 			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFile.getName());
-			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(),
-					URI.createFileURI(corpusFile.getAbsolutePath()));
+			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), URI.createFileURI(corpusFile.getAbsolutePath()));
 
 			// Parse file
-			ToolboxTextSegmentationParser parser = new ToolboxTextSegmentationParser(corpusFile,
-					getProperties().getIdMarker(), getProperties().getRefMarker());
+			ToolboxTextSegmentationParser parser = new ToolboxTextSegmentationParser(corpusFile, getProperties().getIdMarker(), getProperties().getRefMarker());
 			parser.parse();
-			List<Long> idOffsets = parser.getIdOffsets();
-			Map<Long, List<Long>> refMap = parser.getRefMap();
-			// Do some sanity checks on the documents, and write irregularities to log
+			idOffsets = parser.getIdOffsets();
+			refMap = parser.getRefMap();
+			// Do some sanity checks on the documents, and write irregularities
+			// to log
 			if (idOffsets.isEmpty()) {
 				// Corpus has no \ids
 				if (refMap.isEmpty()) {
 					// Corpus also has no \refs
-					throw new PepperModuleException("The corpus file " + corpusFile.getAbsolutePath()
-							+ " contains neither \\ids nor \\refs. Aborting import!");
-				} 
-				else {
+					throw new PepperModuleException("The corpus file " + corpusFile.getAbsolutePath() + " contains neither \\ids nor \\refs. Aborting import!");
+				} else {
+					if (refMap.size() == 1 && refMap.containsKey(-1L)) {
+						;
+					}
 					// Corpus has no \ids but \refs, so create it with a single
 					// document containing all refs
-					// TODO
+					headerEndOffset = refMap.get(-1L).get(0);
+					setMonolithic(true);
 				}
-			} 
-			else {
+			} else {
 				// Corpus has \ids
 				if (refMap.isEmpty()) {
-					// Corpus has only empty \ids, so log a warning but create the empty documents
-					logger.warn("The corpus file " + corpusFile.getAbsolutePath()
-							+ " contains \\ids, but none of them contain \\refs. Will create empty documents with only metadata.");
-				}
-				else if (refMap.containsKey(-1L)) {
+					// Corpus has only empty \ids, so log a warning but create
+					// the empty documents
+					logger.warn("The corpus file " + corpusFile.getAbsolutePath() + " contains \\ids, but none of them contain \\refs. Will create empty documents with only metadata.");
+				} else if (refMap.containsKey(-1L)) {
 					// There are \refs that are not attached to an \id, so log a
 					// warning and drop them
 					List<Long> orphanRefOffsets = refMap.get(-1L);
 					warnAboutOrphanRefs(orphanRefOffsets, corpusFile);
 					refMap.remove(-1L);
 					if (refMap.isEmpty()) {
-						throw new PepperModuleException("There are neither \\id nor \\ref marked sections in the file "
-								+ corpusFile.getAbsolutePath() + "! Aborting import.");
+						// Corpus now only has empty \ids, so log a warning but
+						// create the empty documents
+						logger.warn("The corpus file " + corpusFile.getAbsolutePath() + " contains \\ids, but none of them contain \\refs. Will create empty documents with only metadata.");
 					}
 				}
+				headerEndOffset = idOffsets.get(0);
 			}
 		}
-		// // Create documents for \ids in file
+		// Create documents for \ids in file
+		for (Long idOffset : idOffsets) {
+			SDocument doc = corpusGraph.createDocument(parent, ToolboxTextDocumentNameParser.parse(idOffset, getProperties().getIdMarker(), corpusFile));
+		}
+		
 		// ToolboxTextIdFinder finder = new ToolboxTextIdFinder(corpusFile,
 		// ((ToolboxTextImporterProperties) getProperties()).getIdMarker());
 		// Map<String, Long> idNameOffsetMap = finder.parse();
@@ -167,47 +166,42 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		// headerMap.put(finder.getResourceHeader().getResource(),
 		// finder.getResourceHeader().getHeaderEndOffset());
 		// }
-		else {
-			throw new PepperModuleException("Input " + corpusFile + " is neither directory nor file!");
-		}
+		// else {
+		// throw new PepperModuleException("Input " + corpusFile + " is neither
+		// directory nor file!");
+		// }
 	}
 
 	@Override
 	public PepperMapper createPepperMapper(Identifier identifier) {
-		Collections.sort(sortedOffsets);
+//		Collections.sort(sortedOffsets);
 		if (identifier == null) {
 			throw new PepperModuleException("Cannot create a Pepper mapper! The identifier is null!");
-		} 
-		else if (identifier.getIdentifiableElement() == null) {
-			throw new PepperModuleException(
-					"Cannot create a Pepper mapper! The identifier " + identifier + "'s identifiable element is null!");
+		} else if (identifier.getIdentifiableElement() == null) {
+			throw new PepperModuleException("Cannot create a Pepper mapper! The identifier " + identifier + "'s identifiable element is null!");
 		}
 		PepperMapper mapper = null;
 		URI resource = getIdentifier2ResourceTable().get(identifier);
-		if (((ToolboxTextImporterProperties) getProperties()).splitIdsToDocuments()) {
-			Long offset = offsetMap.get(identifier);
-			int offsetIndex = sortedOffsets.indexOf(offset);
-			Long nextOffset;
-			try {
-				nextOffset = sortedOffsets.get(offsetIndex + 1);
-			} 
-			catch (IndexOutOfBoundsException e) {
-				URI fileURI = getCorpusDesc().getCorpusPath();
-				File corpusFile = new File(fileURI.toFileString());
-				nextOffset = corpusFile.length();
-			}
-			if (identifier.getIdentifiableElement() instanceof SCorpus) {
-				mapper = new IdBasedToolboxTextMapper(headerMap.get(getIdentifier2ResourceTable().get(identifier)),
-						resource);
-			} 
-			else {
-				mapper = new IdBasedToolboxTextMapper(offset, resource, nextOffset);
-			}
-		} 
-		else {
-			mapper = new MonolithicToolboxTextMapper();
-			mapper.setResourceURI(resource);
-		}
+//		if (getProperties().splitIdsToDocuments()) {
+//			Long offset = offsetMap.get(identifier);
+//			int offsetIndex = sortedOffsets.indexOf(offset);
+//			Long nextOffset;
+//			try {
+//				nextOffset = sortedOffsets.get(offsetIndex + 1);
+//			} catch (IndexOutOfBoundsException e) {
+//				URI fileURI = getCorpusDesc().getCorpusPath();
+//				File corpusFile = new File(fileURI.toFileString());
+//				nextOffset = corpusFile.length();
+//			}
+//			if (identifier.getIdentifiableElement() instanceof SCorpus) {
+//				mapper = new IdBasedToolboxTextMapper(headerMap.get(getIdentifier2ResourceTable().get(identifier)), resource);
+//			} else {
+//				mapper = new IdBasedToolboxTextMapper(offset, resource, nextOffset);
+//			}
+//		} else {
+//			mapper = new MonolithicToolboxTextMapper();
+//			mapper.setResourceURI(resource);
+//		}
 		return (mapper);
 	}
 
@@ -244,7 +238,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 */
 	@Override
 	public boolean isReadyToStart() throws PepperModuleNotReadyException {
-		for (String fileExtension : ((String) ((ToolboxTextImporterProperties) getProperties()).getFileExtensions()).split("\\s*,\\s*")) {
+		for (String fileExtension : getProperties().getFileExtensions().split("\\s*,\\s*")) {
 			getDocumentEndings().add(fileExtension);
 		}
 		return (super.isReadyToStart());
@@ -256,54 +250,49 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	}
 
 	/**
-	 * Extracts orphaned \refs by streaming the input file from offset to
-	 * offset for recorded \ref orphans taken from the parameter list
-	 * (or the next \id or EOF in case of the
-	 * last orphaned \ref offset in the list), and building them into a
-	 * string that will be logged at level warn (which in Pepper versions >= 3.1
-	 * will append a separate file containing war-level logs only).
+	 * Extracts orphaned \refs by streaming the input file from offset to offset
+	 * for recorded \ref orphans taken from the parameter list (or the next \id
+	 * or EOF in case of the last orphaned \ref offset in the list), and
+	 * building them into a string that will be logged at level warn (which in
+	 * Pepper versions >= 3.1 will append a separate file containing war-level
+	 * logs only).
 	 *
 	 * @param orphanRefOffsets
 	 */
 	private void warnAboutOrphanRefs(List<Long> orphanRefOffsets, File file) {
-		StringBuilder warningBuilder = new StringBuilder(
-				"====================================================\n"
-				+ "================= W A R N I N G ! ==================\n"
-				+ "====================================================\n"
-				+ "\nFound \\refs that do not belong to any \\ids!\n"
-				+ "The following orphaned \\refs will not be processed:\n\n"
-				+ "====================================================\n");
+		StringBuilder warningBuilder = new StringBuilder("====================================================\n" + "================= W A R N I N G ! ==================\n" + "====================================================\n" + "\nFound \\refs that do not belong to any \\ids!\n" + "The following orphaned \\refs will not be processed:\n\n" + "====================================================\n");
 		for (Long orphanRefOffset : orphanRefOffsets) {
 			int offsetIndex = orphanRefOffsets.indexOf(orphanRefOffset);
 			Long nextOffset = null;
 			if (orphanRefOffsets.size() == offsetIndex + 1) {
-				// offsetIndex is the last index in the list, so leave nextOffset == null
-			} 
-			else {
+				// offsetIndex is the last index in the list, so leave
+				// nextOffset == null
+			} else {
 				nextOffset = orphanRefOffsets.get(offsetIndex + 1);
 			}
 			try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 				if (nextOffset != null) {
-					// Read until the next offset and append text to warning message
+					// Read until the next offset and append text to warning
+					// message
 					byte[] buf = new byte[nextOffset.intValue() - orphanRefOffset.intValue()];
 					raf.seek(orphanRefOffset);
 					raf.readFully(buf);
 					String readRef = new String(buf, StandardCharsets.UTF_8);
 					warningBuilder.append(readRef + "====================================================\n");
-				} 
-				else {
-					// Read until the next instance of \id (or EOF) and append text to warning message
+				} else {
+					// Read until the next instance of \id (or EOF) and append
+					// text to warning message
 					raf.seek(orphanRefOffset);
 					String line, marker;
 					while ((line = raf.readLine()) != null) {
 						if (!line.trim().isEmpty()) {
-							// Extract the marker from the line and check whether it is an \id marker
+							// Extract the marker from the line and check
+							// whether it is an \id marker
 							marker = line.split("\\s+")[0].trim().substring(1);
 							if (!(marker.equals(getProperties().getIdMarker()))) {
 								// Append line to warning message
 								warningBuilder.append(line + "\n");
-							} 
-							else {
+							} else {
 								break;
 							}
 						}
@@ -314,8 +303,29 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			}
 		}
 		// Log warning
-		logger.warn(warningBuilder.toString()
-				+ "====================================================\n====================================================\n====================================================\n");
+		logger.warn(warningBuilder.toString() + "====================================================\n====================================================\n====================================================\n");
+	}
+
+	/**
+	 * @return the headerEndOffset
+	 */
+	public Long getHeaderEndOffset() {
+		return headerEndOffset;
+	}
+
+	/**
+	 * @return the monolithic
+	 */
+	boolean isMonolithic() {
+		return monolithic;
+	}
+
+	/**
+	 * @param monolithic
+	 *            the monolithic to set
+	 */
+	private void setMonolithic(boolean monolithic) {
+		this.monolithic = monolithic;
 	}
 
 }

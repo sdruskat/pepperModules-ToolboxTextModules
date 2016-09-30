@@ -1,0 +1,75 @@
+/*******************************************************************************
+ * Copyright 2016 Humboldt-Universität zu Berlin
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Contributors:
+ *     Stephan Druskat - initial API and implementation
+ *******************************************************************************/
+package org.corpus_tools.peppermodules.toolbox.text;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
+import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * A parser for document names taken from \id marker lines in a Toolbox text file.
+ *
+ * @author Stephan Druskat
+ *
+ */
+public class ToolboxTextDocumentNameParser {
+	
+	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextDocumentNameParser.class);
+	
+	/**
+	 * Parses a document name from a Toolbox text file:
+	 * Reads a line from a specific offset, drops the \id
+	 * marker and return a trimmed {@link String}.
+	 * 
+	 * @param corpusFile 
+	 * @param string 
+	 * @param idOffset 
+	 *
+	 * @return the document name
+	 */
+	public static String parse(Long offset, String idMarker, File file) {
+		String documentName = null;
+		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+			raf.seek(offset);
+			String rawLine = raf.readLine();
+			String[] markerAndLine = rawLine.split("\\\\" + idMarker);
+			if (markerAndLine.length == 2) {
+				documentName = markerAndLine[1].trim();
+			}
+			else {
+				String defaultName = "Document at offset " + offset.intValue();
+				logger.warn("The \\id marked line at offset " + offset + " does either not contain any contents, runs on over more than one line, or could not be parsed into a valid document name. Falling back to default name: " + defaultName + "!");
+				documentName = defaultName;
+			}
+		}
+		catch (FileNotFoundException e) {
+			throw new PepperModuleException("Could not read the file " + file.getAbsolutePath() + "!", e);
+		}
+		catch (IOException e) {
+			throw new PepperModuleException("Failed to jump to offset " + offset + " in file " + file.getAbsolutePath() + "!", e);
+		}
+		return documentName;
+	}
+
+}
