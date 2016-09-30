@@ -33,23 +33,23 @@ import org.junit.Test;
 public class ToolboxTextDocumentNameParserTest {
 
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextDocumentNameParser#parse(java.lang.Long, java.lang.String, java.io.File)}.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextDocumentNameParser#parseId(java.lang.Long, java.lang.String, java.io.File)}.
 	 */
 	@Test
 	public void testParseExistingID() {
 		File file = getFile("ids.txt");
-		assertEquals("ID1", ToolboxTextDocumentNameParser.parse(32L, "id", file));
-		assertEquals("ID3", ToolboxTextDocumentNameParser.parse(202L, "id", file));
+		assertEquals("ID1", ToolboxTextDocumentNameParser.parseId(32L, "id", file));
+		assertEquals("ID3", ToolboxTextDocumentNameParser.parseId(202L, "id", file));
 	}
 
 	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextDocumentNameParser#parse(java.lang.Long, java.lang.String, java.io.File)}.
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextDocumentNameParser#parseId(java.lang.Long, java.lang.String, java.io.File)}.
 	 */
 	@Test
 	public void testParseFaultyID() {
 		File file = getFile("faulty-id-name.txt");
-		assertEquals("Document at offset 32", ToolboxTextDocumentNameParser.parse(32L, "id", file));
-		assertEquals("ID3", ToolboxTextDocumentNameParser.parse(198L, "id", file));
+		assertEquals("Document at offset 32", ToolboxTextDocumentNameParser.parseId(32L, "id", file));
+		assertEquals("ID3", ToolboxTextDocumentNameParser.parseId(198L, "id", file));
 	}
 	
 	private File getFile(String fileName) {

@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +58,8 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	private Long headerEndOffset;
 
 	private boolean monolithic = false;
+	
+	private final Map<Identifier, Long> offsetMap = new HashMap<>();
 
 	public ToolboxTextImporter() {
 		super();
@@ -85,22 +88,25 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	}
 
 	/**
+	 * TODO: Description
+	 *
 	 * @param corpusGraph
 	 * @param parent
 	 * @param corpusFile
 	 */
 	private void importCorpusStructure(SCorpusGraph corpusGraph, SCorpus parent, File corpusFile) {
-
+		URI corpusFileURI = URI.createFileURI(corpusFile.getAbsolutePath());
+		String corpusFileName = corpusFile.getName();
 		if (corpusFile.isDirectory()) {
-			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFile.getName());
-			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), URI.createFileURI(corpusFile.getAbsolutePath()));
+			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName);
+			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), corpusFileURI);
 			for (File child : corpusFile.listFiles()) {
 				importCorpusStructure(corpusGraph, subCorpus, child);
 			}
 		} else if (corpusFile.isFile()) {
 			// Create a corpus for the file
-			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFile.getName());
-			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), URI.createFileURI(corpusFile.getAbsolutePath()));
+			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName);
+			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), corpusFileURI);
 
 			// Parse file
 			ToolboxTextSegmentationParser parser = new ToolboxTextSegmentationParser(corpusFile, getProperties().getIdMarker(), getProperties().getRefMarker());
@@ -116,12 +122,10 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 					throw new PepperModuleException("The corpus file " + corpusFile.getAbsolutePath() + " contains neither \\ids nor \\refs. Aborting import!");
 				} else {
 					if (refMap.size() == 1 && refMap.containsKey(-1L)) {
-						;
+						// Corpus has no \ids but \refs, so create it with a single document containing all refs
+						headerEndOffset = refMap.get(-1L).get(0);
+						setMonolithic(true);
 					}
-					// Corpus has no \ids but \refs, so create it with a single
-					// document containing all refs
-					headerEndOffset = refMap.get(-1L).get(0);
-					setMonolithic(true);
 				}
 			} else {
 				// Corpus has \ids
@@ -143,11 +147,19 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 				}
 				headerEndOffset = idOffsets.get(0);
 			}
-		}
-		// Create documents for \ids in file
-		for (Long idOffset : idOffsets) {
-			SDocument doc = corpusGraph.createDocument(parent, ToolboxTextDocumentNameParser.parse(idOffset, getProperties().getIdMarker(), corpusFile));
-		}
+			// Create documents for \ids in file
+			if (!isMonolithic()) {
+				for (Long idOffset : idOffsets) {
+					SDocument doc = corpusGraph.createDocument(subCorpus, ToolboxTextDocumentNameParser.parseId(idOffset, getProperties().getIdMarker(), corpusFile));
+					getIdentifier2ResourceTable().put(doc.getIdentifier(), corpusFileURI);
+					offsetMap.put(doc.getIdentifier(), idOffset);
+				}
+			}
+			else {
+				SDocument doc = corpusGraph.createDocument(subCorpus, corpusFileName.substring(0, corpusFileName.lastIndexOf('.')));
+				getIdentifier2ResourceTable().put(doc.getIdentifier(), corpusFileURI);
+			}
+		} 
 		
 		// ToolboxTextIdFinder finder = new ToolboxTextIdFinder(corpusFile,
 		// ((ToolboxTextImporterProperties) getProperties()).getIdMarker());
@@ -174,6 +186,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 
 	@Override
 	public PepperMapper createPepperMapper(Identifier identifier) {
+		// TODO Check for isMonolitihic() and create mapper objects accordingly via different constructors
 //		Collections.sort(sortedOffsets);
 		if (identifier == null) {
 			throw new PepperModuleException("Cannot create a Pepper mapper! The identifier is null!");

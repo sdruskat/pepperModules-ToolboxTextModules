@@ -48,7 +48,7 @@ public class ToolboxTextDocumentNameParser {
 	 *
 	 * @return the document name
 	 */
-	public static String parse(Long offset, String idMarker, File file) {
+	public static String parseId(Long offset, String idMarker, File file) {
 		String documentName = null;
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			raf.seek(offset);
