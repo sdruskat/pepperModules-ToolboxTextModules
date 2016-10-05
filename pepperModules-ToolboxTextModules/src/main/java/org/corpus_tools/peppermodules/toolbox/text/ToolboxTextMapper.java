@@ -18,7 +18,12 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
+import java.util.List;
+import java.util.Map;
+
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
+
+import com.google.common.collect.Range;
 
 /**
  * TODO Description
@@ -28,6 +33,22 @@ import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
  */
 public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	
+	private final Long headerEndOffset;
+	private final Map<Long, List<Long>> refMap;
+	private final Range<Long> idRange;
+
+	/**
+	 * @param headerEndOffset2
+	 * @param refMap2
+	 * @param idRange
+	 */
+	public ToolboxTextMapper(Long headerEndOffset2, Map<Long, List<Long>> refMap2, Range<Long> idRange) {
+		System.err.println(idRange);
+		this.idRange = idRange;
+		this.refMap = refMap2;
+		this.headerEndOffset = headerEndOffset2;
+	}
+
 	/**
 	 * {@inheritDoc PepperMapper#setDocument(SDocument)}
 	 * 

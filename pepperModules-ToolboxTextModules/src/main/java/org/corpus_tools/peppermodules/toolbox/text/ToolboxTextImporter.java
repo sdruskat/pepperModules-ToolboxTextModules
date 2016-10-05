@@ -117,8 +117,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			parser.parse();
 			idOffsets = parser.getIdOffsets();
 			refMap = parser.getRefMap();
-			// Do some sanity checks on the documents, and write irregularities
-			// to log
+			// Do some sanity checks on the documents, and write irregularities to log
 			if (idOffsets.isEmpty()) {
 				// Corpus has no \ids
 				if (refMap.isEmpty()) {
@@ -178,10 +177,16 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		} else if (identifier.getIdentifiableElement() == null) {
 			throw new PepperModuleException("Cannot create a Pepper mapper! The identifier " + identifier + "'s identifiable element is null!");
 		}
-//		if (isMonolithic()) {
-			mapper = new ToolboxTextMapper();
-			mapper.setResourceURI(resource);
-//		}
+		Range<Long> idRange = null;
+		if (isMonolithic()) {
+			idRange = Range.closed(headerEndOffset, new File(resource.toFileString()).length());
+		}
+		else {
+			// Get range for ID, pass to constructor, pass refmap
+//			CONTINUE HERE!
+		}
+		mapper = new ToolboxTextMapper(headerEndOffset, refMap, idRange);
+		mapper.setResourceURI(resource);
 //		if (getProperties().splitIdsToDocuments()) {
 //			Long offset = offsetMap.get(identifier);
 //			int offsetIndex = sortedOffsets.indexOf(offset);
@@ -202,7 +207,6 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 //			mapper = new MonolithicToolboxTextMapper();
 //			mapper.setResourceURI(resource);
 //		}
-		System.err.println("I'M MAPPING!");
 		return (mapper);
 	}
 
