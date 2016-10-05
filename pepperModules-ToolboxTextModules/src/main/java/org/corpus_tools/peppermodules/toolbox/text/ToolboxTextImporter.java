@@ -42,6 +42,8 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Range;
+
 @Component(name = "ToolboxTextImporterComponent", factory = "PepperImporterComponentFactory")
 public class ToolboxTextImporter extends PepperImporterImpl implements PepperImporter {
 
@@ -60,6 +62,8 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	private boolean monolithic = false;
 	
 	private final Map<Identifier, Long> offsetMap = new HashMap<>();
+	
+	private final Map<Identifier, Range<Long>> offsetRangeMap = new HashMap<>();
 
 	public ToolboxTextImporter() {
 		super();
@@ -98,14 +102,14 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		URI corpusFileURI = URI.createFileURI(corpusFile.getAbsolutePath());
 		String corpusFileName = corpusFile.getName();
 		if (corpusFile.isDirectory()) {
-			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName);
+			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName.substring(0, corpusFileName.lastIndexOf('.')));
 			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), corpusFileURI);
 			for (File child : corpusFile.listFiles()) {
 				importCorpusStructure(corpusGraph, subCorpus, child);
 			}
 		} else if (corpusFile.isFile()) {
 			// Create a corpus for the file
-			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName);
+			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName.substring(0, corpusFileName.lastIndexOf('.')));
 			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), corpusFileURI);
 
 			// Parse file
@@ -160,32 +164,13 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 				getIdentifier2ResourceTable().put(doc.getIdentifier(), corpusFileURI);
 			}
 		} 
-		
-		// ToolboxTextIdFinder finder = new ToolboxTextIdFinder(corpusFile,
-		// ((ToolboxTextImporterProperties) getProperties()).getIdMarker());
-		// Map<String, Long> idNameOffsetMap = finder.parse();
-		// for (Entry<String, Long> entry : idNameOffsetMap.entrySet()) {
-		// SDocument doc = corpusGraph.createDocument(subCorpus,
-		// entry.getKey());
-		// getIdentifier2ResourceTable().put(doc.getIdentifier(),
-		// corpusFileURI);
-		// Long offset;
-		// System.err.println(" ???????? " + entry.getKey() + "::" +
-		// entry.getValue());
-		// offsetMap.put(doc.getIdentifier(), (offset = entry.getValue()));
-		// sortedOffsets.add(offset);
-		// }
-		// headerMap.put(finder.getResourceHeader().getResource(),
-		// finder.getResourceHeader().getHeaderEndOffset());
-		// }
-		// else {
-		// throw new PepperModuleException("Input " + corpusFile + " is neither
-		// directory nor file!");
-		// }
 	}
 
 	@Override
 	public PepperMapper createPepperMapper(Identifier identifier) {
+		PepperMapper mapper = null;
+		URI resource = getIdentifier2ResourceTable().get(identifier);
+//		Range<Integer> offsetRange = Range.closed(1,2); 
 		// TODO Check for isMonolitihic() and create mapper objects accordingly via different constructors
 //		Collections.sort(sortedOffsets);
 		if (identifier == null) {
@@ -193,8 +178,10 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		} else if (identifier.getIdentifiableElement() == null) {
 			throw new PepperModuleException("Cannot create a Pepper mapper! The identifier " + identifier + "'s identifiable element is null!");
 		}
-		PepperMapper mapper = null;
-		URI resource = getIdentifier2ResourceTable().get(identifier);
+//		if (isMonolithic()) {
+			mapper = new ToolboxTextMapper();
+			mapper.setResourceURI(resource);
+//		}
 //		if (getProperties().splitIdsToDocuments()) {
 //			Long offset = offsetMap.get(identifier);
 //			int offsetIndex = sortedOffsets.indexOf(offset);
@@ -215,6 +202,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 //			mapper = new MonolithicToolboxTextMapper();
 //			mapper.setResourceURI(resource);
 //		}
+		System.err.println("I'M MAPPING!");
 		return (mapper);
 	}
 
