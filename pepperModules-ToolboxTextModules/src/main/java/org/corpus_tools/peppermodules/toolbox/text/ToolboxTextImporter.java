@@ -191,14 +191,12 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 				if (!(indexOfNextIdOffset == idOffsets.size())) {
 					nextIdOffset = idOffsets.get(indexOfNextIdOffset);
 				}
-				System.err.println(offsetMap.get(identifier));
-				System.err.println(nextIdOffset);
 				idRange = Range.closed(offsetMap.get(identifier), nextIdOffset);
 			}
 			mapper = new ToolboxTextMapper(headerEndOffset, refMap, idRange);
 		}
 		else if (element instanceof SCorpus) {
-			System.err.println("Found corpus");
+			mapper = new ToolboxTextMapper(headerEndOffset, null, null);
 		}
 		else {
 			throw new PepperModuleException("Cannot create a mapper for elements that are neither of type SCorpus or SDocument.");

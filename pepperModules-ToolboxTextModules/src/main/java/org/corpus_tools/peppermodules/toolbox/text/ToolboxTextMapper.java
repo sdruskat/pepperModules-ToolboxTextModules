@@ -18,12 +18,24 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
+import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.salt.common.SDocument;
+import org.corpus_tools.salt.core.SMetaAnnotation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Range;
+import com.google.common.io.CountingInputStream;
 
 /**
  * TODO Description
@@ -33,20 +45,21 @@ import com.google.common.collect.Range;
  */
 public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	
+	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextMapper.class);
+	
 	private final Long headerEndOffset;
 	private final Map<Long, List<Long>> refMap;
 	private final Range<Long> idRange;
 
 	/**
-	 * @param headerEndOffset2
+	 * @param headerEndOffset
 	 * @param refMap
 	 * @param idRange
 	 */
-	public ToolboxTextMapper(Long headerEndOffset2, Map<Long, List<Long>> refMap, Range<Long> idRange) {
-		System.err.println(idRange);
+	public ToolboxTextMapper(Long headerEndOffset, Map<Long, List<Long>> refMap, Range<Long> idRange) {
 		this.idRange = idRange;
 		this.refMap = refMap;
-		this.headerEndOffset = headerEndOffset2;
+		this.headerEndOffset = headerEndOffset;
 	}
 
 	/**
@@ -56,6 +69,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	 */
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
+		// TODO Wrap RandomAccessFile in CountingInputStream
 		System.err.println("DOC: " + getDocument().getIdentifier());
 		return DOCUMENT_STATUS.COMPLETED;
 	}
@@ -63,12 +77,65 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	/**
 	 * {@inheritDoc PepperMapper#setCorpus(SCorpus)}
 	 * 
-	 * OVERRIDE THIS METHOD FOR CUSTOMIZED MAPPING.
+	 * Streams the corpus file from 0 to the byte offset of the end
+	 * of the header (i.e., the offset of the first \id or \ref) and
+	 * writes all read bytes into a {@link ByteArrayOutputStream}.
+	 * Every time the stream encounters a marker (starting with \),
+	 * it calls {@link #getMarkerAndValueFromString(String)} passing
+	 * the (non-empty) contents of the {@link ByteArrayOutputStream} 
+	 * as parameter. The resulting two elements of the returned
+	 * {@link String} array are then written to a new {@link SMetaAnnotation}
+	 * on the {@link SDocument}, using the first element as annotation name,
+	 * and the second element as annotation value, or the empty {@link String}
+	 * if no second element exists. Consecutively, the 
+	 * {@link ByteArrayOutputStream} is reset to take up the next line.
+	 * 
 	 */
 	@Override
 	public DOCUMENT_STATUS mapSCorpus() {
-		System.err.println("CORPUS: " + getCorpus().getIdentifier());
+		File file = new File(getResourceURI().toFileString());
+		try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file)));
+				ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+			int currentByte;
+			String[] markerAndValue = null;
+			while ((currentByte = stream.read()) > 0 && stream.getCount() < headerEndOffset) {
+				
+				// If we hit a new marker, write the trimmed contents of bos to the list of marker lines.
+				if (currentByte == '\\' && bos.size() > 0) {
+					markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
+					getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
+					bos.reset();
+				}
+				bos.write(currentByte);
+			}
+			// bos still contains the last marker line, so write that to the list of marker lines.
+			markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
+			getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
+		}
+		catch (FileNotFoundException e) {
+			throw new PepperModuleException("The corpus file " + getResourceURI().toFileString() + " has not been found.", e);
+		}
+		catch (IOException e) {
+			throw new PepperModuleException("Error while parsing the corpus file " + getResourceURI().toFileString() + "!", e);
+		}
 		return DOCUMENT_STATUS.COMPLETED;
+	}
+
+	/**
+	 * Takes a {@link String} parameter, and splits its substring from
+	 * index 1 (dropping the \ of the marker) once at the first whitespace,
+	 * the resulting {@link String} of which it returns.
+	 * 
+	 * Example: the {@link String} "<code>\id Some id or other</code>"
+	 * returns <code>[id, Some id or other]</code>.
+	 *
+	 * @param line
+	 * @return A {@link String} array with two elements, of which the first 
+	 * is the marker {@link String} sans backslash, and of which the second 
+	 * is the contents of the marked line
+	 */
+	private String[] getMarkerAndValueFromString(String line) {
+		return line.substring(1).split(" ", 2);
 	}
 
 }
