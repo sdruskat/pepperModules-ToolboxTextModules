@@ -39,13 +39,13 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 
 	/**
 	 * @param headerEndOffset2
-	 * @param refMap2
+	 * @param refMap
 	 * @param idRange
 	 */
-	public ToolboxTextMapper(Long headerEndOffset2, Map<Long, List<Long>> refMap2, Range<Long> idRange) {
+	public ToolboxTextMapper(Long headerEndOffset2, Map<Long, List<Long>> refMap, Range<Long> idRange) {
 		System.err.println(idRange);
 		this.idRange = idRange;
-		this.refMap = refMap2;
+		this.refMap = refMap;
 		this.headerEndOffset = headerEndOffset2;
 	}
 

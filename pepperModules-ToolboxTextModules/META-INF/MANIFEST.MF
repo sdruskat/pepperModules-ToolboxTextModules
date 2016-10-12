@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1475675850585
+Bnd-LastModified: 1476053237265
 Build-Jdk: 1.8.0_91
 Built-By: stephan
 Bundle-Description: Provides shared POM-data.
@@ -12,11 +12,11 @@ Bundle-SymbolicName: org.corpus-tools.pepperModules-ToolboxTextModules;s
 Bundle-Vendor: Humboldt-Universität zu Berlin
 Bundle-Version: 1.0.0.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
-Export-Package: org.corpus_tools.peppermodules.toolbox.text;uses:="org.c
- orpus_tools.pepper.common,org.corpus_tools.pepper.impl,org.corpus_tools
- .pepper.modules,org.corpus_tools.pepper.modules.exceptions,org.corpus_t
- ools.salt.common,org.corpus_tools.salt.graph,org.eclipse.emf.common.uti
- l";version="1.0.0.SNAPSHOT"
+Export-Package: org.corpus_tools.peppermodules.toolbox.text;uses:="com.g
+ oogle.common.collect,org.corpus_tools.pepper.common,org.corpus_tools.pe
+ pper.impl,org.corpus_tools.pepper.modules,org.corpus_tools.pepper.modul
+ es.exceptions,org.corpus_tools.salt.common,org.corpus_tools.salt.graph,
+ org.eclipse.emf.common.util";version="1.0.0.SNAPSHOT"
 Import-Package: com.google.common.collect;version="[18.0,19)",com.google
  .common.io;version="[18.0,19)",org.corpus_tools.pepper.common,org.corpu
  s_tools.pepper.impl,org.corpus_tools.pepper.modules,org.corpus_tools.pe

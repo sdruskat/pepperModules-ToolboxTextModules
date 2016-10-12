@@ -36,6 +36,7 @@ import org.corpus_tools.pepper.modules.exceptions.PepperModuleNotReadyException;
 import org.corpus_tools.salt.common.SCorpus;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
+import org.corpus_tools.salt.graph.IdentifiableElement;
 import org.corpus_tools.salt.graph.Identifier;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.service.component.annotations.Component;
@@ -169,23 +170,39 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	public PepperMapper createPepperMapper(Identifier identifier) {
 		PepperMapper mapper = null;
 		URI resource = getIdentifier2ResourceTable().get(identifier);
-//		Range<Integer> offsetRange = Range.closed(1,2); 
-		// TODO Check for isMonolitihic() and create mapper objects accordingly via different constructors
-//		Collections.sort(sortedOffsets);
 		if (identifier == null) {
 			throw new PepperModuleException("Cannot create a Pepper mapper! The identifier is null!");
-		} else if (identifier.getIdentifiableElement() == null) {
+		}
+		else if (identifier.getIdentifiableElement() == null) {
 			throw new PepperModuleException("Cannot create a Pepper mapper! The identifier " + identifier + "'s identifiable element is null!");
 		}
-		Range<Long> idRange = null;
-		if (isMonolithic()) {
-			idRange = Range.closed(headerEndOffset, new File(resource.toFileString()).length());
+		IdentifiableElement element = identifier.getIdentifiableElement();
+		if (element instanceof SDocument) {
+			Range<Long> idRange = null;
+			if (isMonolithic()) {
+				idRange = Range.closed(headerEndOffset, new File(resource.toFileString()).length());
+			}
+			else {
+				// Get range for ID, pass to constructor, pass refmap
+				Long idOffset = offsetMap.get(identifier);
+				int indexOfNextIdOffset = idOffsets.indexOf(idOffset) + 1;
+				Long nextIdOffset = new File(resource.toFileString()).length();
+				// Check if this offset is the last one in the list
+				if (!(indexOfNextIdOffset == idOffsets.size())) {
+					nextIdOffset = idOffsets.get(indexOfNextIdOffset);
+				}
+				System.err.println(offsetMap.get(identifier));
+				System.err.println(nextIdOffset);
+				idRange = Range.closed(offsetMap.get(identifier), nextIdOffset);
+			}
+			mapper = new ToolboxTextMapper(headerEndOffset, refMap, idRange);
+		}
+		else if (element instanceof SCorpus) {
+			System.err.println("Found corpus");
 		}
 		else {
-			// Get range for ID, pass to constructor, pass refmap
-//			CONTINUE HERE!
+			throw new PepperModuleException("Cannot create a mapper for elements that are neither of type SCorpus or SDocument.");
 		}
-		mapper = new ToolboxTextMapper(headerEndOffset, refMap, idRange);
 		mapper.setResourceURI(resource);
 //		if (getProperties().splitIdsToDocuments()) {
 //			Long offset = offsetMap.get(identifier);
