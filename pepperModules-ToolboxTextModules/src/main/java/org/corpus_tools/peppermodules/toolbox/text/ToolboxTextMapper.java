@@ -71,6 +71,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	public DOCUMENT_STATUS mapSDocument() {
 		// TODO Wrap RandomAccessFile in CountingInputStream
 		System.err.println("DOC: " + getDocument().getIdentifier());
+		System.err.println("Range: " + idRange);
 		return DOCUMENT_STATUS.COMPLETED;
 	}
 
@@ -100,7 +101,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 			String[] markerAndValue = null;
 			while ((currentByte = stream.read()) > 0 && stream.getCount() < headerEndOffset) {
 				
-				// If we hit a new marker, write the trimmed contents of bos to the list of marker lines.
+				// If we hit a new marker, split the trimmed contents of bos into marker and value and write them to a meta annotation.
 				if (currentByte == '\\' && bos.size() > 0) {
 					markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
 					getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");

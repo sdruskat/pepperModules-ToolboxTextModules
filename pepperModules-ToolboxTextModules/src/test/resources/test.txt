@@ -1,33 +1,18 @@
 \_sh v3.0 Test
-\info Some Info
+\info Some info
+\moreinfo Some more info about the corpus
 
-\id Some ID
+\id Document no. 1
+\idinfo Some document no. 1 info
+\moreidinfo Some more info about document no. 1
 
-\ref First sentence
+\ref Reference no. 1
 \met Some meta information about the first sentence
-\tx Wort Kompositum Wort
-\ta Eins Zwei Drei
-\mb m1 m2 -m3 m4
-\ge M1 M2 M3 M4
-\ll This is a reference level annotation!
-
-
-\ref Second sentence
-\met Some meta info about the second sentence
-\tx Dreifachwort Wort Wort Wort Doppelwort
-\ta Vier Fünf Sechs Sieben Acht
-\mb m5- m6= m7 m8 m9 m10 m11 -m12
-\ge M5 M6 M7 M8 M9 M10 M11 M12
-\ll This is yet another reference level annotation!
-
-\ref Third sentence
-\met Some meta info about the third sentence
-\tx Doppelwortmitfreiemdash Wort
-\ta Neun Zehn
-\mb m13 - m14 m15
-\ge M13 - M14 M15
-\docmet Some randomly put document meta annotation
-\ll This is a third reference level annotation!
+\tx Word1 -Tuple Tuple- Word2 Triple-= Word3  FreedashTuple Word4 FreecliticTuple
+\ta WordOne TupleOne TupleTwo WordTwo Triple WordThree TupleThree WordFour TupleFour
+\mb m1    m2 -m3 m4- m5 m6    m7 -m8 =m9 m10  m11 - m12 m13 m14 = m15
+\ge M1 M2 M3 M4 M5 M6 M7 M8 M9 M10 M11 M12 M13 M14 M15
+\ll A reference testing composites, clitics, and such
 
 \ref Unitref sentence ONE
 \met A sentence with a line-level unitref
@@ -60,3 +45,47 @@
 \ur 1 Unitref m26-m28
 \ur 2 Unitref m30-m31
 \ll uref three
+
+\ref Unitref sentence FOUR
+\met Sentence with two global unitrefs (one lex-level, one morph-level) m26-m28 and m30-m31 on \ur
+\unitref 1 tx 1 3
+\unitref 2 mb 5 6
+\tx Unitref with some random text just like that
+\ta Zwanzig Einundzwanzig Zweiundzwanzig Dreiundzwanzig Vierundzwanzig Fünfundzwanzig Sechsundzwanzig Siebenundzwanzig
+\mb m25 m26 m27 m28 m29 m30 m31 m32
+\ge M25 M26 M27 M28 M29 M30 M31 M32
+\ur 1 Unitref m26-m28
+\ur 2 Unitref m30-m31
+\ll uref three
+
+
+\id Document no. 2
+\idinfo Some document no. 2 info
+\moreidinfo Some more info about document no. 2
+
+\id Document no. 3
+\idinfo Some document no. 3 info
+\moreidinfo Some more info about document no. 3
+
+\id Document no. 4
+\idinfo Some document no. 4 info
+\moreidinfo Some more info about document no. 4
+
+
+# \ref Second sentence
+# \met Some meta info about the second sentence
+# \tx Dreifachwort Wort Wort Wort Doppelwort
+# \ta Vier Fünf Sechs Sieben Acht
+# \mb m5- m6= m7 m8 m9 m10 m11 -m12
+# \ge M5 M6 M7 M8 M9 M10 M11 M12
+# \ll This is yet another reference level annotation!
+
+# \ref Third sentence
+# \met Some meta info about the third sentence
+# \tx Doppelwortmitfreiemdash Wort
+# \ta Neun Zehn
+# \mb m13 - m14 m15
+# \ge M13 - M14 M15
+\docmet Some randomly put document meta annotation
+# \ll This is a third reference level annotation!
+

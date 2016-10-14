@@ -18,6 +18,9 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -27,6 +30,11 @@ import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.common.FormatDesc;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.pepper.testFramework.PepperImporterTest;
+import org.corpus_tools.salt.common.SCorpusGraph;
+import org.corpus_tools.salt.common.SDocument;
+import org.corpus_tools.salt.common.SaltProject;
+import org.corpus_tools.salt.core.SAnnotation;
+import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,13 +93,20 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 		start();
 		assertEquals((Long) 32L, getFixture().getHeaderEndOffset());
 		assertTrue(getFixture().isMonolithic());
+		SCorpusGraph corpusGraph = getNonEmptyCorpusGraph();
+		
+		// Test corpora
+		runCorpusTests(corpusGraph);
+		
+		// Test single document
+		assertEquals(1, corpusGraph.getDocuments().size());
 	}
 	
 	/**
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
-	 * Tests against a minimum example, where there are 0 \ids and n \refs,
+	 * Tests against a minimum example, where there are 3 \ids and n \refs,
 	 * i.e., what will become a single corpus with a single document.
 	 */
 	@Test
@@ -100,6 +115,20 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 		start();
 		assertEquals((Long) 32L, getFixture().getHeaderEndOffset());
 		assertFalse(getFixture().isMonolithic());
+		SCorpusGraph corpusGraph = getNonEmptyCorpusGraph();
+
+		// Test corpora
+		runCorpusTests(corpusGraph);
+		
+		// Test documents
+		assertEquals(3, corpusGraph.getDocuments().size());
+		for (SDocument doc : corpusGraph.getDocuments()) {
+			assertThat(doc.getName(), is(anyOf(is("ID1"), is("ID2"), is("ID3"))));
+			for (SAnnotation anno : doc.getAnnotations()) {
+				System.err.println(anno.getQName());
+				assertThat(anno.getQName(), is("toolbox::idinfo:Info on " + doc.getName()));
+			}
+		}
 	}
 	
 	/**
@@ -131,6 +160,39 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 	@Override
 	public ToolboxTextImporter getFixture() {
 		return (ToolboxTextImporter) super.getFixture();
+	}
+
+	/**
+	 * Returns the first {@link SCorpusGraph} in the fixture's
+	 * {@link SaltProject} that contains > 0 {@link SDocument}s.
+	 *
+	 * @return a non-empty corpus graph.
+	 */
+	private SCorpusGraph getNonEmptyCorpusGraph() {
+		SaltProject project = getFixture().getSaltProject();
+		SCorpusGraph corpusGraph = null;
+		loop:
+		for (SCorpusGraph cg : project.getCorpusGraphs()) {
+			if (cg.getDocuments().size() > 0) {
+				corpusGraph = project.getCorpusGraphs().get(0);
+				break loop;
+			}
+		}
+		return corpusGraph;
+	}
+
+	/**
+	 * TODO: Description
+	 * @param corpusGraph 
+	 *
+	 */
+	private void runCorpusTests(SCorpusGraph corpusGraph) {
+		assertEquals(1, corpusGraph.getCorpora().size());
+		
+		// Test single corpus
+		for (SMetaAnnotation ma : corpusGraph.getCorpora().get(0).getMetaAnnotations()) {
+			assertThat(ma.getQName() + ":" + ma.getValue_STEXT(), is(anyOf(is("toolbox::_sh:v3.0 Test"), is("toolbox::info:Some info"))));
+		}
 	}
 	
 

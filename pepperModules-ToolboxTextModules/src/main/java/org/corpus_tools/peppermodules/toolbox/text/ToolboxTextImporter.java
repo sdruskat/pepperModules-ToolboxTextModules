@@ -193,7 +193,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 				}
 				idRange = Range.closed(offsetMap.get(identifier), nextIdOffset);
 			}
-			mapper = new ToolboxTextMapper(headerEndOffset, refMap, idRange);
+			mapper = new ToolboxTextMapper(null, refMap, idRange);
 		}
 		else if (element instanceof SCorpus) {
 			mapper = new ToolboxTextMapper(headerEndOffset, null, null);
@@ -202,26 +202,6 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			throw new PepperModuleException("Cannot create a mapper for elements that are neither of type SCorpus or SDocument.");
 		}
 		mapper.setResourceURI(resource);
-//		if (getProperties().splitIdsToDocuments()) {
-//			Long offset = offsetMap.get(identifier);
-//			int offsetIndex = sortedOffsets.indexOf(offset);
-//			Long nextOffset;
-//			try {
-//				nextOffset = sortedOffsets.get(offsetIndex + 1);
-//			} catch (IndexOutOfBoundsException e) {
-//				URI fileURI = getCorpusDesc().getCorpusPath();
-//				File corpusFile = new File(fileURI.toFileString());
-//				nextOffset = corpusFile.length();
-//			}
-//			if (identifier.getIdentifiableElement() instanceof SCorpus) {
-//				mapper = new IdBasedToolboxTextMapper(headerMap.get(getIdentifier2ResourceTable().get(identifier)), resource);
-//			} else {
-//				mapper = new IdBasedToolboxTextMapper(offset, resource, nextOffset);
-//			}
-//		} else {
-//			mapper = new MonolithicToolboxTextMapper();
-//			mapper.setResourceURI(resource);
-//		}
 		return (mapper);
 	}
 
