@@ -1,5 +1,5 @@
 \_sh v3.0 Test
-\info Some info
+\info A sample corpus in Toolbox text format. It includes use cases for most phenomena the importer tests against, such as clitics and affixes, unitrefs, meta annotations, etc.
 \moreinfo Some more info about the corpus
 
 \id Document no. 1
@@ -14,7 +14,7 @@
 \ge M1 M2 M3 M4 M5 M6 M7 M8 M9 M10 M11 M12 M13 M14 M15
 \ll A reference testing composites, clitics, and such
 
-\ref Unitref sentence ONE
+\ref Unitref sentence schema 1 (line-level)
 \met A sentence with a line-level unitref
 \tx Unitref sentence one
 \ta Elf Zwölf Dreizehn
@@ -23,7 +23,7 @@
 \ur mb 1 2 Unitref to morphemes m17 and m18 in a span
 \ll uref one
 
-\ref Unitref sentence TWO
+\ref Unitref sentence schema 2 (undefined global) # Test for level
 \met Sentence with a single global unitref (morph-level) from m20 to m23 (incl.) on \ur and \ur2
 \unitref 1 4
 \tx Unitref sentence two with one-to-four ref
@@ -34,7 +34,7 @@
 \ur2 2nd unitref to morphemes m20-m23 in a span
 \ll uref two
 
-\ref Unitref sentence THREE
+\ref Unitref sentence schema 3 (defined global)
 \met Sentence with two global unitrefs (morph-level) m26-m28 and m30-m31 on \ur
 \unitref 1 1 3
 \unitref 2 5 6
@@ -46,7 +46,7 @@
 \ur 2 Unitref m30-m31
 \ll uref three
 
-\ref Unitref sentence FOUR
+\ref Unitref sentence schema 4 (defined global with related line)
 \met Sentence with two global unitrefs (one lex-level, one morph-level) m26-m28 and m30-m31 on \ur
 \unitref 1 tx 1 3
 \unitref 2 mb 5 6
@@ -63,29 +63,54 @@
 \idinfo Some document no. 2 info
 \moreidinfo Some more info about document no. 2
 
+\ref Sentence 2.1
+\tx A sentence
+\ta A word
+\mb m1 m2
+\ge M1 M2
+\ll A ref-level annotation
+
+\ref Sentence 2.2
+\tx A sentence
+\ta A word
+\mb m1 m2
+\ge M1 M2
+\ll A ref-level annotation
+
 \id Document no. 3
 \idinfo Some document no. 3 info
 \moreidinfo Some more info about document no. 3
+
+\ref Sentence 3.1
+\tx A sentence
+\ta A word
+\mb m1 m2
+\ge M1 M2
+\ll A ref-level annotation
+
+\ref Sentence 3.2
+\tx A sentence
+\ta A word
+\docmet Some randomly put document meta annotation
+\mb m1 m2
+\ge M1 M2
+\ll A ref-level annotation
+
 
 \id Document no. 4
 \idinfo Some document no. 4 info
 \moreidinfo Some more info about document no. 4
 
+\ref Sentence 4.1
+\tx A sentence
+\ta A word
+\mb m1 m2
+\ge M1 M2
+\ll A ref-level annotation
 
-# \ref Second sentence
-# \met Some meta info about the second sentence
-# \tx Dreifachwort Wort Wort Wort Doppelwort
-# \ta Vier Fünf Sechs Sieben Acht
-# \mb m5- m6= m7 m8 m9 m10 m11 -m12
-# \ge M5 M6 M7 M8 M9 M10 M11 M12
-# \ll This is yet another reference level annotation!
-
-# \ref Third sentence
-# \met Some meta info about the third sentence
-# \tx Doppelwortmitfreiemdash Wort
-# \ta Neun Zehn
-# \mb m13 - m14 m15
-# \ge M13 - M14 M15
-\docmet Some randomly put document meta annotation
-# \ll This is a third reference level annotation!
-
+\ref Sentence 4.2
+\tx A sentence
+\ta A word
+\mb m1 m2
+\ge M1 M2
+\ll A ref-level annotation
