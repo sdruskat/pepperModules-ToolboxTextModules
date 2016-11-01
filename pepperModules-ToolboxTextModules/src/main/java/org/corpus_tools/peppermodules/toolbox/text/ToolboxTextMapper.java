@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +70,26 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	 */
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
+//		System.err.println("DOC: " + getDocument().getIdentifier());
+//		System.err.println("Range: " + idRange);
+		File file = new File(getResourceURI().toFileString());
+		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+			raf.seek(idRange.lowerEndpoint());
+			int currentByte;
+			StringBuilder sb = new StringBuilder();
+			while ((currentByte = raf.read()) > 0 && raf.getFilePointer() < idRange.upperEndpoint()) {
+				sb.append((char) currentByte);
+			}
+			System.err.println("\n##########\n"+this.hashCode() + "\n" +getDocument().getId() + "\n>>>>>>>>>>>>>>>>>\n" + sb.toString());
+		}
+		catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		// TODO Wrap RandomAccessFile in CountingInputStream
 		return DOCUMENT_STATUS.COMPLETED;
 	}
