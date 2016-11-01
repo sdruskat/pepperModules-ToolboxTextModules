@@ -70,8 +70,6 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
 		// TODO Wrap RandomAccessFile in CountingInputStream
-		System.err.println("DOC: " + getDocument().getIdentifier());
-		System.err.println("Range: " + idRange);
 		return DOCUMENT_STATUS.COMPLETED;
 	}
 

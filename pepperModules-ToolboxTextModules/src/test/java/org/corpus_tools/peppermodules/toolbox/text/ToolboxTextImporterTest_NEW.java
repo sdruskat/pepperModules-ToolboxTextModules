@@ -18,11 +18,12 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -32,8 +33,11 @@ import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.pepper.testFramework.PepperImporterTest;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
+import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.STextualDS;
 import org.corpus_tools.salt.common.SaltProject;
 import org.corpus_tools.salt.core.SAnnotation;
+import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
@@ -46,6 +50,10 @@ import org.junit.Test;
  *
  */
 public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
+
+	private static final String DOC_INFO_ANNO = "A sample \"standard\" corpus in Toolbox text format. It includes use cases for most phenomena the importer tests against, such as clitics and affixes, unitrefs, meta annotations, etc.";
+	private static final String DOC_NO = "Document no. ";
+	private static final String TOOLBOX = "toolbox";
 
 	/**
 	 * @throws java.lang.Exception
@@ -96,7 +104,7 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 		SCorpusGraph corpusGraph = getNonEmptyCorpusGraph();
 		
 		// Test corpora
-		runCorpusTests(corpusGraph);
+		runCorpusTests(corpusGraph, "no-ids.txt");
 		
 		// Test single document
 		assertEquals(1, corpusGraph.getDocuments().size());
@@ -106,27 +114,83 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
-	 * Tests against a minimum example, where there are 3 \ids and n \refs,
-	 * i.e., what will become a single corpus with a single document.
+	 * Tests against a "standard" example, which covers most phenomena 
+	 * the importer tests against, such as clitics and affixes, 
+	 * unitrefs, meta annotations, etc.
 	 */
 	@Test
 	public void testParseStandardDocument() {
-		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("ids.txt"))));
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("test.txt"))));
 		start();
-		assertEquals((Long) 32L, getFixture().getHeaderEndOffset());
+		assertEquals((Long) 246L, getFixture().getHeaderEndOffset());
 		assertFalse(getFixture().isMonolithic());
 		SCorpusGraph corpusGraph = getNonEmptyCorpusGraph();
 
 		// Test corpora
-		runCorpusTests(corpusGraph);
+		runCorpusTests(corpusGraph, "test.txt");
 		
 		// Test documents
-		assertEquals(3, corpusGraph.getDocuments().size());
+		assertEquals(4, corpusGraph.getDocuments().size());
 		for (SDocument doc : corpusGraph.getDocuments()) {
-			assertThat(doc.getName(), is(anyOf(is("ID1"), is("ID2"), is("ID3"))));
+			assertThat(doc.getName(), anyOf(is(DOC_NO + "1"), is(DOC_NO + "2"), is(DOC_NO + "3"), is(DOC_NO + "4")));
+			assertEquals(2, doc.getAnnotations().size());
 			for (SAnnotation anno : doc.getAnnotations()) {
-				System.err.println(anno.getQName());
-				assertThat(anno.getQName(), is("toolbox::idinfo:Info on " + doc.getName()));
+				assertThat(anno.getQName(), anyOf(is(TOOLBOX + "::idinfo"), is(TOOLBOX + "::moreidinfo")));
+				if (anno.getQName().equals(TOOLBOX + "::idinfo")) {
+					assertEquals("Some ".toLowerCase() + doc.getName().toLowerCase() + " info".toLowerCase(), anno.getValue_STEXT().toLowerCase());
+				}
+				else {
+					assertEquals("Some more info about ".toLowerCase() + doc.getName().toLowerCase(), anno.getValue_STEXT().toLowerCase());
+				}
+			}
+		}
+		for (SDocument doc : corpusGraph.getDocuments()) {
+			// General document tests TODO: Factor out to method?
+			assertNotNull(doc.getDocumentGraph());
+			SDocumentGraph graph = doc.getDocumentGraph();
+			assertEquals(2, graph.getTextualDSs().size());
+			// Document-respective tests
+			String docNumber = doc.getId().substring(doc.getId().length() - 1);
+			if (docNumber.equals("1")) {
+				
+			}
+			else {
+				// Document-level
+				assertEquals(DOC_NO + docNumber, doc.getName());
+				assertNotNull(doc.getAnnotation(TOOLBOX + "::idinfo"));
+				assertNotNull(doc.getAnnotation(TOOLBOX + "::moreidinfo"));
+				assertEquals("Some document no. " + docNumber + " info", doc.getAnnotation(TOOLBOX + "::idinfo").getValue_STEXT());
+				assertEquals("Some more info about document no. " + docNumber, doc.getAnnotation(TOOLBOX + "::moreidinfo").getValue_STEXT());
+				if (docNumber.equals("3")) {
+					assertNotNull(doc.getAnnotation(TOOLBOX + "::docmet"));
+					assertEquals("Some randomly put document meta annotation", doc.getAnnotation(TOOLBOX + "::docmet").getValue_STEXT());
+				}
+				
+				// Data sources
+				for (STextualDS ds : graph.getTextualDSs()) {
+					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"), is("A word A word"))));
+				}
+				
+				// Nodes
+				assertEquals(8, graph.getTokens().size());
+				assertEquals(2, graph.getSpans().size());
+				assertEquals(3, graph.getLayers().size()); // ref, lex, morph
+				
+				// Layers
+				for (SLayer l : graph.getLayers()) {
+					if (l.getId().equals("ref")) {
+						assertEquals(2, l.getNodes().size());
+					}
+					else {
+						assertEquals(4, l.getNodes().size());
+						if (l.getId().equals("lex")) {
+							
+						}
+						else {
+							
+						}
+					}
+				}
 			}
 		}
 	}
@@ -186,12 +250,21 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 	 * @param corpusGraph 
 	 *
 	 */
-	private void runCorpusTests(SCorpusGraph corpusGraph) {
+	private void runCorpusTests(SCorpusGraph corpusGraph, String fileName) {
 		assertEquals(1, corpusGraph.getCorpora().size());
-		
+
 		// Test single corpus
-		for (SMetaAnnotation ma : corpusGraph.getCorpora().get(0).getMetaAnnotations()) {
-			assertThat(ma.getQName() + ":" + ma.getValue_STEXT(), is(anyOf(is("toolbox::_sh:v3.0 Test"), is("toolbox::info:Some info"))));
+		if (fileName.equals("test.txt")) {
+			for (SMetaAnnotation ma : corpusGraph.getCorpora().get(0).getMetaAnnotations()) {
+				assertThat(ma.getQName() + ":" + ma.getValue_STEXT(), anyOf(is("toolbox::_sh:v3.0 Test"), 
+						is("toolbox::info:" + DOC_INFO_ANNO),
+						is("toolbox::moreinfo:Some more info about the corpus")));
+			}
+		}
+		else {
+			for (SMetaAnnotation ma : corpusGraph.getCorpora().get(0).getMetaAnnotations()) {
+				assertThat(ma.getQName() + ":" + ma.getValue_STEXT(), is(anyOf(is("toolbox::_sh:v3.0 Test"), is("toolbox::info:Some info"))));
+			}
 		}
 	}
 	
