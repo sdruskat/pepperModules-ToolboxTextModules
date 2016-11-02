@@ -35,10 +35,12 @@ import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.STextualDS;
+import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.common.SaltProject;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
+import org.corpus_tools.salt.core.SNode;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 import org.junit.Test;
@@ -183,8 +185,10 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 					}
 					else {
 						assertEquals(4, l.getNodes().size());
+						for (SNode n : l.getNodes()) {
+							assertTrue(n instanceof SToken);
+						}
 						if (l.getId().equals("lex")) {
-							
 						}
 						else {
 							

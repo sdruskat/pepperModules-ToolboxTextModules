@@ -30,7 +30,9 @@ import java.util.Map;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.peppermodules.toolbox.text.mapping.DocumentHeaderMapper;
 import org.corpus_tools.salt.common.SDocument;
+import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,14 +75,20 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 //		System.err.println("DOC: " + getDocument().getIdentifier());
 //		System.err.println("Range: " + idRange);
 		File file = new File(getResourceURI().toFileString());
-		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+		try (RandomAccessFile raf = new RandomAccessFile(file, "r"); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 			raf.seek(idRange.lowerEndpoint());
+			List<Long> refOffsets = refMap.get(idRange.lowerEndpoint());
 			int currentByte;
-			StringBuilder sb = new StringBuilder();
-			while ((currentByte = raf.read()) > 0 && raf.getFilePointer() < idRange.upperEndpoint()) {
-				sb.append((char) currentByte);
+			long pointer;
+			long firstRefOffset = refOffsets.get(0);
+
+			// Parse document header
+			while ((currentByte = raf.read()) > 0 && (pointer = raf.getFilePointer()) <= firstRefOffset) {
+				bos.write(currentByte);
 			}
-			System.err.println("\n##########\n"+this.hashCode() + "\n" +getDocument().getId() + "\n>>>>>>>>>>>>>>>>>\n" + sb.toString());
+			DocumentHeaderMapper documentHeaderMapper = new DocumentHeaderMapper(getDocument().getDocumentGraph(), bos.toString().trim());
+			SDocumentGraph graph = documentHeaderMapper.map();
+			bos.reset();
 		}
 		catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -90,7 +98,6 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// TODO Wrap RandomAccessFile in CountingInputStream
 		return DOCUMENT_STATUS.COMPLETED;
 	}
 
