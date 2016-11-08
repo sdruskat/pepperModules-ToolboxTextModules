@@ -31,6 +31,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.DocumentHeaderMapper;
+import org.corpus_tools.peppermodules.toolbox.text.mapping.RefMapper;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.core.SMetaAnnotation;
@@ -90,6 +91,24 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 			DocumentHeaderMapper documentHeaderMapper = new DocumentHeaderMapper(getProperties(), graph, bos.toString().trim());
 			documentHeaderMapper.map();
 			bos.reset();
+			for (Long refOffset : refOffsets) {
+				Long nextOffset;
+				boolean isLast = false;
+				if (refOffsets.indexOf(refOffset) == refOffsets.size() - 1) {
+					nextOffset = idRange.upperEndpoint();
+					isLast = true;
+				}
+				else {
+					nextOffset = refOffsets.get(refOffsets.indexOf(refOffset) + 1);
+				}
+				raf.seek(refOffset);
+				while ((currentByte = raf.read()) > 0 && (pointer = raf.getFilePointer()) <= nextOffset) {
+					bos.write(currentByte);
+				}
+				RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim());
+				refMapper.map();
+				bos.reset();
+			}
 		}
 		catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

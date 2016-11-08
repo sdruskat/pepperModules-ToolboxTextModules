@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Stephan Druskat
  *
  */
-public class AbstractBlockMapper extends AbstractToolboxTextMapper {
+public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	
 	private static final Logger log = LoggerFactory.getLogger(AbstractBlockMapper.class);
 	
@@ -129,7 +129,6 @@ public class AbstractBlockMapper extends AbstractToolboxTextMapper {
 		Set<String> duplicateMarkers = new HashSet<>();
 		for (Iterator<String> iterator = lines.iterator(); iterator.hasNext();) {
 		    String l = iterator.next();
-		    System.err.println(l);
 			String marker;
 			if (!existingMarkers.add(marker = l.split(" ", 2)[0])) {
 				log.warn("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nAttempting to concatenate all lines with the same marker in the next step.");
@@ -148,5 +147,7 @@ public class AbstractBlockMapper extends AbstractToolboxTextMapper {
 			}
 		}
 	}
+	
+	public abstract void map();
 
 }

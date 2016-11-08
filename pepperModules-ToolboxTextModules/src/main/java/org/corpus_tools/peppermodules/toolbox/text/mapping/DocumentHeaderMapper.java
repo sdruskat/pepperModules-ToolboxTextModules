@@ -58,6 +58,7 @@ public class DocumentHeaderMapper extends AbstractBlockMapper {
 	 * value to the second index in the split's resulting {@link String}
 	 * array.
 	 */
+	@Override
 	public void map() {
 		for (String line : lines) {
 			if (line.startsWith("\\" + properties.getIdMarker() + " ")) {
