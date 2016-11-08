@@ -72,6 +72,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	 */
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
+		SDocumentGraph graph = getDocument().getDocumentGraph();
 //		System.err.println("DOC: " + getDocument().getIdentifier());
 //		System.err.println("Range: " + idRange);
 		File file = new File(getResourceURI().toFileString());
@@ -86,8 +87,8 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 			while ((currentByte = raf.read()) > 0 && (pointer = raf.getFilePointer()) <= firstRefOffset) {
 				bos.write(currentByte);
 			}
-			DocumentHeaderMapper documentHeaderMapper = new DocumentHeaderMapper(getDocument().getDocumentGraph(), bos.toString().trim());
-			SDocumentGraph graph = documentHeaderMapper.map();
+			DocumentHeaderMapper documentHeaderMapper = new DocumentHeaderMapper(getProperties(), graph, bos.toString().trim());
+			documentHeaderMapper.map();
 			bos.reset();
 		}
 		catch (FileNotFoundException e) {

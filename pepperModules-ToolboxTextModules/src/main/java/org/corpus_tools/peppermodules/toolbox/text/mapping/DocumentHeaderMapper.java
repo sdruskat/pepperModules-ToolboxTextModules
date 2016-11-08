@@ -18,10 +18,17 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
+import org.corpus_tools.pepper.modules.PepperModuleProperties;
+import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.core.SMetaAnnotation;
 
 /**
- * TODO Description
+ * This class provides mapping functionality to map lines
+ * from a Toolbox file that are the \id line or a following line
+ * before the first \ref line to the name of the {@link SDocument}
+ * being mapped onto, and {@link SMetaAnnotation}s on it
+ * respectively.
  *
  * @author Stephan Druskat
  *
@@ -29,20 +36,38 @@ import org.corpus_tools.salt.common.SDocumentGraph;
 public class DocumentHeaderMapper extends AbstractBlockMapper {
 
 	/**
+	 * @param properties 
 	 * @param graph
 	 * @param trimmedInputString
 	 */
-	public DocumentHeaderMapper(SDocumentGraph graph, String trimmedInputString) {
-		super(graph, trimmedInputString);
+	public DocumentHeaderMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString) {
+		super(properties, graph, trimmedInputString);
 	}
 	
 	/**
-	 * TODO: Description
-	 *
-	 * @return
+	 * For the prepared list of lines from the \id (= document)
+	 * header in the Toolbox file to be mapped, if the line
+	 * starts with the ID marker (default: \id), set its
+	 * following contents (after, e.g., "\id ") to the name
+	 * field of the {@link SDocument} being mapped to, and
+	 * for all other lines, create an {@link SMetaAnnotation}
+	 * on the document, using the result of a {@link String#split(String, int)}
+	 * operation (with the parameter 2, so that the splitting
+	 * occurs a maximal times of parameter - 1 times = once) by
+	 * setting the meta annotation's name to the first, and its
+	 * value to the second index in the split's resulting {@link String}
+	 * array.
 	 */
-	public SDocumentGraph map() {
-		return null;
+	public void map() {
+		for (String line : lines) {
+			if (line.startsWith("\\" + properties.getIdMarker() + " ")) {
+				graph.getDocument().setName(line.split(" ", 2)[1]);
+			}
+			else {
+				String[] markerContent = line.split(" ", 2);
+				graph.getDocument().createMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX, markerContent[0].substring(1), markerContent[1]);
+			}
+		}
 	}
-	
+
 }

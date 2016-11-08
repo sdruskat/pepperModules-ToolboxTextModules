@@ -28,9 +28,9 @@ import org.corpus_tools.pepper.impl.PepperMapperImpl;
  */
 public class AbstractToolboxTextMapper extends PepperMapperImpl {
 	
-	protected static final String SALT_NAMESPACE_TOOLBOX = "toolbox";
+	protected final String SALT_NAMESPACE_TOOLBOX = "toolbox";
 
-	protected static final String IMPORTER_NAME = "toolbox-text-importer";
+	protected final String IMPORTER_NAME = "toolbox-text-importer";
 
 
 }

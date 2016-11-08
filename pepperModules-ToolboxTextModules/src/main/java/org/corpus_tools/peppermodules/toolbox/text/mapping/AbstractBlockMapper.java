@@ -28,7 +28,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
+import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,21 +44,31 @@ import org.slf4j.LoggerFactory;
  * @author Stephan Druskat
  *
  */
-public class AbstractBlockMapper {
+public class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	
 	private static final Logger log = LoggerFactory.getLogger(AbstractBlockMapper.class);
 	
-	private final SDocumentGraph graph;
+	protected final SDocumentGraph graph;
 	private final String trimmedInputString;
+	protected final ToolboxTextImporterProperties properties;
 	protected final List<String> lines = new ArrayList<>();
 
 	/**
+	 * @param properties 
 	 * @param graph
 	 * @param trimmedInputString
 	 */
-	public AbstractBlockMapper(SDocumentGraph graph, String trimmedInputString) {
+	public AbstractBlockMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString) {
 		this.graph = graph;
 		this.trimmedInputString = trimmedInputString;
+		if (!(properties instanceof ToolboxTextImporterProperties)) {
+			this.properties = null;
+			throw new PepperModuleException("The wrong type of PepperModuleProperties have been passed to the mapper: " + properties.getClass().getSimpleName() + "!\n"
+					+ "They must always be of type " + ToolboxTextImporterProperties.class.getSimpleName() + "!");
+		}
+		else {
+			this.properties = (ToolboxTextImporterProperties) properties;
+		}
 		prepare();
 	}
 
