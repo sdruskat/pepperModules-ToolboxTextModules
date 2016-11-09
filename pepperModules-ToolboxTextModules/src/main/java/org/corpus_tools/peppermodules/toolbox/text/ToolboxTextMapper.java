@@ -55,8 +55,6 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	private final Map<Long, List<Long>> refMap;
 	private final Range<Long> idRange;
 
-	private ToolboxTextImporterProperties properties;
-
 	/**
 	 * @param headerEndOffset
 	 * @param refMap
@@ -78,10 +76,6 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		SDocumentGraph graph = getDocument().getDocumentGraph();
 		File file = new File(getResourceURI().toFileString());
  
-		/* FIXME: Test for:
-		 * - monolithic!
-		 * - oprhan IDs 
-		 */
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r"); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 			int currentByte;
 			// Whether this document is an orphan, i.e., contains no \refs
@@ -124,7 +118,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 				bos.reset();
 			}
 
-			// Parse refs if there are any
+			// Parse refs if the document is not an orphan
 			if (!isOrphan) {
 				for (Long refOffset : refOffsets) {
 					Long nextOffset;
@@ -196,6 +190,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 						bos.reset();
 					}
 					else {
+						logger.warn("Found an orphan \\ref in the corpus header of \"" + file.getName() + "\" at byte " + stream.getCount() + ".\nWill neglect it and stop parsing the corpus header, and write the content that has already been parsed to the model.");
 						// Break the whole try block
 						break headerParsing;
 					}
@@ -211,9 +206,6 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		}
 		catch (IOException e) {
 			throw new PepperModuleException("Error while parsing the corpus file " + getResourceURI().toFileString() + "!", e);
-		}
-		for (SMetaAnnotation ma : getCorpus().getMetaAnnotations()) {
-			System.out.println(ma.getName() + " ::: " + ma.getValue_STEXT());
 		}
 		return DOCUMENT_STATUS.COMPLETED;
 	}
