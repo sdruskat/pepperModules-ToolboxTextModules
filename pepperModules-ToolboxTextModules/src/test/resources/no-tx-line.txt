@@ -1,0 +1,14 @@
+\_sh v3.0 Test
+
+\id ID1
+
+\ref REF1
+\tx Word
+
+\ref REF2 with empty \tx line
+\tx 
+
+\ref REF3 without \tx line
+
+\ref REF4
+\tx Word

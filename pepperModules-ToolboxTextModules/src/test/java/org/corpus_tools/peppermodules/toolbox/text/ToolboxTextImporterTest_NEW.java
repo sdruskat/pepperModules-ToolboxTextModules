@@ -243,6 +243,19 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 		start();
 		fail("Needs to be implemented further!");
 	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there are 1 \id, 2 standard \refs, 1 \ref without a \tx line and 1 \ref with an empty \tx line.
+	 */
+	@Test
+	public void testParseNoTxLine() {
+		setTestFile("no-tx-line.txt");
+		start();
+		fail("Needs to be implemented further!");
+	}
 
 	/**
 	 * Test method for

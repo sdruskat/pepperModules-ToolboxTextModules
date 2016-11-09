@@ -142,8 +142,8 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 				 * test first if the marker under scrutiny belongs to either group before
 				 * attempting to re-work lines.
 				 */
-				boolean hasUnitrefAnnoMarkers = properties.getUnitRefAnnotationMarkers() != null;
-				String unitrefMarker = properties.getUnitRefDefinitionMarker();
+				boolean hasUnitrefAnnoMarkers = properties.getUnitrefAnnotationMarkers() != null;
+				String unitrefMarker = properties.getUnitrefDefinitionMarker();
 				/* 
 				 * If no unitref annotation markers have been defined, set the boolean 
 				 * depending on the unitref marker only, else use both the latter and
@@ -151,7 +151,7 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 				 */
 				boolean doProcessMarker = hasUnitrefAnnoMarkers ? 
 						(!marker.substring(1).equals(unitrefMarker) && 
-								!Arrays.asList(properties.getUnitRefAnnotationMarkers().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)).contains(marker.substring(1))) : 
+								!Arrays.asList(properties.getUnitrefAnnotationMarkers().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)).contains(marker.substring(1))) : 
 						(!marker.substring(1).equals(unitrefMarker)) ;
 				if (doProcessMarker) {
 					if (properties.mergeDuplicateMarkers()) {

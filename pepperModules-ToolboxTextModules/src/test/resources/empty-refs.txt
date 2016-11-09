@@ -5,7 +5,7 @@
 
 \ref Another empty ref
 
-\ref ORPHANREF1
+\ref REF1
 \tx Wort1
 \mb m1
 

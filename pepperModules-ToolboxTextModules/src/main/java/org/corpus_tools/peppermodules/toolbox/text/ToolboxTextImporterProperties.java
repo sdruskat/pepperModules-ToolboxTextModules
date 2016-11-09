@@ -104,17 +104,17 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	public static final String PROP_MORPH_ANNOTATION_MARKERS = "morphologyAnnotationMarkers";
 	
-	/**
-	 * All Toolbox markers which precede lines with document-specific metadata, 
-	 * without the preceding backslashes, and as a comma-separated list. 
-	 */
-	public static final String PROP_DOCUMENT_METADATA_MARKERS = "documentMetaDataMarkers";
+//	/**
+//	 * All Toolbox markers which precede lines with document-specific metadata, 
+//	 * without the preceding backslashes, and as a comma-separated list. 
+//	 */
+//	public static final String PROP_DOCUMENT_METADATA_MARKERS = "documentMetaDataMarkers";
 	
-	/**
-	 * All Toolbox markers which precede lines with reference-specific metadata, 
-	 * without the preceding backslashes, and as a comma-separated list. 
-	 */
-	public static final String PROP_REF_METADATA_MARKERS = "refMetaDataMarkers";
+//	/**
+//	 * All Toolbox markers which precede lines with reference-specific metadata, 
+//	 * without the preceding backslashes, and as a comma-separated list. 
+//	 */
+//	public static final String PROP_REF_METADATA_MARKERS = "refMetaDataMarkers";
 	
 	/**
 	 * The morpheme delimiters used in the Toolbox files as a comma-separated two-point list where
@@ -145,57 +145,61 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public static final String PROP_UNIT_REF_DEFINITION_MARKER = "unitRefDefinitionMarker";
 	
 	/**
-	 * Wether detached delimiters (as in "item - item" or similar) should be attached to the previous or
-	 * subsequent item, as a two-item comma-separated , where the first item signifies whether the delimiter should
-	 * be attached (if <strong>true</strong> it will be attached), and the second item signifies 
-	 * whether the delimiter should be attached to the <strong>subsequent</strong> item (if <strong>true</strong>
+	 * Whether detached delimiters (as in "item - item" or similar) should be attached to the previous or
+	 * subsequent item, as a two-item comma-separated list, where the first item signifies whether the delimiter should
+	 * be attached at all (if `true` it will be attached), and the second item signifies 
+	 * whether the delimiter should be attached to the **subsequent** item (if `true`
 	 * it will be attached to the subsequent item, making the latter a suffix).
 	 */
 	public static final String PROP_ATTACH_DETACHED_MORPHEME_DELIMITER = "attachDetachedDelimiter";
 	
-	/**
-	 * Whether the importer should fix broken alignment in cases where the number of annotations
-	 * is smaller than the number of tokens. If this is not set to true, the importer will throw
-	 * errors whenever it encounters broken alignments.
-	 */
-	public static final String PROP_FIX_ALIGNMENT = "fixAlignment";
-	
-	/**
-	 * The {@link String} that will be used to flag misalignment. This will be attached <em>n</em>
-	 * times to the end of the line which includes the misalignment, where <em>n</em> is
-	 * the number of missing items. 
-	 */
-	public static final String PROP_FIX_ALIGNMENT_STRING = "fixAlignmentString";
-	
-	/**
-	 * Whether to ignore lexical items which miss a morphological representation.
-	 */
-	public static final String PROP_IGNORE_MISSING_MORPHEMES = "ignoreMissingMorphemes";
+//	/**
+//	 * Whether the importer should flag missing annotations, i.e., when
+//	 * the number of annotations for lexical or morphological tokens
+//	 * is smaller than the number of tokens. 
+//	 * 
+//	 * fix broken alignment in cases where the number of annotations
+//	 * is smaller than the number of tokens. If this is not set to true, the importer will throw
+//	 * errors whenever it encounters broken alignments. FIXME: Refactor to log instead of throw.
+//	 */
+//	public static final String PROP_FLAG_MISSING_ANNOTATIONS = "flagMissingAnnos";
+//	
+//	/**
+//	 * The {@link String} that will be used to flag misalignment. This will be attached *n*
+//	 * times to the end of the line which includes the misalignment, where *n* is
+//	 * the number of missing items. 
+//	 */
+//	public static final String PROP_FLAG_MISSING_ANNOS_STRING = "missingAnnosString";
+//	
+//	/** FIXME: Keep this?
+//	 * Whether to ignore lexical items which miss a morphological representation.
+//	 */
+//	public static final String PROP_IGNORE_MISSING_MORPHEMES = "ignoreMissingMorphemes";
 
-	/**
-	 * Whether a Toolbox file contains IDs, usually marked with \id, for structuring files.
-	 */
-	public static final String PROP_HAS_IDS = "hasIds";
+//	/**
+//	 * Whether a Toolbox file contains IDs, usually marked with \id, for structuring files.
+//	 */
+//	public static final String PROP_HAS_IDS = "hasIds";
 	
-	/**
-	 * Whether to replace missing morphological items with a placeholder string.
-	 */
-	public static final String PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS = "substituteMissingMorphologicalItems";
+//	/**
+//	 * Whether to replace missing morphological items with a placeholder string.
+//	 */
+//	public static final String PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS = "substituteMissingMorphologicalItems";
+//	
+//	/**
+//	 * A custom placeholder string substituting missing morphological items.
+//	 */
+//	public static final String PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER = "missingMorphologicalItemsPlaceholder";
 	
-	/**
-	 * A custom placeholder string substituting missing morphological items.
-	 */
-	public static final String PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER = "missingMorphologicalItemsPlaceholder";
-	
-	/**
-	 * Whether the data contains morphological annotations.
-	 */
-	public static final String PROP_CONTAINS_MORPHOLOGY = "containsMorphology";
-	
-	/**
-	 * Whether \ids from within a single file should be split up into separate documents.
-	 */
-	public static final String PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS = "splitIdsToDocuments";
+//	/**
+//	 * Whether the data contains morphological annotations.
+//	 */
+//	public static final String PROP_CONTAINS_MORPHOLOGY = "containsMorphology";
+//	
+//	/**
+//	 * Whether \ids from within a single file should be split up into separate documents.
+//	 */
+//	public static final String PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS = "splitIdsToDocuments";
 	
 	// ################################## v2 ######################################
 	
@@ -248,16 +252,16 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		addProperty(new PepperModuleProperty<>(PROP_FILE_EXTENSIONS, 
 				String.class,
 				"The file extensions that corpus files can have as a comma-separated list.",
-				"txt,lbl",
+				"txt",
 				true));
-		addProperty(new PepperModuleProperty<>(PROP_DOCUMENT_METADATA_MARKERS, 
-				String.class,
-				"All Toolbox markers which precede lines with document-specific metadata, without the preceding backslashes, and as a comma-separated list.",
-				false));
-		addProperty(new PepperModuleProperty<>(PROP_REF_METADATA_MARKERS, 
-				String.class,
-				"All Toolbox markers which precede lines with reference-specific metadata, without the preceding backslashes, and as a comma-separated list.",
-				false));
+//		addProperty(new PepperModuleProperty<>(PROP_DOCUMENT_METADATA_MARKERS, 
+//				String.class,
+//				"All Toolbox markers which precede lines with document-specific metadata, without the preceding backslashes, and as a comma-separated list.",
+//				false));
+//		addProperty(new PepperModuleProperty<>(PROP_REF_METADATA_MARKERS, 
+//				String.class,
+//				"All Toolbox markers which precede lines with reference-specific metadata, without the preceding backslashes, and as a comma-separated list.",
+//				false));
 		addProperty(new PepperModuleProperty<>(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, 
 				String.class,
 				"Wether detached delimiters (as in \"item - item\" or similar) should be attached to the previous or subsequent item, as a two-item array, where the first item signifies whether the delimiter should be attached (if true it will be attached), and the second item signifies whether the delimiter should be attached to the subsequent item (if true it will be attached to the subsequent item, making the latter a suffix).",
@@ -272,46 +276,46 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"The marker used to define unit refs.",
 				"unitref",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_FIX_ALIGNMENT, 
-				Boolean.class,
-				"Whether the importer should fix broken alignment in cases where the number of annotations is smaller than the number of tokens. If this is not set to true, the importer will throw errors whenever it encounters broken alignments.",
-				false,
-				false));
-		addProperty(new PepperModuleProperty<>(PROP_FIX_ALIGNMENT_STRING, 
-				String.class,
-				"The string that will be used to flag misalignment. This will be attached n times to the end of the line which includes the misalignment, where n is the number of missing items.",
-				"BROKEN_ALIGNMENT",
-				false));
-		addProperty(new PepperModuleProperty<>(PROP_IGNORE_MISSING_MORPHEMES, 
-				Boolean.class,
-				"Whether to ignore lexical items which miss a morphological representation.",
-				false,
-				false));
-		addProperty(new PepperModuleProperty<>(PROP_HAS_IDS,
-				Boolean.class,
-				"Whether a Toolbox file contains IDs, usually marked with \\id, for structuring files.",
-				true,
-				true));
-		addProperty(new PepperModuleProperty<>(PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS,
-				Boolean.class,
-				"Whether to replace missing morphological items with a placeholder string.",
-				true,
-				true));
-		addProperty(new PepperModuleProperty<>(PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER,
-				String.class,
-				"A custom placeholder string substituting missing morphological items.",
-				"***",
-				false));
-		addProperty(new PepperModuleProperty<>(PROP_CONTAINS_MORPHOLOGY,
-				Boolean.class,
-				"Whether the data contains morphological annotations.",
-				true,
-				true));
-		addProperty(new PepperModuleProperty<>(PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS,
-				Boolean.class,
-				"Whether \\ids from within a single file should be split up into separate documents.",
-				true,
-				true));
+//		addProperty(new PepperModuleProperty<>(PROP_FIX_ALIGNMENT, 
+//				Boolean.class,
+//				"Whether the importer should fix broken alignment in cases where the number of annotations is smaller than the number of tokens. If this is not set to true, the importer will throw errors whenever it encounters broken alignments.",
+//				false,
+//				false));
+//		addProperty(new PepperModuleProperty<>(PROP_FIX_ALIGNMENT_STRING, 
+//				String.class,
+//				"The string that will be used to flag misalignment. This will be attached n times to the end of the line which includes the misalignment, where n is the number of missing items.",
+//				"BROKEN_ALIGNMENT",
+//				false));
+//		addProperty(new PepperModuleProperty<>(PROP_IGNORE_MISSING_MORPHEMES, 
+//				Boolean.class,
+//				"Whether to ignore lexical items which miss a morphological representation.",
+//				false,
+//				false));
+//		addProperty(new PepperModuleProperty<>(PROP_HAS_IDS,
+//				Boolean.class,
+//				"Whether a Toolbox file contains IDs, usually marked with \\id, for structuring files.",
+//				true,
+//				true));
+//		addProperty(new PepperModuleProperty<>(PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS,
+//				Boolean.class,
+//				"Whether to replace missing morphological items with a placeholder string.",
+//				true,
+//				true));
+//		addProperty(new PepperModuleProperty<>(PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER,
+//				String.class,
+//				"A custom placeholder string substituting missing morphological items.",
+//				"***",
+//				false));
+//		addProperty(new PepperModuleProperty<>(PROP_CONTAINS_MORPHOLOGY,
+//				Boolean.class,
+//				"Whether the data contains morphological annotations.",
+//				true,
+//				true));
+//		addProperty(new PepperModuleProperty<>(PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS,
+//				Boolean.class,
+//				"Whether \\ids from within a single file should be split up into separate documents.",
+//				true,
+//				true));
 		
 		// ################################## v2 ######################################
 
@@ -359,13 +363,13 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return (String) getProperty(PROP_FILE_EXTENSIONS).getValue();
 	}
 	
-	public String getDocMetadataMarkers() {
-		return (String) getProperty(PROP_DOCUMENT_METADATA_MARKERS).getValue();
-	}
-	
-	public String getRefMetadataMarkers() {
-		return (String) getProperty(PROP_REF_METADATA_MARKERS).getValue();
-	}
+//	public String getDocMetadataMarkers() {
+//		return (String) getProperty(PROP_DOCUMENT_METADATA_MARKERS).getValue();
+//	}
+//	
+//	public String getRefMetadataMarkers() {
+//		return (String) getProperty(PROP_REF_METADATA_MARKERS).getValue();
+//	}
 	
 	public Boolean attachDetachedMorphemeDelimiter() {
 		String value = getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString();
@@ -379,45 +383,45 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return Boolean.valueOf(split[1]);
 	}
 
-	public String getUnitRefAnnotationMarkers() {
+	public String getUnitrefAnnotationMarkers() {
 		return (String) getProperty(PROP_UNIT_REF_ANNOTATION_MARKERS).getValue();
 	}
 	
-	public String getUnitRefDefinitionMarker() {
+	public String getUnitrefDefinitionMarker() {
 		return (String) getProperty(PROP_UNIT_REF_DEFINITION_MARKER).getValue();
 	}
 	
-	public Boolean fixAlignment() {
-		return (Boolean) getProperty(PROP_FIX_ALIGNMENT).getValue();
-	}
-	
-	public String getFixAlignmentString() {
-		return (String) getProperty(PROP_FIX_ALIGNMENT_STRING).getValue();
-	}
-	
-	public Boolean ignoreMissingMorphemes() {
-		return (Boolean) getProperty(PROP_IGNORE_MISSING_MORPHEMES).getValue();
-	}
-	
-	public Boolean hasIds() {
-		return (Boolean) getProperty(PROP_HAS_IDS).getValue();
-	}
-
-	public boolean getSubstituteMissingMorpologicalItems() {
-		return (Boolean) getProperty(PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS).getValue();
-	}
-	
-	public boolean containsMorphology() {
-		return (Boolean) getProperty(PROP_CONTAINS_MORPHOLOGY).getValue();
-	}
-	
-	public String getMissingMorphologicalItemsPlaceholder() {
-		return (String) getProperty(PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER).getValue();
-	}
-	
-	public boolean splitIdsToDocuments() {
-		return (Boolean) getProperty(PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS).getValue();
-	}
+//	public Boolean fixAlignment() {
+//		return (Boolean) getProperty(PROP_FIX_ALIGNMENT).getValue();
+//	}
+//	
+//	public String getFixAlignmentString() {
+//		return (String) getProperty(PROP_FIX_ALIGNMENT_STRING).getValue();
+//	}
+//	
+//	public Boolean ignoreMissingMorphemes() {
+//		return (Boolean) getProperty(PROP_IGNORE_MISSING_MORPHEMES).getValue();
+//	}
+//	
+//	public Boolean hasIds() {
+//		return (Boolean) getProperty(PROP_HAS_IDS).getValue();
+//	}
+//
+//	public boolean getSubstituteMissingMorpologicalItems() {
+//		return (Boolean) getProperty(PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS).getValue();
+//	}
+//	
+//	public boolean containsMorphology() {
+//		return (Boolean) getProperty(PROP_CONTAINS_MORPHOLOGY).getValue();
+//	}
+//	
+//	public String getMissingMorphologicalItemsPlaceholder() {
+//		return (String) getProperty(PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER).getValue();
+//	}
+//	
+//	public boolean splitIdsToDocuments() {
+//		return (Boolean) getProperty(PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS).getValue();
+//	}
 	
 	// ################################## v2 ######################################
 

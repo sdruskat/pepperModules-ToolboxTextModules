@@ -119,7 +119,6 @@
 \ref Sentence 3.2
 \tx A sentence
 \ta A word
-\docmet Some randomly put document meta annotation
 \mb m1 m2
 \ge M1 M2
 \ll A ref-level annotation
