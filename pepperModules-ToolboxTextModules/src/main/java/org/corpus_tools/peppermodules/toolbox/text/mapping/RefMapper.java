@@ -18,8 +18,6 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
-import java.util.Map.Entry;
-
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
@@ -53,11 +51,7 @@ public class RefMapper extends AbstractBlockMapper {
 	 */
 	@Override
 	public void map() {
-		System.err.println("\n\n--------------------------\n");
-		for (Entry<String, String> entry : markerContentMap.entries()) {
-			System.err.println(entry.getKey() + " : " + entry.getValue());
-		}
-		System.err.println("\n\n\n\n");
+		System.err.println("Busy as a bee mapping the refs, one two three! " + markerContentMap);
 	}
 
 }

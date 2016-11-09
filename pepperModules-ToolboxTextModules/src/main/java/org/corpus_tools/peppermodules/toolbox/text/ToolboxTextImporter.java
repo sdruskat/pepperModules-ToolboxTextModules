@@ -153,6 +153,11 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 						// create the empty documents
 						logger.warn("The corpus file " + corpusFile.getAbsolutePath() + " contains \\ids, but none of them contain \\refs. Will create empty documents with only metadata.");
 					}
+					else {
+						// Corpus has ids, of which some might be orphans!
+						// Orphans must be caught in ToolboxTextMapper.
+					}
+
 				}
 				headerEndOffset = idOffsets.get(0);
 			}

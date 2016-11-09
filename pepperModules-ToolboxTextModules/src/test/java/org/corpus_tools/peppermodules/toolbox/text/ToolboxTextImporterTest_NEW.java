@@ -68,6 +68,7 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 		this.supportedFormatsCheck.add(new FormatDesc().setFormatName("toolbox-text").setFormatVersion("3.0"));
 		this.getFixture().getCorpusDesc().getFormatDesc().setFormatName("toolbox-text").setFormatVersion("3.0");
 		getFixture().getSaltProject().createCorpusGraph();
+		getFixture().setProperties(new ToolboxTextImporterProperties());
 	}
 
 	/**
@@ -221,12 +222,24 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
-	 * Tests against a minimum example, where there are 0 \ids and 0 \refs,
-	 * i.e., an empty corpus.
+	 * Tests against a minimum example, where there are 0 \ids and 0 \refs
 	 */
 	@Test
 	public void testParseOrphanRefs() {
 		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("orphan-ids-and-refs.txt"))));
+		start();
+		fail("Needs to be implemented further!");
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there are 0 \ids, 1 standard \ref and 3 empty \refs.
+	 */
+	@Test
+	public void testParseEmptyRefs() {
+		setTestFile("empty-refs.txt");
 		start();
 		fail("Needs to be implemented further!");
 	}

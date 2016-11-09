@@ -1,0 +1,12 @@
+\_sh v3.0 Test
+\info Some info
+
+\ref Empty ref
+
+\ref Another empty ref
+
+\ref ORPHANREF1
+\tx Wort1
+\mb m1
+
+\ref A third empty ref

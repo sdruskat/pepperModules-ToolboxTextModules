@@ -156,7 +156,6 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 				if (doProcessMarker) {
 					if (properties.mergeDuplicateMarkers()) {
 						log.warn("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nAttempting to concatenate all lines with the same marker in the next step.");
-						System.out.println("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nAttempting to concatenate all lines with the same marker in the next step.");
 						duplicateMarkers.add(marker);
 					}
 					else {

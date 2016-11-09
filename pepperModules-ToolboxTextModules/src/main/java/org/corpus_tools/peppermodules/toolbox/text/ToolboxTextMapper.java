@@ -55,6 +55,8 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	private final Map<Long, List<Long>> refMap;
 	private final Range<Long> idRange;
 
+	private ToolboxTextImporterProperties properties;
+
 	/**
 	 * @param headerEndOffset
 	 * @param refMap
@@ -74,46 +76,74 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
 		SDocumentGraph graph = getDocument().getDocumentGraph();
-//		System.err.println("DOC: " + getDocument().getIdentifier());
-//		System.err.println("Range: " + idRange);
 		File file = new File(getResourceURI().toFileString());
+ 
+		/* FIXME: Test for:
+		 * - monolithic!
+		 * - oprhan IDs 
+		 */
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r"); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-			raf.seek(idRange.lowerEndpoint());
-			List<Long> refOffsets = refMap.get(idRange.lowerEndpoint());
 			int currentByte;
-			long pointer;
-			long headerEndOffset; 
-			if (refOffsets.size() == 0) { // I.e., \id has no children, i.e., \refs
-				headerEndOffset = idRange.upperEndpoint(); 
+			// Whether this document is an orphan, i.e., contains no \refs
+			boolean isOrphan = false;
+			List<Long> refOffsets = refMap.get(idRange.lowerEndpoint());
+			if (isMonolithic()) {
+				/*
+				 * If a document is monolithic, i.e., contains no \id markers,
+				 * it cannot have a header. Hence, no header will be mapped, and
+				 * instead of calling an instance of DocumentHeaderMapper, the
+				 * name of the SDocument will be set to the file name sans extension.
+				 */
+				String fileName = file.getName();
+				graph.getDocument().setName(fileName.substring(0, fileName.lastIndexOf('.')));
+				refOffsets = refMap.get(-1L);
 			}
 			else {
-				headerEndOffset = refOffsets.get(0);
-			}
-
-			// Parse document header
-			while ((currentByte = raf.read()) > 0 && (pointer = raf.getFilePointer()) <= headerEndOffset) {
-				bos.write(currentByte);
-			}
-			DocumentHeaderMapper documentHeaderMapper = new DocumentHeaderMapper(getProperties(), graph, bos.toString().trim());
-			documentHeaderMapper.map();
-			bos.reset();
-			for (Long refOffset : refOffsets) {
-				Long nextOffset;
-				boolean isLast = false;
-				if (refOffsets.indexOf(refOffset) == refOffsets.size() - 1) {
-					nextOffset = idRange.upperEndpoint();
-					isLast = true;
+				// The offset at which the header of this document ends
+				long docHeaderEndOffset;
+				/*
+				 * If the list of \ref offsets for this document is not empty, i.e.,
+				 * the document is not an orphan, the headerEndOffset is the offset 
+				 * of the start of the first ref, i.e., the first offset in the list.
+				 * Otherwise, it's the end of the idRange, i.e., its upper endpoint.
+				 */
+				if (refOffsets.size() == 0) {
+					docHeaderEndOffset = idRange.upperEndpoint();
+					isOrphan = true;
 				}
 				else {
-					nextOffset = refOffsets.get(refOffsets.indexOf(refOffset) + 1);
+					docHeaderEndOffset = refOffsets.get(0);
 				}
-				raf.seek(refOffset);
-				while ((currentByte = raf.read()) > 0 && (pointer = raf.getFilePointer()) <= nextOffset) {
+				// Parse document header
+				raf.seek(idRange.lowerEndpoint());
+				while ((currentByte = raf.read()) > 0 && raf.getFilePointer() <= docHeaderEndOffset) {
 					bos.write(currentByte);
 				}
-				RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim());
-				refMapper.map();
+				DocumentHeaderMapper documentHeaderMapper = new DocumentHeaderMapper(getProperties(), graph, bos.toString().trim());
+				documentHeaderMapper.map();
 				bos.reset();
+			}
+
+			// Parse refs if there are any
+			if (!isOrphan) {
+				for (Long refOffset : refOffsets) {
+					Long nextOffset;
+					boolean isLast = false;
+					if (refOffsets.indexOf(refOffset) == refOffsets.size() - 1) {
+						nextOffset = idRange.upperEndpoint();
+						isLast = true;
+					}
+					else {
+						nextOffset = refOffsets.get(refOffsets.indexOf(refOffset) + 1);
+					}
+					raf.seek(refOffset);
+					while ((currentByte = raf.read()) > 0 && raf.getFilePointer() <= nextOffset) {
+						bos.write(currentByte);
+					}
+					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim());
+					refMapper.map();
+					bos.reset();
+				}
 			}
 		}
 		catch (FileNotFoundException e) {
@@ -147,17 +177,28 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	@Override
 	public DOCUMENT_STATUS mapSCorpus() {
 		File file = new File(getResourceURI().toFileString());
+		headerParsing:
 		try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file)));
 				ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 			int currentByte;
 			String[] markerAndValue = null;
 			while ((currentByte = stream.read()) > 0 && stream.getCount() < headerEndOffset) {
-				
-				// If we hit a new marker, split the trimmed contents of bos into marker and value and write them to a meta annotation.
+				/* 
+				 * If we hit a new marker, split the trimmed contents of bos into 
+				 * marker and value and write them to a meta annotation, unless
+				 * the marker is the \ref marker, which means that we have hit an
+				 * orphan \ref before the first \id marker, in which case write and abort!
+				 */
 				if (currentByte == '\\' && bos.size() > 0) {
 					markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
-					getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
-					bos.reset();
+					if (!markerAndValue[0].equals(getProperties().getRefMarker())) {
+						getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
+						bos.reset();
+					}
+					else {
+						// Break the whole try block
+						break headerParsing;
+					}
 				}
 				bos.write(currentByte);
 			}
@@ -170,6 +211,9 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		}
 		catch (IOException e) {
 			throw new PepperModuleException("Error while parsing the corpus file " + getResourceURI().toFileString() + "!", e);
+		}
+		for (SMetaAnnotation ma : getCorpus().getMetaAnnotations()) {
+			System.out.println(ma.getName() + " ::: " + ma.getValue_STEXT());
 		}
 		return DOCUMENT_STATUS.COMPLETED;
 	}
@@ -189,6 +233,29 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	 */
 	private String[] getMarkerAndValueFromString(String line) {
 		return line.substring(1).split(" ", 2);
+	}
+
+	/**
+	 * Verifies whether the document to be mapped is the
+	 * single document in a monolithic corpus, i.e., a
+	 * corpus which contains only one document, which in
+	 * turn contains all the \refs.
+	 * 
+	 * In this case, the Toolbox file will not contain any
+	 * `\id`s but only `\ref`s.
+	 *
+	 * @return
+	 */
+	private boolean isMonolithic() {
+		return refMap.size() == 1 && refMap.containsKey(-1L);
+	}
+
+	/**
+	 * @return the properties
+	 */
+	@Override
+	public ToolboxTextImporterProperties getProperties() {
+		return (ToolboxTextImporterProperties) super.getProperties();
 	}
 
 }
