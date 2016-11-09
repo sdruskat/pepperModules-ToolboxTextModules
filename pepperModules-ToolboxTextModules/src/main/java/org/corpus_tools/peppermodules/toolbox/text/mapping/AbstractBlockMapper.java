@@ -23,12 +23,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Set;
 
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
@@ -39,6 +37,9 @@ import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 
 /**
  * This class can be extended to avoid re-duplication of the methods for
@@ -56,7 +57,7 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	private final String trimmedInputString;
 	protected final ToolboxTextImporterProperties properties;
 	protected final List<String> lines = new ArrayList<>();
-	protected final Map<String, String> markerContentMap = new HashMap<>();
+	protected final ListMultimap<String, String> markerContentMap = ArrayListMultimap.create();
 
 	/**
 	 * @param properties 
@@ -155,6 +156,7 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 				if (doProcessMarker) {
 					if (properties.mergeDuplicateMarkers()) {
 						log.warn("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nAttempting to concatenate all lines with the same marker in the next step.");
+						System.out.println("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nAttempting to concatenate all lines with the same marker in the next step.");
 						duplicateMarkers.add(marker);
 					}
 					else {

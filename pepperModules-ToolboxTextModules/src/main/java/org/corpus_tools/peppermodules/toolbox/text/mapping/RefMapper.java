@@ -54,7 +54,7 @@ public class RefMapper extends AbstractBlockMapper {
 	@Override
 	public void map() {
 		System.err.println("\n\n--------------------------\n");
-		for (Entry<String, String> entry : markerContentMap.entrySet()) {
+		for (Entry<String, String> entry : markerContentMap.entries()) {
 			System.err.println(entry.getKey() + " : " + entry.getValue());
 		}
 		System.err.println("\n\n\n\n");
