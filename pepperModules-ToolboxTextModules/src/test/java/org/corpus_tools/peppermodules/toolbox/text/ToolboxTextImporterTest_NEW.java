@@ -27,6 +27,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+
 import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.common.FormatDesc;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
@@ -110,6 +112,21 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 		
 		// Test single document
 		assertEquals(1, corpusGraph.getDocuments().size());
+		fail("Needs to be implemented further!");
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there are n \ids and 0 \refs,
+	 * i.e., what will become a single corpus with n empty documents.
+	 */
+	@Test
+	public void testParseDocumentWithJustIds() {
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("just-ids.txt"))));
+		start();
+		fail("Needs to be implemented further!");
 	}
 	
 	/**
@@ -122,7 +139,8 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 	 */
 	@Test
 	public void testParseStandardDocument() {
-		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("test.txt"))));
+		setTestFile("test.txt");
+		setProperties("test.properties");
 		start();
 		assertEquals((Long) 246L, getFixture().getHeaderEndOffset());
 		assertFalse(getFixture().isMonolithic());
@@ -210,10 +228,7 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 	public void testParseOrphanRefs() {
 		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("orphan-ids-and-refs.txt"))));
 		start();
-	}
-
-	private String getFile(String fileName) {
-		return this.getClass().getClassLoader().getResource(fileName).getFile();
+		fail("Needs to be implemented further!");
 	}
 
 	/**
@@ -270,6 +285,30 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 				assertThat(ma.getQName() + ":" + ma.getValue_STEXT(), is(anyOf(is("toolbox::_sh:v3.0 Test"), is("toolbox::info:Some info"))));
 			}
 		}
+	}
+
+	private String getFile(String fileName) {
+		return this.getClass().getClassLoader().getResource(fileName).getFile();
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param string
+	 */
+	private void setTestFile(String fileName) {
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile(fileName))));
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param string
+	 */
+	private void setProperties(String string) {
+		ToolboxTextImporterProperties properties = new ToolboxTextImporterProperties();
+		properties.setPropertyValues(new File(getFile("test.properties")));
+		getFixture().setProperties(properties);
 	}
 	
 

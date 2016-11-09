@@ -4,7 +4,6 @@
 
 \id Document no. 1
 \idinfo Some document no. 1 info
-\idinfo Somehtin
 \moreidinfo Some more info about document no. 1
 
 \ref Reference no. 1
@@ -127,10 +126,11 @@
 
 
 \id Document no. 4
-\moreidinfo KEEP ME
-\idinfo Some document no. 4 info
+\idinfo Some document no. 4 info followed by an empty marker
+\idinfo
 \moreidinfo Some more info about document no. 4
-\moreidinfo DELETE ME
+\moreidinfo Duplicate 1
+\moreidinfo Duplicate 2
 
 \ref Sentence 4.1
 \tx A sentence

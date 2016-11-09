@@ -53,6 +53,11 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 * debug messages
 	 **/
 	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextImporter.class);
+	
+	/**
+	 * A regex to be used when splitting a String with a comma-delimited list of values with {@link String#split(String)}.
+	 */
+	public static final String COMMA_DELIM_SPLIT_REGEX = "\\s*,\\s*";
 
 	private List<Long> idOffsets;
 

@@ -197,109 +197,132 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	public static final String PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS = "splitIdsToDocuments";
 	
+	// ################################## v2 ######################################
+	
+	/**
+	 * <p>Whether lines with the same marker in the same block should be merged into one line.</p>
+	 * <p><code>true</code>: subsequent lines marked with {marker} are concatenated to the first
+	 * line marked with {marker}.</p>
+	 * <p><code>false</code>: all lines but the first line marked with {marker} are dropped.
+	 */
+	public static final String PROP_MERGE_DUPL_MARKERS = "mergeDuplMarkers";
+
+	// ################################## v2 ######################################
+
 	
 	public ToolboxTextImporterProperties() {
-		addProperty(new PepperModuleProperty<String>(PROP_LEX_MARKER, 
+		addProperty(new PepperModuleProperty<>(PROP_LEX_MARKER, 
 				String.class, 
 				"The Toolbox marker that precedes lines with source text (usually lexical items), without the preceding backslash.", 
 				"tx",
 				true));
-		addProperty(new PepperModuleProperty<String>(PROP_MORPH_MARKER, 
+		addProperty(new PepperModuleProperty<>(PROP_MORPH_MARKER, 
 				String.class, 
 				"The Toolbox marker that precedes lines with morphological information, without the preceding backslash.",
 				"mb",
 				false));
-		addProperty(new PepperModuleProperty<String>(PROP_ID_MARKER, 
+		addProperty(new PepperModuleProperty<>(PROP_ID_MARKER, 
 				String.class, 
 				"The Toolbox marker that precedes lines with IDs, without the preceding backslash.",
 				"id",
 				false));
-		addProperty(new PepperModuleProperty<String>(PROP_LEX_ANNOTATION_MARKERS, 
+		addProperty(new PepperModuleProperty<>(PROP_LEX_ANNOTATION_MARKERS, 
 				String.class, 
 				"All Toolbox markers which precede lines with annotations of source text segments (usually lexical items), without the preceding backslashes, and as a comma-separated list.",
 				false));
-		addProperty(new PepperModuleProperty<String>(PROP_MORPH_ANNOTATION_MARKERS, 
+		addProperty(new PepperModuleProperty<>(PROP_MORPH_ANNOTATION_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with annotations of morphemes, without the preceding backslashes, and as a comma-separated list.",
 				"ge,ps",
 				false));
-		addProperty(new PepperModuleProperty<String>(PROP_MORPHEME_DELIMITERS, 
+		addProperty(new PepperModuleProperty<>(PROP_MORPHEME_DELIMITERS, 
 				String.class,
 				"The morpheme delimiters used in the Toolbox files as a comma-separated two-point list where the first element is the affix delimiter, and the second element is the clitics delimiter.",
 				"-,=",
 				false));
-		addProperty(new PepperModuleProperty<String>(PROP_REF_MARKER, 
+		addProperty(new PepperModuleProperty<>(PROP_REF_MARKER, 
 				String.class,
 				"The marker used for references, i.e., usually \"ref\" or \"id\".",
 				"ref",
 				true));
-		addProperty(new PepperModuleProperty<String>(PROP_FILE_EXTENSIONS, 
+		addProperty(new PepperModuleProperty<>(PROP_FILE_EXTENSIONS, 
 				String.class,
 				"The file extensions that corpus files can have as a comma-separated list.",
 				"txt,lbl",
 				true));
-		addProperty(new PepperModuleProperty<String>(PROP_DOCUMENT_METADATA_MARKERS, 
+		addProperty(new PepperModuleProperty<>(PROP_DOCUMENT_METADATA_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with document-specific metadata, without the preceding backslashes, and as a comma-separated list.",
 				false));
-		addProperty(new PepperModuleProperty<String>(PROP_REF_METADATA_MARKERS, 
+		addProperty(new PepperModuleProperty<>(PROP_REF_METADATA_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with reference-specific metadata, without the preceding backslashes, and as a comma-separated list.",
 				false));
-		addProperty(new PepperModuleProperty<String>(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, 
+		addProperty(new PepperModuleProperty<>(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, 
 				String.class,
 				"Wether detached delimiters (as in \"item - item\" or similar) should be attached to the previous or subsequent item, as a two-item array, where the first item signifies whether the delimiter should be attached (if true it will be attached), and the second item signifies whether the delimiter should be attached to the subsequent item (if true it will be attached to the subsequent item, making the latter a suffix).",
 				"true,true",
 				false));
-		addProperty(new PepperModuleProperty<String>(PROP_UNIT_REF_ANNOTATION_MARKERS, 
+		addProperty(new PepperModuleProperty<>(PROP_UNIT_REF_ANNOTATION_MARKERS, 
 				String.class,
-				"All Toolbox markers which precede lines with annotations that can potentially span subranges of the complete morphological data source.",
+				"All Toolbox markers which precede lines with annotations that can potentially span subranges of the complete morphological data source, without the preceding backslashes, and as a comma-separated list.",
 				false));
-		addProperty(new PepperModuleProperty<String>(PROP_UNIT_REF_DEFINITION_MARKER, 
+		addProperty(new PepperModuleProperty<>(PROP_UNIT_REF_DEFINITION_MARKER, 
 				String.class,
 				"The marker used to define unit refs.",
 				"unitref",
 				false));
-		addProperty(new PepperModuleProperty<Boolean>(PROP_FIX_ALIGNMENT, 
+		addProperty(new PepperModuleProperty<>(PROP_FIX_ALIGNMENT, 
 				Boolean.class,
 				"Whether the importer should fix broken alignment in cases where the number of annotations is smaller than the number of tokens. If this is not set to true, the importer will throw errors whenever it encounters broken alignments.",
 				false,
 				false));
-		addProperty(new PepperModuleProperty<String>(PROP_FIX_ALIGNMENT_STRING, 
+		addProperty(new PepperModuleProperty<>(PROP_FIX_ALIGNMENT_STRING, 
 				String.class,
 				"The string that will be used to flag misalignment. This will be attached n times to the end of the line which includes the misalignment, where n is the number of missing items.",
 				"BROKEN_ALIGNMENT",
 				false));
-		addProperty(new PepperModuleProperty<Boolean>(PROP_IGNORE_MISSING_MORPHEMES, 
+		addProperty(new PepperModuleProperty<>(PROP_IGNORE_MISSING_MORPHEMES, 
 				Boolean.class,
 				"Whether to ignore lexical items which miss a morphological representation.",
 				false,
 				false));
-		addProperty(new PepperModuleProperty<Boolean>(PROP_HAS_IDS,
+		addProperty(new PepperModuleProperty<>(PROP_HAS_IDS,
 				Boolean.class,
 				"Whether a Toolbox file contains IDs, usually marked with \\id, for structuring files.",
 				true,
 				true));
-		addProperty(new PepperModuleProperty<Boolean>(PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS,
+		addProperty(new PepperModuleProperty<>(PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS,
 				Boolean.class,
 				"Whether to replace missing morphological items with a placeholder string.",
 				true,
 				true));
-		addProperty(new PepperModuleProperty<String>(PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER,
+		addProperty(new PepperModuleProperty<>(PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER,
 				String.class,
 				"A custom placeholder string substituting missing morphological items.",
 				"***",
 				false));
-		addProperty(new PepperModuleProperty<Boolean>(PROP_CONTAINS_MORPHOLOGY,
+		addProperty(new PepperModuleProperty<>(PROP_CONTAINS_MORPHOLOGY,
 				Boolean.class,
 				"Whether the data contains morphological annotations.",
 				true,
 				true));
-		addProperty(new PepperModuleProperty<Boolean>(PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS,
+		addProperty(new PepperModuleProperty<>(PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS,
 				Boolean.class,
 				"Whether \\ids from within a single file should be split up into separate documents.",
 				true,
 				true));
+		
+		// ################################## v2 ######################################
+
+		addProperty(new PepperModuleProperty<>(PROP_MERGE_DUPL_MARKERS,
+				Boolean.class,
+				"Whether lines with the same marker in the same block should be merged into one line, or just the first line kept.",
+				true,
+				true));
+		
+		// ################################## v2 ######################################
+
 	}
 	
 	// Getter methods for the different property values.
@@ -395,5 +418,15 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public boolean splitIdsToDocuments() {
 		return (Boolean) getProperty(PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS).getValue();
 	}
+	
+	// ################################## v2 ######################################
+
+	public boolean mergeDuplicateMarkers() {
+		return (Boolean) getProperty(PROP_MERGE_DUPL_MARKERS).getValue();
+	}
+
+	
+	// ################################## v2 ######################################
+
 	
 }

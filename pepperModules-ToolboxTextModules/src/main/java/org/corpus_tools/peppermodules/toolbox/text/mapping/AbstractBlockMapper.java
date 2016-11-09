@@ -23,14 +23,18 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
+import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.slf4j.Logger;
@@ -52,6 +56,7 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	private final String trimmedInputString;
 	protected final ToolboxTextImporterProperties properties;
 	protected final List<String> lines = new ArrayList<>();
+	protected final Map<String, String> markerContentMap = new HashMap<>();
 
 	/**
 	 * @param properties 
@@ -124,30 +129,75 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 		// Drop empty lines
 		lines.removeAll(Arrays.asList("", null));
 		// Sanity check: No duplicate marker lines allowed!
-		// TODO Do this based on a property "mergeDuplMarkers":true
 		Set<String> existingMarkers = new HashSet<>();
 		Set<String> duplicateMarkers = new HashSet<>();
 		for (Iterator<String> iterator = lines.iterator(); iterator.hasNext();) {
-		    String l = iterator.next();
+			String l = iterator.next();
 			String marker;
 			if (!existingMarkers.add(marker = l.split(" ", 2)[0])) {
-				log.warn("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nAttempting to concatenate all lines with the same marker in the next step.");
-				duplicateMarkers.add(marker);
-				// FIXME Make this depending on the value of above property
-				log.warn("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nDropping all but the first line marked with it.");
-				iterator.remove();
+				/* 
+				 * Both the unitref marker and the lines that can contain annotations to
+				 * be applied to unitrefs can occur more than once in a block, hence
+				 * test first if the marker under scrutiny belongs to either group before
+				 * attempting to re-work lines.
+				 */
+				boolean hasUnitrefAnnoMarkers = properties.getUnitRefAnnotationMarkers() != null;
+				String unitrefMarker = properties.getUnitRefDefinitionMarker();
+				/* 
+				 * If no unitref annotation markers have been defined, set the boolean 
+				 * depending on the unitref marker only, else use both the latter and
+				 * whether the marker is defined as a unitref annotation marker.
+				 */
+				boolean doProcessMarker = hasUnitrefAnnoMarkers ? 
+						(!marker.substring(1).equals(unitrefMarker) && 
+								!Arrays.asList(properties.getUnitRefAnnotationMarkers().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)).contains(marker.substring(1))) : 
+						(!marker.substring(1).equals(unitrefMarker)) ;
+				if (doProcessMarker) {
+					if (properties.mergeDuplicateMarkers()) {
+						log.warn("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nAttempting to concatenate all lines with the same marker in the next step.");
+						duplicateMarkers.add(marker);
+					}
+					else {
+						log.warn("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nDropping all but the first line marked with it.");
+						iterator.remove();
+					}
+				}
 			}
 		}
-		if (!duplicateMarkers.isEmpty()) {
+		// Merge duplicate marker lines if selected via property
+		if (properties.mergeDuplicateMarkers() && !duplicateMarkers.isEmpty()) {
+			ListIterator<String> iterator = lines.listIterator();
 			for (String duplicateMarker : duplicateMarkers) {
-				/* TODO: Iterate list of lines from back to front, if the
-				 * line starts with the marker, remember the line, at the next line with the marker, drop
-				 * the marker from the previous marked line and concatenate at back of newly found line. 
-				 */
+				int firstLineIndex = -1;
+				boolean firstLineSet = false;
+				while (iterator.hasNext()) {
+					int currentIndex = iterator.nextIndex();
+					String line = iterator.next();
+					if (line.startsWith(duplicateMarker + " ")) {
+						if (!firstLineSet) {
+							firstLineIndex = currentIndex;
+							firstLineSet = true;
+						}
+						else {
+							String oldLine = lines.get(firstLineIndex);
+							lines.set(firstLineIndex, oldLine.concat(" ").concat(line.split(" ", 2)[1]));
+							iterator.remove();
+						}
+					}
+				}
 			}
+		}
+		// Build markerContentMap
+		for (String line : lines) {
+			String[] split = line.split(" ", 2);
+			markerContentMap.put(split[0].substring(1), split[1]);
 		}
 	}
 	
+	/**
+	 * TODO: Description
+	 *
+	 */
 	public abstract void map();
 
 }

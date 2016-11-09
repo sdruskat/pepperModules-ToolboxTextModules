@@ -82,10 +82,16 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 			List<Long> refOffsets = refMap.get(idRange.lowerEndpoint());
 			int currentByte;
 			long pointer;
-			long firstRefOffset = refOffsets.get(0);
+			long headerEndOffset; 
+			if (refOffsets.size() == 0) { // I.e., \id has no children, i.e., \refs
+				headerEndOffset = idRange.upperEndpoint(); 
+			}
+			else {
+				headerEndOffset = refOffsets.get(0);
+			}
 
 			// Parse document header
-			while ((currentByte = raf.read()) > 0 && (pointer = raf.getFilePointer()) <= firstRefOffset) {
+			while ((currentByte = raf.read()) > 0 && (pointer = raf.getFilePointer()) <= headerEndOffset) {
 				bos.write(currentByte);
 			}
 			DocumentHeaderMapper documentHeaderMapper = new DocumentHeaderMapper(getProperties(), graph, bos.toString().trim());
