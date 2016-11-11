@@ -1,0 +1,5 @@
+\_sh v3.0 Test
+\info Some info
+
+\ref No morph
+\tx Word

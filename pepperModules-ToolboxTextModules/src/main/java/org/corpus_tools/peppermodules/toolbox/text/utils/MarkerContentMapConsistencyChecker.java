@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * @author Stephan Druskat
  *
  */
-public class MarkerContentMapConsistencyChecker extends Thread {
+public class MarkerContentMapConsistencyChecker {
 	
 	private static final Logger log = LoggerFactory.getLogger(MarkerContentMapConsistencyChecker.class);
 	
@@ -70,7 +70,6 @@ public class MarkerContentMapConsistencyChecker extends Thread {
 		this.ref = refList.get(0);
 	}
 
-	@Override
 	public void run() {
 		set.remove(refMarker);
 		set.remove(lexMarker);
@@ -96,7 +95,7 @@ public class MarkerContentMapConsistencyChecker extends Thread {
 			throw new PepperModuleException("Failed to catch all markers used in reference \"" + ref + "\": \'" + sb.toString().trim() + "\'! Please report this as a bug, attaching this message and the respective file!");
 		}
 		else {
-			log.info("All markers have been caught.");
+			log.debug("All markers have been caught.");
 		}
 	}
 

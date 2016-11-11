@@ -71,6 +71,8 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	
 	private final Map<Identifier, Range<Long>> offsetRangeMap = new HashMap<>();
 
+	private Map<Long, Boolean> idStructureMap;
+
 	public ToolboxTextImporter() {
 		super();
 		setName("ToolboxTextImporter");
@@ -118,11 +120,13 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName.substring(0, corpusFileName.lastIndexOf('.')));
 			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), corpusFileURI);
 
+			ToolboxTextImporterProperties p;
 			// Parse file
-			ToolboxTextSegmentationParser parser = new ToolboxTextSegmentationParser(corpusFile, getProperties().getIdMarker(), getProperties().getRefMarker());
+			ToolboxTextSegmentationParser parser = new ToolboxTextSegmentationParser(corpusFile, (p = getProperties()).getIdMarker(), p.getRefMarker(), p.getMorphMarker());
 			parser.parse();
 			idOffsets = parser.getIdOffsets();
 			refMap = parser.getRefMap();
+			idStructureMap = parser.getIdStructureMap();
 			// Do some sanity checks on the documents, and write irregularities to log
 			if (idOffsets.isEmpty()) {
 				// Corpus has no \ids
@@ -203,10 +207,10 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 				}
 				idRange = Range.closed(offsetMap.get(identifier), nextIdOffset);
 			}
-			mapper = new ToolboxTextMapper(null, refMap, idRange);
+			mapper = new ToolboxTextMapper(null, refMap, idRange, idStructureMap.get(idRange.lowerEndpoint()));
 		}
 		else if (element instanceof SCorpus) {
-			mapper = new ToolboxTextMapper(headerEndOffset, null, null);
+			mapper = new ToolboxTextMapper(headerEndOffset, null, null, false);
 		}
 		else {
 			throw new PepperModuleException("Cannot create a mapper for elements that are neither of type SCorpus or SDocument.");

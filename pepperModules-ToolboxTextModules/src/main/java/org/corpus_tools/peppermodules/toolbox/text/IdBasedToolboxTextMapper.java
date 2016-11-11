@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import java.io.BufferedInputStream; 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,12 +32,13 @@ import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.salt.common.SCorpus;
 import org.corpus_tools.salt.common.SDocument;
 import org.eclipse.emf.common.util.URI;
+
 import com.google.common.io.CountingInputStream;
 
 /**
  * TODO Description
  *
- * @author Stephan Druskat <mail@sdruskat.net>
+ * @author Stephan Druskat <<mail@sdruskat.net>>
  *
  */
 public class IdBasedToolboxTextMapper extends AbstractToolboxTextMapper {

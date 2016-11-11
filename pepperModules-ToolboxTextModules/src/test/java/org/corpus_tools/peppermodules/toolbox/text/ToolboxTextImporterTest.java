@@ -53,7 +53,7 @@ import org.junit.Test;
  * @author Stephan Druskat
  *
  */
-public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
+public class ToolboxTextImporterTest extends PepperImporterTest {
 
 	private static final String DOC_INFO_ANNO = "A sample \"standard\" corpus in Toolbox text format. It includes use cases for most phenomena the importer tests against, such as clitics and affixes, unitrefs, meta annotations, etc.";
 	private static final String DOC_NO = "Document no. ";
@@ -253,6 +253,19 @@ public class ToolboxTextImporterTest_NEW extends PepperImporterTest {
 	@Test
 	public void testParseNoTxLine() {
 		setTestFile("no-tx-line.txt");
+		start();
+		fail("Needs to be implemented further!");
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there are 4 \id, one of which has a \ref **without** a morph line
+	 */
+	@Test
+	public void testParseNoMbLine() {
+		setTestFile("id-without-morph-line.txt");
 		start();
 		fail("Needs to be implemented further!");
 	}

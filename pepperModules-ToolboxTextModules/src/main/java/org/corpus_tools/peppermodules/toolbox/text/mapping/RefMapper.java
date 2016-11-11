@@ -26,6 +26,7 @@ import java.util.List;
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter;
+import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
 import org.corpus_tools.peppermodules.toolbox.text.utils.MarkerContentMapConsistencyChecker;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
@@ -38,9 +39,9 @@ import org.slf4j.LoggerFactory;
 /**
  * This class provides mapping functionality to map lines
  * from a Toolbox file that are the \ref line or a following line
- * before the next \ref line the respective elements, e.g. 
- * {@link SToken}, {@link SSpan}, {@link SAnnotation}m etc.,
- * onto the target {@link SDocument}'s {@link SDocumentGraph}.
+ * before the next \ref line, to the respective elements, e.g. 
+ * {@link SToken}, {@link SSpan}, {@link SAnnotation} etc.,
+ * in the target {@link SDocument}'s {@link SDocumentGraph}.
  *
  * @author Stephan Druskat
  *
@@ -48,14 +49,17 @@ import org.slf4j.LoggerFactory;
 public class RefMapper extends AbstractBlockMapper {
 	
 	private static final Logger log = LoggerFactory.getLogger(RefMapper.class);
+	private final boolean docHasMorphology;
 
 	/**
 	 * @param properties
 	 * @param graph
 	 * @param trimmedInputString
+	 * @param hasMorphology 
 	 */
-	public RefMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString) {
+	public RefMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString, boolean hasMorphology) {
 		super(properties, graph, trimmedInputString);
+		this.docHasMorphology = hasMorphology;
 	}
 
 	/**
@@ -63,6 +67,7 @@ public class RefMapper extends AbstractBlockMapper {
 	 */
 	@Override
 	public void map() {
+		
 		/* \ref Unitref sentence schema 3 (defined global) to mb
 		*	\met Sentence with two global unitrefs (morph-level) m26-m28 and m30-m31 on \\ur
 		*	\\unitref 1 1 3
@@ -101,32 +106,37 @@ public class RefMapper extends AbstractBlockMapper {
 		}
 		
 		// Test if all markers have been caught in a group or as a single marker 
-		MarkerContentMapConsistencyChecker checkerThread = new MarkerContentMapConsistencyChecker(new HashSet<>(markerContentMap.keySet()),
+		new MarkerContentMapConsistencyChecker(new HashSet<>(markerContentMap.keySet()),
 				refMarker, lexMarker, morphMarker, unitrefMarker,
 				lexAnnoMarkers, morphAnnoMarkers, unitrefAnnoMarkers, refAnnoMarkers,
-				markerContentMap.get(refMarker));
-		checkerThread.run();
+				markerContentMap.get(refMarker)).run();
 		
 		// Single lines
 		String ref = getSingleLine(refMarker);
 		String lex = getSingleLine(lexMarker);
-		String morph = getSingleLine(morphMarker);
-
+		String morph = docHasMorphology ? getSingleLine(morphMarker) : null;
+		
 		// Stop here if lex is empty or null
-		if(lex == null || lex.isEmpty()) {
+		if (lex == null || lex.isEmpty()) {
 			log.warn("The reference \"" + ref + "\" does not contain any primary data source (\\" + lexMarker + ") and will be ignored.");
 			return;
 		}
 		
-		
-		System.err.println("Busy as a bee mapping the refs, one two three! " + markerContentMap);
+		// Prepare lexical and morphological layer lines and their annotation lines
+		LayerData lexData = new LayerData(markerContentMap, lexMarker, lex, lexAnnoMarkers, true).compile(); 
+		LayerData refData = new LayerData(markerContentMap, refMarker, ref, refAnnoMarkers, false).compile();
+		LayerData morphData = null;
+		if (morph != null) {
+			morphData = new LayerData(markerContentMap, morphMarker, morph, morphAnnoMarkers, false).compile();
+		}
+
 	}
 
 	/**
 	 * Returns the single line for the marker, or throws
 	 * an exception if there is more than one line marked
 	 * with the marker, which at this point shouldn't be 
-	 * the case!
+	 * the case for ref and morph markers!
 	 *
 	 * @param marker
 	 * @return the contents of the single line marked by the marker.

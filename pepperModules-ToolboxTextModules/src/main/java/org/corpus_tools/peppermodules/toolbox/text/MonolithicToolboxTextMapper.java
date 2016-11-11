@@ -28,14 +28,12 @@
 //import java.util.Arrays;
 //import java.util.Date;
 //import java.util.HashMap;
-//import java.util.HashSet;
 //import java.util.Iterator;
 //import java.util.LinkedList;
 //import java.util.List;
 //import java.util.ListIterator;
 //import java.util.Map;
 //import java.util.Map.Entry;
-//import java.util.Set;
 //
 //import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 //import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
@@ -373,7 +371,7 @@
 //	private void addLineToBlock(ListMultimap<String, List<String>> block, String line) {
 //		String[] markerAndValues = line.split("\\s+");
 //		if (markerAndValues[0] == null) {
-//			LinkedList<String> markerandValuesList = new LinkedList<String>(Arrays.asList(markerAndValues));
+//			LinkedList<String> markerandValuesList = new LinkedList<>(Arrays.asList(markerAndValues));
 //			markerandValuesList.removeFirst();
 //			markerAndValues = (String[]) markerandValuesList.toArray();
 //		}
@@ -511,58 +509,7 @@
 //	 */
 //	private SSpan mapRefToModel(ListMultimap<String, List<String>> block) {
 //		// TODO Re-implement catching empty lex lines before block is mapped for better performance
-//		List<List<String>> lexLine = block.get(getProperties().getLexMarker());
-//		if (lexLine.size() == 1 && lexLine.get(0).isEmpty()) {
-//			logger.info("Dropping reference " + block.get(getProperties().getRefMarker()) + " because it does not contain any lexical information with marker " + getProperties().getLexMarker() + "!");
-//			return null;
-//		}
-//		// Fix missing morphological items where needed, if there is morphology
-//		if (containsMorphology) {
-//			try {
-//			if (block.get(getProperties().getMorphMarker()).get(0).size() == 0) {
-//				if (getProperties().getSubstituteMissingMorpologicalItems()) {
-//					for (int i = 0; i < block.get(getProperties().getLexMarker()).get(0).size() - 1; i++) {
-//						block.get(getProperties().getMorphMarker()).get(0).add(getProperties().getMissingMorphologicalItemsPlaceholder() + " ");
-//					}
-//					block.get(getProperties().getMorphMarker()).get(0).add(getProperties().getMissingMorphologicalItemsPlaceholder());
-//				}
-//			}
-//			}
-//			catch (IndexOutOfBoundsException e) {
-//				throw new PepperModuleException("The reference \"" + block.get(getProperties().getRefMarker()) + "\" does not seem to contain any morphological items, although the parameter \"" + getProperties().getProperty(ToolboxTextImporterProperties.PROP_CONTAINS_MORPHOLOGY).getName() + "\" is set to true! Either add morphological annotation for this reference, with the marker \"" + getProperties().getMorphMarker() + "\", or set the property to false.", e);
-//			}
-//		}
-//		// Resolve properties
-//		String refMarker = getProperties().getRefMarker();
-//		logger.debug("Mapping ref block \"" + block.get(refMarker).toString() + "\".");
-//		String commaDelimRegex = "\\s*,\\s*";
-//		String[] delimiters = getProperties().getMorphemeDelimiters().split(commaDelimRegex);
-//		String lexMarker = getProperties().getLexMarker();
-//		String morphMarker = getProperties().getMorphMarker();
-//		String unitRefDefMarker = getProperties().getUnitrefDefinitionMarker();
-//		boolean hasDefinedUnitRefs = block.get(unitRefDefMarker) != null;
-//		affixDelimiter = delimiters[0].trim();
-//		cliticsDelimiter = delimiters[1].trim();
-//		Set<String> unitRefAnnotationsMarkers = null;
-//		if (hasUnitRefAnnotationProperty()) {
-//			unitRefAnnotationsMarkers = new HashSet<>(Arrays.asList(getProperties().getUnitRefAnnotationMarkers().split(commaDelimRegex)));
-//		}
-//		Set<String> lexAnnotationMarkers = null;
-//		if (hasLexAnnotationProperty()) { // FIXME: Implement so that all levels (but \tx???) can be empty
-//			lexAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getLexAnnotationMarkers().split(commaDelimRegex)));
-//		}
-//		Set<String> morphAnnotationMarkers = null;
-//		if (containsMorphology) {
-//			 morphAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getMorphAnnotationMarkers().split(commaDelimRegex)));
-//		}
-//		Set<String> documentMetaAnnotationMarkers = null;
-//		if (hasDocMetadataProperty()) {
-//			documentMetaAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getDocMetadataMarkers().split(commaDelimRegex)));
-//		}
-//		Set<String> refMetaAnnotationMarkers = null;
-//		if (hasRefMetadataProperty()) {
-//			refMetaAnnotationMarkers = new HashSet<>(Arrays.asList(getProperties().getRefMetadataMarkers().split(commaDelimRegex)));
-//		}
+//		
 //
 //		// Init String builders for STextualDSs
 //		StringBuilder morphDSBuilder = new StringBuilder();
@@ -668,7 +615,7 @@
 //			if (morphologicalTextTokens.contains(cliticsDelimiter) || morphologicalTextTokens.contains(affixDelimiter)) {
 //				ListIterator<String> iterator = morphologicalTextTokens.listIterator();
 //				while (iterator.hasNext()) {
-//					String token = (String) iterator.next();
+//					String token = iterator.next();
 //					if (token.equals(cliticsDelimiter) || token.equals(affixDelimiter)) {
 //						if (getProperties().attachDetachedMorphemeDelimiterToSubsequentElement()) {
 //							String nextToken = morphologicalTextTokens.get(iterator.nextIndex());
@@ -689,7 +636,7 @@
 //					List<String> list = annotationLine.getValue();
 //					iterator = list.listIterator();
 //					while (iterator.hasNext()) {
-//						String token = (String) iterator.next();
+//						String token = iterator.next();
 //						if (token.equals(cliticsDelimiter) || token.equals(affixDelimiter)) {
 //							if (getProperties().attachDetachedMorphemeDelimiterToSubsequentElement()) {
 //								String nextToken = list.get(iterator.nextIndex());

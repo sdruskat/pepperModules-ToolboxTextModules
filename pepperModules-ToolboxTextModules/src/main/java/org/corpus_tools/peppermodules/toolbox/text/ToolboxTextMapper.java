@@ -54,16 +54,25 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	private final Long headerEndOffset;
 	private final Map<Long, List<Long>> refMap;
 	private final Range<Long> idRange;
+	
+	// Mapping indices
+	private int lexTimelineIndex = 0;
+	private int morphTimelineIndex = 0;
+	private int lexDSIndex = 0;
+	private int morphDSIndex = 0;
+	private final boolean hasMorphology;
 
 	/**
 	 * @param headerEndOffset
 	 * @param refMap
 	 * @param idRange
+	 * @param hasMorphology 
 	 */
-	public ToolboxTextMapper(Long headerEndOffset, Map<Long, List<Long>> refMap, Range<Long> idRange) {
+	public ToolboxTextMapper(Long headerEndOffset, Map<Long, List<Long>> refMap, Range<Long> idRange, boolean hasMorphology) {
 		this.idRange = idRange;
 		this.refMap = refMap;
 		this.headerEndOffset = headerEndOffset;
+		this.hasMorphology = hasMorphology;
 	}
 
 	/**
@@ -75,6 +84,10 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	public DOCUMENT_STATUS mapSDocument() {
 		SDocumentGraph graph = getDocument().getDocumentGraph();
 		File file = new File(getResourceURI().toFileString());
+		
+		// Create a timeline to linearize lexical and morphological tokens
+		graph.createTimeline();
+
  
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r"); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 			int currentByte;
@@ -134,7 +147,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 					while ((currentByte = raf.read()) > 0 && raf.getFilePointer() <= nextOffset) {
 						bos.write(currentByte);
 					}
-					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim());
+					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology);
 					refMapper.map();
 					bos.reset();
 				}
