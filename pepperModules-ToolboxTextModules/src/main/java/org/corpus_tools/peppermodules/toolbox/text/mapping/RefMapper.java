@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
@@ -127,15 +129,29 @@ public class RefMapper extends AbstractBlockMapper {
 		}
 		
 		// Prepare lexical and morphological layer lines and their annotation lines
-		LayerData lexData = new LayerData(markerContentMap, lexMarker, lex, lexAnnoMarkers, true).compile();
+		String missingAnnoString = properties.getMissingAnnoString();
+		LayerData lexData = new LayerData(markerContentMap, lexMarker, lex, lexAnnoMarkers, true, missingAnnoString).compile();
 		lexData.warn(getDocName(), ref);
-		LayerData refData = new LayerData(markerContentMap, refMarker, ref, refAnnoMarkers, false).compile();
+		Map<String, List<String>> lexErrors = lexData.getErrors();
+		for (Entry<String, List<String>> e : lexErrors.entrySet()) {
+			System.err.println("LEX PRIM: " + lexData.getPrimaryData());
+			System.err.println("LEX ERROR: " + e.getKey() + ": " + e.getValue());
+			System.err.println("LEX NEW: " + lexData.getAnnotations().get(e.getKey().substring(0, e.getKey().length() - 1)));
+		}
+		LayerData refData = new LayerData(markerContentMap, refMarker, ref, refAnnoMarkers, false, missingAnnoString).compile();
 		refData.warn(getDocName(), ref);
 		LayerData morphData = null;
+		Map<String, List<String>> morphErrors = null;
 		if (morph != null) {
 			System.err.println("MORPH != NULL!!");
-			morphData = new LayerData(markerContentMap, morphMarker, morph, morphAnnoMarkers, true).compile();
+			morphData = new LayerData(markerContentMap, morphMarker, morph, morphAnnoMarkers, true, missingAnnoString).compile();
 			morphData.warn(getDocName(), ref);
+			morphErrors = morphData.getErrors();
+			for (Entry<String, List<String>> e : morphErrors.entrySet()) {
+				System.err.println("MORPH PRIM: " + morphData.getPrimaryData());
+				System.err.println("MORPH ERROR: " + e.getKey() + ": " + e.getValue());
+				System.err.println("MORPH NEW: " + morphData.getAnnotations().get(e.getKey().substring(0, e.getKey().length() - 1)));
+			}
 		}
 		else {
 			log.warn("The reference \"" + ref + "\" in identifier \'" + getDocName() + "\' does not contain a line with morphological items.");

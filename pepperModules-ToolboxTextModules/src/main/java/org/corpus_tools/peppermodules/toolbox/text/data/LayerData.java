@@ -20,8 +20,11 @@ package org.corpus_tools.peppermodules.toolbox.text.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,9 @@ import com.google.common.collect.ListMultimap;
 public class LayerData {
 	
 	private static final Logger log = LoggerFactory.getLogger(LayerData.class);
+
+	private static final String ERROR_TOO_MANY = "+";
+	private static final String ERROR_TOO_FEW = "-";
 	
 	private ListMultimap<String, List<String>> data = ArrayListMultimap.create();
 	private List<String> primaryData = new ArrayList<>();
@@ -49,18 +55,21 @@ public class LayerData {
 	private final String marker;
 	private boolean isEmpty;
 	private List<String> warnings = new ArrayList<>();
+	private Map<String, List<String>> errors = new HashMap<>();
+	private final String missingAnnoString;
 	
 	/**
 	 * @param markerContentMap
 	 * @param marker
 	 * @param annoMarkers
 	 */
-	public LayerData(ListMultimap<String, String> markerContentMap, String marker, String originalPrimaryData, List<String> annoMarkers, boolean segmented) {
+	public LayerData(ListMultimap<String, String> markerContentMap, String marker, String originalPrimaryData, List<String> annoMarkers, boolean segmented, String missingAnnoString) {
 		this.map = markerContentMap;
 		this.originalPrimaryData = originalPrimaryData;
 		this.annotationMarkers = annoMarkers;
 		this.segmented = segmented;
 		this.marker = marker;
+		this.missingAnnoString = missingAnnoString;
 	}
 	
 	public LayerData compile() {
@@ -97,16 +106,33 @@ public class LayerData {
 	 *
 	 */
 	private void runTests() {
-		for (Entry<String, List<String>> entry : annotations.entries()) {
-			int annosN = entry.getValue().size(); 
-			int primaryN = primaryData.size();
-			if (annosN > primaryN) {
-				warnings.add(": " + (annosN - primaryN) + " annotations too many on layer \"" + entry.getKey() + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
-				// FIXME Do something about it: concatenate + errorcode + write errorcode (e.g. A+[entry.getKey] to new error line
-			}
-			else if (annosN < primaryN) {
-				warnings.add(": " + (primaryN - annosN) + " annotations are missing on layer \"" + entry.getKey() + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
-				// FIXME Do something about it: add + errorcode + write errorcode (e.g. A+[entry.getKey] to new error line
+		Set<String> keySet = annotations.keySet();
+		Iterator<String> keyIterator = keySet.iterator();
+		String key;
+		while (keyIterator.hasNext()) {
+			key = keyIterator.next();
+			List<List<String>> valuesCopy = new ArrayList<>(annotations.get(key));
+			for (List<String> anno : valuesCopy) {
+				int annosN = anno.size(); 
+				int primaryN = primaryData.size();
+				if (annosN > primaryN) {
+					warnings.add(": " + (annosN - primaryN) + " annotations too many on layer \"" + key + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
+					errors.put(key.concat(ERROR_TOO_MANY), anno);
+					// FIXME put new List with subList - last elements
+					annotations.remove(key, anno);
+					annotations.put(key, anno.subList(0, primaryN));
+				}
+				else if (annosN < primaryN) {
+					warnings.add(": " + (primaryN - annosN) + " annotations are missing on layer \"" + key + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
+					errors.put(key.concat(ERROR_TOO_FEW), anno);
+					// FIXME Do something about it: add + errorcode + write errorcode (e.g. A+[entry.getKey] to new error line
+					annotations.remove(key, anno);
+					List<String> annoCopy = new ArrayList<>(anno);
+					for (int i = 0; i < (primaryN - annosN); i++) {
+						annoCopy.add(missingAnnoString);
+					}
+					annotations.put(key, annoCopy);
+				}
 			}
 		}
 	}
@@ -176,6 +202,13 @@ public class LayerData {
 			}
 		}
 		
+	}
+
+	/**
+	 * @return the errors
+	 */
+	public final Map<String, List<String>> getErrors() {
+		return errors;
 	}
 
 }

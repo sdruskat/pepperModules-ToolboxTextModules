@@ -224,6 +224,13 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 */
 	public static final String PROP_DETECTION_MODE = "errorDetectionMode";
 
+	/**
+	 * A {@link String} used to fill gaps in annotations.
+	 * 
+	 * Default: *\*\*\**
+	 */
+	public static final String PROP_MISSING_ANNO_STRING = "missingAnnoString";
+
 	// ################################## v2 ######################################
 
 	
@@ -344,6 +351,12 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				true,
 				true));
 
+		addProperty(new PepperModuleProperty<>(PROP_MISSING_ANNO_STRING,
+				String.class,
+				"A string used to fill gaps in annotations. Default: ***.",
+				"***",
+				true));
+
 		// ################################## v2 ######################################
 
 	}
@@ -450,6 +463,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 
 	public boolean runInErrorDetectionMode() {
 		return (Boolean) getProperty(PROP_DETECTION_MODE).getValue();
+	}
+	
+	public String getMissingAnnoString() {
+		return (String) getProperty(PROP_MISSING_ANNO_STRING).getValue();
 	}
 
 	
