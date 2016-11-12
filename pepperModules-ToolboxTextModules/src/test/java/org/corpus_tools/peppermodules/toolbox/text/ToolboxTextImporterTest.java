@@ -278,7 +278,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testParseAnnosUnequalTok() {
-		getFixture().getProperties().setPropertyValue("lexAnnotationMarkers", "ta");
+		getFixture().getProperties().setPropertyValue("lexAnnotationMarkers", "ta, tb");
 		getFixture().getProperties().setPropertyValue("morphAnnotationMarkers", "ge");
 		setTestFile("annos-unequal-tok.txt");
 		start();

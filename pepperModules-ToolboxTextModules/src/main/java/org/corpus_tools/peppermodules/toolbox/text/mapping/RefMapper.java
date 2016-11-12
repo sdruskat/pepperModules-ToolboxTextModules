@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 public class RefMapper extends AbstractBlockMapper {
 	
 	private static final Logger log = LoggerFactory.getLogger(RefMapper.class);
+	private static final String ERROR_LAYER_NAME = "err";
 	private final boolean docHasMorphology;
 	private MappingIndices indices;
 
@@ -133,24 +134,21 @@ public class RefMapper extends AbstractBlockMapper {
 		LayerData lexData = new LayerData(markerContentMap, lexMarker, lex, lexAnnoMarkers, true, missingAnnoString).compile();
 		lexData.warn(getDocName(), ref);
 		Map<String, List<String>> lexErrors = lexData.getErrors();
-		for (Entry<String, List<String>> e : lexErrors.entrySet()) {
-			System.err.println("LEX PRIM: " + lexData.getPrimaryData());
-			System.err.println("LEX ERROR: " + e.getKey() + ": " + e.getValue());
-			System.err.println("LEX NEW: " + lexData.getAnnotations().get(e.getKey().substring(0, e.getKey().length() - 1)));
+		for (Entry<String, List<String>> lexError : lexErrors.entrySet()) {
+			lexData.addAnnotation(lexError.getKey(), lexError.getValue());
+			lexData.addToAnnotation(ERROR_LAYER_NAME, lexError.getKey());
 		}
 		LayerData refData = new LayerData(markerContentMap, refMarker, ref, refAnnoMarkers, false, missingAnnoString).compile();
 		refData.warn(getDocName(), ref);
 		LayerData morphData = null;
 		Map<String, List<String>> morphErrors = null;
 		if (morph != null) {
-			System.err.println("MORPH != NULL!!");
 			morphData = new LayerData(markerContentMap, morphMarker, morph, morphAnnoMarkers, true, missingAnnoString).compile();
 			morphData.warn(getDocName(), ref);
 			morphErrors = morphData.getErrors();
-			for (Entry<String, List<String>> e : morphErrors.entrySet()) {
-				System.err.println("MORPH PRIM: " + morphData.getPrimaryData());
-				System.err.println("MORPH ERROR: " + e.getKey() + ": " + e.getValue());
-				System.err.println("MORPH NEW: " + morphData.getAnnotations().get(e.getKey().substring(0, e.getKey().length() - 1)));
+			for (Entry<String, List<String>> morphError : morphErrors.entrySet()) {
+				morphData.addAnnotation(morphError.getKey(), morphError.getValue());
+				morphData.addToAnnotation(ERROR_LAYER_NAME, morphError.getKey());
 			}
 		}
 		else {
@@ -159,6 +157,15 @@ public class RefMapper extends AbstractBlockMapper {
 		
 		
 		System.err.println(lexData.getPrimaryData());
+		for (Entry<String, List<String>> d : lexData.getAnnotations().entries()) {
+			System.err.println(d.getKey() + ": " + d.getValue());
+		}
+		if (morphData != null) {
+		System.err.println(morphData.getPrimaryData());
+		for (Entry<String, List<String>> d : morphData.getAnnotations().entries()) {
+			System.err.println(d.getKey() + ": " + d.getValue());
+		}}
+		System.err.println("----------------------------\n\n");
 
 	}
 

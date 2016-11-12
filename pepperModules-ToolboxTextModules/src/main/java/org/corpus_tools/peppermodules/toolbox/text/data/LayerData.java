@@ -20,10 +20,12 @@ package org.corpus_tools.peppermodules.toolbox.text.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -109,8 +111,9 @@ public class LayerData {
 		Set<String> keySet = annotations.keySet();
 		Iterator<String> keyIterator = keySet.iterator();
 		String key;
-		while (keyIterator.hasNext()) {
-			key = keyIterator.next();
+		Collection<Entry<String, List<String>>> entriesCopy = new ArrayList<>(annotations.entries());
+		for (Entry<String, List<String>> entry : entriesCopy) {
+			key = entry.getKey();
 			List<List<String>> valuesCopy = new ArrayList<>(annotations.get(key));
 			for (List<String> anno : valuesCopy) {
 				int annosN = anno.size(); 
@@ -134,6 +137,35 @@ public class LayerData {
 					annotations.put(key, annoCopy);
 				}
 			}
+		}
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param key
+	 * @param value
+	 */
+	public void addAnnotation(String key, List<String> value) {
+		annotations.put(key, value);
+		
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param key
+	 * @param value
+	 */
+	public void addToAnnotation(String key, String value) {
+		if (annotations.get(key).size() > 0) {
+			List<String> oldList = new ArrayList<>(annotations.get(key).get(0));
+			annotations.remove(key, oldList);
+			oldList.add(value);
+			annotations.put(key, new ArrayList<>(oldList));
+		}
+		else {
+			annotations.put(key, Arrays.asList(new String[]{value}));
 		}
 	}
 
