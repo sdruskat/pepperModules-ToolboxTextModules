@@ -272,6 +272,21 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 
 	/**
 	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests cases where the number of annotations for lex or morph does not equal the number of tokens.
+	 */
+	@Test
+	public void testParseAnnosUnequalTok() {
+		getFixture().getProperties().setPropertyValue("lexAnnotationMarkers", "ta");
+		getFixture().getProperties().setPropertyValue("morphAnnotationMarkers", "ge");
+		setTestFile("annos-unequal-tok.txt");
+		start();
+		fail("Needs to be implemented further!");
+	}
+
+	/**
+	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#getProperties()}.
 	 */
 	@Test

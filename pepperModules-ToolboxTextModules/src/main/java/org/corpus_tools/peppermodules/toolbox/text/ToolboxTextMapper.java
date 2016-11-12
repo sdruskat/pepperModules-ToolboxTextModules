@@ -32,6 +32,7 @@ import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.DocumentHeaderMapper;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.RefMapper;
+import org.corpus_tools.peppermodules.toolbox.text.utils.MappingIndices;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.core.SMetaAnnotation;
@@ -55,11 +56,6 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	private final Map<Long, List<Long>> refMap;
 	private final Range<Long> idRange;
 	
-	// Mapping indices
-	private int lexTimelineIndex = 0;
-	private int morphTimelineIndex = 0;
-	private int lexDSIndex = 0;
-	private int morphDSIndex = 0;
 	private final boolean hasMorphology;
 
 	/**
@@ -86,7 +82,9 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		File file = new File(getResourceURI().toFileString());
 		
 		// Create a timeline to linearize lexical and morphological tokens
-		graph.createTimeline();
+		if (hasMorphology) {
+			graph.createTimeline();
+		}
 
  
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r"); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
@@ -131,6 +129,8 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 				bos.reset();
 			}
 
+			MappingIndices indices = new MappingIndices();
+			
 			// Parse refs if the document is not an orphan
 			if (!isOrphan) {
 				for (Long refOffset : refOffsets) {
@@ -147,8 +147,9 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 					while ((currentByte = raf.read()) > 0 && raf.getFilePointer() <= nextOffset) {
 						bos.write(currentByte);
 					}
-					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology);
+					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology, indices);
 					refMapper.map();
+					indices = refMapper.getIndices();
 					bos.reset();
 				}
 			}

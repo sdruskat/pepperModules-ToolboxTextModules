@@ -21,6 +21,10 @@ package org.corpus_tools.peppermodules.toolbox.text.data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -33,6 +37,8 @@ import com.google.common.collect.ListMultimap;
  */
 public class LayerData {
 	
+	private static final Logger log = LoggerFactory.getLogger(LayerData.class);
+	
 	private ListMultimap<String, List<String>> data = ArrayListMultimap.create();
 	private List<String> primaryData = new ArrayList<>();
 	private ListMultimap<String, List<String>> annotations = ArrayListMultimap.create();
@@ -42,6 +48,7 @@ public class LayerData {
 	private final boolean segmented;
 	private final String marker;
 	private boolean isEmpty;
+	private List<String> warnings = new ArrayList<>();
 	
 	/**
 	 * @param markerContentMap
@@ -79,7 +86,29 @@ public class LayerData {
 			}
 		}
 		setEmpty(primaryData.isEmpty());
+		if (!isEmpty && segmented) {
+			runTests();
+		}
 		return this;
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 */
+	private void runTests() {
+		for (Entry<String, List<String>> entry : annotations.entries()) {
+			int annosN = entry.getValue().size(); 
+			int primaryN = primaryData.size();
+			if (annosN > primaryN) {
+				warnings.add(": " + (annosN - primaryN) + " annotations too many on layer \"" + entry.getKey() + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
+				// FIXME Do something about it: concatenate + errorcode + write errorcode (e.g. A+[entry.getKey] to new error line
+			}
+			else if (annosN < primaryN) {
+				warnings.add(": " + (primaryN - annosN) + " annotations are missing on layer \"" + entry.getKey() + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
+				// FIXME Do something about it: add + errorcode + write errorcode (e.g. A+[entry.getKey] to new error line
+			}
+		}
 	}
 
 	/**
@@ -131,6 +160,22 @@ public class LayerData {
 	 */
 	public final void setEmpty(boolean isEmpty) {
 		this.isEmpty = isEmpty;
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param docName
+	 * @param ref
+	 */
+	public void warn(String docName, String ref) {
+		if (!warnings.isEmpty()) {
+			for (String warning: warnings) {
+				log.warn("Document " + docName + ", reference " + ref + warning);
+				System.err.println("Document " + docName + ", reference " + ref + warning);
+			}
+		}
+		
 	}
 
 }

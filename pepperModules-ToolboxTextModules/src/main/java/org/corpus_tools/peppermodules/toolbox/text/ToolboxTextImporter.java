@@ -145,7 +145,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 				if (refMap.isEmpty()) {
 					// Corpus has only empty \ids, so log a warning but create
 					// the empty documents
-					logger.warn("The corpus file " + corpusFile.getAbsolutePath() + " contains \\ids, but none of them contain \\refs. Will create empty documents with only metadata.");
+					logger.info("The corpus file " + corpusFile.getAbsolutePath() + " contains \\ids, but none of them contain \\refs. Will create empty documents with only metadata.");
 				} else if (refMap.containsKey(-1L)) {
 					// There are \refs that are not attached to an \id, so log a
 					// warning and drop them
@@ -155,7 +155,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 					if (refMap.isEmpty()) {
 						// Corpus now only has empty \ids, so log a warning but
 						// create the empty documents
-						logger.warn("The corpus file " + corpusFile.getAbsolutePath() + " contains \\ids, but none of them contain \\refs. Will create empty documents with only metadata.");
+						logger.info("The corpus file " + corpusFile.getAbsolutePath() + " contains \\ids, but none of them contain \\refs. Will create empty documents with only metadata.");
 					}
 					else {
 						// Corpus has ids, of which some might be orphans!
@@ -274,6 +274,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 * @param orphanRefOffsets
 	 */
 	private void warnAboutOrphanRefs(List<Long> orphanRefOffsets, File file) {
+		// FIXME Change to one-line logging message
 		StringBuilder warningBuilder = new StringBuilder("====================================================\n" + "================= W A R N I N G ! ==================\n" + "====================================================\n" + "\nFound \\refs that do not belong to any \\ids!\n" + "The following orphaned \\refs will not be processed:\n\n" + "====================================================\n");
 		for (Long orphanRefOffset : orphanRefOffsets) {
 			int offsetIndex = orphanRefOffsets.indexOf(orphanRefOffset);

@@ -27,6 +27,7 @@ import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter;
 import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
+import org.corpus_tools.peppermodules.toolbox.text.utils.MappingIndices;
 import org.corpus_tools.peppermodules.toolbox.text.utils.MarkerContentMapConsistencyChecker;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
@@ -50,16 +51,19 @@ public class RefMapper extends AbstractBlockMapper {
 	
 	private static final Logger log = LoggerFactory.getLogger(RefMapper.class);
 	private final boolean docHasMorphology;
+	private MappingIndices indices;
 
 	/**
 	 * @param properties
 	 * @param graph
 	 * @param trimmedInputString
 	 * @param hasMorphology 
+	 * @param indices 
 	 */
-	public RefMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString, boolean hasMorphology) {
+	public RefMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString, boolean hasMorphology, MappingIndices indices) {
 		super(properties, graph, trimmedInputString);
 		this.docHasMorphology = hasMorphology;
+		this.indices = indices;
 	}
 
 	/**
@@ -118,17 +122,27 @@ public class RefMapper extends AbstractBlockMapper {
 		
 		// Stop here if lex is empty or null
 		if (lex == null || lex.isEmpty()) {
-			log.warn("The reference \"" + ref + "\" does not contain any primary data source (\\" + lexMarker + ") and will be ignored.");
+			log.warn("The reference \"" + ref + "\" in identifier \'" + getDocName() + "\' does not contain any primary data source (\\" + lexMarker + ") and will be ignored.");
 			return;
 		}
 		
 		// Prepare lexical and morphological layer lines and their annotation lines
-		LayerData lexData = new LayerData(markerContentMap, lexMarker, lex, lexAnnoMarkers, true).compile(); 
+		LayerData lexData = new LayerData(markerContentMap, lexMarker, lex, lexAnnoMarkers, true).compile();
+		lexData.warn(getDocName(), ref);
 		LayerData refData = new LayerData(markerContentMap, refMarker, ref, refAnnoMarkers, false).compile();
+		refData.warn(getDocName(), ref);
 		LayerData morphData = null;
 		if (morph != null) {
-			morphData = new LayerData(markerContentMap, morphMarker, morph, morphAnnoMarkers, false).compile();
+			System.err.println("MORPH != NULL!!");
+			morphData = new LayerData(markerContentMap, morphMarker, morph, morphAnnoMarkers, true).compile();
+			morphData.warn(getDocName(), ref);
 		}
+		else {
+			log.warn("The reference \"" + ref + "\" in identifier \'" + getDocName() + "\' does not contain a line with morphological items.");
+		}
+		
+		
+		System.err.println(lexData.getPrimaryData());
 
 	}
 
@@ -152,6 +166,29 @@ public class RefMapper extends AbstractBlockMapper {
 		else {
 			return null;
 		}
+	}
+
+	/**
+	 * @return the indices
+	 */
+	public final MappingIndices getIndices() {
+		return indices;
+	}
+
+	/**
+	 * @param indices the indices to set
+	 */
+	public final void setIndices(MappingIndices indices) {
+		this.indices = indices;
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @return
+	 */
+	private String getDocName() {
+		return graph.getDocument().getName();
 	}
 
 }

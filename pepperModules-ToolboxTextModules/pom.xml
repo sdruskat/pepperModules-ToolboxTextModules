@@ -47,7 +47,7 @@
 	<build>
 		<plugins>
 			<!-- start: creation of bundle jar -->
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<version>${maven-bundle-plugin.version}</version>
@@ -72,11 +72,11 @@
 						<Service-Component>${allServiceComponents}</Service-Component>
 						<Embed-Dependency>hamcrest-all;scope=compile|runtime</Embed-Dependency>
 						<Bundle-ClassPath>.,{maven-dependencies} </Bundle-ClassPath>
-						<Include-Resource> {maven-resources}, {maven-dependencies}<!-- , LICENSE, NOTICE --></Include-Resource>
+						<Include-Resource> {maven-resources}, {maven-dependencies}</Include-Resource>
 						<_exportcontents>org.hamcrest.*</_exportcontents>
 					</instructions>
 				</configuration>
-			</plugin>
+			</plugin>-->
 			<!-- end: creation of bundle jar -->
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>

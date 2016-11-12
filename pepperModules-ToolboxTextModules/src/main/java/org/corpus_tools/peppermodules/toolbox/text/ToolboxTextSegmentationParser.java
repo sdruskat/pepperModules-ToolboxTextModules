@@ -100,7 +100,6 @@ public class ToolboxTextSegmentationParser {
 						if (!idOffsets.isEmpty()) {
 							Collections.sort(idOffsets);
 							Long lastOffset = idOffsets.get(idOffsets.size() - 1);
-							System.err.println("NOW: " + lastOffset + " " + hasMorphology);
 							idStructureMap.put(lastOffset, hasMorphology);
 						}
 						idOffsets.add(currentIdOffset);

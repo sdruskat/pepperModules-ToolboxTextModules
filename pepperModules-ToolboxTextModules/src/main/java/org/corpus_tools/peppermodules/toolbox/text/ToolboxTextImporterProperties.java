@@ -204,12 +204,25 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	// ################################## v2 ######################################
 	
 	/**
-	 * <p>Whether lines with the same marker in the same block should be merged into one line.</p>
-	 * <p><code>true</code>: subsequent lines marked with {marker} are concatenated to the first
-	 * line marked with {marker}.</p>
-	 * <p><code>false</code>: all lines but the first line marked with {marker} are dropped.
+	 * Whether lines with the same marker in the same block should be merged into one line.
+	 * 
+	 * `true`: subsequent lines marked with {marker} are concatenated to the first
+	 * line marked with {marker}.
+	 * 
+	 * `false`: all lines but the first line marked with {marker} are dropped.
 	 */
 	public static final String PROP_MERGE_DUPL_MARKERS = "mergeDuplMarkers";
+
+	/**
+	 * Whether the importer should be run in **error detection mode**.
+	 * 
+	 * `true`: Corpora and documents will be mapped, but documents will remain
+	 * empty. This mode can be used to detect faulty data before attempting
+	 * a conversion.
+	 * 
+	 * `false` (default): Corpora and documents will be mapped in full. 
+	 */
+	public static final String PROP_DETECTION_MODE = "errorDetectionMode";
 
 	// ################################## v2 ######################################
 
@@ -324,7 +337,13 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"Whether lines with the same marker in the same block should be merged into one line, or just the first line kept.",
 				true,
 				true));
-		
+
+		addProperty(new PepperModuleProperty<>(PROP_DETECTION_MODE,
+				Boolean.class,
+				"Whether the importer should be run in error detection mode. true: Corpora and documents will be mapped, but documents will remain empty. This mode can be used to detect faulty data before attempting a conversion. false (default): Corpora and documents will be mapped in full. ",
+				true,
+				true));
+
 		// ################################## v2 ######################################
 
 	}
@@ -427,6 +446,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 
 	public boolean mergeDuplicateMarkers() {
 		return (Boolean) getProperty(PROP_MERGE_DUPL_MARKERS).getValue();
+	}
+
+	public boolean runInErrorDetectionMode() {
+		return (Boolean) getProperty(PROP_DETECTION_MODE).getValue();
 	}
 
 	

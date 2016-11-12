@@ -1,0 +1,19 @@
+\_sh v3.0 Test
+
+\id ID1
+
+\ref REF1
+\tx One Two 
+\mb Uno Dos
+\ta one two
+\ge uno dos
+
+\ref REF2
+\tx One Two 
+\mb Uno Dos
+\ta one two three
+\ge uno
+
+\ref REF3
+\tx One Two 
+\ta one two
