@@ -84,7 +84,7 @@ public class MorphLayerData extends LayerData {
 				}
 			}
 		}
-		// Count "words"
+		// Count "words" and map words back to morphemes contained
 		morphWordMorphemesMap = new HashMap<>();
 		ArrayList<String> prefixedmorphWords = new ArrayList<>();
 		ArrayList<String> morphWords = new ArrayList<>();
@@ -156,7 +156,7 @@ public class MorphLayerData extends LayerData {
 				}
 			}
 		}
-		// Remove all entries that aren't morph words
+		// Remove all entries from the morphWord-morphemes map that aren't actually morph words
 		for (Iterator<String> iterator = morphWordMorphemesMap.keySet().iterator(); iterator.hasNext();) {
 			String key = iterator.next();
 			if (!morphWords.contains(key)) {
