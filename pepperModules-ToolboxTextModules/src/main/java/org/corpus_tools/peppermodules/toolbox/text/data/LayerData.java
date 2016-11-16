@@ -20,13 +20,10 @@ package org.corpus_tools.peppermodules.toolbox.text.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,62 +41,75 @@ public class LayerData {
 	
 	private static final Logger log = LoggerFactory.getLogger(LayerData.class);
 
-	private static final String ERROR_TOO_MANY = "+";
-	private static final String ERROR_TOO_FEW = "-";
+//	private static final String ERROR_TOO_MANY = "+";
+//	private static final String ERROR_TOO_FEW = "-";
 	
-	private ListMultimap<String, List<String>> data = ArrayListMultimap.create();
+//	private ListMultimap<String, List<String>> data = ArrayListMultimap.create(); // FIXME Is this used somewhere via getter?
 	private List<String> primaryData = new ArrayList<>();
 	private ListMultimap<String, List<String>> annotations = ArrayListMultimap.create();
 	private final ListMultimap<String, String> map;
 	private final String originalPrimaryData;
 	private final List<String> annotationMarkers;
-	private final boolean segmented;
+	private boolean segmented;
 	private final String marker;
 	private boolean isEmpty;
 	private List<String> warnings = new ArrayList<>();
 	private Map<String, List<String>> errors = new HashMap<>();
-	private final String missingAnnoString;
+	private String missingAnnoString;
+	private boolean fixErrors;
+	private String docName;
+	private String ref;
 	
 	/**
 	 * @param markerContentMap
 	 * @param marker
 	 * @param annoMarkers
+	 * @param ref2 
+	 * @param string 
+	 * @param fixErrors2 
+	 * @param missingAnnoString2 
+	 * @param b 
 	 */
-	public LayerData(ListMultimap<String, String> markerContentMap, String marker, String originalPrimaryData, List<String> annoMarkers, boolean segmented, String missingAnnoString) {
+	public LayerData(ListMultimap<String, String> markerContentMap, String marker, String originalPrimaryData, List<String> annoMarkers, boolean segmented, String missingAnnoString, boolean fixErrors, String docName, String ref) {
 		this.map = markerContentMap;
+		this.marker = marker;
 		this.originalPrimaryData = originalPrimaryData;
 		this.annotationMarkers = annoMarkers;
 		this.segmented = segmented;
-		this.marker = marker;
 		this.missingAnnoString = missingAnnoString;
+		this.fixErrors = fixErrors;
+		this.docName = docName;
+		this.ref = ref;
 	}
 	
 	public LayerData compile() {
+//		ListMultimap<String, List<String>> annotations = ArrayListMultimap.create();
+//		List<String> primaryData = new ArrayList<>();
 		if (segmented) {
 			primaryData.addAll(Arrays.asList(originalPrimaryData.split("\\s+")));
 		}
 		else {
 			primaryData.add(originalPrimaryData.trim());
 		}
-		data.put(marker, primaryData);
+//		data.put(marker, primaryData);
 		for (String annotationMarker : annotationMarkers) {
 			for (String annotation : map.get(annotationMarker)) {
 				if (segmented) {
 					ArrayList<String> list = new ArrayList<>(Arrays.asList(annotation.split("\\s+")));
 					annotations.put(annotationMarker, list);
-					data.put(annotationMarker, list);
+//					data.put(annotationMarker, list);
 				}
 				else {
 					List<String> list = new ArrayList<>(Arrays.asList(annotation.trim()));
 					annotations.put(annotationMarker, list);
-					data.put(annotationMarker, list);
+//					data.put(annotationMarker, list);
 				}
 			}
 		}
 		setEmpty(primaryData.isEmpty());
-		if (!isEmpty && segmented) {
-			runTests();
-		}
+//		if (!isEmpty && segmented) {
+//			runTests();
+//		} MOVE TO RefMapper
 		return this;
 	}
 
@@ -107,38 +117,49 @@ public class LayerData {
 	 * TODO: Description
 	 *
 	 */
-	private void runTests() {
-		Set<String> keySet = annotations.keySet();
-		Iterator<String> keyIterator = keySet.iterator();
-		String key;
-		Collection<Entry<String, List<String>>> entriesCopy = new ArrayList<>(annotations.entries());
-		for (Entry<String, List<String>> entry : entriesCopy) {
-			key = entry.getKey();
-			List<List<String>> valuesCopy = new ArrayList<>(annotations.get(key));
-			for (List<String> anno : valuesCopy) {
-				int annosN = anno.size(); 
-				int primaryN = primaryData.size();
-				if (annosN > primaryN) {
-					warnings.add(": " + (annosN - primaryN) + " annotations too many on layer \"" + key + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
-					errors.put(key.concat(ERROR_TOO_MANY), anno);
-					// FIXME put new List with subList - last elements
-					annotations.remove(key, anno);
-					annotations.put(key, anno.subList(0, primaryN));
-				}
-				else if (annosN < primaryN) {
-					warnings.add(": " + (primaryN - annosN) + " annotations are missing on layer \"" + key + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
-					errors.put(key.concat(ERROR_TOO_FEW), anno);
-					// FIXME Do something about it: add + errorcode + write errorcode (e.g. A+[entry.getKey] to new error line
-					annotations.remove(key, anno);
-					List<String> annoCopy = new ArrayList<>(anno);
-					for (int i = 0; i < (primaryN - annosN); i++) {
-						annoCopy.add(missingAnnoString);
-					}
-					annotations.put(key, annoCopy);
-				}
-			}
-		}
-	}
+//	public void testAnnotationVTokenData(LayerData data) { // Call from RefMapper
+////		ListMultimap<String, List<String>> annotations = data.getAnnotations();
+////		List<String> primaryData = data.getPrimaryData();
+//		String key;
+//		Collection<Entry<String, List<String>>> entriesCopy = new ArrayList<>(annotations.entries());
+//		for (Entry<String, List<String>> entry : entriesCopy) {
+//			key = entry.getKey();
+//			List<List<String>> valuesCopy = new ArrayList<>(annotations.get(key));
+//			for (List<String> anno : valuesCopy) {
+//				int annosN = anno.size(); 
+//				int primaryN = primaryData.size();
+//				if (annosN > primaryN) {
+//					warnings.add(": " + (annosN - primaryN) + " annotations too many on layer \"" + key + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
+////					errors.put(key.concat(ERROR_TOO_MANY), anno);
+//					if (fixErrors) {
+//						annotations.remove(key, anno);
+//						annotations.put(key, anno.subList(0, primaryN));
+//					}
+//					else {
+//						annotations.remove(key, anno);
+//						ArrayList<String> annoCopy = new ArrayList<>(anno.subList(0, primaryN));
+//						int lastIndex = annoCopy.size() - 1;
+//						for (int i = primaryN; i < anno.size(); i++) {
+//							annoCopy.set(lastIndex, annoCopy.get(lastIndex).concat(" ").concat(anno.get(i)));
+//						}
+//						annotations.put(key, annoCopy);
+//					}
+//				}
+//				else if (annosN < primaryN) {
+//					warnings.add(": " + (primaryN - annosN) + " annotations are missing on layer \"" + key + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
+//					errors.put(key.concat(ERROR_TOO_FEW), anno);
+//					if (fixErrors) {
+//						annotations.remove(key, anno);
+//						List<String> annoCopy = new ArrayList<>(anno);
+//						for (int i = 0; i < (primaryN - annosN); i++) {
+//							annoCopy.add(missingAnnoString);
+//						}
+//						annotations.put(key, annoCopy);
+//					}
+//				}
+//			}
+//		}
+//	}
 
 	/**
 	 * TODO: Description
@@ -169,18 +190,18 @@ public class LayerData {
 		}
 	}
 
-	/**
-	 * @return the data
-	 */
-	public final ListMultimap<String,List<String>> getData() {
-		return data;
-	}
-	/**
-	 * @param data the data to set
-	 */
-	public final void setData(ListMultimap<String, List<String>> data) {
-		this.data = data;
-	}
+//	/**
+//	 * @return the data
+//	 */
+//	public final ListMultimap<String,List<String>> getData() {
+//		return data;
+//	}
+//	/**
+//	 * @param data the data to set
+//	 */
+//	public final void setData(ListMultimap<String, List<String>> data) {
+//		this.data = data;
+//	}
 	/**
 	 * @return the primaryData
 	 */
@@ -206,12 +227,12 @@ public class LayerData {
 		this.annotations = annotations;
 	}
 
-	/**
-	 * @return the isEmpty
-	 */
-	public final boolean isEmpty() {
-		return isEmpty;
-	}
+//	/**
+//	 * @return the isEmpty
+//	 */
+//	public final boolean isEmpty() {
+//		return isEmpty;
+//	}
 
 	/**
 	 * @param isEmpty the isEmpty to set
@@ -229,18 +250,66 @@ public class LayerData {
 	public void warn(String docName, String ref) {
 		if (!warnings.isEmpty()) {
 			for (String warning: warnings) {
-				log.warn("Document " + docName + ", reference " + ref + warning);
-				System.err.println("Document " + docName + ", reference " + ref + warning);
+				log.warn("Document \"" + docName + "\", reference \'" + ref + "\'" + warning);
+				System.err.println("Document \"" + docName + "\", reference \'" + ref + "\'" + warning);
 			}
 		}
 		
 	}
 
+//	/**
+//	 * @return the errors
+//	 */
+//	public final Map<String, List<String>> getErrors() {
+//		return errors;
+//	}
+
 	/**
-	 * @return the errors
+	 * TODO: Description
+	 *
+	 * @param segmented
+	 * @return
 	 */
-	public final Map<String, List<String>> getErrors() {
-		return errors;
+	public LayerData setSegmented(boolean segmented) {
+		this.segmented = segmented;
+		return this;
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param missingAnnoString
+	 * @param fixErrors
+	 * @return
+	 */
+	public LayerData setProperties(String missingAnnoString, boolean fixErrors) {
+		this.missingAnnoString = missingAnnoString;
+		this.fixErrors = fixErrors;
+		return this;
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param docName
+	 * @param ref
+	 * @return
+	 */
+	public LayerData setMetaData(String docName, String ref) {
+		this.docName = docName;
+		this.ref = ref;
+		return this;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.docName + "::" + this.ref + ":" + this.marker + "\n");
+		sb.append(this.getPrimaryData() + "\n");
+		for (Entry<String, List<String>> anno : this.getAnnotations().entries()) {
+			sb.append("    " + anno.getKey() + ":" + anno.getValue() + "\n");
+		}
+		return sb.toString().trim();
 	}
 
 }

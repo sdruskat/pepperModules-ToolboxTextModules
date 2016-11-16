@@ -145,13 +145,13 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public static final String PROP_UNIT_REF_DEFINITION_MARKER = "unitRefDefinitionMarker";
 	
 	/**
-	 * Whether detached delimiters (as in "item - item" or similar) should be attached to the previous or
+	 * Whether detached morphology delimiters (as in "item - item" or similar) should be attached to the previous or
 	 * subsequent item, as a two-item comma-separated list, where the first item signifies whether the delimiter should
 	 * be attached at all (if `true` it will be attached), and the second item signifies 
 	 * whether the delimiter should be attached to the **subsequent** item (if `true`
 	 * it will be attached to the subsequent item, making the latter a suffix).
 	 */
-	public static final String PROP_ATTACH_DETACHED_MORPHEME_DELIMITER = "attachDetachedDelimiter";
+	public static final String PROP_ATTACH_DETACHED_MORPHEME_DELIMITER = "attachDelimiter";
 	
 //	/**
 //	 * Whether the importer should flag missing annotations, i.e., when
@@ -216,8 +216,8 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	/**
 	 * Whether the importer should be run in **error detection mode**.
 	 * 
-	 * `true`: Corpora and documents will be mapped, but documents will remain
-	 * empty. This mode can be used to detect faulty data before attempting
+	 * `true`: No mapping will take place, but warnings will be logged. 
+	 * This mode can be used to detect faulty data before attempting
 	 * a conversion.
 	 * 
 	 * `false` (default): Corpora and documents will be mapped in full. 
@@ -225,7 +225,45 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public static final String PROP_DETECTION_MODE = "errorDetectionMode";
 
 	/**
-	 * A {@link String} used to fill gaps in annotations.
+	 * Whether the importer should record errors.
+	 * 
+	 * `true` (default): Errors in the data model will be recorded, i.e., annotations
+	 * on an error layer (called `err`) will be added for each line which
+	 * seems to contain an error. Additionally, another annotation will be added
+	 * to discrete layers, recording the original faulty line.
+	 * 
+	 * `false`: Errors will not be recorded. 
+	 */
+	public static final String PROP_RECORD_ERRORS = "recordErrors";
+
+	/**
+	 * Whether the importer should fix errors.
+	 * 
+	 * `true` (default): Errors in the data model will be fixed as follows.
+	 * 
+	 * - For **discrepancies between the number of lexical and morphological
+	 * tokens**, morphological tokens will either be added to until their 
+	 * number is equal to that of lexical tokens (using the property 
+	 * {@link #PROP_MISSING_ANNO_STRING}), or all tokens at indices >
+	 * index of the last lexical token will be dropped.
+	 * 
+	 * - For **discrepancies between the number of tokens and their annotations**
+	 * as defined by {@link #PROP_LEX_ANNOTATION_MARKERS} and 
+	 * {@link #PROP_MORPH_ANNOTATION_MARKERS}, annotations will either be
+	 * added to until their number is equal to that of the token layer they
+	 * refer to, or all tokens at indices > index of last token they refer
+	 * to will be dropped.
+	 * 
+	 * `false`: Errors will not be fixed. For missing morphological tokens
+	 * or annotations, nothing will be inserted. Morphological tokens and
+	 * annotations at indices > last index of lexical token, or last index
+	 * of token layer they refer to will respectively, be concatenated to the last element
+	 * on their line, and separated by whitespaces.
+	 */
+	public static final String PROP_FIX_ERRORS = "fixErrors";
+
+	/**
+	 * A {@link String} used to fill interlinearization gaps.
 	 * 
 	 * Default: *\*\*\**
 	 */
@@ -357,6 +395,18 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"***",
 				true));
 
+		addProperty(new PepperModuleProperty<>(PROP_RECORD_ERRORS,
+				Boolean.class,
+				"Whether the importer should record errors.",
+				true,
+				true));
+
+		addProperty(new PepperModuleProperty<>(PROP_FIX_ERRORS,
+				Boolean.class,
+				"Whether the importer should fix errors.",
+				true,
+				true));
+
 		// ################################## v2 ######################################
 
 	}
@@ -403,18 +453,6 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 //		return (String) getProperty(PROP_REF_METADATA_MARKERS).getValue();
 //	}
 	
-	public Boolean attachDetachedMorphemeDelimiter() {
-		String value = getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString();
-		String[] split = value.trim().split("\\s*,\\s*");
-		return Boolean.valueOf(split[0]);
-	}
-	
-	public Boolean attachDetachedMorphemeDelimiterToSubsequentElement() {
-		String value = getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString();
-		String[] split = value.trim().split("\\s*,\\s*");
-		return Boolean.valueOf(split[1]);
-	}
-
 	public String getUnitrefAnnotationMarkers() {
 		return (String) getProperty(PROP_UNIT_REF_ANNOTATION_MARKERS).getValue();
 	}
@@ -461,7 +499,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return (Boolean) getProperty(PROP_MERGE_DUPL_MARKERS).getValue();
 	}
 
-	public boolean runInErrorDetectionMode() {
+	public boolean errorDetectionMode() {
 		return (Boolean) getProperty(PROP_DETECTION_MODE).getValue();
 	}
 	
@@ -469,8 +507,32 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return (String) getProperty(PROP_MISSING_ANNO_STRING).getValue();
 	}
 
+	public boolean recordErrors() {
+		return (Boolean) getProperty(PROP_RECORD_ERRORS).getValue();
+	}
+	
+	public boolean fixErrors() {
+		return (Boolean) getProperty(PROP_FIX_ERRORS).getValue();
+	}
+	
+	public Boolean attachDelimiter() {
+		return Boolean.valueOf(getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString().trim().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)[0]);
+	}
+	
+	public Boolean attachDelimiterToNext() {
+		return Boolean.valueOf(getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString().trim().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)[1]);
+	}
+	
+	public String getAffixDelim() {
+		return getProperty(PROP_MORPHEME_DELIMITERS).getValue().toString().trim().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)[0];
+	}
+	
+	public String getCliticDelim() {
+		return getProperty(PROP_MORPHEME_DELIMITERS).getValue().toString().trim().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)[1];
+	}
 	
 	// ################################## v2 ######################################
 
 	
 }
+

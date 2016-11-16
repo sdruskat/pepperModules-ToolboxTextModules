@@ -278,9 +278,40 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testParseAnnosUnequalTok() {
-		getFixture().getProperties().setPropertyValue("lexAnnotationMarkers", "ta, tb");
-		getFixture().getProperties().setPropertyValue("morphAnnotationMarkers", "ge");
+		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta, tb");
+		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_MORPH_ANNOTATION_MARKERS, "ge");
+//		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ERRORS, false);
+//		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_RECORD_ERRORS, false);
 		setTestFile("annos-unequal-tok.txt");
+		start();
+		fail("Needs to be implemented further!");
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * FIXME Tests against a minimum example, where there are 4 \id, one of which has a \ref **without** a morph line
+	 */
+	@Test
+	public void testDelimAttachment() {
+		setTestFile("delims.txt");
+		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "true, false");
+		start();
+		fail("Needs to be implemented further!");
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * FIXME Tests against a minimum example, where there are 4 \id, one of which has a \ref **without** a morph line
+	 */
+	@Test
+	public void testMorphLexInterlinearization() {
+//		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "false, false");
+		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_MORPH_ANNOTATION_MARKERS, "ma");
+		setTestFile("interlinearization.txt");
 		start();
 		fail("Needs to be implemented further!");
 	}

@@ -20,6 +20,7 @@ package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter;
 import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
+import org.corpus_tools.peppermodules.toolbox.text.data.MorphLayerData;
 import org.corpus_tools.peppermodules.toolbox.text.utils.MappingIndices;
 import org.corpus_tools.peppermodules.toolbox.text.utils.MarkerContentMapConsistencyChecker;
 import org.corpus_tools.salt.common.SDocument;
@@ -38,6 +40,8 @@ import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ArrayListMultimap;
 
 /**
  * This class provides mapping functionality to map lines
@@ -53,6 +57,8 @@ public class RefMapper extends AbstractBlockMapper {
 	
 	private static final Logger log = LoggerFactory.getLogger(RefMapper.class);
 	private static final String ERROR_LAYER_NAME = "err";
+	private static final String ERROR_TOO_MANY = "+";
+	private static final String ERROR_TOO_FEW = "-";
 	private final boolean docHasMorphology;
 	private MappingIndices indices;
 
@@ -131,42 +137,129 @@ public class RefMapper extends AbstractBlockMapper {
 		
 		// Prepare lexical and morphological layer lines and their annotation lines
 		String missingAnnoString = properties.getMissingAnnoString();
-		LayerData lexData = new LayerData(markerContentMap, lexMarker, lex, lexAnnoMarkers, true, missingAnnoString).compile();
-		lexData.warn(getDocName(), ref);
-		Map<String, List<String>> lexErrors = lexData.getErrors();
-		for (Entry<String, List<String>> lexError : lexErrors.entrySet()) {
-			lexData.addAnnotation(lexError.getKey(), lexError.getValue());
-			lexData.addToAnnotation(ERROR_LAYER_NAME, lexError.getKey());
-		}
-		LayerData refData = new LayerData(markerContentMap, refMarker, ref, refAnnoMarkers, false, missingAnnoString).compile();
-		refData.warn(getDocName(), ref);
-		LayerData morphData = null;
-		Map<String, List<String>> morphErrors = null;
+		boolean fixErrors = properties.fixErrors();
+		LayerData lexData = new LayerData(markerContentMap, lexMarker, lex, lexAnnoMarkers, true, missingAnnoString, fixErrors, getDocName(), ref).compile();
+		LayerData refData = new LayerData(markerContentMap, refMarker, ref, refAnnoMarkers, false, missingAnnoString, fixErrors, getDocName(), ref).compile();
+		MorphLayerData morphData = null;
 		if (morph != null) {
-			morphData = new LayerData(markerContentMap, morphMarker, morph, morphAnnoMarkers, true, missingAnnoString).compile();
-			morphData.warn(getDocName(), ref);
-			morphErrors = morphData.getErrors();
-			for (Entry<String, List<String>> morphError : morphErrors.entrySet()) {
-				morphData.addAnnotation(morphError.getKey(), morphError.getValue());
-				morphData.addToAnnotation(ERROR_LAYER_NAME, morphError.getKey());
-			}
+			morphData = new MorphLayerData(markerContentMap, morphMarker, morph, morphAnnoMarkers, true, missingAnnoString, fixErrors, getDocName(), ref).compile();
+			morphData.compileMorphWords(properties.getAffixDelim(), properties.getCliticDelim(), properties.attachDelimiter(), properties.attachDelimiterToNext());
+			morphData = checkLexMorphInterl11n(lexData, morphData, ref);
 		}
 		else {
 			log.warn("The reference \"" + ref + "\" in identifier \'" + getDocName() + "\' does not contain a line with morphological items.");
 		}
-		
-		
-		System.err.println(lexData.getPrimaryData());
-		for (Entry<String, List<String>> d : lexData.getAnnotations().entries()) {
-			System.err.println(d.getKey() + ": " + d.getValue());
-		}
-		if (morphData != null) {
-		System.err.println(morphData.getPrimaryData());
-		for (Entry<String, List<String>> d : morphData.getAnnotations().entries()) {
-			System.err.println(d.getKey() + ": " + d.getValue());
-		}}
-		System.err.println("----------------------------\n\n");
+	}
 
+	/**
+	 * TODO: Description
+	 *
+	 * @param lexData
+	 * @param morphData
+	 * @param ref
+	 * @return 
+	 */
+	private MorphLayerData checkLexMorphInterl11n(LayerData lexData, MorphLayerData morphData, String ref) {
+		Map<String, List<String>> errors = new HashMap<>();
+//		lexData.warn(getDocName(), ref);
+//		Map<String, List<String>> lexErrors = lexData.getErrors();
+//		for (Entry<String, List<String>> lexError : lexErrors.entrySet()) {
+//			lexData.addAnnotation(lexError.getKey(), lexError.getValue());
+//			lexData.addToAnnotation(ERROR_LAYER_NAME, lexError.getKey());
+//		}
+		int sumLex = lexData.getPrimaryData().size();
+		List<String> morphWords = morphData.getMorphWords();
+		List<String> morphs = morphData.getPrimaryData();
+		int sumMorphWords = morphWords.size();
+		if (sumMorphWords > sumLex) {
+			log.warn("Document \"" + getDocName() + "\", reference \'" + ref + "\': The number of morphological units is larger than the number of lexical tokens (" + sumMorphWords + " morphological units vs. " + sumLex + " lexical tokens)!");
+			System.err.println("Document \"" + getDocName() + "\", reference \'" + ref + "\': The number of morphological units is larger than the number of lexical tokens (" + sumMorphWords + " morphological units vs. " + sumLex + " lexical tokens)!");
+			errors.put(properties.getMorphMarker().concat(ERROR_TOO_MANY), morphs);
+//			System.out.println(morphData.toString() + "\n\n");
+			if (properties.fixErrors()) {
+				// Concatenate excess data to last token
+				ArrayList<String> morphemesToConcat = morphData.getMorphemesForMorphWords(morphs, sumLex);
+//				System.out.println("\n\n\n\n\n");
+//				annotations.remove(key, anno);
+//				annotations.put(key, anno.subList(0, sumLex));
+			}
+//			else {
+//				annotations.remove(key, anno);
+//				ArrayList<String> annoCopy = new ArrayList<>(anno.subList(0, sumLex));
+//				int lastIndex = annoCopy.size() - 1;
+//				for (int i = sumLex; i < anno.size(); i++) {
+//					annoCopy.set(lastIndex, annoCopy.get(lastIndex).concat(" ").concat(anno.get(i)));
+//				}
+//				annotations.put(key, annoCopy);
+//			}
+		}
+		else if (sumMorphWords < sumLex) {
+//			warnings.add(": " + (sumLex - sumMorphWords) + " annotations are missing on layer \"" + key + "\" (" + sumMorphWords + " annotations vs. " + sumLex + " " + marker + " tokens)!");
+			errors.put(properties.getMorphMarker().concat(ERROR_TOO_FEW), morphs);
+//			if (fixErrors) {
+//				annotations.remove(key, anno);
+//				List<String> annoCopy = new ArrayList<>(anno);
+//				for (int i = 0; i < (sumLex - sumMorphWords); i++) {
+//					annoCopy.add(missingAnnoString);
+//				}
+//				annotations.put(key, annoCopy);
+//			}
+		}
+		if (properties.recordErrors()) {
+			for (Entry<String, List<String>> error : errors.entrySet()) {
+				morphData.addAnnotation(error.getKey(), error.getValue());
+				morphData.addToAnnotation(ERROR_LAYER_NAME, error.getKey());
+			}
+		}
+//		System.out.println(morphData.toString() + "\n\n");
+		// FIXME Handle errors
+		return morphData;
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param morphData
+	 * @param morphWords 
+	 * @param diffMorphLex
+	 * @return
+	 */
+	private LayerData fixMorphLexInterlinearization(LayerData morphData, ArrayList<String> morphWords, int diffMorphLex) {
+		List<String> morphCopy = morphData.getPrimaryData();
+		List<String> morphOverhead = morphWords.subList(morphWords.size() - diffMorphLex, morphWords.size());
+		int morphemeCount = 0;
+		String affix = properties.getAffixDelim();
+		String clitic = properties.getCliticDelim();
+		for (String w : morphOverhead) {
+			if (!properties.attachDelimiter() && (w.equals(affix) || w.equals(clitic))) {
+				morphemeCount++;
+			}
+			else {
+			String[] split = w.split(properties.getAffixDelim() + "|" + properties.getCliticDelim());
+			morphemeCount = morphemeCount + split.length;
+			}
+		}
+		// Remove overhead morphemes
+		morphCopy.subList(morphCopy.size() - morphemeCount, morphCopy.size()).clear();
+		morphData.setPrimaryData(morphCopy);
+		// Remove overhead annotations accordingly
+		// FIXME: THAT DOESN'T WORK YET!
+		ArrayList<String> annoCopy = null;
+		ArrayListMultimap<String, List<String>> annoMapCopy = ArrayListMultimap.create(morphData.getAnnotations());
+		for (Entry<String, List<String>> a : annoMapCopy.entries()) {
+			annoCopy = new ArrayList<>(a.getValue());
+			System.err.println(a.getKey() + "?? " + annoMapCopy.keySet().contains(a.getKey().substring(0, a.getKey().length() - 1)));
+			if (annoCopy.size() > morphemeCount && !annoMapCopy.keySet().contains(a.getKey().substring(0, a.getKey().length() - 1))) {
+				annoCopy.subList(annoCopy.size() - morphemeCount, annoCopy.size()).clear();
+				boolean removed = morphData.getAnnotations().remove(a.getKey(), a.getValue());
+				System.err.println("REMOVED? " + removed);
+				morphData.getAnnotations().put(a.getKey(), annoCopy);
+			}
+			else {
+				System.err.println("NO! " + a.getKey());
+			}
+		}
+		return morphData;
 	}
 
 	/**

@@ -78,11 +78,12 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	 */
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
+		final boolean eDM = getProperties().errorDetectionMode();
 		SDocumentGraph graph = getDocument().getDocumentGraph();
 		File file = new File(getResourceURI().toFileString());
 		
 		// Create a timeline to linearize lexical and morphological tokens
-		if (hasMorphology) {
+		if (!eDM && hasMorphology) {
 			graph.createTimeline();
 		}
 
@@ -99,11 +100,13 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 				 * instead of calling an instance of DocumentHeaderMapper, the
 				 * name of the SDocument will be set to the file name sans extension.
 				 */
-				String fileName = file.getName();
-				graph.getDocument().setName(fileName.substring(0, fileName.lastIndexOf('.')));
+				if (!eDM) {
+					String fileName = file.getName();
+					graph.getDocument().setName(fileName.substring(0, fileName.lastIndexOf('.')));
+				}
 				refOffsets = refMap.get(-1L);
 			}
-			else {
+			else if (!eDM) {
 				// The offset at which the header of this document ends
 				long docHeaderEndOffset;
 				/*
@@ -184,6 +187,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	 */
 	@Override
 	public DOCUMENT_STATUS mapSCorpus() {
+		final boolean eDM = getProperties().errorDetectionMode();
 		File file = new File(getResourceURI().toFileString());
 		headerParsing:
 		try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file)));
@@ -200,7 +204,9 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 				if (currentByte == '\\' && bos.size() > 0) {
 					markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
 					if (!markerAndValue[0].equals(getProperties().getRefMarker())) {
-						getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
+						if (!eDM) {
+							getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
+						}
 						bos.reset();
 					}
 					else {
@@ -212,8 +218,10 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 				bos.write(currentByte);
 			}
 			// bos still contains the last marker line, so write that to the list of marker lines.
-			markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
-			getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
+			if (!eDM) {
+				markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
+				getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
+			}
 		}
 		catch (FileNotFoundException e) {
 			throw new PepperModuleException("The corpus file " + getResourceURI().toFileString() + " has not been found.", e);

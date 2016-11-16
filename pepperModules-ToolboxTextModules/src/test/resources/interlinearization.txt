@@ -1,0 +1,19 @@
+\_sh v3.0 Test
+\info A sample "standard" corpus in Toolbox text format. It includes use cases for most phenomena the importer tests against, such as clitics and affixes, unitrefs, meta annotations, etc.
+\moreinfo Some more info about the corpus
+
+\id Document no. 1
+
+\ref Reference no. 1 (Simple case, no affixes or clitics in overhead)
+\tx Word1 -Tuple Tuple- Word2 Triple-= Word3  FreedashTuple Word4 FreecliticTuple
+\mb m1    m2 -m3 m4- m5 m6    m7 -m8 =m9 m10  m11 - m12 m13 m14 = m15 overhead1 overhead2 overhead3
+\ma M1 M2 M4 M6 M7 M10 M11 M13 M14
+
+\ref Reference no. 2 (Affixes / clitics in overhead)
+\tx Word1 Word2 Word3
+\mb m1 m2 m3 overhead1 -overhead2 - overhead3 overhead4= overhead5
+\ma M1 M2 M3 OVERHEAD1 OVERHEAD2 OVERHEAD3 OVERHEAD4 OVERHEAD5
+
+\ref Reference no. 3 (simple)
+\tx Word1 Word2 Word3 Word4
+\mb 0- 1 2 -3 -4 5 -6 7
