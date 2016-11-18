@@ -311,6 +311,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	public void testMorphLexInterlinearization() {
 //		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "false, false");
 		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_MORPH_ANNOTATION_MARKERS, "ma");
+		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 //		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ERRORS, false);
 		setTestFile("interlinearization.txt");
 		start();

@@ -312,4 +312,11 @@ public class LayerData {
 		return sb.toString().trim();
 	}
 
+	/**
+	 * @return the marker
+	 */
+	public final String getMarker() {
+		return marker;
+	}
+
 }

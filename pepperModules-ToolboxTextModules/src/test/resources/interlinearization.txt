@@ -7,7 +7,7 @@
 \ref Reference no. 1 (Simple case, no affixes or clitics in overhead)
 \tx Word1 -Tuple Tuple- Word2 Triple-= Word3  FreedashTuple Word4 FreecliticTuple
 \mb m1    m2 -m3 m4- m5 m6    m7 -m8 =m9 m10  m11 - m12 m13 m14 = m15 overhead1 overhead2 overhead3
-\ma M1 M2 M4 M6 M7 M10 M11 M13 M14
+\ma M1    M2 -M3 M4- M5 M6    M7 -M8 =M9 M10  M11 - M12 M13 M14 = M15 O1 O2 O3
 
 \ref Reference no. 2 (Affixes / clitics in overhead)
 \tx Word1 Word2 Word3
@@ -21,7 +21,30 @@
 \ref Reference no. 4 (Simple mb < lex)
 \tx Word1 Word2 Word3 Word4
 \mb m1 m2
+\ma M1 M2
 
 \ref Reference no. 5 (mb < lex with affixes and clitics)
 \tx Word1 Word2 Word3 Word4
 \mb m1- m2 m3 -m4 -m5 m6 = m7- m8
+
+\ref Reference no. 6 (too many ma annos)
+\tx Word1 Word2 Word3
+\mb m1 m2 m3
+\ma M1 M2 M3 M4
+
+\ref Reference no. 7 (too few ma annos)
+\tx Word1 Word2 Word3
+\mb m1 m2 m3
+\ma M1 M2
+
+\ref Reference no. 8 (too many ta annos)
+\tx Word1 Word2 Word3
+\ta W1 W2 W3 W4 W5
+\mb m1 m2 m3
+\ma M1 M2 M3
+
+\ref Reference no. 9 (too few ta annos)
+\tx Word1 Word2 Word3
+\ta W1
+\mb m1 m2 m3
+\ma M1 M2 M3

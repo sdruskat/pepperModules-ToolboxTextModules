@@ -237,9 +237,9 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public static final String PROP_RECORD_ERRORS = "recordErrors";
 
 	/**
-	 * Whether the importer should fix errors.
+	 * Whether the importer should fix interlinearization.
 	 * 
-	 * `true` (default): Errors in the data model will be fixed as follows.
+	 * `true` (default): Interlinearization error in the data model will be fixed as follows.
 	 * 
 	 * - For **discrepancies between the number of lexical and morphological
 	 * tokens**, morphological tokens will either be added to until their 
@@ -254,13 +254,13 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * refer to, or all tokens at indices > index of last token they refer
 	 * to will be dropped.
 	 * 
-	 * `false`: Errors will not be fixed. For missing morphological tokens
+	 * `false`: Interlinearization errors will not be fixed. For missing morphological tokens
 	 * or annotations, nothing will be inserted. Morphological tokens and
 	 * annotations at indices > last index of lexical token, or last index
 	 * of token layer they refer to will respectively, be concatenated to the last element
 	 * on their line, and separated by whitespaces.
 	 */
-	public static final String PROP_FIX_ERRORS = "fixErrors";
+	public static final String PROP_FIX_INTERL11N = "fixInterl11n";
 
 	/**
 	 * A {@link String} used to fill interlinearization gaps.
@@ -401,9 +401,9 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				true,
 				true));
 
-		addProperty(new PepperModuleProperty<>(PROP_FIX_ERRORS,
+		addProperty(new PepperModuleProperty<>(PROP_FIX_INTERL11N,
 				Boolean.class,
-				"Whether the importer should fix errors.",
+				"Whether the importer should fix interlinearization errors.",
 				true,
 				true));
 
@@ -511,8 +511,8 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return (Boolean) getProperty(PROP_RECORD_ERRORS).getValue();
 	}
 	
-	public boolean fixErrors() {
-		return (Boolean) getProperty(PROP_FIX_ERRORS).getValue();
+	public boolean fixInterl11n() {
+		return (Boolean) getProperty(PROP_FIX_INTERL11N).getValue();
 	}
 	
 	public Boolean attachDelimiter() {

@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.common.collect.ListMultimap;
 
@@ -61,29 +62,7 @@ public class MorphLayerData extends LayerData {
 
 	public MorphLayerData compileMorphWords(String affix, String clitic, boolean attach, boolean attachToNext) {
 		List<String> morphs = getPrimaryData();
-		// Attach delimiters if specified
-		if (attach) {
-			for (ListIterator<String> iterator = morphs.listIterator(); iterator.hasNext();) {
-				String tok = iterator.next();
-				if (tok.equals(affix) || tok.equals(clitic)) {
-					if (attachToNext) {
-						String next = iterator.next();
-						iterator.set(tok + next);
-						iterator.previous();
-						iterator.previous();
-						iterator.remove();
-					}
-					else {
-						iterator.previous();
-						String previous = iterator.previous();
-						iterator.set(previous + tok);
-						iterator.next();
-						iterator.next();
-						iterator.remove();
-					}
-				}
-			}
-		}
+		attachDelimiters(affix, clitic, attach, attachToNext, morphs);
 		// Count "words" and map words back to morphemes contained
 		morphWordMorphemesMap = new HashMap<>();
 		ArrayList<String> prefixedmorphWords = new ArrayList<>();
@@ -165,6 +144,70 @@ public class MorphLayerData extends LayerData {
 		}
 		this.morphWords = morphWords;
 		return this;
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param affix
+	 * @param clitic
+	 * @param attach
+	 * @param attachToNext
+	 * @param morphs
+	 */
+	private void attachDelimiters(String affix, String clitic, boolean attach, boolean attachToNext, List<String> morphs) {
+		// Attach delimiters if specified
+		if (attach) {
+			for (ListIterator<String> iterator = morphs.listIterator(); iterator.hasNext();) {
+				int index = iterator.nextIndex();
+				String tok = iterator.next();
+				if (tok.equals(affix) || tok.equals(clitic)) {
+					if (attachToNext) {
+						String next = iterator.next();
+						iterator.set(tok + next);
+						iterator.previous();
+						iterator.previous();
+						iterator.remove();
+						// Process annotations accordingly
+						for (Entry<String, List<String>> anno : getAnnotations().entries()) {
+							String delimValue = anno.getValue().get(index);
+							if (delimValue.equals(affix) || delimValue.equals(clitic)) {
+								String nextValue = anno.getValue().get(index + 1);
+								String newNextValue = delimValue + nextValue;
+								anno.getValue().remove(index);
+								anno.getValue().set(index, newNextValue);
+							}
+						}
+					}
+					else {
+						iterator.previous();
+						String previous = iterator.previous();
+						iterator.set(previous + tok);
+						iterator.next();
+						iterator.next();
+						iterator.remove();
+						// Process annotations accordingly
+						for (Entry<String, List<String>> anno : getAnnotations().entries()) {
+							String delimValue = anno.getValue().get(index);
+							if (delimValue.equals(affix) || delimValue.equals(clitic)) {
+								String previousValue = null;
+								if (index - 1 >= 0) {
+									previousValue = anno.getValue().get(index -1);
+								}
+								else {
+									// Attach to next instead
+								}
+								if (previousValue != null) {
+									String newPreviousValue = previousValue + delimValue;
+									anno.getValue().remove(index);
+									anno.getValue().set(index - 1, newPreviousValue);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**
