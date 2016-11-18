@@ -179,6 +179,7 @@ public class RefMapper extends AbstractBlockMapper {
 			for (List<String> anno : valuesCopy) {
 				int annosN = anno.size(); 
 				int primaryN = primaryData.size();
+				// If there are more annotations than tokens
 				if (annosN > primaryN) {
 					String logMessage = "Document \"" + getDocName() + "\", reference " + refData.getPrimaryData() + ": The number of \'" + key + "\' annotations is larger than the number of \'" + data.getMarker() + "\' tokens (" + annosN + " annotations vs. " + primaryN + " tokens)!";
 					errors.put(key.concat(ERROR_TOO_MANY), anno);
@@ -191,6 +192,7 @@ public class RefMapper extends AbstractBlockMapper {
 					log.warn(logMessage);
 					System.err.println(logMessage);
 				}
+				// If there are less annotations than tokens
 				else if (annosN < primaryN) {
 					String logMessage = "Document \"" + getDocName() + "\", reference " + refData.getPrimaryData() + ": The number of \'" + key + "\' annotations is lower than the number of \'" + data.getMarker() + "\' tokens (" + annosN + " annotations vs. " + primaryN + " tokens)!";
 					errors.put(key.concat(ERROR_TOO_FEW), anno);
@@ -234,6 +236,7 @@ public class RefMapper extends AbstractBlockMapper {
 		// Copy for recording errors
 		final ArrayList<String> origMorphs = new ArrayList<>(morphs);
 		int sumMorphWords = morphWords.size();
+		// If there are more "morph words" than lexical items
 		if (sumMorphWords > sumLex) {
 			String logMessage = "Document \"" + getDocName() + "\", reference " + refData.getPrimaryData() + ": The number of morphological units is larger than the number of lexical tokens (" + sumMorphWords + " morphological units vs. " + sumLex + " lexical tokens)!";
 			logMessage += "\nThe number of annotations on these units may be too high as well!";
@@ -268,6 +271,7 @@ public class RefMapper extends AbstractBlockMapper {
 			log.warn(logMessage);
 			System.err.println(logMessage);
 		}
+		// If there are fewer morphological units than lexical units
 		else if (sumMorphWords < sumLex) {
 			String logMessage = "Document \"" + getDocName() + "\", reference \'" + refData.getPrimaryData() + "\': The number of morphological units is lower than the number of lexical tokens (" + sumMorphWords + " morphological units vs. " + sumLex + " lexical tokens)!";
 			logMessage += "\nThe number of annotations on these units may be too low as well!";
