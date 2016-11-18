@@ -236,6 +236,7 @@ public class RefMapper extends AbstractBlockMapper {
 		int sumMorphWords = morphWords.size();
 		if (sumMorphWords > sumLex) {
 			String logMessage = "Document \"" + getDocName() + "\", reference " + refData.getPrimaryData() + ": The number of morphological units is larger than the number of lexical tokens (" + sumMorphWords + " morphological units vs. " + sumLex + " lexical tokens)!";
+			logMessage += "\nThe number of annotations on these units may be too high as well!";
 			errors.put(properties.getMorphMarker().concat(ERROR_TOO_MANY), origMorphs);
 			int excessMorphWordsSum = sumMorphWords - sumLex;
 			List<String> excessMorphWords = morphWords.subList(morphWords.size() - excessMorphWordsSum, morphWords.size());
@@ -269,6 +270,7 @@ public class RefMapper extends AbstractBlockMapper {
 		}
 		else if (sumMorphWords < sumLex) {
 			String logMessage = "Document \"" + getDocName() + "\", reference \'" + refData.getPrimaryData() + "\': The number of morphological units is lower than the number of lexical tokens (" + sumMorphWords + " morphological units vs. " + sumLex + " lexical tokens)!";
+			logMessage += "\nThe number of annotations on these units may be too low as well!";
 			errors.put(properties.getMorphMarker().concat(ERROR_TOO_FEW), origMorphs);
 			int diffMorphWordsSum = sumLex - sumMorphWords;
 			String missingString = properties.getMissingAnnoString();

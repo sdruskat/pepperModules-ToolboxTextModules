@@ -312,7 +312,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 //		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_ATTACH_DETACHED_MORPHEME_DELIMITER, "false, false");
 		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_MORPH_ANNOTATION_MARKERS, "ma");
 		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
-//		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_ERRORS, false);
+		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_FIX_INTERL11N, false);
 		setTestFile("interlinearization.txt");
 		start();
 		fail("Needs to be implemented further!");
