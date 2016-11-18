@@ -17,3 +17,11 @@
 \ref Reference no. 3 (simple)
 \tx Word1 Word2 Word3 Word4
 \mb 0- 1 2 -3 -4 5 -6 7
+
+\ref Reference no. 4 (Simple mb < lex)
+\tx Word1 Word2 Word3 Word4
+\mb m1 m2
+
+\ref Reference no. 5 (mb < lex with affixes and clitics)
+\tx Word1 Word2 Word3 Word4
+\mb m1- m2 m3 -m4 -m5 m6 = m7- m8

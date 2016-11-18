@@ -192,18 +192,6 @@ public class MorphLayerData extends LayerData {
 	}
 	
 	/**
-	 * TODO: Description
-	 *
-	 * @param morphs
-	 * @param sumLex
-	 * @return
-	 */
-	public ArrayList<String> getMorphemesForMorphWords(List<String> morphs, int sumLex) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
 	 * @return the morphWords
 	 */
 	public final List<String> getMorphWords() {
