@@ -46,7 +46,7 @@ import com.google.common.collect.ListMultimap;
  * compiling a list of trimmed marker lines from the
  * {@link #trimmedInputString}.
  *
- * @author Stephan Druskat
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
 public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {

@@ -23,7 +23,7 @@ import org.corpus_tools.pepper.impl.PepperMapperImpl;
 /**
  * TODO Description
  *
- * @author Stephan Druskat
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
 public class AbstractToolboxTextMapper extends PepperMapperImpl {

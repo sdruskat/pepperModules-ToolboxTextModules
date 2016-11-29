@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A parser for document names taken from \id marker lines in a Toolbox text file.
  *
- * @author Stephan Druskat
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
 public class ToolboxTextDocumentNameParser {

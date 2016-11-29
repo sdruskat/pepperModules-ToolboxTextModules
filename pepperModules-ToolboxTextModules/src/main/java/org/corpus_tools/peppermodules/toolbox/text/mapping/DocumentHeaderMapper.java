@@ -30,7 +30,7 @@ import org.corpus_tools.salt.core.SMetaAnnotation;
  * being mapped onto, and {@link SMetaAnnotation}s on it
  * respectively.
  *
- * @author Stephan Druskat
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
 public class DocumentHeaderMapper extends AbstractBlockMapper {

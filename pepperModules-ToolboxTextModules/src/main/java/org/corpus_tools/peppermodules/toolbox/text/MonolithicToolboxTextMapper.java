@@ -71,7 +71,7 @@
 // * The reference marker itself is modeled as a span over those marker tokens of the reference which are defined by {@link ToolboxTextImporterProperties#PROP_MAP_REF_ANNOTATIONS_TO_LEXICAL_LAYER}. All markers <em>not</em> belonging to either
 // * a lexical or a morphological annotation layer are assumed to be reference level annotations and are as such modeled as annotations on the reference span.
 // *
-// * @author Stephan Druskat <mail@sdruskat.net>
+// * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
 // */
 //public class MonolithicToolboxTextMapper extends AbstractToolboxTextMapper {
 //

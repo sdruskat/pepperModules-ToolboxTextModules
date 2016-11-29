@@ -35,7 +35,7 @@ import com.google.common.io.CountingInputStream;
 /**
  * A parser that finds the header section and byte offsets for \id markers in a Toolbox text file.
  *
- * @author Stephan Druskat <mail@sdruskat.net>
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
 public class ToolboxTextIdFinder {
@@ -119,7 +119,7 @@ public class ToolboxTextIdFinder {
 	 * as well as a byte offset of type {@link Long} that points at the end
 	 * of the header section of the file.
 	 *
-	 * @author Stephan Druskat <mail@sdruskat.net>
+	 * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
 	 *
 	 */
 	protected class ResourceHeaderEnd {

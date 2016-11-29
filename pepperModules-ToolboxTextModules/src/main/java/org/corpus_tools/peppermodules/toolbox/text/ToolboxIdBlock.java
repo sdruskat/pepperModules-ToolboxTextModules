@@ -30,7 +30,7 @@ import org.corpus_tools.salt.common.SSpan;
  * \id blocks can contain \id-level annotations and 1* ref
  * blocks, i.e., spans.
  *
- * @author Stephan Druskat <mail@sdruskat.net>
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
 public class ToolboxIdBlock {

@@ -63,7 +63,7 @@ import org.corpus_tools.pepper.modules.PepperModuleProperty;
  * </tr>
  * </table>
  * TODO FIXME Finalize table
- * @author Stephan Druskat <mail@sdruskat.net>
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
 public class ToolboxTextImporterProperties extends PepperModuleProperties {
@@ -257,8 +257,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * `false`: Interlinearization errors will not be fixed. For missing morphological tokens
 	 * or annotations, nothing will be inserted. Morphological tokens and
 	 * annotations at indices > last index of lexical token, or last index
-	 * of token layer they refer to will respectively, be concatenated to the last element
+	 * of token layer they refer to will, respectively, be concatenated to the last element
 	 * on their line, and separated by whitespaces.
+	 * 
+	 * **NOTE:** If the property is set to `false`, unfixed interl11n errors amy
+	 * cause an exception during be thrown during runtime!
 	 */
 	public static final String PROP_FIX_INTERL11N = "fixInterl11n";
 

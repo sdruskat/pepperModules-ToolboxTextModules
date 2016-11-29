@@ -38,7 +38,7 @@ import com.google.common.io.CountingInputStream;
 /**
  * TODO Description
  *
- * @author Stephan Druskat <<mail@sdruskat.net>>
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
 public class IdBasedToolboxTextMapper extends AbstractToolboxTextMapper {

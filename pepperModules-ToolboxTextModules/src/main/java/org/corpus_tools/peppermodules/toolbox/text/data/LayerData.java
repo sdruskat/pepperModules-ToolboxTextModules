@@ -34,7 +34,7 @@ import com.google.common.collect.ListMultimap;
 /**
  * TODO Description
  *
- * @author Stephan Druskat
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
 public class LayerData {

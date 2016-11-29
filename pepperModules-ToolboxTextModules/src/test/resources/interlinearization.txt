@@ -48,3 +48,13 @@
 \ta W1
 \mb m1 m2 m3
 \ma M1 M2 M3
+
+\ref Reference no. 10 (mb > lex, ma > lex)
+\tx Word1 Word2
+\mb m1 m2 m3 m4
+\ma M1 M2 M3 M4
+
+\ref Reference no. 11 (mb < lex BUT ma > lex)
+\tx Word1 Word2 Word3
+\mb m1
+\ma M1 M2 M3 M4 M5
