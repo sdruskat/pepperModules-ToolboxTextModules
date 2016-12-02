@@ -83,83 +83,33 @@ public class LayerData {
 	}
 	
 	public LayerData compile() {
-//		ListMultimap<String, List<String>> annotations = ArrayListMultimap.create();
-//		List<String> primaryData = new ArrayList<>();
 		if (segmented) {
+			/*
+			 * "Tokenization", i.e., a simple split on whitespace(s).
+			 * This is leaving the complexity of tokenization with
+			 * Toolbox (users), which is permissible as it should be assumed
+			 * that Toolbox provides correct data. Right.
+			 */
 			primaryData.addAll(Arrays.asList(originalPrimaryData.split("\\s+")));
 		}
 		else {
 			primaryData.add(originalPrimaryData.trim());
 		}
-//		data.put(marker, primaryData);
 		for (String annotationMarker : annotationMarkers) {
 			for (String annotation : map.get(annotationMarker)) {
 				if (segmented) {
 					ArrayList<String> list = new ArrayList<>(Arrays.asList(annotation.split("\\s+")));
 					annotations.put(annotationMarker, list);
-//					data.put(annotationMarker, list);
 				}
 				else {
 					List<String> list = new ArrayList<>(Arrays.asList(annotation.trim()));
 					annotations.put(annotationMarker, list);
-//					data.put(annotationMarker, list);
 				}
 			}
 		}
 		setEmpty(primaryData.isEmpty());
-//		if (!isEmpty && segmented) {
-//			runTests();
-//		} MOVE TO RefMapper
 		return this;
 	}
-
-	/**
-	 * TODO: Description
-	 *
-	 */
-//	public void testAnnotationVTokenData(LayerData data) { // Call from RefMapper
-////		ListMultimap<String, List<String>> annotations = data.getAnnotations();
-////		List<String> primaryData = data.getPrimaryData();
-//		String key;
-//		Collection<Entry<String, List<String>>> entriesCopy = new ArrayList<>(annotations.entries());
-//		for (Entry<String, List<String>> entry : entriesCopy) {
-//			key = entry.getKey();
-//			List<List<String>> valuesCopy = new ArrayList<>(annotations.get(key));
-//			for (List<String> anno : valuesCopy) {
-//				int annosN = anno.size(); 
-//				int primaryN = primaryData.size();
-//				if (annosN > primaryN) {
-//					warnings.add(": " + (annosN - primaryN) + " annotations too many on layer \"" + key + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
-////					errors.put(key.concat(ERROR_TOO_MANY), anno);
-//					if (fixErrors) {
-//						annotations.remove(key, anno);
-//						annotations.put(key, anno.subList(0, primaryN));
-//					}
-//					else {
-//						annotations.remove(key, anno);
-//						ArrayList<String> annoCopy = new ArrayList<>(anno.subList(0, primaryN));
-//						int lastIndex = annoCopy.size() - 1;
-//						for (int i = primaryN; i < anno.size(); i++) {
-//							annoCopy.set(lastIndex, annoCopy.get(lastIndex).concat(" ").concat(anno.get(i)));
-//						}
-//						annotations.put(key, annoCopy);
-//					}
-//				}
-//				else if (annosN < primaryN) {
-//					warnings.add(": " + (primaryN - annosN) + " annotations are missing on layer \"" + key + "\" (" + annosN + " annotations vs. " + primaryN + " " + marker + " tokens)!");
-//					errors.put(key.concat(ERROR_TOO_FEW), anno);
-//					if (fixErrors) {
-//						annotations.remove(key, anno);
-//						List<String> annoCopy = new ArrayList<>(anno);
-//						for (int i = 0; i < (primaryN - annosN); i++) {
-//							annoCopy.add(missingAnnoString);
-//						}
-//						annotations.put(key, annoCopy);
-//					}
-//				}
-//			}
-//		}
-//	}
 
 	/**
 	 * TODO: Description
@@ -190,18 +140,6 @@ public class LayerData {
 		}
 	}
 
-//	/**
-//	 * @return the data
-//	 */
-//	public final ListMultimap<String,List<String>> getData() {
-//		return data;
-//	}
-//	/**
-//	 * @param data the data to set
-//	 */
-//	public final void setData(ListMultimap<String, List<String>> data) {
-//		this.data = data;
-//	}
 	/**
 	 * @return the primaryData
 	 */
@@ -227,42 +165,12 @@ public class LayerData {
 		this.annotations = annotations;
 	}
 
-//	/**
-//	 * @return the isEmpty
-//	 */
-//	public final boolean isEmpty() {
-//		return isEmpty;
-//	}
-
 	/**
 	 * @param isEmpty the isEmpty to set
 	 */
 	public final void setEmpty(boolean isEmpty) {
 		this.isEmpty = isEmpty;
 	}
-
-	/**
-	 * TODO: Description
-	 *
-	 * @param docName
-	 * @param ref
-	 */
-	public void warn(String docName, String ref) {
-		if (!warnings.isEmpty()) {
-			for (String warning: warnings) {
-				log.warn("Document \"" + docName + "\", reference \'" + ref + "\'" + warning);
-				System.err.println("Document \"" + docName + "\", reference \'" + ref + "\'" + warning);
-			}
-		}
-		
-	}
-
-//	/**
-//	 * @return the errors
-//	 */
-//	public final Map<String, List<String>> getErrors() {
-//		return errors;
-//	}
 
 	/**
 	 * TODO: Description

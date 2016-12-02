@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,8 +34,11 @@ import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.DocumentHeaderMapper;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.RefMapper;
 import org.corpus_tools.peppermodules.toolbox.text.utils.MappingIndices;
+import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.STextualDS;
+import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +61,11 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	private final Range<Long> idRange;
 	
 	private final boolean hasMorphology;
+	
+	/**
+	 * Maps marker {@link String}s to {@link SLayer}s belonging to that marker.
+	 */
+	private Map<String, SLayer> layers = new HashMap<>();
 
 	/**
 	 * @param headerEndOffset
@@ -82,11 +91,24 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		SDocumentGraph graph = getDocument().getDocumentGraph();
 		File file = new File(getResourceURI().toFileString());
 		
+		// Create layers
+		getLayer(getProperties().getLexMarker());
+		getLayer(getProperties().getMorphMarker());
+		for (SLayer layer : graph.getLayers()) {
+			System.err.println("LAYER: " + layer.getName());
+		}
+		
 		// Create a timeline to linearize lexical and morphological tokens
 		if (!eDM && hasMorphology) {
 			graph.createTimeline();
 		}
-
+		
+		// Create primary data sources
+		final STextualDS lexDS = graph.createTextualDS("");
+		STextualDS morphDS = null;
+		if (hasMorphology) {
+			morphDS = graph.createTextualDS("");
+		}
  
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r"); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 			int currentByte;
@@ -127,6 +149,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 				while ((currentByte = raf.read()) > 0 && raf.getFilePointer() <= docHeaderEndOffset) {
 					bos.write(currentByte);
 				}
+				// Create and call a mapper for the document header
 				DocumentHeaderMapper documentHeaderMapper = new DocumentHeaderMapper(getProperties(), graph, bos.toString().trim());
 				documentHeaderMapper.map();
 				bos.reset();
@@ -150,7 +173,8 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 					while ((currentByte = raf.read()) > 0 && raf.getFilePointer() <= nextOffset) {
 						bos.write(currentByte);
 					}
-					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology, indices);
+					// Create and call a mapper for the \ref section
+					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology, indices, lexDS, morphDS, layers);
 					refMapper.map();
 					indices = refMapper.getIndices();
 					bos.reset();
@@ -263,6 +287,27 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	private boolean isMonolithic() {
 		return refMap.size() == 1 && refMap.containsKey(-1L);
 	}
+	
+	/**
+	 * Creates and names an {@link SLayer} and puts it to the {@link #layers}
+	 * {@link Map} under its name.
+	 * 
+	 * @param name
+	 * @return 
+	 */
+	private SLayer getLayer(String name) {
+		SLayer layer = null;
+		if ((layer = layers.get(name)) == null) {
+			layer = SaltFactory.createSLayer();
+			layer.setName(name);
+			getDocument().getDocumentGraph().addLayer(layer);
+			layers.put(name, layer);
+		}
+		return layer;
+	}
+
+
+
 
 	/**
 	 * @return the properties

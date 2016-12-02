@@ -1,0 +1,26 @@
+\_sh v3.0 Test
+\info Sample corpus using refs with *and* without morphology
+\moreinfo Some more info about the corpus
+
+\id Document no. 1
+\idinfo Some document no. 1 info
+\moreidinfo Some more info about document no. 1
+
+\ref Sentence 1 with mb line
+\tx Word1 Word2
+\ta W1 W2
+\mb m1 m2
+\ge M1 M2
+\ll A ref-level annotation
+
+\ref Sentence 2 *without* mb line
+\tx Word3 Word4
+\ta W3 W4
+\ll A ref-level annotation
+
+\ref Sentence 1 with mb line
+\tx Word5 Word6
+\ta W5 W6
+\mb m5 m6
+\ge M5 M6
+\ll A ref-level annotation

@@ -389,7 +389,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		addProperty(new PepperModuleProperty<>(PROP_DETECTION_MODE,
 				Boolean.class,
 				"Whether the importer should be run in error detection mode. true: Corpora and documents will be mapped, but documents will remain empty. This mode can be used to detect faulty data before attempting a conversion. false (default): Corpora and documents will be mapped in full. ",
-				true,
+				false,
 				true));
 
 		addProperty(new PepperModuleProperty<>(PROP_MISSING_ANNO_STRING,

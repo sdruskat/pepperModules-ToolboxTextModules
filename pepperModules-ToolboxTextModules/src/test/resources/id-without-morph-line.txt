@@ -2,4 +2,4 @@
 \info Some info
 
 \ref No morph
-\tx Word
+\tx This is a birthday pony ! ( Google this ? )
