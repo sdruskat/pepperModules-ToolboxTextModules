@@ -94,9 +94,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		// Create layers
 		getLayer(getProperties().getLexMarker());
 		getLayer(getProperties().getMorphMarker());
-		for (SLayer layer : graph.getLayers()) {
-			System.err.println("LAYER: " + layer.getName());
-		}
+		getLayer(getProperties().getRefMarker());
 		
 		// Create a timeline to linearize lexical and morphological tokens
 		if (!eDM && hasMorphology) {
@@ -161,10 +159,8 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 			if (!isOrphan) {
 				for (Long refOffset : refOffsets) {
 					Long nextOffset;
-					boolean isLast = false;
 					if (refOffsets.indexOf(refOffset) == refOffsets.size() - 1) {
 						nextOffset = idRange.upperEndpoint();
-						isLast = true;
 					}
 					else {
 						nextOffset = refOffsets.get(refOffsets.indexOf(refOffset) + 1);
@@ -182,12 +178,10 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 			}
 		}
 		catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new PepperModuleException("The corpus file " + getResourceURI().toFileString() + " has not been found.", e);
 		}
 		catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new PepperModuleException("Error while parsing the corpus file " + getResourceURI().toFileString() + "!", e);
 		}
 		return DOCUMENT_STATUS.COMPLETED;
 	}

@@ -47,6 +47,7 @@ import org.corpus_tools.salt.common.STimelineRelation;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
+import org.corpus_tools.salt.core.SNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,25 +183,69 @@ public class RefMapper extends AbstractBlockMapper {
 		 * so let the mapping commence!
 		 */
 		
+		List<SNode> lexTokens = mapTokens(morph != null, lexData, morphData);
+		mapRef(refData, lexTokens);
+
+		System.err.println("----- " + refData.toString());
+		System.err.println(lexData.toString());
+		if (morph != null) {
+			System.err.println(morphData.toString());
+		}
+		System.err.println("\n\n\n\n\n");
+		
+	}
+
+	/**
+	 * TODO: Description
+	 * FIXME: Declare why spans are always over lex tokens!
+	 *
+	 * @param refData
+	 * @param lexTokens 
+	 */
+	private void mapRef(LayerData refData, List<SNode> lexTokens) {
+		List<SToken> tokenList = new ArrayList<>();
+		tokenList.addAll((Collection<? extends SToken>) lexTokens);
+		SSpan span = graph.createSpan(tokenList);
+		layers.get(refData.getMarker()).addNode(span);
+		/*
+		 *  Add the actual primary data as annotation.
+		 *  As we deal with refData, for which #segmented == false,
+		 *  we can safely assume that the list of primary data has
+		 *  size 1 and contains only the complete ref name String.
+		 */
+		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, refData.getMarker(), refData.getPrimaryData().get(0).trim());
+		span.setName(refData.getPrimaryData().get(0).trim());
+		addAnnotations(refData, Arrays.asList(new SNode[]{span}));
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param hasMorphology
+	 * @param lexData
+	 * @param morphData
+	 * @return 
+	 */
+	private List<SNode> mapTokens(boolean hasMorphology, LayerData lexData, MorphLayerData morphData) {
+		List<SNode> lexTokens = new ArrayList<>();
+		List<SNode> morphTokens = new ArrayList<>();
 		// Build tokens, text and timeline
 		if (docHasMorphology) {
-			if (morph != null) {
+			if (hasMorphology) {
 				STimeline timeline = graph.getTimeline();
 				int morphTimelineEnd = timeline.getEnd() == null ? 0 : timeline.getEnd();
 				int lexTimelineEnd = morphTimelineEnd;
-				int numberOfLexUnits = lexData.getPrimaryData().size();
-				Map<String, ArrayList<String>> morphWords = morphData.getMorphWordMorphemesMap();
 				for (String morpheme : morphData.getPrimaryData()) {
 					// Create morphological token
 					morphDS.setText(morphDS.getText() + morpheme);
 					SToken token = graph.createToken(morphDS, morphDS.getEnd() - morpheme.length(), morphDS.getEnd());
+					morphTokens.add(token);
 					STimelineRelation timeLineRel = SaltFactory.createSTimelineRelation();
 					timeLineRel.setSource(token);
 					timeLineRel.setTarget(timeline);
 					timeLineRel.setStart(morphTimelineEnd);
 					timeLineRel.setEnd(morphTimelineEnd += 1);
 					graph.addRelation(timeLineRel);
-					log.warn("layers: " + layers.toString());
 					layers.get(morphData.getMarker()).addNode(token);
 				}
 				/* 
@@ -212,6 +257,7 @@ public class RefMapper extends AbstractBlockMapper {
 					String lexUnit = lexData.getPrimaryData().get(i);
 					lexDS.setText(lexDS.getText().isEmpty() ? lexUnit : lexDS.getText() + " " + lexUnit);
 					SToken token = graph.createToken(lexDS, lexDS.getEnd() - lexUnit.length(), lexDS.getEnd());
+					lexTokens.add(token);
 					/* 
 					 * timeSteps are calculated using the size of the list
 					 * of morphemes for the morph word at the same index as
@@ -227,6 +273,9 @@ public class RefMapper extends AbstractBlockMapper {
 					graph.addRelation(timeLineRel);
 					layers.get(lexData.getMarker()).addNode(token);
 				}
+				addAnnotations(lexData, lexTokens);
+				addAnnotations(morphData, morphTokens);
+
 			}
 			else {
 				// Document has morphology, but no morphology line in this ref
@@ -237,6 +286,7 @@ public class RefMapper extends AbstractBlockMapper {
 					String lexUnit = lexData.getPrimaryData().get(i);
 					lexDS.setText(lexDS.getText().isEmpty() ? lexUnit : lexDS.getText() + " " + lexUnit);
 					SToken token = graph.createToken(lexDS, lexDS.getEnd() - lexUnit.length(), lexDS.getEnd());
+					lexTokens.add(token);
 					STimelineRelation timeLineRel = SaltFactory.createSTimelineRelation();
 					timeLineRel.setSource(token);
 					timeLineRel.setTarget(timeline);
@@ -246,6 +296,7 @@ public class RefMapper extends AbstractBlockMapper {
 					graph.addRelation(timeLineRel);
 					layers.get(lexData.getMarker()).addNode(token);
 				}
+				addAnnotations(lexData, lexTokens);
 			}
 		}
 		else {
@@ -253,18 +304,26 @@ public class RefMapper extends AbstractBlockMapper {
 				// Create lexical token
 				lexDS.setText(lexDS.getText().isEmpty() ? lexUnit : lexDS.getText() + " " + lexUnit);
 				SToken token = graph.createToken(lexDS, lexDS.getEnd() - lexUnit.length(), lexDS.getEnd());
+				lexTokens.add(token);
 				layers.get(lexData.getMarker()).addNode(token);
 			}
+			addAnnotations(lexData, lexTokens);
 		}
+		return lexTokens;
+	}
 
-		System.err.println("----- " + refData.toString());
-		System.err.println("TEXT: " + lexDS.getText());
-		System.err.println("TEXT: " + morphDS.getText());
-		System.err.println(lexData.toString());
-		if (morph != null) {
-		System.err.println(morphData.toString());
+	/**
+	 * TODO: Description
+	 *
+	 * @param data
+	 * @param nodes
+	 */
+	private void addAnnotations(LayerData data, List<SNode> nodes) {
+		for (Entry<String, List<String>> annotation : data.getAnnotations().entries()) {
+			for (int i = 0; i < nodes.size(); i++) {
+				nodes.get(i).createAnnotation(SALT_NAMESPACE_TOOLBOX, annotation.getKey(), annotation.getValue().get(i));
+			}
 		}
-		System.err.println("\n\n\n\n\n");
 	}
 
 	/**

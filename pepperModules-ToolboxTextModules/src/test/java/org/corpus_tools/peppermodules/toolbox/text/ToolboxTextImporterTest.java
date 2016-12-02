@@ -28,9 +28,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.IOException;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.common.FormatDesc;
@@ -46,7 +43,6 @@ import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.corpus_tools.salt.core.SNode;
-import org.corpus_tools.salt.util.VisJsVisualizer;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 import org.junit.Test;
@@ -278,30 +274,25 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
-	 * Tests against a minimum example, where there are 4 \id, one of which has a \ref **without** a morph line
+	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
 	 */
 	@Test
 	public void testMixedWithWithoutMbLines() {
 		setTestFile("test-mixed-with-without-mb.txt");
 		start();
-		getFixture().getSaltProject().saveSaltProject(URI.createFileURI("/home/stephan/Schreibtisch/salt-test/"));
-		String inputSaltFile = "/home/stephan/Schreibtisch/salt-test/test-mixed-with-without-mb/Document no. 1.salt"; 
-		String outputFolder = "/home/stephan/Schreibtisch/salt-test/vis/";
-		URI uri = URI.createFileURI(inputSaltFile);
-		      VisJsVisualizer visJsVisualizer = null;
-			try {
-				visJsVisualizer = new VisJsVisualizer(uri);
-			}
-			catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		      try {
-		               URI outputFileUri = URI.createFileURI(outputFolder);
-		               visJsVisualizer.visualize(outputFileUri);
-		      } catch (IOException | XMLStreamException e) { 
-		              e.printStackTrace();
-		      }
+		fail("Needs to be implemented further!");
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there are no morphology lines
+	 */
+	@Test
+	public void testWithoutMbLines() {
+		setTestFile("test-no-mb-lines.txt");
+		start();
 		fail("Needs to be implemented further!");
 	}
 
