@@ -37,12 +37,10 @@ import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.STextualDS;
-import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.common.SaltProject;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
-import org.corpus_tools.salt.core.SNode;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 import org.junit.Test;
@@ -154,7 +152,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertEquals(4, corpusGraph.getDocuments().size());
 		for (SDocument doc : corpusGraph.getDocuments()) {
 			assertThat(doc.getName(), anyOf(is(DOC_NO + "1"), is(DOC_NO + "2"), is(DOC_NO + "3"), is(DOC_NO + "4")));
-			assertEquals(2, doc.getAnnotations().size());
+			assertEquals(2, doc.getMetaAnnotations().size());
 			for (SAnnotation anno : doc.getAnnotations()) {
 				assertThat(anno.getQName(), anyOf(is(TOOLBOX + "::idinfo"), is(TOOLBOX + "::moreidinfo")));
 				if (anno.getQName().equals(TOOLBOX + "::idinfo")) {
@@ -172,47 +170,117 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			assertEquals(2, graph.getTextualDSs().size());
 			// Document-respective tests
 			String docNumber = doc.getId().substring(doc.getId().length() - 1);
-			if (docNumber.equals("1")) {
-				
+			// FIXME switch on docNumber
+			// Document-level
+			assertEquals(DOC_NO + docNumber, doc.getName());
+			assertNotNull(doc.getMetaAnnotation(TOOLBOX + "::idinfo"));
+			assertNotNull(doc.getMetaAnnotation(TOOLBOX + "::moreidinfo"));
+			switch (docNumber) {
+			case "4":
+				assertEquals("Some document no. " + docNumber + " info followed by an empty marker", doc.getMetaAnnotation(TOOLBOX + "::idinfo").getValue_STEXT());
+				assertEquals("Some more info about document no. " + docNumber + " Duplicate 1 Duplicate 2", doc.getMetaAnnotation(TOOLBOX + "::moreidinfo").getValue_STEXT());
+				break;
+
+			default:
+				assertEquals("Some document no. " + docNumber + " info", doc.getMetaAnnotation(TOOLBOX + "::idinfo").getValue_STEXT());
+				assertEquals("Some more info about document no. " + docNumber, doc.getMetaAnnotation(TOOLBOX + "::moreidinfo").getValue_STEXT());
+				break;
 			}
-			else {
-				// Document-level
-				assertEquals(DOC_NO + docNumber, doc.getName());
-				assertNotNull(doc.getAnnotation(TOOLBOX + "::idinfo"));
-				assertNotNull(doc.getAnnotation(TOOLBOX + "::moreidinfo"));
-				assertEquals("Some document no. " + docNumber + " info", doc.getAnnotation(TOOLBOX + "::idinfo").getValue_STEXT());
-				assertEquals("Some more info about document no. " + docNumber, doc.getAnnotation(TOOLBOX + "::moreidinfo").getValue_STEXT());
-				if (docNumber.equals("3")) {
-					assertNotNull(doc.getAnnotation(TOOLBOX + "::docmet"));
-					assertEquals("Some randomly put document meta annotation", doc.getAnnotation(TOOLBOX + "::docmet").getValue_STEXT());
+			// Data sources
+			for (STextualDS ds : graph.getTextualDSs()) {
+				switch (docNumber) {
+				case "1":
+					assertThat(ds.getText(), is(anyOf(is("Word1 -Tuple Tuple- Word2 Triple-= Word3 FreedashTuple Word4 FreecliticTuple Unitref sentence one Unitref sentence one Unitref sentence two with one-to-four ref Unitref sentence two with one-to-four ref Unitref with some random text just like that Unitref with some random text just like that Unitref with some random text just like that"), 
+							is("m1m2-m3m4-m5m6m7-m8=m9m10m11-m12m13m14=m15m16m17m18m19m20m21m22m23m24m25m26m27m28m29m30m31m32m33m34m35m36m37m38m39m40m41m42m43"))));
+					break;
+
+				case "2":
+					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"),
+							is("m1m2m1m2"))));
+					break;
+
+				case "3":
+					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"),
+							is("m1m2m1m2"))));
+					break;
+
+				case "4":
+					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"),
+							is("m1m2m1m2"))));
+					break;
+
+				default:
+					fail();
+					break;
 				}
-				
-				// Data sources
-				for (STextualDS ds : graph.getTextualDSs()) {
-					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"), is("A word A word"))));
-				}
-				
-				// Nodes
+			}
+			switch (docNumber) {
+			case "1":
+				assertEquals(94, graph.getTokens().size());
+				assertEquals(8, graph.getSpans().size());
+				assertEquals(3, graph.getLayers().size());
+				break;
+
+			case "2":
+			case "3":
+			case "4":
 				assertEquals(8, graph.getTokens().size());
 				assertEquals(2, graph.getSpans().size());
-				assertEquals(3, graph.getLayers().size()); // ref, lex, morph
-				
-				// Layers
-				for (SLayer l : graph.getLayers()) {
-					if (l.getId().equals("ref")) {
-						assertEquals(2, l.getNodes().size());
+				assertEquals(3, graph.getLayers().size());
+				break;
+
+			default:
+				fail();
+				break;
+			}
+			// Layers
+			for (SLayer l : graph.getLayers()) {
+				switch (docNumber) {
+				case "1":
+					switch (l.getName()) {
+					case "tx":
+						assertEquals(51, l.getNodes().size());
+						break;
+						
+					case "mb":
+						assertEquals(43, l.getNodes().size());
+						break;
+						
+					case "ref":
+						assertEquals(8, l.getNodes().size());
+						break;
+
+					default:
+						fail();
+						break;
 					}
-					else {
+					break;
+
+				case "2":
+				case "3":
+				case "4":
+					switch (l.getName()) {
+					case "tx":
 						assertEquals(4, l.getNodes().size());
-						for (SNode n : l.getNodes()) {
-							assertTrue(n instanceof SToken);
-						}
-						if (l.getId().equals("lex")) {
-						}
-						else {
-							
-						}
+						break;
+						
+					case "mb":
+						assertEquals(4, l.getNodes().size());
+						break;
+						
+					case "ref":
+						assertEquals(2, l.getNodes().size());
+						break;
+
+					default:
+						fail();
+						break;
 					}
+					break;
+
+				default:
+					fail();
+					break;
 				}
 			}
 		}
