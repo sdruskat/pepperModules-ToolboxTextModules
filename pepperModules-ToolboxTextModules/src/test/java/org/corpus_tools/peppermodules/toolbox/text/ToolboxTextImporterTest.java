@@ -36,7 +36,9 @@ import org.corpus_tools.pepper.testFramework.PepperImporterTest;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.STextualDS;
+import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.common.SaltProject;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
@@ -275,6 +277,55 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 					default:
 						fail();
 						break;
+					}
+					break;
+
+				default:
+					fail();
+					break;
+				}
+			}
+			// Ref-level annotations
+			for (SSpan s : graph.getSpans()) {
+				switch (docNumber) {
+				case "1":
+					assertEquals(3, s.getAnnotations().size());
+					for (SAnnotation a : s.getAnnotations()) {
+						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+					}
+					break;
+
+				case "2":
+				case "3":
+				case "4":
+					assertEquals(2, s.getAnnotations().size());
+					for (SAnnotation a : s.getAnnotations()) {
+						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"))));
+					}
+					break;
+
+				default:
+					fail();
+					break;
+				}
+			}
+			for (int i = 0; i < graph.getTokens().size(); i++) {
+				SToken tok = graph.getTokens().get(i);
+				switch (docNumber) {
+				case "1":
+					FIXME DO TOKEN ANNOTATIONS CHECK!
+					assertEquals(1, tok.getAnnotations().size());
+					for (SAnnotation a : tok.getAnnotations()) {
+						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+					}
+					break;
+
+				case "2":
+				case "3":
+				case "4":
+					assertEquals(1, tok.getAnnotations().size());
+					for (SAnnotation a : tok.getAnnotations()) {
+						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
 					}
 					break;
 
