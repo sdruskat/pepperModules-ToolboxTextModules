@@ -80,19 +80,25 @@ public class MorphLayerData extends LayerData {
 				if (attach) {
 					String next = null;
 					try {
-					next = iterator.next();
-					String val = tok.concat(next);
-					prefixedmorphWords.add(val);
-					mapMorphWordToMorphemes(tok, next, val);
+						next = iterator.next();
 					}
 					catch (NoSuchElementException e) {
 						log.warn("Cannot attach affix/clitic delimited morpheme \'" + tok + "\' because there is no other morpheme following it (document: \"" + getDocName() + "\", reference: \"" + getRef() + "\")! Ignoring this morpheme.");
 					}
+					String val = next != null ? tok.concat(next) : tok;
+					prefixedmorphWords.add(val);
+					mapMorphWordToMorphemes(tok, next, val);
 				}
 				else {
 					if (!tok.equals(affix) && !tok.equals(clitic)) {
-						String next = iterator.next();
-						String val = tok.concat(next);
+						String next = null;
+						try {
+							next = iterator.next();
+						}
+						catch (NoSuchElementException e) {
+							log.warn("Cannot attach affix/clitic delimited morpheme \'" + tok + "\' because there is no other morpheme following it (document: \"" + getDocName() + "\", reference: \"" + getRef() + "\")! Ignoring this morpheme.");
+						}
+						String val = next != null ? tok.concat(next) : tok;
 						prefixedmorphWords.add(val);
 						mapMorphWordToMorphemes(tok, next, val);
 					}
@@ -182,12 +188,18 @@ public class MorphLayerData extends LayerData {
 						iterator.remove();
 						// Process annotations accordingly
 						for (Entry<String, List<String>> anno : getAnnotations().entries()) {
-							String delimValue = anno.getValue().get(index);
-							if (delimValue.equals(affix) || delimValue.equals(clitic)) {
-								String nextValue = anno.getValue().get(index + 1);
-								String newNextValue = delimValue + nextValue;
-								anno.getValue().remove(index);
-								anno.getValue().set(index, newNextValue);
+							String delimValue = null;
+							try {
+								delimValue = anno.getValue().get(index);
+								if (delimValue.equals(affix) || delimValue.equals(clitic)) {
+									String nextValue = anno.getValue().get(index + 1);
+									String newNextValue = delimValue + nextValue;
+									anno.getValue().remove(index);
+									anno.getValue().set(index, newNextValue);
+								}
+							}
+							catch (IndexOutOfBoundsException e) {
+								log.warn("Mismatch between no. of morphemes and no. of annotations on layer \"" + anno.getKey() + "\" in document \"" + getDocName() + "\", reference \"" + getRef() + "\". Ignoring annotation.");
 							}
 						}
 					}

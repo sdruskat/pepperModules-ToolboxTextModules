@@ -262,6 +262,12 @@ public class RefMapper extends AbstractBlockMapper {
 					 * of morphemes for the morph word at the same index as
 					 * the current lexUnit.
 					 */
+					try {
+						morphData.getMorphWords().get(i);
+					}
+					catch (IndexOutOfBoundsException e) {
+						log.warn("Concatenating morphemes for lexical items, there seems to be faulty information in document \"" + getDocName() + "\"! Cannot find morphological information for lexical unit \"" + lexUnit + "\" (contained in \'" + lexData.getPrimaryData() + "\'!\nThis document will not be mapped!\n    Further information:\n    Morphological data:\n        " + morphData.toString() + "\n    Concatenations:\n        " + morphData.getMorphWords().toString());
+					}
 					int timeSteps = morphData.getMorphWordMorphemesMap().get(morphData.getMorphWords().get(i)).size();
 					STimelineRelation timeLineRel = SaltFactory.createSTimelineRelation();
 					timeLineRel.setSource(token);
