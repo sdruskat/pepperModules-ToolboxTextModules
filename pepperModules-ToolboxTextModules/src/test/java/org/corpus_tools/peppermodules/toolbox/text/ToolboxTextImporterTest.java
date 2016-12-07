@@ -19,6 +19,7 @@
 package org.corpus_tools.peppermodules.toolbox.text;
 
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -518,14 +519,11 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		setProperties("real-data.properties");
 		start();
 		assertEquals(214, getNonEmptyCorpusGraph().getDocuments().size());
-//		for (SDocument doc : getNonEmptyCorpusGraph().getDocuments()) {
-//			SDocumentGraph graph = doc.getDocumentGraph();
-//			if (graph.getTokens().size() < 1) {
-//				System.err.println(graph.getDocument().getName());
-//			}
-//			assertThat(graph.getTokens().size(), is(greaterThan(0)));
-//		}
-//		fail("Needs to be implemented further!");
+		for (SDocument doc : getNonEmptyCorpusGraph().getDocuments()) {
+			SDocumentGraph graph = doc.getDocumentGraph();
+			assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		}
+		fail("Needs to be implemented further!");
 	}
 
 	/**

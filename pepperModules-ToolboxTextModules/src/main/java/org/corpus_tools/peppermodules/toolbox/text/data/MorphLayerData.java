@@ -26,6 +26,10 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ListMultimap;
 
@@ -36,6 +40,8 @@ import com.google.common.collect.ListMultimap;
  *
  */
 public class MorphLayerData extends LayerData {
+	
+	private static final Logger log = LoggerFactory.getLogger(MorphLayerData.class);
 	
 	private List<String> morphWords = new ArrayList<>();
 	private Map<String, ArrayList<String>> morphWordMorphemesMap;
@@ -72,10 +78,16 @@ public class MorphLayerData extends LayerData {
 			String tok = iterator.next();
 			if (tok.endsWith(affix) || tok.endsWith(clitic)) {
 				if (attach) {
-					String next = iterator.next();
+					String next = null;
+					try {
+					next = iterator.next();
 					String val = tok.concat(next);
 					prefixedmorphWords.add(val);
 					mapMorphWordToMorphemes(tok, next, val);
+					}
+					catch (NoSuchElementException e) {
+						log.warn("Cannot attach affix/clitic delimited morpheme \'" + tok + "\' because there is no other morpheme following it (document: \"" + getDocName() + "\", reference: \"" + getRef() + "\")! Ignoring this morpheme.");
+					}
 				}
 				else {
 					if (!tok.equals(affix) && !tok.equals(clitic)) {

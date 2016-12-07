@@ -51,6 +51,7 @@ import org.corpus_tools.salt.core.SNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
 /**
@@ -438,7 +439,8 @@ public class RefMapper extends AbstractBlockMapper {
 				logMessage += "\nRemoving excess morphological units!";
 				morphData.setPrimaryData(morphs.subList(0, morphs.size() - excessMorphemesSum));
 				// Remove excess data in annotations if possible
-				for (Iterator<Entry<String, List<String>>> iterator = morphData.getAnnotations().entries().iterator(); iterator.hasNext();) {
+				ArrayListMultimap<String, List<String>> morphAnnosCopy = ArrayListMultimap.create(morphData.getAnnotations());
+				for (Iterator<Entry<String, List<String>>> iterator = morphAnnosCopy.entries().iterator(); iterator.hasNext();) {
 					Entry<String, List<String>> anno = iterator.next();
 					ArrayList<String> valueCopy = new ArrayList<>(anno.getValue());
 					String key = anno.getKey();
@@ -446,7 +448,7 @@ public class RefMapper extends AbstractBlockMapper {
 					if (sumAnno == shallowMorphsCopy.size()) {
 						errors.put(key.concat(ERROR_TOO_MANY), valueCopy);
 						logMessage += "\nRemoving excess morphological annotations from layer \'" + key + "\'!";
-						iterator.remove();
+						morphData.getAnnotations().remove(key, anno.getValue());
 						morphData.getAnnotations().put(key, anno.getValue().subList(0, anno.getValue().size() - excessMorphemesSum));
 
 					}

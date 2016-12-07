@@ -227,4 +227,18 @@ public class LayerData {
 		return marker;
 	}
 
+	/**
+	 * @return the docName
+	 */
+	public final String getDocName() {
+		return docName;
+	}
+
+	/**
+	 * @return the ref
+	 */
+	public final String getRef() {
+		return ref;
+	}
+
 }
