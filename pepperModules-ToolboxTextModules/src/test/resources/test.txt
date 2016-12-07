@@ -144,3 +144,18 @@
 \mb m1 m2
 \ge M1 M2
 \ll A ref-level annotation
+
+\id Document no. 5
+\idinfo Some document no. 5 info
+\moreidinfo Some more info about document no. 5
+
+\ref Dupes
+\tx One Two
+\ta 1 2
+\mb m1 m2
+\ge M1 M2
+\ll A ref-level annotation
+\tx Three Four
+\ta 3 4
+\mb m3 m4
+\ge M3 M4

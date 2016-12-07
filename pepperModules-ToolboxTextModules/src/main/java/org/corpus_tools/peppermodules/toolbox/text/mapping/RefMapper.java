@@ -183,7 +183,7 @@ public class RefMapper extends AbstractBlockMapper {
 		 * so let the mapping commence!
 		 */
 		
-		List<SNode> lexTokens = mapTokens(morph != null, lexData, morphData);
+		List<SToken> lexTokens = mapTokens(morph != null, lexData, morphData);
 		mapRef(refData, lexTokens);
 
 		System.err.println("----- " + refData.toString());
@@ -202,10 +202,8 @@ public class RefMapper extends AbstractBlockMapper {
 	 * @param refData
 	 * @param lexTokens 
 	 */
-	private void mapRef(LayerData refData, List<SNode> lexTokens) {
-		List<SToken> tokenList = new ArrayList<>();
-		tokenList.addAll((Collection<? extends SToken>) lexTokens);
-		SSpan span = graph.createSpan(tokenList);
+	private void mapRef(LayerData refData, List<SToken> lexTokens) {
+		SSpan span = graph.createSpan(lexTokens);
 		layers.get(refData.getMarker()).addNode(span);
 		/*
 		 *  Add the actual primary data as annotation.
@@ -226,9 +224,9 @@ public class RefMapper extends AbstractBlockMapper {
 	 * @param morphData
 	 * @return 
 	 */
-	private List<SNode> mapTokens(boolean hasMorphology, LayerData lexData, MorphLayerData morphData) {
-		List<SNode> lexTokens = new ArrayList<>();
-		List<SNode> morphTokens = new ArrayList<>();
+	private List<SToken> mapTokens(boolean hasMorphology, LayerData lexData, MorphLayerData morphData) {
+		List<SToken> lexTokens = new ArrayList<>();
+		List<SToken> morphTokens = new ArrayList<>();
 		// Build tokens, text and timeline
 		if (docHasMorphology) {
 			if (hasMorphology) {
@@ -318,10 +316,16 @@ public class RefMapper extends AbstractBlockMapper {
 	 * @param data
 	 * @param nodes
 	 */
-	private void addAnnotations(LayerData data, List<SNode> nodes) {
+	private void addAnnotations(LayerData data, List<?> nodes) {
 		for (Entry<String, List<String>> annotation : data.getAnnotations().entries()) {
 			for (int i = 0; i < nodes.size(); i++) {
-				nodes.get(i).createAnnotation(SALT_NAMESPACE_TOOLBOX, annotation.getKey(), annotation.getValue().get(i));
+				Object node = nodes.get(i);
+				if (!(node instanceof SNode)) {
+					throw new PepperModuleException("Cannot add an annotation to an object that is not of type " + SNode.class.getSimpleName() + " (here: " + node.getClass().getName() + ")!");
+				}
+				else {
+					((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, annotation.getKey(), annotation.getValue().get(i));
+				}
 			}
 		}
 	}
@@ -409,6 +413,7 @@ public class RefMapper extends AbstractBlockMapper {
 	 * @return
 	 */
 	private MorphLayerData checkLexMorphInterl11n(LayerData lexData, MorphLayerData morphData, LayerData refData) {
+		boolean isInterl11nFaulty = false;
 		Map<String, List<String>> errors = new HashMap<>();
 		int sumLex = lexData.getPrimaryData().size();
 		List<String> morphWords = morphData.getMorphWords();
@@ -418,6 +423,7 @@ public class RefMapper extends AbstractBlockMapper {
 		int sumMorphWords = morphWords.size();
 		// If there are more "morph words" than lexical items
 		if (sumMorphWords > sumLex) {
+			isInterl11nFaulty = true;
 			String logMessage = "Document \"" + getDocName() + "\", reference " + refData.getPrimaryData() + ": The number of morphological units is larger than the number of lexical tokens (" + sumMorphWords + " morphological units vs. " + sumLex + " lexical tokens)!";
 			logMessage += "\nThe number of annotations on these units may be too high as well!";
 			errors.put(properties.getMorphMarker().concat(ERROR_TOO_MANY), shallowMorphsCopy);
@@ -464,6 +470,7 @@ public class RefMapper extends AbstractBlockMapper {
 		}
 		// If there are fewer morphological units than lexical units
 		else if (sumMorphWords < sumLex) {
+			isInterl11nFaulty = true;
 			String logMessage = "Document \"" + getDocName() + "\", reference \'" + refData.getPrimaryData() + "\': The number of morphological units is lower than the number of lexical tokens (" + sumMorphWords + " morphological units vs. " + sumLex + " lexical tokens)!";
 			logMessage += "\nThe number of annotations on these units may be too low as well!";
 			errors.put(properties.getMorphMarker().concat(ERROR_TOO_FEW), shallowMorphsCopy);
@@ -501,6 +508,14 @@ public class RefMapper extends AbstractBlockMapper {
 				refData.addToAnnotation(ERROR_LAYER_NAME, error.getKey());
 			}
 		}
+		/*
+		 *  If the interl11n has proven faulty, the morph words
+		 *  need to be re-compiled as they are used later to
+		 *  calculate time steps! 
+		 */
+		if (isInterl11nFaulty) {
+			morphData.compileMorphWords(properties.getAffixDelim(), properties.getCliticDelim(), properties.attachDelimiter(), properties.attachDelimiterToNext());
+		}
 		return morphData;
 	}
 
@@ -516,6 +531,7 @@ public class RefMapper extends AbstractBlockMapper {
 	private String getSingleLine(String marker) {
 		List<String> list = markerContentMap.get(marker);
 		if (list.size() > 1) {
+			System.out.println("Reference block contains two \\" + marker + " lines, which at this point shouldn't be the case. Please report this as a bug!"); 
 			throw new PepperModuleException("Reference block contains two \\" + marker + " lines, which at this point shouldn't be the case. Please report this as a bug!"); 
 			// FIXME: Provide link to final issue site
 		}

@@ -167,8 +167,8 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 		}
 		// Merge duplicate marker lines if selected via property
 		if (properties.mergeDuplicateMarkers() && !duplicateMarkers.isEmpty()) {
-			ListIterator<String> iterator = lines.listIterator();
 			for (String duplicateMarker : duplicateMarkers) {
+				ListIterator<String> iterator = lines.listIterator();
 				int firstLineIndex = -1;
 				boolean firstLineSet = false;
 				while (iterator.hasNext()) {

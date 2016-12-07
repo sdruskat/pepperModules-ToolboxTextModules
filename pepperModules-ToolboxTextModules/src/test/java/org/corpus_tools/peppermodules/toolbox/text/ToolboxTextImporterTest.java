@@ -28,6 +28,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.common.FormatDesc;
@@ -43,6 +45,7 @@ import org.corpus_tools.salt.common.SaltProject;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
+import org.corpus_tools.salt.core.SNode;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 import org.junit.Test;
@@ -151,9 +154,9 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		runCorpusTests(corpusGraph, "test.txt");
 		
 		// Test documents
-		assertEquals(4, corpusGraph.getDocuments().size());
+		assertEquals(5, corpusGraph.getDocuments().size());
 		for (SDocument doc : corpusGraph.getDocuments()) {
-			assertThat(doc.getName(), anyOf(is(DOC_NO + "1"), is(DOC_NO + "2"), is(DOC_NO + "3"), is(DOC_NO + "4")));
+			assertThat(doc.getName(), anyOf(is(DOC_NO + "1"), is(DOC_NO + "2"), is(DOC_NO + "3"), is(DOC_NO + "4"), is(DOC_NO + "5")));
 			assertEquals(2, doc.getMetaAnnotations().size());
 			for (SAnnotation anno : doc.getAnnotations()) {
 				assertThat(anno.getQName(), anyOf(is(TOOLBOX + "::idinfo"), is(TOOLBOX + "::moreidinfo")));
@@ -210,12 +213,18 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"),
 							is("m1m2m1m2"))));
 					break;
+					
+				case "5":
+					assertThat(ds.getText(), is(anyOf(is("One Two Three Four"),
+							is("m1m2m3m4"))));
+					break;
 
 				default:
 					fail();
 					break;
 				}
 			}
+			// Tokens, spans, layers
 			switch (docNumber) {
 			case "1":
 				assertEquals(94, graph.getTokens().size());
@@ -228,6 +237,12 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			case "4":
 				assertEquals(8, graph.getTokens().size());
 				assertEquals(2, graph.getSpans().size());
+				assertEquals(3, graph.getLayers().size());
+				break;
+
+			case "5":
+				assertEquals(8, graph.getTokens().size());
+				assertEquals(1, graph.getSpans().size());
 				assertEquals(3, graph.getLayers().size());
 				break;
 
@@ -280,6 +295,26 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 					}
 					break;
 
+				case "5":
+					switch (l.getName()) {
+					case "tx":
+						assertEquals(4, l.getNodes().size());
+						break;
+						
+					case "mb":
+						assertEquals(4, l.getNodes().size());
+						break;
+						
+					case "ref":
+						assertEquals(1, l.getNodes().size());
+						break;
+
+					default:
+						fail();
+						break;
+					}
+					break;
+
 				default:
 					fail();
 					break;
@@ -298,6 +333,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 				case "2":
 				case "3":
 				case "4":
+				case "5":
 					assertEquals(2, s.getAnnotations().size());
 					for (SAnnotation a : s.getAnnotations()) {
 						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"))));
@@ -309,30 +345,98 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 					break;
 				}
 			}
-			for (int i = 0; i < graph.getTokens().size(); i++) {
-				SToken tok = graph.getTokens().get(i);
-				switch (docNumber) {
-				case "1":
-					FIXME DO TOKEN ANNOTATIONS CHECK!
-					assertEquals(1, tok.getAnnotations().size());
-					for (SAnnotation a : tok.getAnnotations()) {
-						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+			// Token annotations
+			String[] lexAnnos, morphAnnos;
+			List<SToken> sortedLexToks = new ArrayList<>();
+			List<SToken> sortedMorphToks = new ArrayList<>();
+			switch (docNumber) {
+			case "1":
+				lexAnnos = new String[] { "WordOne", "TupleOne", "TupleTwo", "WordTwo", "Triple", "WordThree", "TupleThree", "WordFour", "TupleFour", "t11", "t12", "t13", "t14", "t15", "t16", "t17", "t18", "t19", "t20", "t21", "t22", "t23", "t24", "t25", "t26", "t27", "t28", "t29", "t30", "t31", "t32", "t33", "t34", "t35", "t36", "t37", "t38", "t39", "t40", "t41", "t42", "t43", "t44", "t45", "t46", "t47", "t48", "t49", "t50", "t51", "t52" };
+				morphAnnos = new String[] { "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11", "M12", "M13", "M14", "M15", "M16", "M17", "M18", "M19", "M20", "M21", "M22", "M23", "M24", "M25", "M26", "M27", "M28", "M29", "M30", "M31", "M32", "M33", "M34", "M35", "M36", "M37", "M38", "M39", "M40", "M41", "M42", "M43" };
+				for (SToken sortedTok : graph.getSortedTokenByText()) {
+					if (graph.getLayerByName("tx").get(0).getNodes().contains(sortedTok)) {
+						sortedLexToks.add(sortedTok);
 					}
-					break;
-
-				case "2":
-				case "3":
-				case "4":
-					assertEquals(1, tok.getAnnotations().size());
-					for (SAnnotation a : tok.getAnnotations()) {
-						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+					else if (graph.getLayerByName("mb").get(0).getNodes().contains(sortedTok)) {
+						sortedMorphToks.add(sortedTok);
 					}
-					break;
-
-				default:
-					fail();
-					break;
 				}
+				for (int j = 0; j < sortedLexToks.size(); j++) {
+					assertEquals(lexAnnos[j], sortedLexToks.get(j).getAnnotation("toolbox::ta").getValue());
+				}
+				for (int j = 0; j < sortedMorphToks.size(); j++) {
+					assertEquals(morphAnnos[j], sortedMorphToks.get(j).getAnnotation("toolbox::ge").getValue());
+				}
+				break;
+
+			case "2":
+			case "3":
+			case "4":
+				lexAnnos = new String[] { "A", "word", "A", "word"};
+				morphAnnos = new String[] { "M1", "M2", "M1", "M2"};
+				for (SToken sortedTok : graph.getSortedTokenByText()) {
+					if (graph.getLayerByName("tx").get(0).getNodes().contains(sortedTok)) {
+						sortedLexToks.add(sortedTok);
+					}
+					else if (graph.getLayerByName("mb").get(0).getNodes().contains(sortedTok)) {
+						sortedMorphToks.add(sortedTok);
+					}
+				}
+				for (int j = 0; j < sortedLexToks.size(); j++) {
+					assertEquals(lexAnnos[j], sortedLexToks.get(j).getAnnotation("toolbox::ta").getValue());
+				}
+				for (int j = 0; j < sortedMorphToks.size(); j++) {
+					assertEquals(morphAnnos[j], sortedMorphToks.get(j).getAnnotation("toolbox::ge").getValue());
+				}
+				break;
+
+			case "5":
+				lexAnnos = new String[] { "1", "2", "3", "4"};
+				morphAnnos = new String[] { "M1", "M2", "M3", "M4"};
+				for (SToken sortedTok : graph.getSortedTokenByText()) {
+					if (graph.getLayerByName("tx").get(0).getNodes().contains(sortedTok)) {
+						sortedLexToks.add(sortedTok);
+					}
+					else if (graph.getLayerByName("mb").get(0).getNodes().contains(sortedTok)) {
+						sortedMorphToks.add(sortedTok);
+					}
+				}
+				for (int j = 0; j < sortedLexToks.size(); j++) {
+					assertEquals(lexAnnos[j], sortedLexToks.get(j).getAnnotation("toolbox::ta").getValue());
+				}
+				for (int j = 0; j < sortedMorphToks.size(); j++) {
+					assertEquals(morphAnnos[j], sortedMorphToks.get(j).getAnnotation("toolbox::ge").getValue());
+				}
+				break;
+
+			default:
+				fail();
+				break;
+			}
+			// Spanning
+			switch (docNumber) {
+			case "1":
+				for (SSpan span : graph.getSpans()) {
+					if (span.getName().equals("Reference no. 1")) {
+						assertEquals(9, graph.getOverlappedTokens(span).size());
+						for (SToken tok : graph.getOverlappedTokens(span)) {
+//							graph.getTimeline().get
+						}
+					}
+				}
+				break;
+
+			case "2":
+			case "3":
+			case "4":
+				
+				break;
+
+			case "5":
+				break;
+
+			default:
+				break;
 			}
 		}
 	}
@@ -406,6 +510,35 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
+	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
+	 */
+	@Test
+	public void testRealData() {
+		setTestFile("real-data.txt");
+		setProperties("real-data.properties");
+		start();
+		assertEquals(214, getNonEmptyCorpusGraph().getDocuments().size());
+		for (SDocument doc : getNonEmptyCorpusGraph().getDocuments()) {
+			SDocumentGraph graph = doc.getDocumentGraph();
+//			if (graph.getTokens().size() < 1) {
+//				System.err.println(graph.getDocument().getName());
+//			}
+//			assertTrue(graph.getTokens().size() > 0);
+		}
+		try {
+			Thread.sleep(10000);
+		}
+		catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		fail("Needs to be implemented further!");
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
 	 * Tests against a minimum example, where there are no morphology lines
 	 */
 	@Test
@@ -413,6 +546,33 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		setTestFile("test-no-mb-lines.txt");
 		start();
 		fail("Needs to be implemented further!");
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there are duplicate lines in the refs
+	 */
+	@Test
+	public void testDuplicateMarkers() {
+		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
+		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_MORPH_ANNOTATION_MARKERS, "ge");
+		setTestFile("duplicate-markers.txt");
+		start();
+		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
+		assertEquals(1, graph.getDocument().getMetaAnnotations().size());
+		assertEquals("Some more info about document no. 4 Duplicate 1 Duplicate 2", graph.getDocument().getMetaAnnotation("toolbox::moreidinfo").getValue_STEXT());
+		assertEquals("A sentence another sentence", graph.getTextualDSs().get(0).getText());
+		assertEquals("m1m2m3m4", graph.getTextualDSs().get(1).getText());
+		for (SNode node : graph.getLayerByName("tx").get(0).getNodes()) {
+			assertEquals(1, node.getAnnotations().size());
+			assertThat(node.getAnnotation("toolbox::ta").getValue_STEXT(), anyOf(is("A"), is("word"), is("another")));
+		}
+		for (SNode node : graph.getLayerByName("mb").get(0).getNodes()) {
+			assertEquals(1, node.getAnnotations().size());
+			assertThat(node.getAnnotation("toolbox::ge").getValue_STEXT(), anyOf(is("M1"), is("M2"), is("M3"), is("M4")));
+		}
 	}
 
 	/**

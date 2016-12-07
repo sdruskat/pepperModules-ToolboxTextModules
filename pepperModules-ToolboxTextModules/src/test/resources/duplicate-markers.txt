@@ -1,0 +1,17 @@
+\_sh v3.0 Test
+
+\id Document
+\moreidinfo Some more info about document no. 4
+\moreidinfo Duplicate 1
+\moreidinfo Duplicate 2
+
+\ref Sentence 1
+\tx A sentence
+\ta A word
+\mb m1 m2
+\ge M1 M2
+
+\tx another sentence
+\ta another word
+\mb m3 m4
+\ge M3 M4
