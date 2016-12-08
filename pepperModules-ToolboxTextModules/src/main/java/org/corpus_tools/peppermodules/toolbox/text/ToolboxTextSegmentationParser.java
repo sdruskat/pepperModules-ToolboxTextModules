@@ -72,30 +72,24 @@ public class ToolboxTextSegmentationParser {
 	 * 
 	 */
 	public void parse() {
+		int longestMarkerLength = Math.max(idMarkerLength, Math.max(refMarkerLength, morphMarkerLength));
 		try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file)));
-				ByteArrayOutputStream idBos = new ByteArrayOutputStream(idMarkerLength);
-				ByteArrayOutputStream refBos = new ByteArrayOutputStream(idMarkerLength);
-				ByteArrayOutputStream morphBos = new ByteArrayOutputStream(morphMarkerLength)) {
+				ByteArrayOutputStream bos = new ByteArrayOutputStream(longestMarkerLength);) {
 			int currentByte;
-			int longestMarkerLength = Math.max(idMarkerLength, Math.max(refMarkerLength, morphMarkerLength));
 			long currentIdOffset = -1;
 			boolean hasMorphology = false;
 			while ((currentByte = stream.read()) > 0) {
 				long currentOffset = stream.getCount() - 1;
 				if (currentByte == '\\') {
-					for (int i = 0; i < longestMarkerLength + 1; i++) {
-						currentByte = stream.read();
-						if (i <= idMarkerLength) {
-							idBos.write(currentByte);
+					while ((currentByte = stream.read()) > -1) {
+						if (Character.isWhitespace((char) currentByte)) {
+							break;
 						}
-						if (i <= refMarkerLength) {
-							refBos.write(currentByte);
-						}
-						if (i <= morphMarkerLength) {
-							morphBos.write(currentByte);
+						else {
+							bos.write(currentByte);
 						}
 					}
-					if (idBos.toString().equals(idMarker + ' ')) {
+					if (bos.toString().equals(idMarker)) {
 						currentIdOffset = currentOffset;
 						if (!idOffsets.isEmpty()) {
 							Collections.sort(idOffsets);
@@ -106,7 +100,7 @@ public class ToolboxTextSegmentationParser {
 						refMap.put(currentIdOffset, new ArrayList<Long>());
 						hasMorphology = false;
 					}
-					else if (refBos.toString().equals(refMarker + ' ')) {
+					else if (bos.toString().equals(refMarker)) {
 						if (refMap.get(currentIdOffset) == null) {
 							refMap.put(-1L, new ArrayList<Long>());
 							refMap.get(-1L).add(currentOffset);
@@ -115,12 +109,10 @@ public class ToolboxTextSegmentationParser {
 							refMap.get(currentIdOffset).add(currentOffset);
 						}
 					}
-					else if (morphBos.toString().equals(morphMarker + ' ')) {
+					else if (bos.toString().equals(morphMarker)) {
 						hasMorphology = true;
 					}
-					idBos.reset();
-					refBos.reset();
-					morphBos.reset();
+					bos.reset();
 				}
 			}
 			// Write hasMorphology one last time
