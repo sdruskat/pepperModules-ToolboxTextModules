@@ -21,12 +21,10 @@ package org.corpus_tools.peppermodules.toolbox.text.data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +42,9 @@ public class MorphLayerData extends LayerData {
 	private static final Logger log = LoggerFactory.getLogger(MorphLayerData.class);
 	
 	private List<String> morphWords = new ArrayList<>();
-	private Map<String, ArrayList<String>> morphWordMorphemesMap;
+	private Map<String, ArrayList<String>> morphWordMorphemesMap = new HashMap<>();
+
+	private ArrayList<String[]> morphemesInMorphWordList;
 
 	/**
 	 * @param markerContentMap
@@ -69,97 +69,160 @@ public class MorphLayerData extends LayerData {
 	public MorphLayerData compileMorphWords(String affix, String clitic, boolean attach, boolean attachToNext) {
 		List<String> morphs = getPrimaryData();
 		attachDelimiters(affix, clitic, attach, attachToNext, morphs);
-		// Count "words" and map words back to morphemes contained
-		morphWordMorphemesMap = new HashMap<>();
-		ArrayList<String> prefixedmorphWords = new ArrayList<>();
-		ArrayList<String> morphWords = new ArrayList<>();
-		// Append prefixes first
-		for (ListIterator<String> iterator = morphs.listIterator(); iterator.hasNext();) {
-			String tok = iterator.next();
-			if (tok.endsWith(affix) || tok.endsWith(clitic)) {
-				if (attach) {
-					String next = null;
-					try {
-						next = iterator.next();
-					}
-					catch (NoSuchElementException e) {
-						log.warn("Cannot attach affix/clitic delimited morpheme \'" + tok + "\' because there is no other morpheme following it (document: \"" + getDocName() + "\", reference: \"" + getRef() + "\")! Ignoring this morpheme.");
-					}
-					String val = next != null ? tok.concat(next) : tok;
-					prefixedmorphWords.add(val);
-					mapMorphWordToMorphemes(tok, next, val);
-				}
-				else {
-					if (!tok.equals(affix) && !tok.equals(clitic)) {
-						String next = null;
-						try {
-							next = iterator.next();
-						}
-						catch (NoSuchElementException e) {
-							log.warn("Cannot attach affix/clitic delimited morpheme \'" + tok + "\' because there is no other morpheme following it (document: \"" + getDocName() + "\", reference: \"" + getRef() + "\")! Ignoring this morpheme.");
-						}
-						String val = next != null ? tok.concat(next) : tok;
-						prefixedmorphWords.add(val);
-						mapMorphWordToMorphemes(tok, next, val);
-					}
-					else {
-						// As they should not be attached, add delimiter to list
-						prefixedmorphWords.add(tok);
-						if (morphWordMorphemesMap.get(tok) == null) {
-							morphWordMorphemesMap.put(tok, new ArrayList<>(Arrays.asList(new String[]{tok})));
-						}
-					}
-				}
+		/*
+		 *  Count "words" and map words back to morphemes contained.
+		 *  Concatenate prefixes first.
+		 */
+		morphemesInMorphWordList = new ArrayList<>();
+		List<String> tmpList = new ArrayList<>();
+		List<String> prefixWords = new ArrayList<>();
+//		List<String> morphWords = new ArrayList<>();
+		for (String morph : morphs) {
+			if (morph.endsWith(affix) || morph.endsWith(clitic)) {
+				tmpList.add(morph);
 			}
 			else {
-				prefixedmorphWords.add(tok);
-				if (morphWordMorphemesMap.get(tok) == null) {
-					morphWordMorphemesMap.put(tok, new ArrayList<>(Arrays.asList(new String[]{tok})));
+				tmpList.add(morph);
+				String prefixWord = "";
+				for (String tmpMorph : tmpList) {
+					prefixWord += tmpMorph;
 				}
+				prefixWords.add(prefixWord);
+				morphemesInMorphWordList.add(tmpList.toArray(new String[tmpList.size()]));
+				tmpList.clear();
 			}
 		}
-		// Append suffixes
-		for (ListIterator<String> iterator = prefixedmorphWords.listIterator(); iterator.hasNext();) {
-			String tok = iterator.next();
-			if (tok.startsWith(affix) || tok.startsWith(clitic)) {
-				if (attach) {
-					int lastIndex = morphWords.size() - 1;
-					String lastTokInList = morphWords.get(lastIndex);
-					morphWords.remove(lastIndex);
-					morphWords.add(lastTokInList + tok);
-					mapMorphWordToMorphemes(lastTokInList, tok, lastTokInList + tok);
+		System.err.println("PREFIX WORDS: " + prefixWords.toString());
+		for (String[] ms : morphemesInMorphWordList) {
+			System.err.println(" >>> " + Arrays.toString(ms));
+		}
+		// Now concatenate suffixes
+		List<String> morphWords = new ArrayList<>();
+		ListIterator<String[]> iterator = morphemesInMorphWordList.listIterator();
+		while (iterator.hasNext()) {
+			String[] prefixWord = iterator.next();
+			if (!prefixWord[0].startsWith(affix) && !prefixWord[0].startsWith(clitic)) {
+				String suffixWord = "";
+				for (int j = 0; j < prefixWord.length; j++) {
+					suffixWord += prefixWord[j];
 				}
-				else {
-					if (!tok.equals(affix) && !tok.equals(clitic)) {
-						int lastIndex = morphWords.size() - 1;
-						String lastTokInList = morphWords.get(lastIndex);
-						morphWords.remove(lastIndex);
-						morphWords.add(lastTokInList + tok);
-						mapMorphWordToMorphemes(lastTokInList, tok, lastTokInList + tok);
-					}
-					else {
-						// As they should not be attached, add delimiter to list
-						morphWords.add(tok);
-						if (morphWordMorphemesMap.get(tok) == null) {
-							morphWordMorphemesMap.put(tok, new ArrayList<>(Arrays.asList(new String[]{tok})));
-						}
-					}
-				}
+				morphWords.add(suffixWord);
 			}
 			else {
-				morphWords.add(tok);
-				if (morphWordMorphemesMap.get(tok) == null) {
-					morphWordMorphemesMap.put(tok, new ArrayList<>(Arrays.asList(new String[]{tok})));
+				String newMorphWord = morphWords.get(morphWords.size() - 1);
+				for (String pw : prefixWord) {
+					newMorphWord = newMorphWord.concat(pw);
 				}
-			}
-		}
-		// Remove all entries from the morphWord-morphemes map that aren't actually morph words
-		for (Iterator<String> iterator = morphWordMorphemesMap.keySet().iterator(); iterator.hasNext();) {
-			String key = iterator.next();
-			if (!morphWords.contains(key)) {
+				morphWords.set(morphWords.size() - 1, newMorphWord);
+				iterator.previous();
+				String[] oldMorphsArr = iterator.previous();
+				String[] newMorphsArr = Arrays.copyOf(oldMorphsArr, oldMorphsArr.length + prefixWord.length);
+				newMorphsArr[newMorphsArr.length - 1] = prefixWord[0];
+				iterator.next();
+				iterator.set(newMorphsArr);
+				iterator.next();
 				iterator.remove();
 			}
 		}
+		System.err.println("MORPH WORDS: " + morphWords.toString());
+		for (int i = 0; i < morphemesInMorphWordList.size(); i++) {
+			String[] ms = morphemesInMorphWordList.get(i);
+			System.err.println(" >>> " + Arrays.toString(ms));
+			System.err.println(morphWords.get(i));
+			System.err.println(ms);
+			System.err.println(morphWordMorphemesMap);
+			morphWordMorphemesMap.put(morphWords.get(i), new ArrayList<>(Arrays.asList(ms)));
+		}
+		// morphWordMorphemesMap = new HashMap<>();
+		// ArrayList<String> prefixedmorphWords = new ArrayList<>();
+		// ArrayList<String> morphWords = new ArrayList<>();
+		// // Append prefixes first
+//		for (ListIterator<String> iterator = morphs.listIterator(); iterator.hasNext();) {
+//			String tok = iterator.next();
+//			if (tok.endsWith(affix) || tok.endsWith(clitic)) {
+//				if (attach) {
+//					String next = null;
+//					try {
+//						next = iterator.next();
+//					}
+//					catch (NoSuchElementException e) {
+//						log.warn("Cannot attach affix/clitic delimited morpheme \'" + tok + "\' because there is no other morpheme following it (document: \"" + getDocName() + "\", reference: \"" + getRef() + "\")! Ignoring this morpheme.");
+//					}
+//					String val = next != null ? tok.concat(next) : tok;
+//					prefixedmorphWords.add(val);
+//					mapMorphWordToMorphemes(tok, next, val);
+//				}
+//				else {
+//					if (!tok.equals(affix) && !tok.equals(clitic)) {
+//						String next = null;
+//						try {
+//							next = iterator.next();
+//						}
+//						catch (NoSuchElementException e) {
+//							log.warn("Cannot attach affix/clitic delimited morpheme \'" + tok + "\' because there is no other morpheme following it (document: \"" + getDocName() + "\", reference: \"" + getRef() + "\")! Ignoring this morpheme.");
+//						}
+//						String val = next != null ? tok.concat(next) : tok;
+//						prefixedmorphWords.add(val);
+//						mapMorphWordToMorphemes(tok, next, val);
+//					}
+//					else {
+//						// As they should not be attached, add delimiter to list
+//						prefixedmorphWords.add(tok);
+//						if (morphWordMorphemesMap.get(tok) == null) {
+//							morphWordMorphemesMap.put(tok, new ArrayList<>(Arrays.asList(new String[]{tok})));
+//						}
+//					}
+//				}
+//			}
+//			else {
+//				prefixedmorphWords.add(tok);
+//				if (morphWordMorphemesMap.get(tok) == null) {
+//					morphWordMorphemesMap.put(tok, new ArrayList<>(Arrays.asList(new String[]{tok})));
+//				}
+//			}
+//		}
+//		// Append suffixes
+//		for (ListIterator<String> iterator = prefixedmorphWords.listIterator(); iterator.hasNext();) {
+//			String tok = iterator.next();
+//			if (tok.startsWith(affix) || tok.startsWith(clitic)) {
+//				if (attach) {
+//					int lastIndex = morphWords.size() - 1;
+//					String lastTokInList = morphWords.get(lastIndex);
+//					morphWords.remove(lastIndex);
+//					morphWords.add(lastTokInList + tok);
+//					mapMorphWordToMorphemes(lastTokInList, tok, lastTokInList + tok);
+//				}
+//				else {
+//					if (!tok.equals(affix) && !tok.equals(clitic)) {
+//						int lastIndex = morphWords.size() - 1;
+//						String lastTokInList = morphWords.get(lastIndex);
+//						morphWords.remove(lastIndex);
+//						morphWords.add(lastTokInList + tok);
+//						mapMorphWordToMorphemes(lastTokInList, tok, lastTokInList + tok);
+//					}
+//					else {
+//						// As they should not be attached, add delimiter to list
+//						morphWords.add(tok);
+//						if (morphWordMorphemesMap.get(tok) == null) {
+//							morphWordMorphemesMap.put(tok, new ArrayList<>(Arrays.asList(new String[]{tok})));
+//						}
+//					}
+//				}
+//			}
+//			else {
+//				morphWords.add(tok);
+//				if (morphWordMorphemesMap.get(tok) == null) {
+//					morphWordMorphemesMap.put(tok, new ArrayList<>(Arrays.asList(new String[]{tok})));
+//				}
+//			}
+//		}
+//		// Remove all entries from the morphWord-morphemes map that aren't actually morph words
+//		for (Iterator<String> iterator = morphWordMorphemesMap.keySet().iterator(); iterator.hasNext();) {
+//			String key = iterator.next();
+//			if (!morphWords.contains(key)) {
+//				iterator.remove();
+//			}
+//		}
 		this.morphWords = morphWords;
 		return this;
 	}
@@ -270,6 +333,13 @@ public class MorphLayerData extends LayerData {
 	 */
 	public final Map<String, ArrayList<String>> getMorphWordMorphemesMap() {
 		return morphWordMorphemesMap;
+	}
+
+	/**
+	 * @return the morphemesInMorphWordList
+	 */
+	public final ArrayList<String[]> getMorphemesInMorphWordList() {
+		return morphemesInMorphWordList;
 	}
 
 }

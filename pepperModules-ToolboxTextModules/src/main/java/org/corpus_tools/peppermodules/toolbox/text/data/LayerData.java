@@ -59,6 +59,8 @@ public class LayerData {
 	private boolean fixErrors;
 	private String docName;
 	private String ref;
+	private final List<String> subrefs = new ArrayList<>();
+	private final List<String> subrefAnnotations = new ArrayList<>();
 	
 	/**
 	 * @param markerContentMap

@@ -1,161 +1,64 @@
 \_sh v3.0 Test
-\info A sample "standard" corpus in Toolbox text format. It includes use cases for most phenomena the importer tests against, such as clitics and affixes, unitrefs, meta annotations, etc.
-\moreinfo Some more info about the corpus
 
 \id Document no. 1
-\idinfo Some document no. 1 info
-\moreidinfo Some more info about document no. 1
 
-\ref Reference no. 1
-\met Some meta information about the first sentence
-\tx Word1 -Tuple Tuple- Word2 Triple-= Word3  FreedashTuple Word4 FreecliticTuple
-\ta WordOne TupleOne TupleTwo WordTwo Triple WordThree TupleThree WordFour TupleFour
-\mb m1    m2 -m3 m4- m5 m6    m7 -m8 =m9 m10  m11 - m12 m13 m14 = m15
-\ge M1 M2 M3 M4 M5 M6 M7 M8 M9 M10 M11 M12 M13 M14 M15
-\ll A reference testing composites, clitics, and such
-
-\ref Unitref sentence schema 1 (line-level) to mb
-\met A sentence with a line-level unitref
-\tx Unitref sentence one
-\ta t11 t12 t13
+\ref subref sentence schema 1 (line-level) to mb
+\met A sentence with a line-level subref
+\tx subref sentence one
 \mb m16 m17 m18
-\ge M16 M17 M18
-\ur mb 1 2 Unitref to morphemes m17 and m18 in a span
-\ll uref one-mb
+\sr mb 1 2 subref to morphemes m17 and m18 in a span
 
-\ref Unitref sentence schema 1 (line-level) to tx
-\met A sentence with a line-level unitref
-\tx Unitref sentence one
-\ta t14 t15 t16
+\ref subref sentence schema 1 (line-level) to tx
+\met A sentence with a line-level subref
+\tx subref sentence one
 \mb m19 m20 m21
-\ge M19 M20 M21
-\ur tx 1 2 Unitref to lexicals t15 and t16 in a span
-\ll uref one-tx
+\sr tx 1 2 subref to lexicals t15 and t16 in a span
 
-\ref Unitref sentence schema 2 (undefined global) with existing mb line
-\met Sentence with a single global unitref (morph-level) from m23 to m26 (incl.) on \ur and \ur2
-\unitref 1 4
-\tx Unitref sentence two with one-to-four ref
-\ta t17 t18 t19 t20 t21 t22
+\ref subref sentence schema 2 (undefined global) with existing mb line
+\met Sentence with a single global subref (morph-level) from m23 to m26 (incl.) on \sr and \sr2
+\subref 1 4
+\tx subref sentence two with one-to-four ref
 \mb m22 m23 m24 m25 m26 m27
-\ge M22 M23 M24 M25 M26 M27
-\ur Unitref to morphemes m23-m26 in a span
-\ur2 2nd unitref to morphemes m23-m26 in a span
-\ll uref two-with
+\sr subref to morphemes m23-m26 in a span
+\sr2 2nd subref to morphemes m23-m26 in a span
 
-\ref Unitref sentence schema 2 (undefined global) without mb line
-\met Sentence with a single global unitref (lex-level) from t24 to t27 (incl.) on \ur and \ur2
-\unitref 1 4
-\tx Unitref sentence two with one-to-four ref
-\ta t23 t24 t25 t26 t27 t28
-\ur Unitref to lexicals "sentence"-"one-to-four" in a span
-\ur2 2nd unitref to lexicals "sentence"-"one-to-four" in a span
-\ll uref two-without
+\ref subref sentence schema 2 (undefined global) without mb line
+\met Sentence with a single global subref (lex-level) from t24 to t27 (incl.) on \sr and \sr2
+\subref 1 4
+\tx subref sentence two with one-to-four ref
+\sr subref to lexicals "sentence"-"one-to-four" in a span
+\sr2 2nd subref to lexicals "sentence"-"one-to-four" in a span
 
-\ref Unitref sentence schema 3 (defined global) to mb
-\met Sentence with two global unitrefs (morph-level) m26-m28 and m30-m31 on \ur
-\unitref 1 1 3
-\unitref 2 5 6
-\tx Unitref with some random text just like that
-\ta t29 t30 t31 t32 t33 t34 t35 t36
+\ref subref sentence schema 3 (defined global) to mb
+\met Sentence with two global subrefs (morph-level) m26-m28 and m30-m31 on \sr
+\subref 1 1 3
+\subref 2 5 6
+\tx subref with some random text just like that
 \mb m28 m29 m30 m31 m32 m33 m34 m35
-\ge M28 M29 M30 M31 M32 M33 M34 M35
-\ur 1 Unitref m30-m32
-\ur 2 Unitref m33-m34
-\ll uref three-mb
+\sr 1 subref m30-m32
+\sr 2 subref m33-m34
 
-\ref Unitref sentence schema 3 (defined global) to tx
-\met Sentence with two global unitrefs (lex-level) t38-t40 and t43-t44 on \ur
-\unitref 1 1 3
-\unitref 2 5 6
-\tx Unitref with some random text just like that
-\ta t37 t38 t39 t40 t41 t42 t43 t44
-\ur 1 Unitref t38-t40
-\ur 2 Unitref t43-t44
-\ll uref three-tx
+\ref subref sentence schema 3 (defined global) to tx
+\met Sentence with two global subrefs (lex-level) t38-t40 and t43-t44 on \sr
+\subref 1 1 3
+\subref 2 5 6
+\tx subref with some random text just like that
+\sr 1 subref t38-t40
+\sr 2 subref t43-t44
 
-\ref Unitref sentence schema 4 (defined global with related line)
-\met Sentence with two global unitrefs (one lex-level, one morph-level) m26-m28 and m30-m31 on \ur
-\unitref 1 tx 1 3
-\unitref 2 mb 5 6
-\tx Unitref with some random text just like that
-\ta t45 t46 t47 t48 t49 t50 t51 t52
+\ref subref sentence schema 4 (defined global with related line)
+\met Sentence with two global subrefs (one lex-level, one morph-level) m26-m28 and m30-m31 on \sr
+\subref 1 tx 1 3
+\subref 2 mb 5 6
+\tx subref with some random text just like that
 \mb m36 m37 m38 m39 m40 m41 m42 m43
-\ge M36 M37 M38 M39 M40 M41 M42 M43
-\ur 1 Unitref t46-t48
-\ur 2 Unitref m41-m42
-\ll uref four
+\sr 1 subref t46-t48
+\sr 2 subref m41-m42
 
-
-\id Document no. 2
-\idinfo Some document no. 2 info
-\moreidinfo Some more info about document no. 2
-
-\ref Sentence 2.1
-\tx A sentence
-\ta A word
-\mb m1 m2
-\ge M1 M2
-\ll A ref-level annotation
-
-\ref Sentence 2.2
-\tx A sentence
-\ta A word
-\mb m1 m2
-\ge M1 M2
-\ll A ref-level annotation
-
-\id Document no. 3
-\idinfo Some document no. 3 info
-\moreidinfo Some more info about document no. 3
-
-\ref Sentence 3.1
-\tx A sentence
-\ta A word
-\mb m1 m2
-\ge M1 M2
-\ll A ref-level annotation
-
-\ref Sentence 3.2
-\tx A sentence
-\ta A word
-\mb m1 m2
-\ge M1 M2
-\ll A ref-level annotation
-
-
-\id Document no. 4
-\idinfo Some document no. 4 info followed by an empty marker
-\idinfo
-\moreidinfo Some more info about document no. 4
-\moreidinfo Duplicate 1
-\moreidinfo Duplicate 2
-
-\ref Sentence 4.1
-\tx A sentence
-\ta A word
-\mb m1 m2
-\ge M1 M2
-\ll A ref-level annotation
-
-\ref Sentence 4.2
-\tx A sentence
-\ta A word
-\mb m1 m2
-\ge M1 M2
-\ll A ref-level annotation
-
-\id Document no. 5
-\idinfo Some document no. 5 info
-\moreidinfo Some more info about document no. 5
-
-\ref Dupes
-\tx One Two
-\ta 1 2
-\mb m1 m2
-\ge M1 M2
-\ll A ref-level annotation
-\tx Three Four
-\ta 3 4
-\mb m3 m4
-\ge M3 M4
+\ref subref sentence schema 5 (linked)
+\met Sentence with two subrefs which are linked (m37-m39, m41-m42)
+\subref 1 mb 1 3
+\subref 1 mb 5 6
+\tx subref with some random text just like that
+\mb m36 m37 m38 m39 m40 m41 m42 m43
+\sr 1 subref m37-m39 & m41-m42

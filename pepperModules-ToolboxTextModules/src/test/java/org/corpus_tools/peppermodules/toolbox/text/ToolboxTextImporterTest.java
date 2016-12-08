@@ -549,6 +549,44 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
+	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
+	 */
+	@Test
+	public void testMissionaries2() {
+		setTestFile("missionaries2.txt");
+		setProperties("missionaries.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		for (SDocument doc : getNonEmptyCorpusGraph().getDocuments()) {
+			SDocumentGraph graph = doc.getDocumentGraph();
+			assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		}
+		fail("Needs to be implemented further!");
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
+	 */
+	@Test
+	public void testSubRefs() {
+		setTestFile("subrefs.txt");
+		setProperties("subrefs.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertEquals(8 + 11, graph.getSpans().size());
+		fail("Needs to be implemented further!");
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
 	 * Tests against a minimum example, where there are no morphology lines
 	 */
 	@Test

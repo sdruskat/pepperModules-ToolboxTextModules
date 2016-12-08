@@ -134,10 +134,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public static final String PROP_FILE_EXTENSIONS = "fileExtensions";
 	
 	/**
-	 * All Toolbox markers which precede lines with annotations that can potentially span
+	 * The marker which precedes lines with annotations that can potentially span
 	 * subranges of the complete morphological data source.
 	 */
-	public static final String PROP_SUB_REF_ANNOTATION_MARKERS = "subRefAnnotationMarkers";
+	public static final String PROP_SUB_REF_ANNOTATION_MARKER = "subRefAnnotationMarker";
 	
 	/**
 	 * The marker used to define unit refs.
@@ -328,7 +328,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"Wether detached delimiters (as in \"item - item\" or similar) should be attached to the previous or subsequent item, as a two-item array, where the first item signifies whether the delimiter should be attached (if true it will be attached), and the second item signifies whether the delimiter should be attached to the subsequent item (if true it will be attached to the subsequent item, making the latter a suffix).",
 				"true,true",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_SUB_REF_ANNOTATION_MARKERS, 
+		addProperty(new PepperModuleProperty<>(PROP_SUB_REF_ANNOTATION_MARKER, 
 				String.class,
 				"All Toolbox markers which precede lines with annotations that can potentially span subranges of the complete morphological data source, without the preceding backslashes, and as a comma-separated list.",
 				false));
@@ -456,8 +456,8 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 //		return (String) getProperty(PROP_REF_METADATA_MARKERS).getValue();
 //	}
 	
-	public String getSubRefAnnotationMarkers() {
-		return (String) getProperty(PROP_SUB_REF_ANNOTATION_MARKERS).getValue();
+	public String getSubRefAnnotationMarker() {
+		return (String) getProperty(PROP_SUB_REF_ANNOTATION_MARKER).getValue();
 	}
 	
 	public String getSubRefDefinitionMarker() {
