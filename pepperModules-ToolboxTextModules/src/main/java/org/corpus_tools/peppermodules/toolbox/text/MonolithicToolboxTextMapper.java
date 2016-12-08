@@ -389,10 +389,10 @@
 //			block.put(marker, valueList);
 //		}
 //		else {
-//			if (getProperties().getUnitRefAnnotationMarkers() != null && Arrays.asList(getProperties().getUnitRefAnnotationMarkers().split("\\s*,\\s*")).contains(marker)) {
+//			if (getProperties().getSubRefAnnotationMarkers() != null && Arrays.asList(getProperties().getSubRefAnnotationMarkers().split("\\s*,\\s*")).contains(marker)) {
 //				block.put(marker, valueList);
 //			}
-//			else if (getProperties().getUnitrefDefinitionMarker().equals(marker)) {
+//			else if (getProperties().getSubRefDefinitionMarker().equals(marker)) {
 //				block.put(marker, valueList);
 //			}
 //			else {
@@ -516,7 +516,7 @@
 //		StringBuilder lexDSBuilder = new StringBuilder();
 //
 //		// Init unit refs
-//		Map<String, int[]> definedUnitRefs = new HashMap<>();
+//		Map<String, int[]> definedSubRefs = new HashMap<>();
 //
 //		// Get text tokens for lex and morph
 //		List<String> lexicalTextTokens = null;
@@ -549,7 +549,7 @@
 //		// Init maps for annotation lines sorted by layer
 //		HashMap<String, List<String>> lexAnnotationLines = new HashMap<>();
 //		HashMap<String, List<String>> morphAnnotationLines = new HashMap<>();
-//		ListMultimap<String, List<String>> unitRefAnnotationLines = ArrayListMultimap.create();
+//		ListMultimap<String, List<String>> subRefAnnotationLines = ArrayListMultimap.create();
 //		HashMap<String, List<String>> refAnnotationLines = new HashMap<>();
 //		HashMap<String, List<String>> docMetaAnnotationLines = new HashMap<>();
 //		HashMap<String, List<String>> refMetaAnnotationLines = new HashMap<>();
@@ -567,13 +567,13 @@
 //				}
 //				continue;
 //			}
-//			else if (key.equals(unitRefDefMarker)) {
+//			else if (key.equals(subRefDefMarker)) {
 //				try {
 //					if (line.getValue().size() == 2) {// undefined definitor
-//						definedUnitRefs.put("", new int[] { Integer.valueOf(line.getValue().get(0)), Integer.valueOf(line.getValue().get(1)) });
+//						definedSubRefs.put("", new int[] { Integer.valueOf(line.getValue().get(0)), Integer.valueOf(line.getValue().get(1)) });
 //					}
 //					else {
-//						definedUnitRefs.put(line.getValue().get(0), new int[] { Integer.valueOf(line.getValue().get(1)), Integer.valueOf(line.getValue().get(2)) });
+//						definedSubRefs.put(line.getValue().get(0), new int[] { Integer.valueOf(line.getValue().get(1)), Integer.valueOf(line.getValue().get(2)) });
 //					}
 //					continue;
 //				}
@@ -593,16 +593,16 @@
 //			else if (refMetaAnnotationMarkers != null && refMetaAnnotationMarkers.contains(key)) {
 //				refMetaAnnotationLines.put(key, line.getValue());
 //			}
-//			else if (unitRefAnnotationsMarkers != null && unitRefAnnotationsMarkers.contains(key)) {
+//			else if (subRefAnnotationsMarkers != null && subRefAnnotationsMarkers.contains(key)) {
 //				/*
-//				 * It could be, however, that there are unitref-able lines which are annotations on the whole ref! I.e., when there is no unitref marker in the block, and the unitref-able line does not have unit ref markup. In this case,
+//				 * It could be, however, that there are subref-able lines which are annotations on the whole ref! I.e., when there is no subref marker in the block, and the subref-able line does not have unit ref markup. In this case,
 //				 * skip.
 //				 */
-//				if (!hasDefinedUnitRefs && !hasUnitRefMarkup(line.getValue(), morphologicalTextTokens.size(), lexicalTextTokens.size())) {
+//				if (!hasDefinedSubRefs && !hasSubRefMarkup(line.getValue(), morphologicalTextTokens.size(), lexicalTextTokens.size())) {
 //					break;
 //				}
 //				else {
-//					unitRefAnnotationLines.put(key, line.getValue());
+//					subRefAnnotationLines.put(key, line.getValue());
 //				}
 //			}
 //			else { // "True" reference annotations, always on the whole reference
@@ -768,8 +768,8 @@
 //
 //		// Build the general ref span and add ref-level annotations
 //		SSpan ref = createRefSpan(refLine, spanMorphTokens, spanLexTokens, refAnnotationLines, refMetaAnnotationLines);
-//		for (Entry<String, List<String>> unitRefLine : unitRefAnnotationLines.entries()) {
-//			createUnitRefSpan(getGraph().getSortedTokenByText(spanMorphTokens), getGraph().getSortedTokenByText(spanLexTokens), unitRefLine, definedUnitRefs);
+//		for (Entry<String, List<String>> subRefLine : subRefAnnotationLines.entries()) {
+//			createSubRefSpan(getGraph().getSortedTokenByText(spanMorphTokens), getGraph().getSortedTokenByText(spanLexTokens), subRefLine, definedSubRefs);
 //		}
 //
 //		createDocumentMetaAnnotations(docMetaAnnotationLines);
@@ -780,13 +780,13 @@
 //	 * TODO: Description
 //	 *
 //	 * @param sortedMorphTokens
-//	 * @param unitRefLine
+//	 * @param subRefLine
 //	 * @return
 //	 */
-//	private SSpan createUnitRefSpan(List<SToken> sortedMorphTokens, List<SToken> sortedLexTokens, Entry<String, List<String>> unitRefLine, Map<String, int[]> definedUnitRefs) {
+//	private SSpan createSubRefSpan(List<SToken> sortedMorphTokens, List<SToken> sortedLexTokens, Entry<String, List<String>> subRefLine, Map<String, int[]> definedSubRefs) {
 //		List<SToken> targetedTokens = new ArrayList<>();
-//		List<String> lineContents = unitRefLine.getValue();
-//		if (hasUnitRefMarkup(lineContents, sortedMorphTokens.size(), sortedLexTokens.size())) { // If line has direct unitref markup
+//		List<String> lineContents = subRefLine.getValue();
+//		if (hasSubRefMarkup(lineContents, sortedMorphTokens.size(), sortedLexTokens.size())) { // If line has direct subref markup
 //			if (lineContents.get(0).equals(getProperties().getMorphMarker())) {
 //				for (int i = Integer.parseInt(lineContents.get(1)); i <= (Integer.parseInt(lineContents.get(2))); i++) {
 //					targetedTokens.add(sortedMorphTokens.get(i));
@@ -799,16 +799,16 @@
 //			}
 //			lineContents = lineContents.subList(3, lineContents.size());
 //		}
-//		else if (definedUnitRefs.size() == 1) { // There is exactly one unit ref definition without a definitor
-//			for (int[] value : definedUnitRefs.values()) {
+//		else if (definedSubRefs.size() == 1) { // There is exactly one unit ref definition without a definitor
+//			for (int[] value : definedSubRefs.values()) {
 //				for (int i = value[0]; i < value[1] + 1; i++) {
 //					targetedTokens.add(sortedMorphTokens.get(i));
 //				}
 //			}
 //		}
-//		else {// if (definedUnitRefs.get(lineContents.get(0)) != null && (getMorphologicalTextualDS().getText().startsWith(lineContents.get(0)) || getLexicalTextualDS().getText().startsWith(lineContents.get(0)))) { // Line has defined unit
+//		else {// if (definedSubRefs.get(lineContents.get(0)) != null && (getMorphologicalTextualDS().getText().startsWith(lineContents.get(0)) || getLexicalTextualDS().getText().startsWith(lineContents.get(0)))) { // Line has defined unit
 //				// ref
-//			int[] value = definedUnitRefs.get(lineContents.get(0));
+//			int[] value = definedSubRefs.get(lineContents.get(0));
 //			for (int i = value[0]; i < value[1] + 1; i++) {
 //				targetedTokens.add(sortedMorphTokens.get(i));
 //			}
@@ -820,7 +820,7 @@
 //			sb.append(s);
 //			sb.append(" ");
 //		}
-//		String key = unitRefLine.getKey();
+//		String key = subRefLine.getKey();
 //		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, key, sb.toString().trim());
 //		span.setName(sb.toString().trim());
 //
@@ -916,7 +916,7 @@
 //	 * @param numberOfMorphemes
 //	 * @return whether the first three objects in the first argument adhere to unit ref markup format
 //	 */
-//	private boolean hasUnitRefMarkup(List<String> lineContents, int numberOfMorphemes, int numberOfLexemes) {
+//	private boolean hasSubRefMarkup(List<String> lineContents, int numberOfMorphemes, int numberOfLexemes) {
 //		String marker = lineContents.get(0);
 //		if (!(marker.equals(getProperties().getLexMarker()) || marker.equals(getProperties().getMorphMarker()))) {
 //			return false;
@@ -1133,8 +1133,8 @@
 //		return (getProperties().getLexAnnotationMarkers() != null);
 //	}
 //
-//	private boolean hasUnitRefAnnotationProperty() {
-//		return (getProperties().getUnitRefAnnotationMarkers() != null);
+//	private boolean hasSubRefAnnotationProperty() {
+//		return (getProperties().getSubRefAnnotationMarkers() != null);
 //	}
 //
 //}

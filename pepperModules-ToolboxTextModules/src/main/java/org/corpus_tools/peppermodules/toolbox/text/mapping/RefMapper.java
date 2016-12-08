@@ -109,17 +109,17 @@ public class RefMapper extends AbstractBlockMapper {
 	public void map() {
 
 		/*
-		 * \ref Unitref sentence schema 3 (defined global) to mb
-		 * \met Sentence with two global unitrefs (morph-level) m26-m28 and
+		 * \ref SubRef sentence schema 3 (defined global) to mb
+		 * \met Sentence with two global subrefs (morph-level) m26-m28 and
 		 * m30-m31 on \\ur
-		 * \\unitref 1 1 3
-		 * \\unitref 2 5 6
-		 * \tx Unitref with some random text just like that
+		 * \\subref 1 1 3
+		 * \\subref 2 5 6
+		 * \tx SubRef with some random text just like that
 		 * \ta t29 t30 t31 t32 t33 t34 t35 t36
 		 * \mb m28 m29 m30 m31 m32 m33 m34 m35
 		 * \ge M28 M29 M30 M31 M32 M33 M34 M35
-		 * \\ur 1 Unitref m30-m32
-		 * \\ur 2 Unitref m33-m34
+		 * \\ur 1 SubRef m30-m32
+		 * \\ur 2 SubRef m33-m34
 		 * \ll uref three-mb
 		 */
 
@@ -127,22 +127,22 @@ public class RefMapper extends AbstractBlockMapper {
 		String refMarker = properties.getRefMarker();
 		String lexMarker = properties.getLexMarker();
 		String morphMarker = properties.getMorphMarker();
-		String unitrefMarker = properties.getUnitrefDefinitionMarker();
+		String subrefMarker = properties.getSubRefDefinitionMarker();
 
 		// Marker groups
 		String mks;
 		List<String> lexAnnoMarkers = (mks = properties.getLexAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
 		List<String> morphAnnoMarkers = (mks = properties.getMorphAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
-		List<String> unitrefAnnoMarkers = (mks = properties.getUnitrefAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
+		List<String> subrefAnnoMarkers = (mks = properties.getSubRefAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
 		List<String> refAnnoMarkers = new ArrayList<>();
 		for (String key : markerContentMap.keySet()) {
-			if (!key.equals(refMarker) && !key.equals(lexMarker) && !key.equals(morphMarker) && !key.equals(unitrefMarker) && !lexAnnoMarkers.contains(key) && !morphAnnoMarkers.contains(key) && !unitrefAnnoMarkers.contains(key)) {
+			if (!key.equals(refMarker) && !key.equals(lexMarker) && !key.equals(morphMarker) && !key.equals(subrefMarker) && !lexAnnoMarkers.contains(key) && !morphAnnoMarkers.contains(key) && !subrefAnnoMarkers.contains(key)) {
 				refAnnoMarkers.add(key);
 			}
 		}
 
 		// Test if all markers have been caught in a group or as a single marker
-		new MarkerContentMapConsistencyChecker(new HashSet<>(markerContentMap.keySet()), refMarker, lexMarker, morphMarker, unitrefMarker, lexAnnoMarkers, morphAnnoMarkers, unitrefAnnoMarkers, refAnnoMarkers, markerContentMap.get(refMarker)).run();
+		new MarkerContentMapConsistencyChecker(new HashSet<>(markerContentMap.keySet()), refMarker, lexMarker, morphMarker, subrefMarker, lexAnnoMarkers, morphAnnoMarkers, subrefAnnoMarkers, refAnnoMarkers, markerContentMap.get(refMarker)).run();
 
 		// Single lines
 		String ref = getSingleLine(refMarker);
@@ -279,6 +279,7 @@ public class RefMapper extends AbstractBlockMapper {
 					catch (Exception e) {
 						log.warn("The number of lexical units is larger than the number of morpheme groups relating to lexical units in document \"" + getDocName() + "\", at reference \"" + refData.getPrimaryData() + "\"!\nTherefore, the lexical token cannot be tied to the document's token timeline correctly!\nPlease review the following information and fix the issue before trying to convert this corpus!\nReference data:\n" + refData.toString() + "\n\nLexical data:\n" + lexData.toString() + "\n\nMorphological data:\n" + morphData.toString() +"\n\nMorpheme groups:\n" + morphData.getMorphWords().toString(), e);
 						System.out.println("The number of lexical units is larger than the number of morpheme groups relating to lexical units in document \"" + getDocName() + "\", at reference \"" + refData.getPrimaryData() + "\"!\nTherefore, the lexical token cannot be tied to the documents token timeline correctly!\nPlease review the following information and fix the issue before trying to convert this corpus!\nReference data:\n" + refData.toString() + "\n\nLexical data:\n" + lexData.toString() + "\n\nMorphological data:\n" + morphData.toString() +"\n\nMorpheme groups:\n" + morphData.getMorphWords().toString() + "\n" + e);
+						refData.addToAnnotation(ERROR_LAYER_NAME, "interl11n");
 					}
 					layers.get(lexData.getMarker()).addNode(token);
 				}

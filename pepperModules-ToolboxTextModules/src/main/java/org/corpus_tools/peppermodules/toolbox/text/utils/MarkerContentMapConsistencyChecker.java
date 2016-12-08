@@ -39,10 +39,10 @@ public class MarkerContentMapConsistencyChecker {
 	String refMarker;
 	String lexMarker;
 	String morphMarker;
-	String unitrefMarker;
+	String subrefMarker;
 	List<String> lexAnnoMarkers;
 	List<String> morphAnnoMarkers;
-	List<String> unitrefAnnoMarkers;
+	List<String> subrefAnnoMarkers;
 	List<String> refAnnoMarkers;
 	private String ref;
 	
@@ -51,21 +51,21 @@ public class MarkerContentMapConsistencyChecker {
 	 * @param refMarker
 	 * @param lexMarker
 	 * @param morphMarker
-	 * @param unitrefMarker
+	 * @param subrefMarker
 	 * @param lexAnnoMarkers
 	 * @param morphAnnoMarkers
-	 * @param unitrefAnnoMarkers
+	 * @param subrefAnnoMarkers
 	 * @param refAnnoMarkers
 	 */
-	public MarkerContentMapConsistencyChecker(Set<String> keySet, String refMarker, String lexMarker, String morphMarker, String unitrefMarker, List<String> lexAnnoMarkers, List<String> morphAnnoMarkers, List<String> unitrefAnnoMarkers, List<String> refAnnoMarkers, List<String> refList) {
+	public MarkerContentMapConsistencyChecker(Set<String> keySet, String refMarker, String lexMarker, String morphMarker, String subrefMarker, List<String> lexAnnoMarkers, List<String> morphAnnoMarkers, List<String> subrefAnnoMarkers, List<String> refAnnoMarkers, List<String> refList) {
 		this.set = keySet;
 		this.refMarker = refMarker;
 		this.lexMarker = lexMarker;
 		this.morphMarker = morphMarker;
-		this.unitrefMarker = unitrefMarker;
+		this.subrefMarker = subrefMarker;
 		this.lexAnnoMarkers = lexAnnoMarkers;
 		this.morphAnnoMarkers = morphAnnoMarkers;
-		this.unitrefAnnoMarkers = unitrefAnnoMarkers;
+		this.subrefAnnoMarkers = subrefAnnoMarkers;
 		this.refAnnoMarkers = refAnnoMarkers;
 		this.ref = refList.get(0);
 	}
@@ -74,14 +74,14 @@ public class MarkerContentMapConsistencyChecker {
 		set.remove(refMarker);
 		set.remove(lexMarker);
 		set.remove(morphMarker);
-		set.remove(unitrefMarker);
+		set.remove(subrefMarker);
 		for (String marker : lexAnnoMarkers) {
 			set.remove(marker);
 		}
 		for (String marker : morphAnnoMarkers) {
 			set.remove(marker);
 		}
-		for (String marker : unitrefAnnoMarkers) {
+		for (String marker : subrefAnnoMarkers) {
 			set.remove(marker);
 		}
 		for (String marker : refAnnoMarkers) {

@@ -137,22 +137,22 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 			String marker;
 			if (!existingMarkers.add(marker = l.split(" ", 2)[0])) {
 				/* 
-				 * Both the unitref marker and the lines that can contain annotations to
-				 * be applied to unitrefs can occur more than once in a block, hence
+				 * Both the subref marker and the lines that can contain annotations to
+				 * be applied to subrefs can occur more than once in a block, hence
 				 * test first if the marker under scrutiny belongs to either group before
 				 * attempting to re-work lines.
 				 */
-				boolean hasUnitrefAnnoMarkers = properties.getUnitrefAnnotationMarkers() != null;
-				String unitrefMarker = properties.getUnitrefDefinitionMarker();
+				boolean hasSubRefAnnoMarkers = properties.getSubRefAnnotationMarkers() != null;
+				String subrefMarker = properties.getSubRefDefinitionMarker();
 				/* 
-				 * If no unitref annotation markers have been defined, set the boolean 
-				 * depending on the unitref marker only, else use both the latter and
-				 * whether the marker is defined as a unitref annotation marker.
+				 * If no subref annotation markers have been defined, set the boolean 
+				 * depending on the subref marker only, else use both the latter and
+				 * whether the marker is defined as a subref annotation marker.
 				 */
-				boolean doProcessMarker = hasUnitrefAnnoMarkers ? 
-						(!marker.substring(1).equals(unitrefMarker) && 
-								!Arrays.asList(properties.getUnitrefAnnotationMarkers().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)).contains(marker.substring(1))) : 
-						(!marker.substring(1).equals(unitrefMarker)) ;
+				boolean doProcessMarker = hasSubRefAnnoMarkers ? 
+						(!marker.substring(1).equals(subrefMarker) && 
+								!Arrays.asList(properties.getSubRefAnnotationMarkers().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)).contains(marker.substring(1))) : 
+						(!marker.substring(1).equals(subrefMarker)) ;
 				if (doProcessMarker) {
 					if (properties.mergeDuplicateMarkers()) {
 						log.info("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nAttempting to concatenate all lines with the same marker in the next step.");

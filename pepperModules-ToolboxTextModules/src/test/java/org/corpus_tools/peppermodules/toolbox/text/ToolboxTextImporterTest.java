@@ -59,7 +59,7 @@ import org.junit.Test;
  */
 public class ToolboxTextImporterTest extends PepperImporterTest {
 
-	private static final String DOC_INFO_ANNO = "A sample \"standard\" corpus in Toolbox text format. It includes use cases for most phenomena the importer tests against, such as clitics and affixes, unitrefs, meta annotations, etc.";
+	private static final String DOC_INFO_ANNO = "A sample \"standard\" corpus in Toolbox text format. It includes use cases for most phenomena the importer tests against, such as clitics and affixes, subrefs, meta annotations, etc.";
 	private static final String DOC_NO = "Document no. ";
 	private static final String TOOLBOX = "toolbox";
 
@@ -140,7 +140,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * 
 	 * Tests against a "standard" example, which covers most phenomena 
 	 * the importer tests against, such as clitics and affixes, 
-	 * unitrefs, meta annotations, etc.
+	 * subrefs, meta annotations, etc.
 	 */
 	@Test
 	public void testParseStandardDocument() {
@@ -196,7 +196,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			for (STextualDS ds : graph.getTextualDSs()) {
 				switch (docNumber) {
 				case "1":
-					assertThat(ds.getText(), is(anyOf(is("Word1 -Tuple Tuple- Word2 Triple-= Word3 FreedashTuple Word4 FreecliticTuple Unitref sentence one Unitref sentence one Unitref sentence two with one-to-four ref Unitref sentence two with one-to-four ref Unitref with some random text just like that Unitref with some random text just like that Unitref with some random text just like that"), 
+					assertThat(ds.getText(), is(anyOf(is("Word1 -Tuple Tuple- Word2 Triple-= Word3 FreedashTuple Word4 FreecliticTuple SubRef sentence one SubRef sentence one SubRef sentence two with one-to-four ref SubRef sentence two with one-to-four ref SubRef with some random text just like that SubRef with some random text just like that SubRef with some random text just like that"), 
 							is("m1m2-m3m4-m5m6m7-m8=m9m10m11-m12m13m14=m15m16m17m18m19m20m21m22m23m24m25m26m27m28m29m30m31m32m33m34m35m36m37m38m39m40m41m42m43"))));
 					break;
 
