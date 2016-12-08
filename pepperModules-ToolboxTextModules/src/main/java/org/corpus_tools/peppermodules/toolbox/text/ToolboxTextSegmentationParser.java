@@ -82,6 +82,10 @@ public class ToolboxTextSegmentationParser {
 				long currentOffset = stream.getCount() - 1;
 				if (currentByte == '\\') {
 					while ((currentByte = stream.read()) > -1) {
+						/*
+						 *  If the stream hits a whitespace, it must be the end
+						 *  of the marker, so break out of this iteration.
+						 */
 						if (Character.isWhitespace((char) currentByte)) {
 							break;
 						}

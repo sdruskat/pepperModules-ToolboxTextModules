@@ -525,6 +525,25 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		}
 		fail("Needs to be implemented further!");
 	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
+	 */
+	@Test
+	public void testMissionaries() {
+		setTestFile("missionaries.txt");
+		setProperties("missionaries.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		for (SDocument doc : getNonEmptyCorpusGraph().getDocuments()) {
+			SDocumentGraph graph = doc.getDocumentGraph();
+			assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		}
+		fail("Needs to be implemented further!");
+	}
 
 	/**
 	 * Test method for
