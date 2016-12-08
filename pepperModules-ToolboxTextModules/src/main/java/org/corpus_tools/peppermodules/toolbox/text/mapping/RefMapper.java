@@ -68,8 +68,8 @@ public class RefMapper extends AbstractBlockMapper {
 
 	private static final Logger log = LoggerFactory.getLogger(RefMapper.class);
 	private static final String ERROR_LAYER_NAME = "err";
-	private static final String ERROR_TOO_MANY = "+";
-	private static final String ERROR_TOO_FEW = "-";
+	private static final String ERROR_TOO_MANY = "-p";
+	private static final String ERROR_TOO_FEW = "-m";
 	private final boolean docHasMorphology;
 	private MappingIndices indices;
 	private final STextualDS lexDS;
@@ -184,7 +184,7 @@ public class RefMapper extends AbstractBlockMapper {
 		 * so let the mapping commence!
 		 */
 		
-		List<SToken> lexTokens = mapTokens(morph != null, lexData, morphData);
+		List<SToken> lexTokens = mapTokens(morph != null, lexData, morphData, refData);
 		mapRef(refData, lexTokens);
 
 		System.err.println("----- " + refData.toString());
@@ -223,14 +223,16 @@ public class RefMapper extends AbstractBlockMapper {
 	 * @param hasMorphology
 	 * @param lexData
 	 * @param morphData
+	 * @param refData 
 	 * @return 
 	 */
-	private List<SToken> mapTokens(boolean hasMorphology, LayerData lexData, MorphLayerData morphData) {
+	private List<SToken> mapTokens(boolean hasMorphology, LayerData lexData, MorphLayerData morphData, LayerData refData) {
 		List<SToken> lexTokens = new ArrayList<>();
 		List<SToken> morphTokens = new ArrayList<>();
 		// Build tokens, text and timeline
 		if (docHasMorphology) {
 			if (hasMorphology) {
+//				boolean isLexInfoMappable = true;
 				STimeline timeline = graph.getTimeline();
 				int morphTimelineEnd = timeline.getEnd() == null ? 0 : timeline.getEnd();
 				int lexTimelineEnd = morphTimelineEnd;
@@ -251,6 +253,8 @@ public class RefMapper extends AbstractBlockMapper {
 				 * Use int-based iteration because this helps interacting
 				 * with the list of morph words.
 				 */
+				// First, re-build morph words, because the original ones might have changed in the meantimme
+//				MorphLayerData recompiledMorphData = morphData.compileMorphWords(properties.getAffixDelim(), properties.getCliticDelim(), properties.attachDelimiter(), properties.attachDelimiterToNext());
 				for (int i = 0; i < lexData.getPrimaryData().size(); i++) {
 					// Create lexical token
 					String lexUnit = lexData.getPrimaryData().get(i);
@@ -263,19 +267,20 @@ public class RefMapper extends AbstractBlockMapper {
 					 * the current lexUnit.
 					 */
 					try {
-						morphData.getMorphWords().get(i);
+						int timeSteps = morphData.getMorphWordMorphemesMap().get(morphData.getMorphWords().get(i)).size();
+						STimelineRelation timeLineRel = SaltFactory.createSTimelineRelation();
+						timeLineRel.setSource(token);
+						timeLineRel.setTarget(timeline);
+						timeLineRel.setStart(lexTimelineEnd);
+						timeLineRel.setEnd(lexTimelineEnd += timeSteps);
+						timeline.increasePointOfTime(timeSteps);
+						graph.addRelation(timeLineRel);
 					}
-					catch (IndexOutOfBoundsException e) {
-						log.warn("Concatenating morphemes for lexical items, there seems to be faulty information in document \"" + getDocName() + "\"! Cannot find morphological information for lexical unit \"" + lexUnit + "\" (contained in \'" + lexData.getPrimaryData() + "\'!\nThis document will not be mapped!\n    Further information:\n    Morphological data:\n        " + morphData.toString() + "\n    Concatenations:\n        " + morphData.getMorphWords().toString());
+					catch (Exception e) {
+						log.warn("The number of lexical units is larger than the number of morpheme groups relating to lexical units in document \"" + getDocName() + "\", at reference \"" + refData.getPrimaryData() + "\"!\nTherefore, the lexical token cannot be tied to the documents token timeline correctly!\nPlease review the following information and fix the issue before trying to convert this corpus!\nReference data:\n" + refData.toString() + "\n\nLexical data:\n" + lexData.toString() + "\n\nMorphological data:\n" + morphData.toString(), e);
+						System.out.println("The number of lexical units is larger than the number of morpheme groups relating to lexical units in document \"" + getDocName() + "\", at reference \"" + refData.getPrimaryData() + "\"!\nTherefore, the lexical token cannot be tied to the documents token timeline correctly!\nPlease review the following information and fix the issue before trying to convert this corpus!\nReference data:\n" + refData.toString() + "\n\nLexical data:\n" + lexData.toString() + "\n\nMorphological data:\n" + morphData.toString() + "\n" + e);
+//						isLexInfoMappable = false;
 					}
-					int timeSteps = morphData.getMorphWordMorphemesMap().get(morphData.getMorphWords().get(i)).size();
-					STimelineRelation timeLineRel = SaltFactory.createSTimelineRelation();
-					timeLineRel.setSource(token);
-					timeLineRel.setTarget(timeline);
-					timeLineRel.setStart(lexTimelineEnd);
-					timeLineRel.setEnd(lexTimelineEnd += timeSteps);
-					timeline.increasePointOfTime(timeSteps);
-					graph.addRelation(timeLineRel);
 					layers.get(lexData.getMarker()).addNode(token);
 				}
 				addAnnotations(lexData, lexTokens);
@@ -331,7 +336,21 @@ public class RefMapper extends AbstractBlockMapper {
 					throw new PepperModuleException("Cannot add an annotation to an object that is not of type " + SNode.class.getSimpleName() + " (here: " + node.getClass().getName() + ")!");
 				}
 				else {
-					((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, annotation.getKey(), annotation.getValue().get(i));
+					if (annotation.getKey().equals(ERROR_LAYER_NAME) || annotation.getKey().endsWith(ERROR_TOO_FEW) || annotation.getKey().endsWith(ERROR_TOO_MANY)) {
+						StringBuilder sb = new StringBuilder();
+						for (int j = 0; j < annotation.getValue().size(); j++) {
+							if (j != annotation.getValue().size() - 1) {
+								sb.append(annotation.getValue().get(j) + ", ");
+							}
+							else {
+								sb.append(annotation.getValue().get(j));
+							}
+						}
+						((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, annotation.getKey(), sb.toString().trim());
+					}
+					else {
+						((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, annotation.getKey(), annotation.getValue().get(i));
+					}
 				}
 			}
 		}
@@ -442,7 +461,7 @@ public class RefMapper extends AbstractBlockMapper {
 			}
 			if (properties.fixInterl11n()) {
 				// Remove excess data
-				logMessage += "\nRemoving excess morphological units!";
+				logMessage += "\nRemoving excess morphological units: " + morphs.subList(morphs.size() - excessMorphemesSum, morphs.size()) + "!";
 				morphData.setPrimaryData(morphs.subList(0, morphs.size() - excessMorphemesSum));
 				// Remove excess data in annotations if possible
 				ArrayListMultimap<String, List<String>> morphAnnosCopy = ArrayListMultimap.create(morphData.getAnnotations());
