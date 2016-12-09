@@ -191,30 +191,6 @@ public class MorphLayerData extends LayerData {
 		}
 	}
 
-//	/**
-//	 * TODO: Description
-//	 *
-//	 * @param morphWordMorphemesMap
-//	 * @param m1
-//	 * @param m2
-//	 * @param morphWord
-//	 */
-//	private void mapMorphWordToMorphemes(String m1, String m2, String morphWord) {
-//		ArrayList<String> wordMorphemes;
-//		if ((wordMorphemes = morphWordMorphemesMap.get(m1)) != null) {
-//			wordMorphemes.add(m2);
-//		}
-//		else if ((wordMorphemes = morphWordMorphemesMap.get(m2)) != null) {
-//			wordMorphemes.add(m1);
-//		}
-//		else {
-//			wordMorphemes = new ArrayList<>();
-//			wordMorphemes.add(m1);
-//			wordMorphemes.add(m2);
-//		}
-//		morphWordMorphemesMap.put(morphWord, wordMorphemes);
-//	}
-	
 	/**
 	 * @return the morphWords
 	 */

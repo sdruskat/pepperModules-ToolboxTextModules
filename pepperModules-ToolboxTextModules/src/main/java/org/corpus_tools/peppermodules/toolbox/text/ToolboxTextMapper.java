@@ -97,15 +97,17 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		getLayer(getProperties().getRefMarker());
 		
 		// Create a timeline to linearize lexical and morphological tokens
-		if (!eDM && hasMorphology) {
+//		if (!eDM && hasMorphology) {
 			graph.createTimeline();
-		}
+//		}
 		
 		// Create primary data sources
 		final STextualDS lexDS = graph.createTextualDS("");
+		lexDS.setName(getProperties().getLexMarker());
 		STextualDS morphDS = null;
 		if (hasMorphology) {
 			morphDS = graph.createTextualDS("");
+			morphDS.setName(getProperties().getMorphMarker());
 		}
  
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r"); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {

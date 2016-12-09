@@ -276,7 +276,7 @@ public class RefMapper extends AbstractBlockMapper {
 				int morphTimelineEnd = timeline.getEnd() == null ? 0 : timeline.getEnd();
 				int lexTimelineEnd = morphTimelineEnd;
 				for (String morpheme : morphData.getPrimaryData()) {
-					// Create morphological token
+					// Create morphological token;
 					morphDS.setText(morphDS.getText() + morpheme);
 					SToken token = graph.createToken(morphDS, morphDS.getEnd() - morpheme.length(), morphDS.getEnd());
 					morphTokens.add(token);
@@ -340,13 +340,22 @@ public class RefMapper extends AbstractBlockMapper {
 				addAnnotations(lexData, lexTokens);
 			}
 		}
-		else {
+		else {				
+			STimeline timeline = graph.getTimeline();
+			int timelineEnd = timeline.getEnd() == null ? 0 : timeline.getEnd();
 			for (String lexUnit : lexData.getPrimaryData()) {
 				// Create lexical token
 				lexDS.setText(lexDS.getText().isEmpty() ? lexUnit : lexDS.getText() + " " + lexUnit);
 				SToken token = graph.createToken(lexDS, lexDS.getEnd() - lexUnit.length(), lexDS.getEnd());
 				lexTokens.add(token);
 				layers.get(lexData.getMarker()).addNode(token);
+				STimelineRelation timeLineRel = SaltFactory.createSTimelineRelation();
+				timeLineRel.setSource(token);
+				timeLineRel.setTarget(timeline);
+				timeLineRel.setStart(timelineEnd);
+				timeLineRel.setEnd(timelineEnd += 1);
+				timeline.increasePointOfTime(1);
+				graph.addRelation(timeLineRel);
 			}
 			addAnnotations(lexData, lexTokens);
 		}
