@@ -179,12 +179,12 @@ public class RefMapper extends AbstractBlockMapper {
 		List<SToken> morphTokens = tokens.getRight();
 		mapRef(refData, lexTokens);
 		
-		System.err.println("----- " + refData.toString());
-		System.err.println(lexData.toString());
-		if (refHasMorphology) {
-			System.err.println(morphData.toString());
-		}
-		System.err.println("\n\n\n\n\n");
+//		System.err.println("----- " + refData.toString());
+//		System.err.println(lexData.toString());
+//		if (refHasMorphology) {
+//			System.err.println(morphData.toString());
+//		}
+//		System.err.println("\n\n\n\n\n");
 		
 		this.refData = refData;
 		this.lexTokens = lexTokens;

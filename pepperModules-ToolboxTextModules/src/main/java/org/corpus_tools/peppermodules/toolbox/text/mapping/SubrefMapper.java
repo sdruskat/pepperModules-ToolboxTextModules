@@ -107,9 +107,9 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 * TODO: Description
 	 */
 	public void map() {
-		Set<String[]> definedSubrefs = new HashSet<>();
+		Set<String> definedSubrefs = new HashSet<>();
 		for (String subrefLine : markerContentMap.get(subRefDefinitionMarker)) {
-			definedSubrefs.add(subrefLine.split("\\s+"));
+			definedSubrefs.add(subrefLine);
 		}
 		Map<String, String> subrefAnnoLines = new HashMap<>();
 		for (String subrefAnnoMarker : subRefAnnotationMarkers) {
@@ -137,7 +137,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 					break;
 
 				case UNDEFINED_GLOBAL:
-					mapUndefinedGlobal(subrefAnnoLine, marker);
+					mapUndefinedGlobal(definedSubrefs, subrefAnnoLine, marker);
 					break;
 
 				case UNDEFINED_GLOBAL_TARGETED:
@@ -186,6 +186,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		}
 		catch (NumberFormatException e) {
 			log.warn("The subref annotation \"" + subrefAnnoLine + "\" is not in the correct format ({int} {int} {annotation})! Ignoring it.");
+			return;
 		}
 		SSpan subref = null;
 		if (refHasMorphology) {
@@ -203,9 +204,9 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		if (subref != null) {
 			subref.createAnnotation("toolbox", marker, split[2]); // FIXME!
 		}
-		System.out.println(refData.toString());
+		System.err.println("\n\n\n" + refData.toString());
 		for (SAnnotation anno : subref.getAnnotations()) {
-			System.out.println("ANNO: " + anno.getNamespace() + " :: " + anno.getName() + " : " + anno.getValue_STEXT());
+			System.err.println("ANNO: " + anno.getNamespace() + " :: " + anno.getName() + " : " + anno.getValue_STEXT());
 		}
 	}
 
@@ -228,6 +229,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		}
 		catch (NumberFormatException e) {
 			log.warn("The subref annotation \"" + subrefAnnoLine + "\" is not in the correct format ({marker} {int} {int} {annotation})! Ignoring it.");
+			return;
 		}
 		SSpan subref = null;
 		if (split[0].equals(lexMarker)) {
@@ -242,25 +244,62 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		}
 		else {
 			log.warn("The targeted line must be marked with either the lexical marker \"" + lexMarker + "\" or the morphological marker \"" + morphMarker + "\"!\nInstead, the target marker is given as \"" + split[0] + "\"!");
-			System.err.println("\nERROR!\nThe targeted line must be marked with either the lexical marker \"" + lexMarker + "\" or the morphological marker \"" + morphMarker + "\"!\nInstead, the target marker is given as \"" + split[0] + "\"!\n");
+			return;
 		}
 		if (subref != null) {
 			subref.createAnnotation("toolbox", marker, split[3]);
 		}
-		System.out.println(refData.toString());
+		System.err.println("\n\n\n" + refData.toString());
 		for (SAnnotation anno : subref.getAnnotations()) {
-			System.out.println("ANNO: " + anno.getNamespace() + " :: " + anno.getName() + " : " + anno.getValue_STEXT());
+			System.err.println("ANNO: " + anno.getNamespace() + " :: " + anno.getName() + " : " + anno.getValue_STEXT());
 		}
 	}
 
 	/**
 	 * TODO: Description
+	 * @param definedSubrefs 
 	 *
 	 * @param subrefAnnoLine
 	 * @param marker
 	 */
-	private void mapUndefinedGlobal(String subrefAnnoLine, String marker) {
-		System.out.println("UNDEFINED_GLOBAL SUBREF: " + marker + " : " + subrefAnnoLine + "\n" + refData.toString() + "\n\n");
+	private void mapUndefinedGlobal(Set<String> definedSubrefs, String subrefAnnoLine, String marker) {
+		if (definedSubrefs.size() > 1) {
+			log.warn("Subref type \"" + SUBREF_TYPE.UNDEFINED_GLOBAL + "\" only allows for exactly one subref definition with marker \"" + subRefDefinitionMarker + "\"!\nHowever, " + definedSubrefs.size() + " were found. Ignoring subrefs!");
+		}
+		String definition = definedSubrefs.iterator().next();
+		String[] split = definition.split("\\s+", 3);
+		int from = -1, to = -1;
+		try {
+			from = Integer.parseInt(split[0]);
+			/*
+			 * 1 must be added to *to* because List#subList(from,to)
+			 * works with **excluive** *to*!
+			 */
+			to = Integer.parseInt(split[1]) + 1;
+		}
+		catch (NumberFormatException e) {
+			log.warn("The subref definition \"\\" + subRefDefinitionMarker + " "+ definition + "\" is not in the correct format ({marker} {int} {int})! Ignoring it.");
+		}
+		SSpan subref = null;
+		if (refHasMorphology) {
+			// Map to mb
+			List<SToken> orderedMorphTokens = graph.getSortedTokenByText(morphTokens);
+			subref = graph.createSpan(orderedMorphTokens.subList(from, to));
+			graph.getLayerByName(morphMarker).get(0).addNode(subref);
+		}
+		else {
+			// map to tx
+			List<SToken> orderedLexTokens = graph.getSortedTokenByText(lexTokens);
+			subref = graph.createSpan(orderedLexTokens.subList(from, to));
+			graph.getLayerByName(refMarker).get(0).addNode(subref);
+		}
+		if (subref != null) {
+			subref.createAnnotation("toolbox", marker, subrefAnnoLine.trim());
+		}
+		System.err.println("\n\n\n" + refData.toString());
+		for (SAnnotation anno : subref.getAnnotations()) {
+			System.err.println("ANNO: " + anno.getNamespace() + " :: " + anno.getName() + " : " + anno.getValue_STEXT());
+		}
 	}
 
 	/**
@@ -310,7 +349,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 * @param split
 	 * @return
 	 */
-	private SUBREF_TYPE determineType(Set<String[]> definedSubrefs, String[] split) {
+	private SUBREF_TYPE determineType(Set<String> definedSubrefs, String[] split) {
 		if (definedSubrefs.isEmpty()) {
 			// Can be SIMPLE, SIMPLE_TARGETED
 			if (split[0].equals(lexMarker) || split[0].equals(morphMarker)) {
@@ -327,7 +366,8 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			 * with, 2, 3, 4, or more arguments
 			 */
 			int numberOfArguments = -1;
-			for (String[] definedSubRef : definedSubrefs) {
+			for (String definedSubRefString : definedSubrefs) {
+				String[] definedSubRef = definedSubRefString.split("\\s+");
 				if (numberOfArguments == -1) {
 					numberOfArguments = definedSubRef.length;
 				}
@@ -344,7 +384,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 					return SUBREF_TYPE.UNDEFINED_GLOBAL;
 
 				case 3:
-					String firstDefinedSubref = definedSubrefs.iterator().next()[0];
+					String firstDefinedSubref = definedSubrefs.iterator().next().split("\\s+", 2)[0];
 					if (firstDefinedSubref.equals(lexMarker) || firstDefinedSubref.equals(morphMarker)) {
 						return SUBREF_TYPE.UNDEFINED_GLOBAL_TARGETED;
 					}

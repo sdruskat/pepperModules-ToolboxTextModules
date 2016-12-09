@@ -19,15 +19,15 @@
 \met SIMPLE_TARGETED to tx
 \tx L1 L2 L3
 \mb m19 m20 m21
-\sr tx 1 2 subref to lexicals L2 and L3 in a span
+\sr tx 1 2 SIMPLE_TARGETED L2-L3
 
 \ref subref sentence schema 2 (undefined global) with existing mb line
 \met UNDEFINED_GLOBAL to mb
 \subref 1 4
 \tx subref sentence two with one-to-four ref
 \mb m22 m23 m24 m25 m26 m27
-\sr subref to morphemes m23-m26 in a span
-\sr2 2nd subref to morphemes m23-m26 in a span
+\sr UNDEFINED_GLOBAL m23-m26
+\sr2 UNDEFINED_GLOBAL m23-m26
 
 \ref subref sentence schema 2 (undefined global TARGETED) with existing mb line
 \met UNDEFINED_GLOBAL_TARGETED to mb
@@ -40,9 +40,9 @@
 \ref subref sentence schema 2 (undefined global) without mb line
 \met UNDEFINED_GLOBAL to tx (no mb!)
 \subref 1 4
-\tx subref sentence two with one-to-four ref
-\sr subref to lexicals "sentence"-"one-to-four" in a span
-\sr2 2nd subref to lexicals "sentence"-"one-to-four" in a span
+\tx L1 L2 L3 L4 L5 L6
+\sr UNDEFINED_GLOBAL L2-L5
+\sr2 UNDEFINED_GLOBAL L2-L5
 
 \ref subref sentence schema 3 (defined global) to mb
 \met DEFINED_GLOBAL to mb
