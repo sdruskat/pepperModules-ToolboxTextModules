@@ -154,7 +154,6 @@ public class RefMapper extends AbstractBlockMapper {
 		if (docHasMorphology && morph != null) {
 			morphData = new MorphLayerData(markerContentMap, morphMarker, morph, morphAnnoMarkers, true, missingAnnoString, fixErrors, getDocName(), ref).compile();
 			morphData.compileMorphWords(properties.getAffixDelim(), properties.getCliticDelim(), properties.attachDelimiter(), properties.attachDelimiterToNext());
-			System.err.println("MORPH WORDS " + morphData.getMorphWords().size() + ":" + morphData.getMorphWords().toString() + "\nLEX WORDS: " + lexData.getPrimaryData().size());
 			morphData = checkLexMorphInterl11n(lexData, morphData, refData);
 		}
 		else {
@@ -294,33 +293,25 @@ public class RefMapper extends AbstractBlockMapper {
 				 * with the list of morph words.
 				 */
 				// First, re-build morph words, because the original ones might have changed in the meantimme
-//				MorphLayerData recompiledMorphData = morphData.compileMorphWords(properties.getAffixDelim(), properties.getCliticDelim(), properties.attachDelimiter(), properties.attachDelimiterToNext());
 				for (int i = 0; i < lexData.getPrimaryData().size(); i++) {
 					// Create lexical token
 					String lexUnit = lexData.getPrimaryData().get(i);
 					lexDS.setText(lexDS.getText().isEmpty() ? lexUnit : lexDS.getText() + " " + lexUnit);
 					SToken token = graph.createToken(lexDS, lexDS.getEnd() - lexUnit.length(), lexDS.getEnd());
 					lexTokens.add(token);
-					/* 
+					/*
 					 * timeSteps are calculated using the size of the list
 					 * of morphemes for the morph word at the same index as
 					 * the current lexUnit.
 					 */
-					try {
-						int timeSteps = morphData.getMorphWordMorphemesMap().get(morphData.getMorphWords().get(i)).size();
-						STimelineRelation timeLineRel = SaltFactory.createSTimelineRelation();
-						timeLineRel.setSource(token);
-						timeLineRel.setTarget(timeline);
-						timeLineRel.setStart(lexTimelineEnd);
-						timeLineRel.setEnd(lexTimelineEnd += timeSteps);
-						timeline.increasePointOfTime(timeSteps);
-						graph.addRelation(timeLineRel);
-					}
-					catch (Exception e) {
-						log.warn("The number of lexical units is larger than the number of morpheme groups relating to lexical units in document \"" + getDocName() + "\", at reference \"" + refData.getPrimaryData() + "\"!\nTherefore, the lexical token cannot be tied to the document's token timeline correctly!\nPlease review the following information and fix the issue before trying to convert this corpus!\nReference data:\n" + refData.toString() + "\n\nLexical data:\n" + lexData.toString() + "\n\nMorphological data:\n" + morphData.toString() +"\n\nMorpheme groups:\n" + morphData.getMorphWords().toString(), e);
-						System.out.println("The number of lexical units is larger than the number of morpheme groups relating to lexical units in document \"" + getDocName() + "\", at reference \"" + refData.getPrimaryData() + "\"!\nTherefore, the lexical token cannot be tied to the documents token timeline correctly!\nPlease review the following information and fix the issue before trying to convert this corpus!\nReference data:\n" + refData.toString() + "\n\nLexical data:\n" + lexData.toString() + "\n\nMorphological data:\n" + morphData.toString() +"\n\nMorpheme groups:\n" + morphData.getMorphWords().toString() + "\n" + e);
-						refData.addToAnnotation(ERROR_LAYER_NAME, "interl11n");
-					}
+					int timeSteps = morphData.getMorphemesInMorphWordList().get(i).length;
+					STimelineRelation timeLineRel = SaltFactory.createSTimelineRelation();
+					timeLineRel.setSource(token);
+					timeLineRel.setTarget(timeline);
+					timeLineRel.setStart(lexTimelineEnd);
+					timeLineRel.setEnd(lexTimelineEnd += timeSteps);
+					timeline.increasePointOfTime(timeSteps);
+					graph.addRelation(timeLineRel);
 					layers.get(lexData.getMarker()).addNode(token);
 				}
 				addAnnotations(lexData, lexTokens);
@@ -494,13 +485,10 @@ public class RefMapper extends AbstractBlockMapper {
 			logMessage += "\nThe number of annotations on these units may be too high as well!";
 			errors.put(properties.getMorphMarker().concat(ERROR_TOO_MANY), shallowMorphsCopy);
 			int excessMorphWordsSum = sumMorphWords - sumLex;
-			List<String> excessMorphWords = morphWords.subList(morphWords.size() - excessMorphWordsSum, morphWords.size());
 			int excessMorphemesSum = 0;
-			for (String morphWord : excessMorphWords) {
-				System.err.println("\n"+morphWord);
-				System.err.println("?" + morphData.getMorphWordMorphemesMap().get(morphWord).toString());
-				excessMorphemesSum += morphData.getMorphWordMorphemesMap().get(morphWord).size();
-				System.err.println(excessMorphemesSum+"\n");
+			ArrayList<String[]> morphWordsList = morphData.getMorphemesInMorphWordList();
+			for (int i = sumMorphWords - excessMorphWordsSum; i < sumMorphWords; i++) {
+				excessMorphemesSum += morphWordsList.get(i).length;
 			}
 			if (properties.fixInterl11n()) {
 				// Remove excess data
