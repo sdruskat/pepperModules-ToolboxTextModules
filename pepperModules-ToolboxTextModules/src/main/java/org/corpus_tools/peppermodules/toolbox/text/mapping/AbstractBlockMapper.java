@@ -32,7 +32,6 @@ import java.util.Set;
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
-import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.slf4j.Logger;
@@ -142,7 +141,7 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 				 * test first if the marker under scrutiny belongs to either group before
 				 * attempting to re-work lines.
 				 */
-				boolean hasSubRefAnnoMarkers = properties.getSubRefAnnotationMarker() != null;
+				boolean hasSubRefAnnoMarkers = properties.getSubRefAnnotationMarkers() != null;
 				String subrefMarker = properties.getSubRefDefinitionMarker();
 				/* 
 				 * If no subref annotation markers have been defined, set the boolean 
@@ -151,7 +150,7 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 				 */
 				boolean doProcessMarker = hasSubRefAnnoMarkers ? 
 						(!marker.substring(1).equals(subrefMarker) && 
-								!Arrays.asList(properties.getSubRefAnnotationMarker().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)).contains(marker.substring(1))) : 
+								!properties.getSubRefAnnotationMarkers().contains(marker.substring(1))) : 
 						(!marker.substring(1).equals(subrefMarker)) ;
 				if (doProcessMarker) {
 					if (properties.mergeDuplicateMarkers()) {

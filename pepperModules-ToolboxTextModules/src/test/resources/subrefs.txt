@@ -11,14 +11,15 @@
 \ref subref sentence schema 1 (line-level) to mb
 \met A sentence with a line-level subref
 \tx subref sentence one
-\mb m16 m17 m18
+\mb m16 m17 m18 -m19
 \sr mb 1 2 subref to morphemes m17 and m18 in a span
+\xt mb 2 3 subref to morphemes m18 and -m19 in a span
 
 \ref subref sentence schema 1 (line-level) to tx
 \met A sentence with a line-level subref
-\tx subref sentence one
+\tx L1 L2 L3
 \mb m19 m20 m21
-\sr tx 1 2 subref to lexicals t15 and t16 in a span
+\sr tx 1 2 subref to lexicals L2 and L3 in a span
 
 \ref subref sentence schema 2 (undefined global) with existing mb line
 \met Sentence with a single global subref (morph-level) from m23 to m26 (incl.) on \sr and \sr2

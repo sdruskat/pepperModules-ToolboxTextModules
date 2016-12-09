@@ -120,7 +120,7 @@ public class RefMapper extends AbstractBlockMapper {
 		String mks;
 		List<String> lexAnnoMarkers = (mks = properties.getLexAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
 		List<String> morphAnnoMarkers = (mks = properties.getMorphAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
-		List<String> subrefAnnoMarkers = (mks = properties.getSubRefAnnotationMarker()) != null ? Arrays.asList(mks.split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
+		List<String> subrefAnnoMarkers = (List<String>) (properties.getSubRefAnnotationMarkers() != null ? properties.getSubRefAnnotationMarkers() : new ArrayList<>());
 		List<String> refAnnoMarkers = new ArrayList<>();
 		for (String key : markerContentMap.keySet()) {
 			if (!key.equals(refMarker) && !key.equals(lexMarker) && !key.equals(morphMarker) && !key.equals(subrefMarker) && !lexAnnoMarkers.contains(key) && !morphAnnoMarkers.contains(key) && !subrefAnnoMarkers.contains(key)) {
@@ -173,7 +173,7 @@ public class RefMapper extends AbstractBlockMapper {
 		Pair<List<SToken>, List<SToken>> tokens = mapTokens(morph != null, lexData, morphData, refData);
 		List<SToken> lexTokens = tokens.getLeft();
 		List<SToken> morphTokens = tokens.getRight();
-		SSpan span = mapRef(refData, lexTokens);
+		mapRef(refData, lexTokens);
 		
 		mapSubrefs(refData, graph, lexTokens, morphTokens);
 
@@ -187,7 +187,7 @@ public class RefMapper extends AbstractBlockMapper {
 	}
 
 	/**
-	 * TODO: Description
+	 * Subrefs are described here: [MelaTAMP wiki, tagset page](https://wikis.hu-berlin.de/melatamp/Tagset).
 	 *
 	 * @param refData
 	 * @param graph
@@ -202,16 +202,31 @@ public class RefMapper extends AbstractBlockMapper {
 		for (String subrefLine : markerContentMap.get(properties.getSubRefDefinitionMarker())) {
 			definedSubrefs.add(subrefLine.split("\\s+"));
 		}
-		for (String subrefAnnoLine : markerContentMap.get(properties.getSubRefAnnotationMarker())) {
+		Map<String, String> subrefAnnoLines = new HashMap<>();
+		for (String subrefAnnoMarker : properties.getSubRefAnnotationMarkers()) {
+			if (markerContentMap.get(subrefAnnoMarker) != null) {
+				if (!markerContentMap.get(subrefAnnoMarker).isEmpty()) {
+					subrefAnnoLines.put(subrefAnnoMarker, markerContentMap.get(subrefAnnoMarker).get(0));
+				}
+			
+			}
+		}
+		for (Entry<String, String> subrefAnnoLineEntry : subrefAnnoLines.entrySet()) {
+			String marker = subrefAnnoLineEntry.getKey();
+			String subrefAnnoLine = subrefAnnoLineEntry.getValue();
 			String[] split = subrefAnnoLine.split("\\s+");
-			System.err.println("PLSIT " + Arrays.deepToString(split));
+			System.err.println("SPLIT " + Arrays.toString(split));
 			// Check if the first element is the name of a marker
 			if (split[0].equals(morphMarker) || split[0].equals(lexMarker)) {
 				// Subref is targeted at either morph or lex layer on line level
 				int from = -1, to = -1;
 				try {
 					from = Integer.parseInt(split[1]);
-					to = Integer.parseInt(split[2]);
+					/*
+					 * 1 must be added to *to* because List#subList(from,to)
+					 * works with **excluive** *to*!
+					 */
+					to = Integer.parseInt(split[2]) + 1;
 				}
 				catch (NumberFormatException e) {
 					log.warn("The subref annotation \"" + subrefAnnoLine + "\" is not in the correct format ({marker} {int} {int})! Ignoring it.");
@@ -220,14 +235,22 @@ public class RefMapper extends AbstractBlockMapper {
 				if (split[0].equals(lexMarker)) {
 					List<SToken> orderedLexTokens = graph.getSortedTokenByText(lexTokens);
 					subref = graph.createSpan(orderedLexTokens.subList(from, to));
-					graph.getLayerByName(properties.getRefMarker()).get(0).addNode(subref);
+//					graph.getLayerByName(properties.getRefMarker()).get(0).addNode(subref);
 				}
 				else if (split[0].equals(morphMarker)) {
-					List<SToken> orderedLexTokens = graph.getSortedTokenByText(morphTokens);
-					subref = graph.createSpan(orderedLexTokens.subList(from, to));
-					graph.getLayerByName(properties.getRefMarker()).get(0).addNode(subref);
+					List<SToken> orderedMorphTokens = graph.getSortedTokenByText(morphTokens);
+					subref = graph.createSpan(orderedMorphTokens.subList(from, to));
+//					graph.getLayerByName(properties.getMorphMarker()).get(0).addNode(subref);
 				}
-				subref.createAnnotation("toolbox", properties.getSubRefAnnotationMarker(), Arrays.toString(split));
+				else {
+//					FIXME WARN HERE
+				}
+				if (subref != null) {
+					subref.createAnnotation("toolbox", marker, Arrays.toString(split));
+				}
+				for (SAnnotation anno : subref.getAnnotations()) {
+					System.out.println(anno.getNamespace() + " :: " + anno.getName() + " : " + anno.getValue_STEXT());
+				}
 			}
 		}
 		

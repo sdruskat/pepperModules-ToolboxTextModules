@@ -18,6 +18,10 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.PepperModuleProperty;
 
@@ -137,7 +141,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * The marker which precedes lines with annotations that can potentially span
 	 * subranges of the complete morphological data source.
 	 */
-	public static final String PROP_SUB_REF_ANNOTATION_MARKER = "subRefAnnotationMarker";
+	public static final String PROP_SUB_REF_ANNOTATION_MARKERS = "subRefAnnotationMarkers";
 	
 	/**
 	 * The marker used to define unit refs.
@@ -328,7 +332,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"Wether detached delimiters (as in \"item - item\" or similar) should be attached to the previous or subsequent item, as a two-item array, where the first item signifies whether the delimiter should be attached (if true it will be attached), and the second item signifies whether the delimiter should be attached to the subsequent item (if true it will be attached to the subsequent item, making the latter a suffix).",
 				"true,true",
 				false));
-		addProperty(new PepperModuleProperty<>(PROP_SUB_REF_ANNOTATION_MARKER, 
+		addProperty(new PepperModuleProperty<>(PROP_SUB_REF_ANNOTATION_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with annotations that can potentially span subranges of the complete morphological data source, without the preceding backslashes, and as a comma-separated list.",
 				false));
@@ -456,8 +460,8 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 //		return (String) getProperty(PROP_REF_METADATA_MARKERS).getValue();
 //	}
 	
-	public String getSubRefAnnotationMarker() {
-		return (String) getProperty(PROP_SUB_REF_ANNOTATION_MARKER).getValue();
+	public List<String> getSubRefAnnotationMarkers() {
+		return new ArrayList<>(Arrays.asList(((String) getProperty(PROP_SUB_REF_ANNOTATION_MARKERS).getValue()).split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)));
 	}
 	
 	public String getSubRefDefinitionMarker() {
