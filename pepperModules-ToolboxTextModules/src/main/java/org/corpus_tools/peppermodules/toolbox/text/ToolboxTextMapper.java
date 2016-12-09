@@ -33,6 +33,7 @@ import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.DocumentHeaderMapper;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.RefMapper;
+import org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper;
 import org.corpus_tools.peppermodules.toolbox.text.utils.MappingIndices;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocument;
@@ -175,6 +176,8 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology, indices, lexDS, morphDS, layers);
 					refMapper.map();
 					indices = refMapper.getIndices();
+					SubrefMapper subrefMapper = new SubrefMapper(getProperties(), graph, refMapper.getRefData(), refMapper.getLexTokens(), refMapper.getMorphTokens(), refMapper.getMarkerContentMap());
+					subrefMapper.map();
 					bos.reset();
 				}
 			}

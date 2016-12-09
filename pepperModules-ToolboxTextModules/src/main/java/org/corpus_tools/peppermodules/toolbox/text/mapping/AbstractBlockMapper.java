@@ -200,4 +200,11 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	 */
 	public abstract void map();
 
+	/**
+	 * @return the markerContentMap
+	 */
+	public final ListMultimap<String, String> getMarkerContentMap() {
+		return markerContentMap;
+	}
+
 }

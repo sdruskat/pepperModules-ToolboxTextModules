@@ -3,41 +3,49 @@
 \id Document no. 1
 
 \ref subref sentence schema 1 (line-level) with no defined target line
-\met A sentence with a line-level subref. If no target line is defined, offsets are always based on morphology!
+\met SIMPLE
 \tx subref sentence one
 \mb m1 m2 m3
 \sr 1 2 subref to morphemes m2 and m3 in a span
 
 \ref subref sentence schema 1 (line-level) to mb
-\met A sentence with a line-level subref
+\met SIMPLE_TARGETED to mb
 \tx subref sentence one
 \mb m16 m17 m18 -m19
 \sr mb 1 2 subref to morphemes m17 and m18 in a span
 \xt mb 2 3 subref to morphemes m18 and -m19 in a span
 
 \ref subref sentence schema 1 (line-level) to tx
-\met A sentence with a line-level subref
+\met SIMPLE_TARGETED to tx
 \tx L1 L2 L3
 \mb m19 m20 m21
 \sr tx 1 2 subref to lexicals L2 and L3 in a span
 
 \ref subref sentence schema 2 (undefined global) with existing mb line
-\met Sentence with a single global subref (morph-level) from m23 to m26 (incl.) on \sr and \sr2
+\met UNDEFINED_GLOBAL to mb
 \subref 1 4
 \tx subref sentence two with one-to-four ref
 \mb m22 m23 m24 m25 m26 m27
 \sr subref to morphemes m23-m26 in a span
 \sr2 2nd subref to morphemes m23-m26 in a span
 
+\ref subref sentence schema 2 (undefined global TARGETED) with existing mb line
+\met UNDEFINED_GLOBAL_TARGETED to mb
+\subref mb 1 4
+\tx subref sentence two with one-to-four ref
+\mb m22 m23 m24 m25 m26 m27
+\sr subref to morphemes m23-m26 in a span
+\sr2 2nd subref to morphemes m23-m26 in a span
+
 \ref subref sentence schema 2 (undefined global) without mb line
-\met Sentence with a single global subref (lex-level) from t24 to t27 (incl.) on \sr and \sr2
+\met UNDEFINED_GLOBAL to tx (no mb!)
 \subref 1 4
 \tx subref sentence two with one-to-four ref
 \sr subref to lexicals "sentence"-"one-to-four" in a span
 \sr2 2nd subref to lexicals "sentence"-"one-to-four" in a span
 
 \ref subref sentence schema 3 (defined global) to mb
-\met Sentence with two global subrefs (morph-level) m26-m28 and m30-m31 on \sr
+\met DEFINED_GLOBAL to mb
 \subref 1 1 3
 \subref 2 5 6
 \tx subref with some random text just like that
@@ -46,7 +54,7 @@
 \sr 2 subref m33-m34
 
 \ref subref sentence schema 3 (defined global) to tx
-\met Sentence with two global subrefs (lex-level) t38-t40 and t43-t44 on \sr
+\met DEFINED_GLOBAL to tx (no mb!)
 \subref 1 1 3
 \subref 2 5 6
 \tx subref with some random text just like that
@@ -54,7 +62,7 @@
 \sr 2 subref t43-t44
 
 \ref subref sentence schema 4 (defined global with related line)
-\met Sentence with two global subrefs (one lex-level, one morph-level) m26-m28 and m30-m31 on \sr
+\met DEFINED_GLOBAL_TARGETED to tx & mb
 \subref 1 tx 1 3
 \subref 2 mb 5 6
 \tx subref with some random text just like that
@@ -63,9 +71,8 @@
 \sr 2 subref m41-m42
 
 \ref subref sentence schema 5 (linked)
-\met Sentence with two subrefs which are linked (m37-m39, m41-m42)
-\subref 1 mb 1 3
-\subref 1 mb 5 6
+\met LINKED_TARGETED to mb
+\subref 1 mb 1 3 5 6
 \tx subref with some random text just like that
 \mb m36 m37 m38 m39 m40 m41 m42 m43
 \sr 1 subref m37-m39 & m41-m42
