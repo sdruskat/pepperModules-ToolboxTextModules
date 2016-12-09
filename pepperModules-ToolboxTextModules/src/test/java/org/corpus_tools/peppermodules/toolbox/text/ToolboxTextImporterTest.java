@@ -579,7 +579,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
-		assertEquals(8 + 11, graph.getSpans().size());
+		assertEquals(9 + 12, graph.getSpans().size());
 		fail("Needs to be implemented further!");
 	}
 
