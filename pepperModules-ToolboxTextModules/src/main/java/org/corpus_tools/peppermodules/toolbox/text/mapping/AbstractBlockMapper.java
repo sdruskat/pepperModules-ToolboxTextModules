@@ -101,7 +101,7 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 				line = line.trim();
 				if (line.startsWith("\\")) {
 					// Check whether the line contains more than a marker
-					if (line.split(" ", 2).length > 1) {
+					if (line.split("\\s+", 2).length > 1) {
 						lines.add(line);
 					}
 					else {
@@ -190,7 +190,7 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 		}
 		// Build markerContentMap
 		for (String line : lines) {
-			String[] split = line.split(" ", 2);
+			String[] split = line.split("\\s+", 2);
 			markerContentMap.put(split[0].substring(1), split[1]);
 		}
 	}
