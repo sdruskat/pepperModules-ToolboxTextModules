@@ -6,14 +6,14 @@
 \met SIMPLE
 \tx subref sentence one
 \mb m1 m2 m3
-\sr 1 2 subref to morphemes m2 and m3 in a span
+\sr 1 2 SIMPLE m2-m3
 
 \ref subref sentence schema 1 (line-level) to mb
 \met SIMPLE_TARGETED to mb
 \tx subref sentence one
 \mb m16 m17 m18 -m19
-\sr mb 1 2 subref to morphemes m17 and m18 in a span
-\xt mb 2 3 subref to morphemes m18 and -m19 in a span
+\sr mb 1 2 SIMPLE_TARGETED m17-m18
+\xt mb 2 3 SIMPLE_TARGETED m18-m19
 
 \ref subref sentence schema 1 (line-level) to tx
 \met SIMPLE_TARGETED to tx
