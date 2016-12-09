@@ -97,9 +97,9 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		getLayer(getProperties().getRefMarker());
 		
 		// Create a timeline to linearize lexical and morphological tokens
-//		if (!eDM && hasMorphology) {
+		if (!eDM) {
 			graph.createTimeline();
-//		}
+		}
 		
 		// Create primary data sources
 		final STextualDS lexDS = graph.createTextualDS("");
