@@ -194,7 +194,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 						break;
 					}
 					if (split != null) {
-						mapSubref(split, false, marker);
+						mapSubref(split, split.getTargetMarker() != null, marker);
 					}
 					else {
 						log.warn("At this point, the " + SplitResult.class.getName() + " should not be null. Please report this as a bug!"); // FIXME
@@ -224,6 +224,8 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 * TODO: Description
 	 *
 	 * @param split
+	 * @param checkAgainstMarker
+	 * @param marker
 	 */
 	private void mapSubref(SplitResult split, boolean checkAgainstMarker, String marker) {
 		if (split.getRanges() == null) {
@@ -251,21 +253,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 					mapData(split, from, to, marker, false);
 				}
 			}
-//			boolean mapToMorphology = checkAgainstMarker ? split.getTargetMarker().equals(morphMarker) && refHasMorphology : refHasMorphology;
-////			if ((checkAgainstMarker ? split.getTargetMarker().equals(morphMarker) : false)) {
-////				if (refHasMorphology) {
-//			if (mapToMorphology) {
-//					mapData(split, from, to, marker, true);
-//			}
-//			else if (!refHasMorphology) {
-//				
-////				}
-////				else {
-////				}
-//			}
-//			else {
-//				mapData(split, from, to, marker, false);
-//			}
 		}
 		else {
 			mapLinkedSubref(split, marker);

@@ -37,6 +37,13 @@
 \sr UNIDENTIFIED_GLOBAL_TARGETED m23-m26
 \sr2 UNIDENTIFIED_GLOBAL_TARGETED m23-m26
 
+\ref subref sentence schema 2 (undefined global TARGETED) with existing mb line
+\met UNIDENTIFIED_GLOBAL_TARGETED to tx
+\subref tx 1 4
+\tx subref sentence two with one-to-four ref
+\sr UNIDENTIFIED_GLOBAL_TARGETED m23-m26
+\sr2 UNIDENTIFIED_GLOBAL_TARGETED m23-m26
+
 \ref subref sentence schema 2 (undefined global) without mb line
 \met UNIDENTIFIED_GLOBAL to tx (no mb!)
 \subref 1 4
