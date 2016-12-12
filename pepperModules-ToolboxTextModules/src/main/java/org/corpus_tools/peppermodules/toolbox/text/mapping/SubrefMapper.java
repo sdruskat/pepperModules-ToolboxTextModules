@@ -19,6 +19,7 @@
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -275,7 +276,10 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		}
 		else {
 			List<SToken> orderedTokens = graph.getSortedTokenByText(mapToMorphology ? morphTokens : lexTokens);
-			System.err.println(refData.toString() + "\nsplit " + split.toString() + "\nfrom " + from + "\nto " + to + "\nmtm " + mapToMorphology);
+			if (orderedTokens.size() < to) {
+				log.warn("Cannot create subref as end offset is > index of tokens in " + refData.getPrimaryData() + "!");
+				return null;
+			}
 			subref = graph.createSpan(orderedTokens.subList(from, to));
 		}
 		graph.getLayerByName(mapToMorphology ? morphMarker : lexMarker).get(0).addNode(subref);
@@ -296,6 +300,9 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				SSpan subref = null;
 				for (Pair<Integer, Integer> range : split.getRanges()) {
 					subref = mapData(split, range.getLeft(), range.getRight(), marker, true);
+					if (subref == null) {
+						return;
+					}
 					if (lastSpan != null) {
 						SPointingRelation rel = (SPointingRelation) graph.createRelation(lastSpan, subref, SALT_TYPE.SPOINTING_RELATION, null);
 						rel.setType("l");
@@ -314,6 +321,9 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			SSpan subref = null;
 			for (Pair<Integer, Integer> range : split.getRanges()) {
 				subref = mapData(split, range.getLeft(), range.getRight(), marker, false);
+				if (subref == null) {
+					return;
+				}
 				if (lastSpan != null) {
 					SPointingRelation rel = (SPointingRelation) graph.createRelation(lastSpan, subref, SALT_TYPE.SPOINTING_RELATION, null);
 					rel.setType("l");
@@ -445,6 +455,10 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				 */
 				if (!targeted) {
 					// SUBREF_TYPE.SIMPLE
+					if (split.length < 3) {
+						log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.");
+						return null;
+					}
 					/*
 					 * 1 must be added to *to* because List#subList(from,to)
 					 * works with **exclusive** *to*!
@@ -454,6 +468,10 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				}
 				else {
 					// SUBREF_TYPE.SIMPLE_TARGETED
+					if (split.length < 4) {
+						log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.");
+						return null;
+					}
 					targetMarker = split[0];
 					singleRange = pairify(split[1], split[2]);
 					annotation = split[3];
@@ -496,11 +514,19 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 					if (!linked) {
 						if (!targeted) {
 							// SUBREF_TYPE.IDENTIFIED_GLOBAL
+							if (split.length < 3 || annoSplit.length < 2) {
+								log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
+								return null;
+							}
 							singleRange = pairify(split[1], split[2]);
 							annotation = annoSplit[1].trim();
 						}
 						else {
 							// SUBREF_TYPE.IDENTIFIED_GLOBAL_TARGETED
+							if (split.length < 4 || annoSplit.length < 2) {
+								log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
+								return null;
+							}
 							targetMarker = split[1];
 							singleRange = pairify(split[2], split[3]);
 							annotation = annoSplit[1].trim();
@@ -520,6 +546,10 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 								return null;
 							}
 							ranges.add(range);
+						}
+						if (annoSplit.length < 2) {
+							log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
+							return null;
 						}
 						annotation = annoSplit[1].trim();
 					}
