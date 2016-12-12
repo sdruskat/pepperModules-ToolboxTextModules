@@ -176,7 +176,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology, indices, lexDS, morphDS, layers);
 					refMapper.map();
 					indices = refMapper.getIndices();
-					SubrefMapper subrefMapper = new SubrefMapper(getProperties(), graph, refMapper.getRefData(), refMapper.getLexTokens(), refMapper.getMorphTokens(), refMapper.getMarkerContentMap(), refMapper.refHasMorphology());
+					SubrefMapper subrefMapper = new SubrefMapper(getProperties(), graph, refMapper.getRefData(), refMapper.getLexTokens(), refMapper.getMorphTokens(), refMapper.getMarkerContentMap(), refMapper.refHasMorphology(), lexDS, morphDS);
 					subrefMapper.map();
 					bos.reset();
 				}

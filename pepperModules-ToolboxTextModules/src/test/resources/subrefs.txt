@@ -50,25 +50,27 @@
 \subref 2 5 6
 \tx subref with some random text just like that
 \mb m28 m29 m30 m31 m32 m33 m34 m35
-\sr 1 subref m30-m32
-\sr 2 subref m33-m34
+\sr 1 DEFINED_GLOBAL m29-m31
+\sr 2 DEFINED_GLOBAL m33-m34
 
 \ref subref sentence schema 3 (defined global) to tx
 \met DEFINED_GLOBAL to tx (no mb!)
 \subref 1 1 3
 \subref 2 5 6
-\tx subref with some random text just like that
-\sr 1 subref t38-t40
-\sr 2 subref t43-t44
+\tx L0 L1 L2 L3 L4 L5 L6 L7
+\sr 1 DEFINED_GLOBAL L1-L3
+\sr 2 DEFINED_GLOBAL L5-L6
 
 \ref subref sentence schema 4 (defined global with related line)
 \met DEFINED_GLOBAL_TARGETED to tx & mb
 \subref 1 tx 1 3
 \subref 2 mb 5 6
-\tx subref with some random text just like that
-\mb m36 m37 m38 m39 m40 m41 m42 m43
-\sr 1 subref t46-t48
-\sr 2 subref m41-m42
+\subref 3 mb 1 3
+\tx L0 L1 L2 L3 L4 L5 L6 L7
+\mb m0 m1 m2 m3 m4 m5 m6 m7
+\sr 1 DEFINED_GLOBAL_TARGETED L1-L3
+\sr 2 DEFINED_GLOBAL_TARGETED m5-m6
+\sr 3 DEFINED_GLOBAL_TARGETED m1-m3
 
 \ref subref sentence schema 5 (linked)
 \met LINKED_TARGETED to mb
@@ -76,3 +78,21 @@
 \tx subref with some random text just like that
 \mb m36 m37 m38 m39 m40 m41 m42 m43
 \sr 1 subref m37-m39 & m41-m42
+
+\ref subref sentence schema 5 (linked)
+\met LINKED_TARGETED to tx
+\subref 1 tx 1 3 5 6
+\tx L0 L1 L2 L3 L4 L5 L6 L7
+\sr 1 LINKED_TARGETED L1-L3 & L5-L6
+
+\ref Non-subref sentence with \sr line
+\met NON-SUBREF
+\tx subref sentence one
+\mb m1 m2 m3
+\sr Full-ref annotation
+
+\ref Non-subref sentence with long \sr line
+\met NON-SUBREF
+\tx subref sentence one
+\mb m1 m2 m3
+\sr Full-ref annotation with an annotation line that is longer than 5 units if split with \\s+
