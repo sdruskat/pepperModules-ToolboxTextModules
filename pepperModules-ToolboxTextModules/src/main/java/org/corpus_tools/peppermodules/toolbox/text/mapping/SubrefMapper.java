@@ -61,7 +61,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	private final String morphMarker;
 	private final String subRefDefinitionMarker;
 	private final List<String> subRefAnnotationMarkers;
-	private final String refMarker;
 	private final boolean refHasMorphology;
 
 	private final STextualDS morphDS;
@@ -111,7 +110,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		this.morphMarker = properties.getMorphMarker();
 		this.subRefDefinitionMarker = properties.getSubRefDefinitionMarker();
 		this.subRefAnnotationMarkers = properties.getSubRefAnnotationMarkers();
-		this.refMarker = properties.getRefMarker();
 		this.refHasMorphology = refHasMorphology;
 		this.morphDS = morphDS;
 		this.lexDS = lexDS;
@@ -418,7 +416,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	
 	private class SplitResult {
 		
-		private String definition = null;
 		private String targetMarker = null;
 		private String annotation = null;
 		private Pair<Integer, Integer> singleRange = null;
@@ -512,13 +509,11 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 					if (!linked) {
 						if (!targeted) {
 							// SUBREF_TYPE.IDENTIFIED_GLOBAL
-							definition = split[0];
 							singleRange = pairify(split[1], split[2]);
 							annotation = annoSplit[1].trim();
 						}
 						else {
 							// SUBREF_TYPE.IDENTIFIED_GLOBAL_TARGETED
-							definition = split[0];
 							targetMarker = split[1];
 							singleRange = pairify(split[2], split[3]);
 							annotation = annoSplit[1].trim();
@@ -530,7 +525,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 					else {
 						// SUBREF_TYPE.LINKED_TARGETED;
 						split = definitionLine.split("\\s+");
-						definition = split[0];
 						targetMarker = split[1];
 						ranges = new ArrayList<>();
 						for (int firstProbInt = 2; firstProbInt < split.length; firstProbInt += 2) {
@@ -569,13 +563,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		}
 
 		/**
-		 * @return the definition
-		 */
-		public final String getDefinition() {
-			return definition;
-		}
-
-		/**
 		 * @return the targetMarker
 		 */
 		public final String getTargetMarker() {
@@ -594,13 +581,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		 */
 		public final List<Pair<Integer, Integer>> getRanges() {
 			return ranges;
-		}
-
-		/**
-		 * @return the numberOfSplits
-		 */
-		public final int getNumberOfSplits() {
-			return numberOfSplits;
 		}
 
 		/**
