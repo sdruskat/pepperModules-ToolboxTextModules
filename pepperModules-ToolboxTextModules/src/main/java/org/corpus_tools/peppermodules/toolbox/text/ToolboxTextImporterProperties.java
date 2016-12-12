@@ -335,6 +335,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		addProperty(new PepperModuleProperty<>(PROP_SUB_REF_ANNOTATION_MARKERS, 
 				String.class,
 				"All Toolbox markers which precede lines with annotations that can potentially span subranges of the complete morphological data source, without the preceding backslashes, and as a comma-separated list.",
+				"",
 				false));
 		addProperty(new PepperModuleProperty<>(PROP_SUB_REF_DEFINITION_MARKER, 
 				String.class,
