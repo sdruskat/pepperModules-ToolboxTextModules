@@ -64,9 +64,9 @@ public class MorphLayerData extends LayerData {
 		return (MorphLayerData) super.compile();
 	}
 
-	public MorphLayerData compileMorphWords(String affix, String clitic, boolean attach, boolean attachToNext) {
+	public MorphLayerData compileMorphWords(String affix, String clitic, String liaison, boolean attach, boolean attachToNext) {
 		List<String> morphs = getPrimaryData();
-		attachDelimiters(affix, clitic, attach, attachToNext, morphs);
+		attachDelimiters(affix, clitic, liaison, attach, attachToNext, morphs);
 		/*
 		 *  Count "words" and map words back to morphemes contained.
 		 *  Concatenate prefixes first.
@@ -130,7 +130,7 @@ public class MorphLayerData extends LayerData {
 	 * @param attachToNext
 	 * @param morphs
 	 */
-	private void attachDelimiters(String affix, String clitic, boolean attach, boolean attachToNext, List<String> morphs) {
+	private void attachDelimiters(String affix, String clitic, String liaison, boolean attach, boolean attachToNext, List<String> morphs) {
 		// Attach delimiters if specified
 		if (attach) {
 			for (ListIterator<String> iterator = morphs.listIterator(); iterator.hasNext();) {

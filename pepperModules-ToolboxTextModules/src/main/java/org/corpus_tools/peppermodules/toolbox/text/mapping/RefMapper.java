@@ -157,7 +157,7 @@ public class RefMapper extends AbstractBlockMapper {
 		MorphLayerData morphData = null;
 		if (docHasMorphology && refHasMorphology) {
 			morphData = new MorphLayerData(markerContentMap, morphMarker, morph, morphAnnoMarkers, true, missingAnnoString, fixErrors, getDocName(), ref).compile();
-			morphData.compileMorphWords(properties.getAffixDelim(), properties.getCliticDelim(), properties.attachDelimiter(), properties.attachDelimiterToNext());
+			morphData.compileMorphWords(properties.getAffixDelim(), properties.getCliticDelim(), properties.getLiaisonDelim(), properties.attachDelimiter(), properties.attachDelimiterToNext());
 			morphData = checkLexMorphInterl11n(lexData, morphData, refData);
 		}
 		else {
@@ -539,7 +539,7 @@ public class RefMapper extends AbstractBlockMapper {
 		 *  calculate time steps! 
 		 */
 		if (isInterl11nFaulty) {
-			morphData.compileMorphWords(properties.getAffixDelim(), properties.getCliticDelim(), properties.attachDelimiter(), properties.attachDelimiterToNext());
+			morphData.compileMorphWords(properties.getAffixDelim(), properties.getCliticDelim(), properties.getLiaisonDelim(), properties.attachDelimiter(), properties.attachDelimiterToNext());
 		}
 		return morphData;
 	}

@@ -116,6 +116,29 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	private static final String PROP_MORPHEME_DELIMITERS = "morphemeDelimiters";
 	
 	/**
+	 * The morpheme delimiter used in the Toolbox files to mark words (represented on the
+	 * morphological layer) that are contracted into words on the lexical layer, e.g.,
+	 * Saliba `tane = ta wane`. This delimiter can be used for cases where the importer
+	 * may otherwise not have enough information to figure out that the lexical word should
+	 * contain the "morphological word". 
+	 * 
+	 * It will be **dropped after parsing** and will not show up in either the Salt model
+	 * or any further model transformations.
+	 * 
+	 * The marker is only picked up when used to **suffix the second to nth word**, i.e. for the
+	 * Saliba example above, `ta _wane` (property default is the underscore `_`) will be 
+	 * mapped as two items on the morphological layer which are ruled by one item on 
+	 * the lexical layer:
+	 * 
+	 * ```
+	 *   lex: | tane      |
+	 *        |-----------|
+	 * morph: | ta | wane |
+	 * ```
+	 */
+	private static final String PROP_LIAISON_DELIMITER = "liaisonDelimiter";
+	
+	/**
 	 * The marker used for references, i.e., usually "ref" or "id".
 	 */
 	private static final String PROP_REF_MARKER = "refMarker";
@@ -372,6 +395,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	
 	public String getCliticDelim() {
 		return getProperty(PROP_MORPHEME_DELIMITERS).getValue().toString().trim().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)[1];
+	}
+
+	public String getLiaisonDelim() {
+		return (String) getProperty(PROP_LIAISON_DELIMITER).getValue();
 	}
 }
 
