@@ -217,8 +217,11 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 */
 	private void mapFullRef(String fullRefAnnoLine, String marker) {
 		SSpan span = graph.createSpan(lexTokens);
-		graph.getLayerByName(refData.getMarker()).get(0).addNode(span);
-		span.createAnnotation("toolbox", marker, fullRefAnnoLine);
+		// Span *can* be null here for refs that don't have lexical tokens.
+		if (span != null) {
+			graph.getLayerByName(refData.getMarker()).get(0).addNode(span);
+			span.createAnnotation("toolbox", marker, fullRefAnnoLine);
+		}
 	}
 
 	/**
