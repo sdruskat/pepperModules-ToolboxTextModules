@@ -62,11 +62,18 @@ public class DocumentHeaderMapper extends AbstractBlockMapper {
 	public void map() {
 		for (String line : lines) {
 			if (line.startsWith("\\" + properties.getIdMarker() + " ")) {
-				graph.getDocument().setName(line.split(" ", 2)[1]);
+				graph.getDocument().setName(line.split("\\s+", 2)[1]);
 			}
 			else {
-				String[] markerContent = line.split(" ", 2);
-				graph.getDocument().createMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX, markerContent[0].substring(1), markerContent[1]);
+				String[] markerContent = line.split("\\s+", 3);
+				if (graph.getDocument().getMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX + "::" + markerContent[0].substring(1)) != null) {
+					String oldVal = graph.getDocument().getMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX + "::" + markerContent[0].substring(1)).getValue_STEXT();
+					String newVal = oldVal + " " + markerContent[1];
+					graph.getDocument().getMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX + "::" + markerContent[0].substring(1)).setValue(newVal);
+				}
+				else {
+					graph.getDocument().createMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX, markerContent[0].substring(1), markerContent[1]);
+				}
 			}
 		}
 	}
