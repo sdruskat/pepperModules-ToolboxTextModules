@@ -484,15 +484,27 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				}
 			}
 			else {
+				if (definedSubrefs.isEmpty() || definedSubrefs == null) {
+					log.warn("Found an annotation on a defined subref in ref " + refData.getPrimaryData() + ", but could not find any definitions!");
+					return null;
+				}
 				if (!identified) {
 					String[] split = definedSubrefs.iterator().next().split("\\s+", numberOfSplits);
 					if (!targeted) {
 						// SUBREF_TYPE.UNIDENTIFIED_GLOBAL
+						if (split.length < 2) {
+							log.warn("Subref definition line is too short: \"" + Arrays.toString(split) + "\" in ref " + refData.getPrimaryData() + "!");
+							return null;
+						}
 						singleRange = pairify(split[0], split[1]);
 						annotation = subrefAnnoLine.trim();
 					}
 					else {
 						// SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED
+						if (split.length < 3) {
+							log.warn("Subref definition line is too short: \"" + Arrays.toString(split) + "\" in ref " + refData.getPrimaryData() + "!");
+							return null;
+						}
 						targetMarker = split[0];
 						singleRange = pairify(split[1], split[2]);
 						annotation = subrefAnnoLine.trim();
@@ -540,6 +552,10 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 					}
 					else {
 						// SUBREF_TYPE.LINKED_TARGETED;
+						if (annoSplit.length < 2) {
+							log.warn("Subref annotation line is too short: \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "!");
+							return null;
+						}
 						split = definitionLine.split("\\s+");
 						targetMarker = split[1];
 						ranges = new ArrayList<>();
