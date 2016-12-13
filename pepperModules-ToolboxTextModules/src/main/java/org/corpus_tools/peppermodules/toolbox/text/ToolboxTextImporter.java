@@ -112,10 +112,13 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		if (corpusFile.isDirectory()) {
 			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName.substring(0, corpusFileName.lastIndexOf('.')));
 			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), corpusFileURI);
-			for (File child : corpusFile.listFiles()) {
-				importCorpusStructure(corpusGraph, subCorpus, child);
+			if (corpusFile != null) {
+				for (File child : corpusFile.listFiles()) {
+					importCorpusStructure(corpusGraph, subCorpus, child);
+				}
 			}
-		} else if (corpusFile.isFile()) {
+		}
+		else if (corpusFile.isFile()) {
 			// Create a corpus for the file
 			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName.substring(0, corpusFileName.lastIndexOf('.')));
 			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), corpusFileURI);
@@ -127,26 +130,31 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			idOffsets = parser.getIdOffsets();
 			refMap = parser.getRefMap();
 			idStructureMap = parser.getIdStructureMap();
-			// Do some sanity checks on the documents, and write irregularities to log
+			// Do some sanity checks on the documents, and write irregularities
+			// to log
 			if (idOffsets.isEmpty()) {
 				// Corpus has no \ids
 				if (refMap.isEmpty()) {
 					// Corpus also has no \refs
 					throw new PepperModuleException("The corpus file " + corpusFile.getAbsolutePath() + " contains neither \\ids nor \\refs. Aborting import!");
-				} else {
+				}
+				else {
 					if (refMap.size() == 1 && refMap.containsKey(-1L)) {
-						// Corpus has no \ids but \refs, so create it with a single document containing all refs
+						// Corpus has no \ids but \refs, so create it with a
+						// single document containing all refs
 						headerEndOffset = refMap.get(-1L).get(0);
 						setMonolithic(true);
 					}
 				}
-			} else {
+			}
+			else {
 				// Corpus has \ids
 				if (refMap.isEmpty()) {
 					// Corpus has only empty \ids, so log a warning but create
 					// the empty documents
 					logger.info("The corpus file " + corpusFile.getAbsolutePath() + " contains \\ids, but none of them contain \\refs. Will create empty documents with only metadata.");
-				} else if (refMap.containsKey(-1L)) {
+				}
+				else if (refMap.containsKey(-1L)) {
 					// There are \refs that are not attached to an \id, so log a
 					// warning and drop them
 					List<Long> orphanRefOffsets = refMap.get(-1L);
@@ -177,7 +185,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 				SDocument doc = corpusGraph.createDocument(subCorpus, corpusFileName.substring(0, corpusFileName.lastIndexOf('.')));
 				getIdentifier2ResourceTable().put(doc.getIdentifier(), corpusFileURI);
 			}
-		} 
+		}
 	}
 
 	@Override

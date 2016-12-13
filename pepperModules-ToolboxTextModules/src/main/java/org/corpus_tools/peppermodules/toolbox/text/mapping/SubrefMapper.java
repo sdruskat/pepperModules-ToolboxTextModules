@@ -484,7 +484,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				}
 			}
 			else {
-				if (definedSubrefs.isEmpty() || definedSubrefs == null) {
+				if (definedSubrefs == null || definedSubrefs.isEmpty()) {
 					log.warn("Found an annotation on a defined subref in ref " + refData.getPrimaryData() + ", but could not find any definitions!");
 					return null;
 				}
@@ -553,7 +553,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 					else {
 						// SUBREF_TYPE.LINKED_TARGETED;
 						if (annoSplit.length < 2) {
-							log.warn("Subref annotation line is too short: \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "!");
+							log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
 							return null;
 						}
 						split = definitionLine.split("\\s+");
@@ -565,10 +565,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 								return null;
 							}
 							ranges.add(range);
-						}
-						if (annoSplit.length < 2) {
-							log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
-							return null;
 						}
 						annotation = annoSplit[1].trim();
 					}
