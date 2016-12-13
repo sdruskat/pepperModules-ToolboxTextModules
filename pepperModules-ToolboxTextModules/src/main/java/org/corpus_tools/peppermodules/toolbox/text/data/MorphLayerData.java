@@ -187,6 +187,29 @@ public class MorphLayerData extends LayerData {
 						}
 					}
 				}
+				else if (tok.equals(liaison)) {
+					String next = iterator.next();
+					iterator.set(tok + next);
+					iterator.previous();
+					iterator.previous();
+					iterator.remove();
+					// Process annotations accordingly
+					for (Entry<String, List<String>> anno : getAnnotations().entries()) {
+						String delimValue = null;
+						try {
+							delimValue = anno.getValue().get(index);
+							if (delimValue.equals(affix) || delimValue.equals(clitic)) {
+								String nextValue = anno.getValue().get(index + 1);
+								String newNextValue = delimValue + nextValue;
+								anno.getValue().remove(index);
+								anno.getValue().set(index, newNextValue);
+							}
+						}
+						catch (IndexOutOfBoundsException e) {
+							log.warn("Mismatch between no. of morphemes and no. of annotations on layer \"" + anno.getKey() + "\" in document \"" + getDocName() + "\", reference \"" + getRef() + "\". Ignoring annotation.");
+						}
+					}					
+				}
 			}
 		}
 	}
