@@ -330,14 +330,6 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return (String) getProperty(PROP_FILE_EXTENSIONS).getValue();
 	}
 	
-//	public String getDocMetadataMarkers() {
-//		return (String) getProperty(PROP_DOCUMENT_METADATA_MARKERS).getValue();
-//	}
-//	
-//	public String getRefMetadataMarkers() {
-//		return (String) getProperty(PROP_REF_METADATA_MARKERS).getValue();
-//	}
-	
 	public List<String> getSubRefAnnotationMarkers() {
 		return new ArrayList<>(Arrays.asList(((String) getProperty(PROP_SUB_REF_ANNOTATION_MARKERS).getValue()).split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)));
 	}
@@ -346,40 +338,6 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return (String) getProperty(PROP_SUB_REF_DEFINITION_MARKER).getValue();
 	}
 	
-//	public Boolean fixAlignment() {
-//		return (Boolean) getProperty(PROP_FIX_ALIGNMENT).getValue();
-//	}
-//	
-//	public String getFixAlignmentString() {
-//		return (String) getProperty(PROP_FIX_ALIGNMENT_STRING).getValue();
-//	}
-//	
-//	public Boolean ignoreMissingMorphemes() {
-//		return (Boolean) getProperty(PROP_IGNORE_MISSING_MORPHEMES).getValue();
-//	}
-//	
-//	public Boolean hasIds() {
-//		return (Boolean) getProperty(PROP_HAS_IDS).getValue();
-//	}
-//
-//	public boolean getSubstituteMissingMorpologicalItems() {
-//		return (Boolean) getProperty(PROP_SUBSTITUTE_MISSING_MORPHOLOGICAL_ITEMS).getValue();
-//	}
-//	
-//	public boolean containsMorphology() {
-//		return (Boolean) getProperty(PROP_CONTAINS_MORPHOLOGY).getValue();
-//	}
-//	
-//	public String getMissingMorphologicalItemsPlaceholder() {
-//		return (String) getProperty(PROP_MISSING_MORPHOLOGICAL_ITEMS_PLACEHOLDER).getValue();
-//	}
-//	
-//	public boolean splitIdsToDocuments() {
-//		return (Boolean) getProperty(PROP_SPLIT_IDS_TO_DISCRETE_DOCUMENTS).getValue();
-//	}
-	
-	// ################################## v2 ######################################
-
 	public boolean mergeDuplicateMarkers() {
 		return (Boolean) getProperty(PROP_MERGE_DUPL_MARKERS).getValue();
 	}
@@ -415,9 +373,5 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public String getCliticDelim() {
 		return getProperty(PROP_MORPHEME_DELIMITERS).getValue().toString().trim().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)[1];
 	}
-	
-	// ################################## v2 ######################################
-
-	
 }
 

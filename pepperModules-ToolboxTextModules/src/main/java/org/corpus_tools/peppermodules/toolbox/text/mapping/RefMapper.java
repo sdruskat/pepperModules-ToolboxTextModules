@@ -123,7 +123,7 @@ public class RefMapper extends AbstractBlockMapper {
 		String mks;
 		List<String> lexAnnoMarkers = (mks = properties.getLexAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
 		List<String> morphAnnoMarkers = (mks = properties.getMorphAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
-		List<String> subrefAnnoMarkers = (List<String>) (properties.getSubRefAnnotationMarkers() != null ? properties.getSubRefAnnotationMarkers() : new ArrayList<>());
+		List<String> subrefAnnoMarkers = properties.getSubRefAnnotationMarkers() != null ? properties.getSubRefAnnotationMarkers() : new ArrayList<String>();
 		List<String> refAnnoMarkers = new ArrayList<>();
 		for (String key : markerContentMap.keySet()) {
 			if (!key.equals(refMarker) && !key.equals(lexMarker) && !key.equals(morphMarker) && !key.equals(subrefMarker) && !lexAnnoMarkers.contains(key) && !morphAnnoMarkers.contains(key) && !subrefAnnoMarkers.contains(key)) {

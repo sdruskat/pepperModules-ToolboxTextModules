@@ -20,13 +20,8 @@ package org.corpus_tools.peppermodules.toolbox.text.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -39,12 +34,6 @@ import com.google.common.collect.ListMultimap;
  */
 public class LayerData {
 	
-	private static final Logger log = LoggerFactory.getLogger(LayerData.class);
-
-//	private static final String ERROR_TOO_MANY = "+";
-//	private static final String ERROR_TOO_FEW = "-";
-	
-//	private ListMultimap<String, List<String>> data = ArrayListMultimap.create(); // FIXME Is this used somewhere via getter?
 	private List<String> primaryData = new ArrayList<>();
 	private ListMultimap<String, List<String>> annotations = ArrayListMultimap.create();
 	private final ListMultimap<String, String> map;
@@ -52,15 +41,8 @@ public class LayerData {
 	private final List<String> annotationMarkers;
 	private boolean segmented;
 	private final String marker;
-	private boolean isEmpty;
-	private List<String> warnings = new ArrayList<>();
-	private Map<String, List<String>> errors = new HashMap<>();
-	private String missingAnnoString;
-	private boolean fixErrors;
 	private String docName;
 	private String ref;
-	private final List<String> subrefs = new ArrayList<>();
-	private final List<String> subrefAnnotations = new ArrayList<>();
 	
 	/**
 	 * @param markerContentMap
@@ -78,8 +60,6 @@ public class LayerData {
 		this.originalPrimaryData = originalPrimaryData;
 		this.annotationMarkers = annoMarkers;
 		this.segmented = segmented;
-		this.missingAnnoString = missingAnnoString;
-		this.fixErrors = fixErrors;
 		this.docName = docName;
 		this.ref = ref;
 	}
@@ -171,7 +151,6 @@ public class LayerData {
 	 * @param isEmpty the isEmpty to set
 	 */
 	public final void setEmpty(boolean isEmpty) {
-		this.isEmpty = isEmpty;
 	}
 
 	@Override
