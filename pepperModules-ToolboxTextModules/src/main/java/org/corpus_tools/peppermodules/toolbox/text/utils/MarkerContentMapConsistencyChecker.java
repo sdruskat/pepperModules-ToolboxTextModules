@@ -35,15 +35,15 @@ public class MarkerContentMapConsistencyChecker {
 	
 	private static final Logger log = LoggerFactory.getLogger(MarkerContentMapConsistencyChecker.class);
 	
-	Set<String> set;
-	String refMarker;
-	String lexMarker;
-	String morphMarker;
-	String subrefMarker;
-	List<String> lexAnnoMarkers;
-	List<String> morphAnnoMarkers;
-	List<String> subrefAnnoMarkers;
-	List<String> refAnnoMarkers;
+	private Set<String> set;
+	private String refMarker;
+	private String lexMarker;
+	private String morphMarker;
+	private String subrefMarker;
+	private List<String> lexAnnoMarkers;
+	private List<String> morphAnnoMarkers;
+	private List<String> subrefAnnoMarkers;
+	private List<String> refAnnoMarkers;
 	private String ref;
 	
 	/**

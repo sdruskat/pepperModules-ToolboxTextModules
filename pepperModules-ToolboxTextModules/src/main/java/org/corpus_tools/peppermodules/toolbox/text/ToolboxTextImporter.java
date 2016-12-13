@@ -69,8 +69,6 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	
 	private final Map<Identifier, Long> offsetMap = new HashMap<>();
 	
-	private final Map<Identifier, Range<Long>> offsetRangeMap = new HashMap<>();
-
 	private Map<Long, Boolean> idStructureMap;
 
 	public ToolboxTextImporter() {

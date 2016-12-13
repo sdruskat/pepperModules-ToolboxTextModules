@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CountingInputStream;
 
@@ -41,10 +39,8 @@ import com.google.common.io.CountingInputStream;
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
-public class ToolboxTextSegmentationParser {
+class ToolboxTextSegmentationParser {
 	
-	Logger logger = LoggerFactory.getLogger(ToolboxTextSegmentationParser.class);
-
 	private final File file;
 	private final String idMarker;
 	private final String refMarker;
@@ -58,7 +54,7 @@ public class ToolboxTextSegmentationParser {
 
 
 
-	public ToolboxTextSegmentationParser(File corpusFile, String idMarker, String refMarker, String morphMarker) {
+	ToolboxTextSegmentationParser(File corpusFile, String idMarker, String refMarker, String morphMarker) {
 		this.file = corpusFile;
 		this.idMarker = idMarker;
 		this.refMarker = refMarker;
@@ -71,7 +67,7 @@ public class ToolboxTextSegmentationParser {
 	/**
 	 * 
 	 */
-	public void parse() {
+	void parse() {
 		int longestMarkerLength = Math.max(idMarkerLength, Math.max(refMarkerLength, morphMarkerLength));
 		try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file)));
 				ByteArrayOutputStream bos = new ByteArrayOutputStream(longestMarkerLength);) {

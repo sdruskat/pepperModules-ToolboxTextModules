@@ -174,43 +174,6 @@ public class LayerData {
 		this.isEmpty = isEmpty;
 	}
 
-	/**
-	 * TODO: Description
-	 *
-	 * @param segmented
-	 * @return
-	 */
-	public LayerData setSegmented(boolean segmented) {
-		this.segmented = segmented;
-		return this;
-	}
-
-	/**
-	 * TODO: Description
-	 *
-	 * @param missingAnnoString
-	 * @param fixErrors
-	 * @return
-	 */
-	public LayerData setProperties(String missingAnnoString, boolean fixErrors) {
-		this.missingAnnoString = missingAnnoString;
-		this.fixErrors = fixErrors;
-		return this;
-	}
-
-	/**
-	 * TODO: Description
-	 *
-	 * @param docName
-	 * @param ref
-	 * @return
-	 */
-	public LayerData setMetaData(String docName, String ref) {
-		this.docName = docName;
-		this.ref = ref;
-		return this;
-	}
-	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

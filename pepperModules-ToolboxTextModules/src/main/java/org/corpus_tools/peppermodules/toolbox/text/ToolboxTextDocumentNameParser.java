@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
-public class ToolboxTextDocumentNameParser {
+class ToolboxTextDocumentNameParser {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextDocumentNameParser.class);
 	
@@ -48,7 +48,7 @@ public class ToolboxTextDocumentNameParser {
 	 *
 	 * @return the document name
 	 */
-	public static String parseId(Long offset, String idMarker, File file) {
+	static String parseId(Long offset, String idMarker, File file) {
 		String documentName = null;
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			raf.seek(offset);

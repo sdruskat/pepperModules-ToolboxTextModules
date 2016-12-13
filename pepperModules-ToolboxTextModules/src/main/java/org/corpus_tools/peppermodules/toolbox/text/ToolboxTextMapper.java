@@ -53,7 +53,7 @@ import com.google.common.io.CountingInputStream;
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
-public class ToolboxTextMapper extends AbstractToolboxTextMapper {
+class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextMapper.class);
 	
@@ -74,7 +74,7 @@ public class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	 * @param idRange
 	 * @param hasMorphology 
 	 */
-	public ToolboxTextMapper(Long headerEndOffset, Map<Long, List<Long>> refMap, Range<Long> idRange, boolean hasMorphology) {
+	ToolboxTextMapper(Long headerEndOffset, Map<Long, List<Long>> refMap, Range<Long> idRange, boolean hasMorphology) {
 		this.idRange = idRange;
 		this.refMap = refMap;
 		this.headerEndOffset = headerEndOffset;

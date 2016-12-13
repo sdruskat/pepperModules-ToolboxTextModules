@@ -30,7 +30,4 @@ public class AbstractToolboxTextMapper extends PepperMapperImpl {
 	
 	protected final String SALT_NAMESPACE_TOOLBOX = "toolbox";
 
-	protected final String IMPORTER_NAME = "toolbox-text-importer";
-
-
 }

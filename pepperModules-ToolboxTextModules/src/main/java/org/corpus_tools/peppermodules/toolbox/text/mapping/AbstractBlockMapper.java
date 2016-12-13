@@ -48,7 +48,7 @@ import com.google.common.collect.ListMultimap;
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
-public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
+abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	
 	private static final Logger log = LoggerFactory.getLogger(AbstractBlockMapper.class);
 	
@@ -63,7 +63,7 @@ public abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	 * @param graph
 	 * @param trimmedInputString
 	 */
-	public AbstractBlockMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString) {
+	AbstractBlockMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString) {
 		this.graph = graph;
 		this.trimmedInputString = trimmedInputString;
 		if (!(properties instanceof ToolboxTextImporterProperties)) {
