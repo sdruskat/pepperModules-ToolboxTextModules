@@ -3,3 +3,23 @@
 \ref REF1
 \tx Word Contraction Word
 \mb m1 con _traction m2
+
+\ref AboutDialects_01DP_0095
+\subref
+\ELANBegin 186.621
+\ELANEnd 190.204
+\dialect Logea
+\sex male
+\generation C
+\sound AboutDialects_01DP.wav 186.200 190.204
+\tx unai/ unai  kabo      ta         hedede    tane            malaitom    iteinai
+\mb unai  unai  kabo      ta         hedede    ta         _wane malaitom    itenai
+\g PP.SG PP.SG will/then 1INCL.SBJ talk/tell 1INCL.SBJ _say  next.day(s) in.future/after.tomorrow
+\p post  post  part      pro.pref   v         pro.pref   _v    n           adv
+
+\tx kabo
+\mb kabo
+\g will/then
+\p part
+
+\f Therefore, when we say it (the "madai"), we mean that

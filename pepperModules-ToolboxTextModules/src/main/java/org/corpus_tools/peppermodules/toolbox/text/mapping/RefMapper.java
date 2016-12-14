@@ -210,7 +210,7 @@ public class RefMapper extends AbstractBlockMapper {
 		 */
 		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, refData.getMarker(), refData.getPrimaryData().get(0).trim());
 		span.setName(refData.getPrimaryData().get(0).trim());
-		addAnnotations(refData, Arrays.asList(new SNode[]{span}));
+		addAnnotations(refData, Arrays.asList(new SNode[]{span}), false);
 		return span;
 	}
 
@@ -228,12 +228,18 @@ public class RefMapper extends AbstractBlockMapper {
 		List<SToken> morphTokens = new ArrayList<>();
 		// Build tokens, text and timeline
 		if (docHasMorphology) {
+			boolean hasLiaisonDelimiter = false;
 			if (hasMorphology) {
 //				boolean isLexInfoMappable = true;
 				STimeline timeline = graph.getTimeline();
 				int morphTimelineEnd = timeline.getEnd() == null ? 0 : timeline.getEnd();
 				int lexTimelineEnd = morphTimelineEnd;
 				for (String morpheme : morphData.getPrimaryData()) {
+					// Drop liaison delimiter if necessary
+					if (morpheme.startsWith(properties.getLiaisonDelim())) {
+						hasLiaisonDelimiter = true;
+					}
+					morpheme = hasLiaisonDelimiter ? morpheme.substring(1) : morpheme;
 					// Create morphological token;
 					morphDS.setText(morphDS.getText() + morpheme);
 					SToken token = graph.createToken(morphDS, morphDS.getEnd() - morpheme.length(), morphDS.getEnd());
@@ -272,8 +278,8 @@ public class RefMapper extends AbstractBlockMapper {
 					graph.addRelation(timeLineRel);
 					layers.get(lexData.getMarker()).addNode(token);
 				}
-				addAnnotations(lexData, lexTokens);
-				addAnnotations(morphData, morphTokens);
+				addAnnotations(lexData, lexTokens, false);
+				addAnnotations(morphData, morphTokens, hasLiaisonDelimiter);
 
 			}
 			else {
@@ -295,7 +301,7 @@ public class RefMapper extends AbstractBlockMapper {
 					graph.addRelation(timeLineRel);
 					layers.get(lexData.getMarker()).addNode(token);
 				}
-				addAnnotations(lexData, lexTokens);
+				addAnnotations(lexData, lexTokens, false);
 			}
 		}
 		else {				
@@ -315,7 +321,7 @@ public class RefMapper extends AbstractBlockMapper {
 				timeline.increasePointOfTime(1);
 				graph.addRelation(timeLineRel);
 			}
-			addAnnotations(lexData, lexTokens);
+			addAnnotations(lexData, lexTokens, false);
 		}
 		return Pair.of(lexTokens, morphTokens);
 	}
@@ -325,8 +331,9 @@ public class RefMapper extends AbstractBlockMapper {
 	 *
 	 * @param data
 	 * @param nodes
+	 * @param hasLiaisonDelimiter 
 	 */
-	private void addAnnotations(LayerData data, List<?> nodes) {
+	private void addAnnotations(LayerData data, List<?> nodes, boolean hasLiaisonDelimiter) {
 		for (Entry<String, List<String>> annotation : data.getAnnotations().entries()) {
 			for (int i = 0; i < nodes.size(); i++) {
 				Object node = nodes.get(i);
@@ -334,20 +341,35 @@ public class RefMapper extends AbstractBlockMapper {
 					throw new PepperModuleException("Cannot add an annotation to an object that is not of type " + SNode.class.getSimpleName() + " (here: " + node.getClass().getName() + ")!");
 				}
 				else {
+					String annotationValue = null;
 					if (annotation.getKey().equals(ERROR_LAYER_NAME) || annotation.getKey().endsWith(ERROR_TOO_FEW) || annotation.getKey().endsWith(ERROR_TOO_MANY)) {
 						StringBuilder sb = new StringBuilder();
 						for (int j = 0; j < annotation.getValue().size(); j++) {
-							if (j != annotation.getValue().size() - 1) {
-								sb.append(annotation.getValue().get(j) + ", ");
+							if (hasLiaisonDelimiter) {
+								if ((annotationValue = annotation.getValue().get(j)).startsWith(properties.getLiaisonDelim())) {
+									annotationValue = annotationValue.substring(1);
+								}
 							}
 							else {
-								sb.append(annotation.getValue().get(j));
+								annotationValue = annotation.getValue().get(j);
+							}
+							if (j != annotation.getValue().size() - 1) {
+								sb.append(annotationValue + ", ");
+							}
+							else {
+								sb.append(annotationValue);
 							}
 						}
 						((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, annotation.getKey(), sb.toString().trim());
 					}
 					else {
-						((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, annotation.getKey(), annotation.getValue().get(i));
+						if (hasLiaisonDelimiter && annotation.getValue().get(i).startsWith(properties.getLiaisonDelim())) {
+								annotationValue = annotation.getValue().get(i).substring(1);
+						}
+						else {
+							annotationValue = annotation.getValue().get(i);
+						}
+						((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, annotation.getKey(), annotationValue);
 					}
 				}
 			}

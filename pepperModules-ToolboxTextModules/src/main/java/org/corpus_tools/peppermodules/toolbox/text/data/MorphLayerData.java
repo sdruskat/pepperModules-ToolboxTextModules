@@ -129,10 +129,10 @@ public class MorphLayerData extends LayerData {
 				iterator.remove();
 			}
 		}
-		for (Integer liaisonIndex : liaisonIndices) {
-			String oldLiaisonWord = getPrimaryData().get(liaisonIndex);
-			getPrimaryData().set(liaisonIndex, oldLiaisonWord.substring(1));
-		}
+//		for (Integer liaisonIndex : liaisonIndices) {
+//			String oldLiaisonWord = getPrimaryData().get(liaisonIndex);
+//			getPrimaryData().set(liaisonIndex, oldLiaisonWord.substring(1));
+//		}
 		this.morphWords = morphWords;
 		return this;
 	}
