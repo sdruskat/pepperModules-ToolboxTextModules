@@ -108,7 +108,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		URI corpusFileURI = URI.createFileURI(corpusFile.getAbsolutePath());
 		String corpusFileName = corpusFile.getName();
 		if (corpusFile.isDirectory()) {
-			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName.substring(0, corpusFileName.lastIndexOf('.')));
+			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName.substring(0, corpusFileName));
 			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), corpusFileURI);
 			if (corpusFile != null) {
 				for (File child : corpusFile.listFiles()) {
