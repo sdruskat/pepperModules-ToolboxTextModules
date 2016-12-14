@@ -40,7 +40,6 @@ public class MorphLayerData extends LayerData {
 	private static final Logger log = LoggerFactory.getLogger(MorphLayerData.class);
 	
 	private List<String> morphWords = new ArrayList<>();
-//	private Map<String, ArrayList<String>> morphWordMorphemesMap = new HashMap<>();
 
 	private ArrayList<String[]> morphemesInMorphWordList;
 
@@ -74,7 +73,20 @@ public class MorphLayerData extends LayerData {
 		morphemesInMorphWordList = new ArrayList<>();
 		List<String> tmpList = new ArrayList<>();
 		List<String> prefixWords = new ArrayList<>();
-		for (String morph : morphs) {
+		List<Integer> liaisonIndices = new ArrayList<>();
+		for (int i = 0; i < morphs.size(); i++) {
+			String morph = morphs.get(i);
+			/* 
+			 * While we have an iterating index,
+			 * check whether the morpheme starts
+			 * with the liaison delimiter, and if
+			 * so, remember the index. Based on these
+			 * indices, the liaison delimiter will be
+			 * dropped from the primary data later on.
+			 */
+			if (morph.startsWith(liaison)) {
+				liaisonIndices.add(i);
+			}
 			if (morph.endsWith(affix) || morph.endsWith(clitic)) {
 				tmpList.add(morph);
 			}
@@ -94,7 +106,7 @@ public class MorphLayerData extends LayerData {
 		ListIterator<String[]> iterator = morphemesInMorphWordList.listIterator();
 		while (iterator.hasNext()) {
 			String[] prefixWord = iterator.next();
-			if (!prefixWord[0].startsWith(affix) && !prefixWord[0].startsWith(clitic)) {
+			if (!prefixWord[0].startsWith(affix) && !prefixWord[0].startsWith(clitic) && !prefixWord[0].startsWith(liaison)) {
 				String suffixWord = "";
 				for (int j = 0; j < prefixWord.length; j++) {
 					suffixWord += prefixWord[j];
@@ -116,6 +128,10 @@ public class MorphLayerData extends LayerData {
 				iterator.next();
 				iterator.remove();
 			}
+		}
+		for (Integer liaisonIndex : liaisonIndices) {
+			String oldLiaisonWord = getPrimaryData().get(liaisonIndex);
+			getPrimaryData().set(liaisonIndex, oldLiaisonWord.substring(1));
 		}
 		this.morphWords = morphWords;
 		return this;
@@ -186,6 +202,29 @@ public class MorphLayerData extends LayerData {
 							}
 						}
 					}
+				}
+				else if (tok.equals(liaison)) {
+					String next = iterator.next();
+					iterator.set(tok + next);
+					iterator.previous();
+					iterator.previous();
+					iterator.remove();
+					// Process annotations accordingly
+					for (Entry<String, List<String>> anno : getAnnotations().entries()) {
+						String delimValue = null;
+						try {
+							delimValue = anno.getValue().get(index);
+							if (delimValue.equals(affix) || delimValue.equals(clitic)) {
+								String nextValue = anno.getValue().get(index + 1);
+								String newNextValue = delimValue + nextValue;
+								anno.getValue().remove(index);
+								anno.getValue().set(index, newNextValue);
+							}
+						}
+						catch (IndexOutOfBoundsException e) {
+							log.warn("Mismatch between no. of morphemes and no. of annotations on layer \"" + anno.getKey() + "\" in document \"" + getDocName() + "\", reference \"" + getRef() + "\". Ignoring annotation.");
+						}
+					}					
 				}
 			}
 		}
