@@ -267,6 +267,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"The morpheme delimiters used in the Toolbox files as a comma-separated two-point list where the first element is the affix delimiter, and the second element is the clitics delimiter.",
 				"-,=",
 				false));
+		addProperty(new PepperModuleProperty<>(PROP_LIAISON_DELIMITER, 
+				String.class,
+				"The morpheme delimiter used in the Toolbox files to mark words (represented on the morphological layer) that are contracted into words on the lexical layer.",
+				"_",
+				false));
 		addProperty(new PepperModuleProperty<>(PROP_REF_MARKER, 
 				String.class,
 				"The marker used for references, i.e., usually \"ref\" or \"id\".",

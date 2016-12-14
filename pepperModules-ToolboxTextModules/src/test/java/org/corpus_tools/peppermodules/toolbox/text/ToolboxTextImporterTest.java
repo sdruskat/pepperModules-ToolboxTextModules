@@ -49,6 +49,7 @@ import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.corpus_tools.salt.core.SNode;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -513,7 +514,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * 
 	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
 	 */
-	@Test
+	@Test @Ignore
 	public void testRealData() {
 		setTestFile("real-data.txt");
 		setProperties("real-data.properties");
@@ -532,7 +533,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * 
 	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
 	 */
-	@Test
+	@Test @Ignore
 	public void testMissionaries() {
 		setTestFile("missionaries.txt");
 		setProperties("missionaries.properties");
@@ -551,7 +552,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * 
 	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
 	 */
-	@Test
+	@Test @Ignore
 	public void testMissionaries2() {
 		setTestFile("missionaries2.txt");
 		setProperties("missionaries.properties");
@@ -579,8 +580,27 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
-		assertEquals(9 + 12, graph.getSpans().size());
+		assertEquals(14 + 20, graph.getSpans().size());
 		fail("Needs to be implemented further!");
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there is 1 liaison delimiter
+	 */
+	@Test
+	public void testLiaison() {
+		setTestFile("liaison.txt");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertEquals("Word Contraction Word", graph.getTextualDSs().get(0).getText());
+		assertEquals("m1contractionm2", graph.getTextualDSs().get(1).getText());
+		assertEquals(7, graph.getTokens().size());
 	}
 
 	/**

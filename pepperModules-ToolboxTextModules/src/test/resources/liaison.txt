@@ -1,0 +1,5 @@
+\_sh v3.0 Test
+
+\ref REF1
+\tx Word Contraction Word
+\mb m1 con _traction m2
