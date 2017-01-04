@@ -32,7 +32,7 @@
 \mb m4
 
 \id ORPHANID1
-\idinfo Info on ID3
+\idinfo Info on ORID1
 
 \id ID3
 \idinfo Info on ID3
@@ -46,4 +46,4 @@
 \mb m6
 
 \id ORPHANID2
-\idinfo Info on ID3
+\idinfo Info on ORID2

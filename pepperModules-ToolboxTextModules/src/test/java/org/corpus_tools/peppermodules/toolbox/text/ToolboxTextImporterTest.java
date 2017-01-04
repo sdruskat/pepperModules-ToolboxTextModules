@@ -49,7 +49,6 @@ import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.corpus_tools.salt.core.SNode;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -74,15 +73,6 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		this.getFixture().getCorpusDesc().getFormatDesc().setFormatName("toolbox-text").setFormatVersion("3.0");
 		getFixture().getSaltProject().createCorpusGraph();
 		getFixture().setProperties(new ToolboxTextImporterProperties());
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#createPepperMapper(org.corpus_tools.salt.graph.Identifier)}.
-	 */
-	@Test
-	public void testCreatePepperMapper() {
-		fail("Not yet implemented"); // TODO
 	}
 
 	/**
@@ -118,7 +108,16 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		
 		// Test single document
 		assertEquals(1, corpusGraph.getDocuments().size());
-		fail("Needs to be implemented further!");
+		assertEquals("no-ids", corpusGraph.getDocuments().get(0).getName());
+		SDocumentGraph graph = getGraph("no-ids");
+		assertEquals(2, graph.getTextualDSs().size());
+		assertEquals("Wort1 Wort2 Wort3 Wort4 Wort5 Wort6", graph.getTextualDSs().get(0).getText());
+		assertEquals("m1m2m3m4m5m6", graph.getTextualDSs().get(1).getText());
+		assertEquals(12, getGraph("no-ids").getTokens().size());
+		assertEquals(6, getGraph("no-ids").getSpans().size());
+		for (SSpan span : getGraph("no-ids").getSpans()) {
+			assertEquals(1, graph.getOverlappedTokens(span).size());
+		}
 	}
 	
 	/**
@@ -132,7 +131,17 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	public void testParseDocumentWithJustIds() {
 		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("just-ids.txt"))));
 		start();
-		fail("Needs to be implemented further!");
+		assertEquals(4, getNonEmptyCorpusGraph().getDocuments().size());
+		for (int i = 0; i < getNonEmptyCorpusGraph().getDocuments().size(); i++) {
+			SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(i).getDocumentGraph();
+			assertEquals(0, graph.getTokens().size());
+			assertEquals(0, graph.getSpans().size());
+		}
+		assertEquals(0, getDocument("ID4 (no further info)").getMetaAnnotations().size());
+		assertEquals(1, getDocument("ID1").getMetaAnnotations().size());
+		assertEquals(1, getDocument("ID2").getMetaAnnotations().size());
+		assertEquals(1, getDocument("ID3").getMetaAnnotations().size());
+		assertEquals("Info on ID1", getDocument("ID1").getMetaAnnotations().iterator().next().getValue_STEXT());
 	}
 	
 	/**
@@ -422,7 +431,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 					if (span.getName().equals("Reference no. 1")) {
 						assertEquals(9, graph.getOverlappedTokens(span).size());
 						for (SToken tok : graph.getOverlappedTokens(span)) {
-//							graph.getTimeline().get
+//							FIXME CONTINUE IMPLEMENTATION graph.getTimeline().get
 						}
 					}
 				}
@@ -451,9 +460,31 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testParseOrphanRefs() {
-		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("orphan-ids-and-refs.txt"))));
+		setTestFile("orphan-ids-and-refs.txt");
 		start();
-		fail("Needs to be implemented further!");
+		assertEquals(5, getNonEmptyCorpusGraph().getDocuments().size());
+		assertEquals("Wort1 Wort2", getGraph("ID1").getTextualDSs().get(0).getText());
+		assertEquals("m1m2", getGraph("ID1").getTextualDSs().get(1).getText());
+		assertEquals(4, getGraph("ID1").getTokens().size());
+		assertEquals(2, getGraph("ID1").getSpans().size());
+		assertEquals("Wort3 Wort4", getGraph("ID2").getTextualDSs().get(0).getText());
+		assertEquals("m3m4", getGraph("ID2").getTextualDSs().get(1).getText());
+		assertEquals(4, getGraph("ID2").getTokens().size());
+		assertEquals(2, getGraph("ID2").getSpans().size());
+		assertEquals("Wort3 Wort4", getGraph("ID2").getTextualDSs().get(0).getText());
+		assertEquals("m3m4", getGraph("ID2").getTextualDSs().get(1).getText());
+		assertEquals("Wort5 Wort6", getGraph("ID3").getTextualDSs().get(0).getText());
+		assertEquals("m5m6", getGraph("ID3").getTextualDSs().get(1).getText());
+		assertEquals(4, getGraph("ID3").getTokens().size());
+		assertEquals(2, getGraph("ID3").getSpans().size());
+		assertEquals(1, getDocument("ORPHANID1").getMetaAnnotations().size());
+		assertEquals("Info on ORID1", getDocument("ORPHANID1").getMetaAnnotations().iterator().next().getValue_STEXT());
+		assertEquals(0, getGraph("ORPHANID1").getTokens().size());
+		assertEquals(0, getGraph("ORPHANID1").getSpans().size());
+		assertEquals(1, getDocument("ORPHANID2").getMetaAnnotations().size());
+		assertEquals("Info on ORID2", getDocument("ORPHANID2").getMetaAnnotations().iterator().next().getValue_STEXT());
+		assertEquals(0, getGraph("ORPHANID2").getTokens().size());
+		assertEquals(0, getGraph("ORPHANID2").getSpans().size());
 	}
 	
 	/**
@@ -466,7 +497,13 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	public void testParseEmptyRefs() {
 		setTestFile("empty-refs.txt");
 		start();
-		fail("Needs to be implemented further!");
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocumentGraph graph = getGraph("empty-refs");
+		assertEquals(2, graph.getTextualDSs().size());
+		assertEquals("Wort1", graph.getTextualDSs().get(0).getText());
+		assertEquals("m1", graph.getTextualDSs().get(1).getText());
+		assertEquals(2, graph.getTokens().size());
+		assertEquals(1, graph.getSpans().size());
 	}
 	
 	/**
@@ -479,7 +516,12 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	public void testParseNoTxLine() {
 		setTestFile("no-tx-line.txt");
 		start();
-		fail("Needs to be implemented further!");
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocumentGraph graph = getGraph("ID1");
+		assertEquals(1, graph.getTextualDSs().size());
+		assertEquals("Word Word", graph.getTextualDSs().get(0).getText());
+		assertEquals(2, graph.getTokens().size());
+		assertEquals(2, graph.getSpans().size());
 	}
 	
 	/**
@@ -492,7 +534,12 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	public void testParseNoMbLine() {
 		setTestFile("id-without-morph-line.txt");
 		start();
-		fail("Needs to be implemented further!");
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocumentGraph graph = getGraph("id-without-morph-line");
+		assertEquals(1, graph.getTextualDSs().size());
+		assertEquals("This is a birthday pony ! ( Google this ? )", graph.getTextualDSs().get(0).getText());
+		assertEquals(11, graph.getTokens().size());
+		assertEquals(1, graph.getSpans().size());
 	}
 
 	/**
@@ -504,65 +551,19 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	@Test
 	public void testMixedWithWithoutMbLines() {
 		setTestFile("test-mixed-with-without-mb.txt");
-		start();
-		fail("Needs to be implemented further!");
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
-	 * 
-	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
-	 */
-	@Test @Ignore
-	public void testRealData() {
-		setTestFile("real-data.txt");
-		setProperties("real-data.properties");
-		start();
-		assertEquals(214, getNonEmptyCorpusGraph().getDocuments().size());
-		for (SDocument doc : getNonEmptyCorpusGraph().getDocuments()) {
-			SDocumentGraph graph = doc.getDocumentGraph();
-			assertThat(graph.getTokens().size(), is(greaterThan(0)));
-		}
-		fail("Needs to be implemented further!");
-	}
-	
-	/**
-	 * Test method for
-	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
-	 * 
-	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
-	 */
-	@Test @Ignore
-	public void testMissionaries() {
-		setTestFile("missionaries.txt");
-		setProperties("missionaries.properties");
+		setProperties("test-mixed-with-without-mb.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
-		for (SDocument doc : getNonEmptyCorpusGraph().getDocuments()) {
-			SDocumentGraph graph = doc.getDocumentGraph();
-			assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		SDocumentGraph graph = getGraph("Document no. 1");
+		assertEquals(2, graph.getTextualDSs().size());
+		assertEquals("Word1 Word2 Word3 Word4 Word5 Word6", graph.getTextualDSs().get(0).getText());
+		assertEquals("m1m2m5m6", graph.getTextualDSs().get(1).getText());
+		assertEquals(10, graph.getTokens().size());
+		assertEquals(3, graph.getSpans().size());
+		for (SSpan span : graph.getSpans()) {
+			assertThat(span.getName(), anyOf(is("Sentence 2 *without* mb line"), is("Sentence 1 with mb line")));
+			assertEquals(2, span.getAnnotations().size());
 		}
-		fail("Needs to be implemented further!");
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
-	 * 
-	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
-	 */
-	@Test @Ignore
-	public void testMissionaries2() {
-		setTestFile("missionaries2.txt");
-		setProperties("missionaries.properties");
-		start();
-		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
-		for (SDocument doc : getNonEmptyCorpusGraph().getDocuments()) {
-			SDocumentGraph graph = doc.getDocumentGraph();
-			assertThat(graph.getTokens().size(), is(greaterThan(0)));
-		}
-		fail("Needs to be implemented further!");
 	}
 
 	/**
@@ -580,7 +581,14 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
-		assertEquals(14 + 20, graph.getSpans().size());
+		for (SSpan s : graph.getSpans()) {
+			System.err.println(s.getName());
+			for (SToken x : graph.getSortedTokenByText(graph.getOverlappedTokens(s))) {
+				System.err.println("      " + graph.getText(x));
+			}
+		}
+//		FIXME GO GO GO!
+//		assertEquals(14 + 18, graph.getSpans().size());
 		fail("Needs to be implemented further!");
 	}
 	
@@ -597,10 +605,10 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
 		SDocumentGraph graph = doc.getDocumentGraph();
-		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertEquals("Word Contraction Word", graph.getTextualDSs().get(0).getText());
 		assertEquals("m1contractionm2", graph.getTextualDSs().get(1).getText());
 		assertEquals(7, graph.getTokens().size());
+		assertEquals(1, graph.getSpans().size());
 	}
 
 	/**
@@ -612,8 +620,18 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	@Test
 	public void testWithoutMbLines() {
 		setTestFile("test-no-mb-lines.txt");
+		setProperties("test-no-mb-lines.properties");
 		start();
-		fail("Needs to be implemented further!");
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertEquals(1, graph.getTextualDSs().size());
+		assertEquals("Word1 Word2 Word3 Word4 Word5 Word6", graph.getTextualDSs().get(0).getText());
+		assertEquals(6, graph.getTokens().size());
+		assertEquals(3, graph.getSpans().size());
+		for (SToken token: graph.getTokens()) {
+			assertEquals(1, token.getAnnotations().size());
+		}
 	}
 	
 	/**
@@ -771,5 +789,16 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		getFixture().setProperties(properties);
 	}
 	
+	private SDocumentGraph getGraph(String name) {
+		return getDocument(name).getDocumentGraph();
+	}
 
+	private SDocument getDocument(String name) {
+		for (SDocument doc : getNonEmptyCorpusGraph().getDocuments()) {
+			if (doc.getName().equals(name)) {
+				return doc;
+			}
+		}
+		return null;
+	}
 }

@@ -90,6 +90,10 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	public DOCUMENT_STATUS mapSDocument() {
 		final boolean eDM = getProperties().errorDetectionMode();
 		SDocumentGraph graph = getDocument().getDocumentGraph();
+		if (graph == null) {
+			graph = SaltFactory.createSDocumentGraph();
+			getDocument().setDocumentGraph(graph);
+		}
 		File file = new File(getResourceURI().toFileString());
 		
 		// Create layers
@@ -212,45 +216,53 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	public DOCUMENT_STATUS mapSCorpus() {
 		final boolean eDM = getProperties().errorDetectionMode();
 		File file = new File(getResourceURI().toFileString());
-		headerParsing:
-		try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file)));
-				ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-			int currentByte;
-			String[] markerAndValue = null;
-			while ((currentByte = stream.read()) > 0 && stream.getCount() < headerEndOffset) {
-				/* 
-				 * If we hit a new marker, split the trimmed contents of bos into 
-				 * marker and value and write them to a meta annotation, unless
-				 * the marker is the \ref marker, which means that we have hit an
-				 * orphan \ref before the first \id marker, in which case write and abort!
-				 */
-				if (currentByte == '\\' && bos.size() > 0) {
-					markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
-					if (!markerAndValue[0].equals(getProperties().getRefMarker())) {
-						if (!eDM) {
-							getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
+		if (!file.isDirectory()) {
+			headerParsing: try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file))); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+				int currentByte;
+				String[] markerAndValue = null;
+				while ((currentByte = stream.read()) > 0 && stream.getCount() < headerEndOffset) {
+					/*
+					 * If we hit a new marker, split the trimmed contents of bos
+					 * into marker and value and write them to a meta 
+					 * annotation, unless the marker is the \ref marker, 
+					 * which means that we have hit an orphan \ref before the 
+					 * first \id marker, in which case write and abort!
+					 */
+					if (currentByte == '\\' && bos.size() > 0) {
+						markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
+						if (!markerAndValue[0].equals(getProperties().getRefMarker())) {
+							if (!eDM) {
+								// If the meta annotation already exists, overwrite its value ; TODO Document this behaviour
+								if (getCorpus().getMetaAnnotation(SALT_NAMESPACE_TOOLBOX + "::" + markerAndValue[0]) != null) {
+									getCorpus().getMetaAnnotation(SALT_NAMESPACE_TOOLBOX + "::" + markerAndValue[0]).setValue(markerAndValue.length > 1 ? markerAndValue[1] : "");
+								}
+								else {
+									getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
+								}
+							}
+							bos.reset();
 						}
-						bos.reset();
+						else {
+							logger.warn("Found an orphan \\ref in the corpus header of \"" + file.getName() + "\" at byte " + stream.getCount() + ".\nWill neglect it and stop parsing the corpus header, and write the content that has already been parsed to the model.");
+							// Break the whole try block
+							break headerParsing;
+						}
 					}
-					else {
-						logger.warn("Found an orphan \\ref in the corpus header of \"" + file.getName() + "\" at byte " + stream.getCount() + ".\nWill neglect it and stop parsing the corpus header, and write the content that has already been parsed to the model.");
-						// Break the whole try block
-						break headerParsing;
-					}
+					bos.write(currentByte);
 				}
-				bos.write(currentByte);
+				// bos still contains the last marker line, so write that to the
+				// list of marker lines.
+				if (!eDM) {
+					markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
+					getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
+				}
 			}
-			// bos still contains the last marker line, so write that to the list of marker lines.
-			if (!eDM) {
-				markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
-				getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
+			catch (FileNotFoundException e) {
+				throw new PepperModuleException("The corpus file " + getResourceURI().toFileString() + " has not been found.", e);
 			}
-		}
-		catch (FileNotFoundException e) {
-			throw new PepperModuleException("The corpus file " + getResourceURI().toFileString() + " has not been found.", e);
-		}
-		catch (IOException e) {
-			throw new PepperModuleException("Error while parsing the corpus file " + getResourceURI().toFileString() + "!", e);
+			catch (IOException e) {
+				throw new PepperModuleException("Error while parsing the corpus file " + getResourceURI().toFileString() + "!", e);
+			}
 		}
 		return DOCUMENT_STATUS.COMPLETED;
 	}

@@ -65,7 +65,7 @@ public class DocumentHeaderMapper extends AbstractBlockMapper {
 				graph.getDocument().setName(line.split("\\s+", 2)[1]);
 			}
 			else {
-				String[] markerContent = line.split("\\s+", 3);
+				String[] markerContent = line.split("\\s+", 2);
 				if (graph.getDocument().getMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX + "::" + markerContent[0].substring(1)) != null) {
 					String oldVal = graph.getDocument().getMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX + "::" + markerContent[0].substring(1)).getValue_STEXT();
 					String newVal = oldVal + " " + markerContent[1];

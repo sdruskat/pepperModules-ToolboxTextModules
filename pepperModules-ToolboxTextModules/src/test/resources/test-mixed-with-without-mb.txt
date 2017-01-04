@@ -16,6 +16,7 @@
 \ref Sentence 2 *without* mb line
 \tx Word3 Word4
 \ta W3 W4
+\ge Will be ignored!
 \ll A ref-level annotation
 
 \ref Sentence 1 with mb line

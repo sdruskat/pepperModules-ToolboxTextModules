@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -130,7 +132,13 @@ public class RefMapper extends AbstractBlockMapper {
 				refAnnoMarkers.add(key);
 			}
 		}
-
+		
+		// Test if \ref is named
+		if (getSingleLine(refMarker) == null) {
+			markerContentMap.removeAll(refMarker);
+			markerContentMap.put(refMarker, "Unnamed \\ref (" + new BigInteger(130, new SecureRandom()).toString(32) + ")");
+		}
+		
 		// Test if all markers have been caught in a group or as a single marker
 		new MarkerContentMapConsistencyChecker(new HashSet<>(markerContentMap.keySet()), refMarker, lexMarker, morphMarker, subrefMarker, lexAnnoMarkers, morphAnnoMarkers, subrefAnnoMarkers, refAnnoMarkers, markerContentMap.get(refMarker)).run();
 
@@ -236,10 +244,12 @@ public class RefMapper extends AbstractBlockMapper {
 				int lexTimelineEnd = morphTimelineEnd;
 				for (String morpheme : morphData.getPrimaryData()) {
 					// Drop liaison delimiter if necessary
+					boolean dropLiaisonDelim = false;
 					if (morpheme.startsWith(properties.getLiaisonDelim())) {
 						hasLiaisonDelimiter = true;
+						dropLiaisonDelim = true;
 					}
-					morpheme = hasLiaisonDelimiter ? morpheme.substring(1) : morpheme;
+					morpheme = dropLiaisonDelim ? morpheme.substring(1) : morpheme;
 					// Create morphological token;
 					morphDS.setText(morphDS.getText() + morpheme);
 					SToken token = graph.createToken(morphDS, morphDS.getEnd() - morpheme.length(), morphDS.getEnd());

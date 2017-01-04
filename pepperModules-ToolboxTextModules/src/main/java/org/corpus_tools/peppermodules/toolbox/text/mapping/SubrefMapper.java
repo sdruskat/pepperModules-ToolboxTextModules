@@ -217,6 +217,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 */
 	private void mapFullRef(String fullRefAnnoLine, String marker) {
 		SSpan span = graph.createSpan(lexTokens);
+		span.setName(fullRefAnnoLine);
 		// Span *can* be null here for refs that don't have lexical tokens.
 		if (span != null) {
 			graph.getLayerByName(refData.getMarker()).get(0).addNode(span);
@@ -284,6 +285,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				return null;
 			}
 			subref = graph.createSpan(orderedTokens.subList(from, to));
+			subref.setName(marker);
 		}
 		graph.getLayerByName(mapToMorphology ? morphMarker : lexMarker).get(0).addNode(subref);
 		subref.createAnnotation("toolbox", marker, split.getAnnotation());

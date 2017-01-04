@@ -76,11 +76,11 @@ class ToolboxTextSegmentationParser {
 			boolean hasMorphology = false;
 			while ((currentByte = stream.read()) > 0) {
 				long currentOffset = stream.getCount() - 1;
-				if (currentByte == '\\') {
+				if (currentByte == '\\') { // Most likely hit a marker
 					while ((currentByte = stream.read()) > -1) {
 						/*
-						 *  If the stream hits a whitespace, it must be the end
-						 *  of the marker, so break out of this iteration.
+						 * If the stream hits a whitespace, it must be the end
+						 * of the marker, so break out of this iteration.
 						 */
 						if (Character.isWhitespace((char) currentByte)) {
 							break;
@@ -91,11 +91,13 @@ class ToolboxTextSegmentationParser {
 					}
 					if (bos.toString().equals(idMarker)) {
 						currentIdOffset = currentOffset;
+						// Write hasMorphology information for document
 						if (!idOffsets.isEmpty()) {
 							Collections.sort(idOffsets);
 							Long lastOffset = idOffsets.get(idOffsets.size() - 1);
 							idStructureMap.put(lastOffset, hasMorphology);
 						}
+						// Add \id offset, prepare for \ref recording and reset hasMorphology
 						idOffsets.add(currentIdOffset);
 						refMap.put(currentIdOffset, new ArrayList<Long>());
 						hasMorphology = false;
