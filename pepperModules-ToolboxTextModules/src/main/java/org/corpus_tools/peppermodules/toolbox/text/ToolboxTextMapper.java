@@ -216,7 +216,11 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	public DOCUMENT_STATUS mapSCorpus() {
 		final boolean eDM = getProperties().errorDetectionMode();
 		File file = new File(getResourceURI().toFileString());
-		if (!file.isDirectory()) {
+		/*
+		 * headerEndOffset should only be null if the corpus represents
+		 * a directory. In this case, don't parse obviously.
+		 */
+		if (!file.isDirectory() && headerEndOffset != null) {
 			headerParsing: try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file))); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 				int currentByte;
 				String[] markerAndValue = null;

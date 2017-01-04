@@ -59,17 +59,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 */
 	public static final String COMMA_DELIM_SPLIT_REGEX = "\\s*,\\s*";
 
-	private List<Long> idOffsets;
-
-	private Map<Long, List<Long>> refMap;
-
-	private Long headerEndOffset;
-
-	private boolean monolithic = false;
-	
-	private final Map<Identifier, Long> offsetMap = new HashMap<>();
-	
-	private Map<Long, Boolean> idStructureMap;
+	private Map<Identifier, ToolboxParseBean> parseMap = new HashMap<>();
 
 	public ToolboxTextImporter() {
 		super();
@@ -105,7 +95,13 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 * @param corpusFile
 	 */
 	private void importCorpusStructure(SCorpusGraph corpusGraph, SCorpus parent, File corpusFile) {
-		URI corpusFileURI = URI.createFileURI(corpusFile.getAbsolutePath());
+		List<Long> idOffsets;
+		Map<Long, List<Long>> refMap;
+		Long headerEndOffset = null;
+		boolean monolithic = false;
+		final Map<Identifier, Long> offsetMap = new HashMap<>();
+		Map<Long, Boolean> idStructureMap;
+		URI corpusFileURI = URI.createFileURI(corpusFile != null ? corpusFile.getAbsolutePath() : null);
 		String corpusFileName = corpusFile.getName();
 		if (corpusFile.isDirectory()) {
 			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName);
@@ -141,7 +137,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 						// Corpus has no \ids but \refs, so create it with a
 						// single document containing all refs
 						headerEndOffset = refMap.get(-1L).get(0);
-						setMonolithic(true);
+						monolithic = true;
 					}
 				}
 			}
@@ -172,22 +168,25 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 				headerEndOffset = idOffsets.get(0);
 			}
 			// Create documents for \ids in file
-			if (!isMonolithic()) {
+			if (!monolithic) {
 				for (Long idOffset : idOffsets) {
 					SDocument doc = corpusGraph.createDocument(subCorpus, ToolboxTextDocumentNameParser.parseId(idOffset, getProperties().getIdMarker(), corpusFile));
 					getIdentifier2ResourceTable().put(doc.getIdentifier(), corpusFileURI);
 					offsetMap.put(doc.getIdentifier(), idOffset);
+					parseMap .put(doc.getIdentifier(), new ToolboxParseBean(idOffsets, refMap, headerEndOffset, monolithic, offsetMap, idStructureMap));
 				}
 			}
 			else {
 				SDocument doc = corpusGraph.createDocument(subCorpus, corpusFileName.substring(0, corpusFileName.lastIndexOf('.')));
 				getIdentifier2ResourceTable().put(doc.getIdentifier(), corpusFileURI);
+				parseMap.put(doc.getIdentifier(), new ToolboxParseBean(idOffsets, refMap, headerEndOffset, monolithic, offsetMap, idStructureMap));
 			}
 		}
 	}
 
 	@Override
 	public PepperMapper createPepperMapper(Identifier identifier) {
+		ToolboxParseBean parse = parseMap.get(identifier);
 		PepperMapper mapper = null;
 		URI resource = getIdentifier2ResourceTable().get(identifier);
 		if (identifier == null) {
@@ -199,24 +198,29 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		IdentifiableElement element = identifier.getIdentifiableElement();
 		if (element instanceof SDocument) {
 			Range<Long> idRange = null;
-			if (isMonolithic()) {
-				idRange = Range.closed(headerEndOffset, new File(resource.toFileString()).length());
+			if (parse.monolithic) {
+				idRange = Range.closed(parse.headerEndOffset, new File(resource.toFileString()).length());
 			}
 			else {
 				// Get range for ID, pass to constructor, pass refmap
-				Long idOffset = offsetMap.get(identifier);
-				int indexOfNextIdOffset = idOffsets.indexOf(idOffset) + 1;
+				Long idOffset = parse.offsetMap.get(identifier);
+				int indexOfNextIdOffset = parse.idOffsets.indexOf(idOffset) + 1;
 				Long nextIdOffset = new File(resource.toFileString()).length();
 				// Check if this offset is the last one in the list
-				if (!(indexOfNextIdOffset == idOffsets.size())) {
-					nextIdOffset = idOffsets.get(indexOfNextIdOffset);
+				if (!(indexOfNextIdOffset == parse.idOffsets.size())) {
+					nextIdOffset = parse.idOffsets.get(indexOfNextIdOffset);
 				}
-				idRange = Range.closed(offsetMap.get(identifier), nextIdOffset);
+				idRange = Range.closed(parse.offsetMap.get(identifier), nextIdOffset);
 			}
-			mapper = new ToolboxTextMapper(null, refMap, idRange, idStructureMap.get(idRange.lowerEndpoint()));
+			mapper = new ToolboxTextMapper(null, parse.refMap, idRange, parse.idStructureMap.get(idRange.lowerEndpoint()));
 		}
 		else if (element instanceof SCorpus) {
-			mapper = new ToolboxTextMapper(headerEndOffset, null, null, false);
+			if (parse != null) {
+				mapper = new ToolboxTextMapper(parse.headerEndOffset, null, null, false);
+			}
+			else { // If there is no parse, we are dealing woth a directory!
+				mapper = new ToolboxTextMapper(null, null, null, false);
+			}
 		}
 		else {
 			throw new PepperModuleException("Cannot create a mapper for elements that are neither of type SCorpus or SDocument.");
@@ -281,7 +285,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 */
 	private void warnAboutOrphanRefs(List<Long> orphanRefOffsets, File file) {
 		// FIXME Change to one-line logging message
-		StringBuilder warningBuilder = new StringBuilder("====================================================\n" + "================= W A R N I N G ! ==================\n" + "====================================================\n" + "\nFound \\refs that do not belong to any \\ids!\n" + "The following orphaned \\refs will not be processed:\n\n" + "====================================================\n");
+		StringBuilder warningBuilder = new StringBuilder("====================================================\n" + "================= W A R N I N G ! ==================\n" + "====================================================\n" + file.getName() + ":\nFound \\refs that do not belong to any \\ids!\n" + "The following orphaned \\refs will not be processed:\n\n" + "====================================================\n");
 		for (Long orphanRefOffset : orphanRefOffsets) {
 			int offsetIndex = orphanRefOffsets.indexOf(orphanRefOffset);
 			Long nextOffset = null;
@@ -327,26 +331,61 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		logger.warn(warningBuilder.toString() + "====================================================\n====================================================\n====================================================\n");
 	}
 
-	/**
-	 * @return the headerEndOffset
-	 */
-	public Long getHeaderEndOffset() {
-		return headerEndOffset;
-	}
+//	/**
+//	 * @return the headerEndOffset
+//	 */
+//	public Long getHeaderEndOffset() {
+//		return headerEndOffset;
+//	}
+//
+//	/**
+//	 * @return the monolithic
+//	 */
+//	boolean isMonolithic() {
+//		return monolithic;
+//	}
+//
+//	/**
+//	 * @param monolithic
+//	 *            the monolithic to set
+//	 */
+//	private void setMonolithic(boolean monolithic) {
+//		this.monolithic = monolithic;
+//	}
 
 	/**
-	 * @return the monolithic
-	 */
-	boolean isMonolithic() {
-		return monolithic;
-	}
+		 * TODO Description
+		 *
+		 * @author Stephan Druskat
+		 *
+		 */
+	private class ToolboxParseBean {
+	
+		private final List<Long> idOffsets;
+		private final Map<Long, List<Long>> refMap;
+		private final Long headerEndOffset;
+		private final boolean monolithic;
+		private final Map<Identifier, Long> offsetMap;
+		private final Map<Long, Boolean> idStructureMap;
 
-	/**
-	 * @param monolithic
-	 *            the monolithic to set
-	 */
-	private void setMonolithic(boolean monolithic) {
-		this.monolithic = monolithic;
+		/**
+		 * @param idOffsets
+		 * @param refMap
+		 * @param headerEndOffset
+		 * @param monolithic
+		 * @param offsetMap
+		 * @param idStructureMap
+		 */
+		private ToolboxParseBean(List<Long> idOffsets, Map<Long, List<Long>> refMap, Long headerEndOffset, boolean monolithic, Map<Identifier, Long> offsetMap, Map<Long, Boolean> idStructureMap) {
+			this.idOffsets = idOffsets;
+			this.refMap = refMap;
+			this.headerEndOffset = headerEndOffset;
+			this.monolithic = monolithic;
+			this.offsetMap = offsetMap;
+			this.idStructureMap = idStructureMap;
+			
+		}
+	
 	}
 
 }
