@@ -114,6 +114,7 @@ public class MorphLayerData extends LayerData {
 				morphWords.add(suffixWord);
 			}
 			else {
+				if (morphWords.size() > 0) {
 				String newMorphWord = morphWords.get(morphWords.size() - 1);
 				for (String pw : prefixWord) {
 					newMorphWord = newMorphWord.concat(pw);
@@ -127,6 +128,10 @@ public class MorphLayerData extends LayerData {
 				iterator.set(newMorphsArr);
 				iterator.next();
 				iterator.remove();
+				}
+				else {
+					log.info("Reference {} in document {} does not contain suffixed morphemes, hence skipping concatenation.", ref, docName);
+				}
 			}
 		}
 //		for (Integer liaisonIndex : liaisonIndices) {

@@ -41,8 +41,8 @@ public class LayerData {
 	private final List<String> annotationMarkers;
 	private boolean segmented;
 	private final String marker;
-	private String docName;
-	private String ref;
+	protected String docName;
+	protected String ref;
 	
 	/**
 	 * @param markerContentMap
