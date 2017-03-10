@@ -34,6 +34,7 @@ import org.corpus_tools.salt.common.SPointingRelation;
 import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.STextualDS;
 import org.corpus_tools.salt.common.SToken;
+import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.util.DataSourceSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -288,7 +289,13 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			subref.setName(marker);
 		}
 		graph.getLayerByName(mapToMorphology ? morphMarker : lexMarker).get(0).addNode(subref);
-		subref.createAnnotation("toolbox", marker, split.getAnnotation());
+		SAnnotation anno;
+		if ((anno = subref.getAnnotation("toolbox::marker")) != null) {
+			log.warn("Annotation {} already exists in reference {} in document {}!\nWill NOT change annotation value from {} to {}!", marker, refData.getRef(), refData.getDocName(), anno.getValue_STEXT(), split.getAnnotation());
+		}
+		else {
+			subref.createAnnotation("toolbox", marker, split.getAnnotation());
+		}
 		return subref;
 	}
 
