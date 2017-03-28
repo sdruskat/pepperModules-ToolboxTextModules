@@ -270,31 +270,50 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 *
 	 * @param split
 	 * @param marker
-	 * @param mapToMorphology 
+	 * @param mapToMorphology
 	 * @return
 	 */
 	private SSpan mapData(SplitResult split, int from, int to, String marker, boolean mapToMorphology) {
 		SSpan subref = null;
-		List<SSpan> spanList = graph.getSpansBySequence(new DataSourceSequence<Number>(mapToMorphology ? morphDS : lexDS, from, to));
-		if (spanList != null && spanList.size() > 0) {
-			subref = spanList.get(0);
-		}
-		else {
-			List<SToken> orderedTokens = graph.getSortedTokenByText(mapToMorphology ? morphTokens : lexTokens);
-			if (orderedTokens.size() < to) {
-				log.warn("Cannot create subref as end offset is > index of tokens in " + refData.getPrimaryData() + "!");
-				return null;
+		List<SToken> orderedTokens = graph.getSortedTokenByText(mapToMorphology ? morphTokens : lexTokens);
+		List<SToken> subrefTokens = orderedTokens.subList(from, to);
+		if (orderedTokens.size() < to) {
+			log.warn("Cannot create subref as end offset is > index of tokens in " + refData.getPrimaryData() + "!");
+			return null;
+		} else {
+			/*
+			 * Compare the list of subrefTokens with the list of sorted tokens
+			 * for each span to find out if a span spanning the same tokens
+			 * already exists in the document graph.
+			 * 
+			 */
+			forspans: for (SSpan span : graph.getSpans()) {
+				List<SToken> sortedSpanTokens = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
+				if (sortedSpanTokens.size() == subrefTokens.size()) {
+					int lastindex = sortedSpanTokens.size() - 1;
+					if (sortedSpanTokens.get(0) == subrefTokens.get(0)
+							&& sortedSpanTokens.get(lastindex) == subrefTokens.get(lastindex)) {
+						subref = span;
+						String name = subref.getName();
+						subref.setName(name.isEmpty() ? "subref-" + marker : name + "-" + marker);
+						break forspans;
+					}
+				}
 			}
-			subref = graph.createSpan(orderedTokens.subList(from, to));
-			subref.setName(marker);
 		}
-		// FIXME Bug: If annotation id already exists, fails here (cf. daakaka conversion)
+		if (subref == null) {
+			subref = graph.createSpan(orderedTokens.subList(from, to));
+			subref.setName("subref-" + marker);
+		}
+		// FIXME Bug: If annotation id already exists, fails here (cf. daakaka
+		// conversion)
 		graph.getLayerByName(mapToMorphology ? morphMarker : lexMarker).get(0).addNode(subref);
 		SAnnotation anno;
 		if ((anno = subref.getAnnotation("toolbox::" + marker)) != null) {
-			log.warn("Annotation {} already exists in reference {} in document {}!\nWill NOT change annotation value from {} to {}!", marker, refData.getRef(), refData.getDocName(), anno.getValue_STEXT(), split.getAnnotation());
-		}
-		else {
+			log.warn(
+					"Annotation {} already exists in reference {} in document {}!\nWill NOT change annotation value from {} to {}!",
+					marker, refData.getRef(), refData.getDocName(), anno.getValue_STEXT(), split.getAnnotation());
+		} else {
 			subref.createAnnotation("toolbox", marker, split.getAnnotation());
 		}
 		return subref;
@@ -595,6 +614,14 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			try {
 				int fromInt = Integer.parseInt(from);
 				int toInt = Integer.parseInt(to);
+				/* 
+				 * NOTE: 1 is added to the second argument as 
+				 * the result will be used later on in a 
+				 * List.subList(int, int) operation, which
+				 * excludes the index at the second int argument.
+				 * 
+				 * Cf. API for java.util.List#subList(int, int)
+				 */
 				pair = Pair.of(fromInt, toInt + 1);
 			}
 			catch (NumberFormatException e) {
