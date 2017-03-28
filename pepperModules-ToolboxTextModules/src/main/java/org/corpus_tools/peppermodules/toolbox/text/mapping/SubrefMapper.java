@@ -288,9 +288,10 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			subref = graph.createSpan(orderedTokens.subList(from, to));
 			subref.setName(marker);
 		}
+		// FIXME Bug: If annotation id already exists, fails here (cf. daakaka conversion)
 		graph.getLayerByName(mapToMorphology ? morphMarker : lexMarker).get(0).addNode(subref);
 		SAnnotation anno;
-		if ((anno = subref.getAnnotation("toolbox::marker")) != null) {
+		if ((anno = subref.getAnnotation("toolbox::" + marker)) != null) {
 			log.warn("Annotation {} already exists in reference {} in document {}!\nWill NOT change annotation value from {} to {}!", marker, refData.getRef(), refData.getDocName(), anno.getValue_STEXT(), split.getAnnotation());
 		}
 		else {
