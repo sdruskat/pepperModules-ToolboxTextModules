@@ -1,0 +1,9 @@
+\_sh v3.0 Test
+
+\id Document no. 1
+
+\ref subref sentence schema 1 (line-level) to tx
+\met SIMPLE_TARGETED to tx
+\tx L1 L2 L3
+\mb m19 m20 m21
+\sr tx 1 2 SIMPLE_TARGETED L2-L3

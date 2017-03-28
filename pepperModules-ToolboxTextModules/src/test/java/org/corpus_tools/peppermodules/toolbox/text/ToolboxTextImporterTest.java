@@ -610,7 +610,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#SIMPLE_TARGETED}.
 	 */
 	@Test
-	public void testSubRefSIMPLE_TARGETED() {
+	public void testSubRefSIMPLE_TARGETED_MB() {
 		setTestFile("subref_SIMPLE_TARGETED.txt");
 		setProperties("subref_SIMPLE_TARGETED.properties");
 		start();
@@ -642,31 +642,35 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("SIMPLE_TARGETED m17-m18"));
 	}
 	
-//	/**
-//	 * Test method for
-//	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
-//	 * 
-//	 * Tests against a minimum example, where there are 3 \refs, one of which has **no** morph line
-//	 */
-//	@Test
-//	public void testRealSubRefs() {
-//		setTestFile("subrefs-real.txt");
-//		setProperties("subrefs-real.properties");
-//		start();
-//		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
-//		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
-//		SDocumentGraph graph = doc.getDocumentGraph();
-//		assertThat(graph.getTokens().size(), is(greaterThan(0)));
-//		for (SToken tok : graph.getTokens()) {
-//			System.err.println("TOKEN " + tok);
-//		}
-//		System.err.println("\n\n");
-//		for (SSpan span: graph.getSpans()) {
-//			System.err.println("SPAN " + span + "\n");
-//		}
-////		fail("Needs to be implemented further!");
-//	}
-	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#SIMPLE_TARGETED}.
+	 */
+	@Test
+	public void testSubRefSIMPLE_TARGETED_TX() {
+		setTestFile("subref_SIMPLE_TARGETED_tx.txt");
+		setProperties("subref_SIMPLE_TARGETED.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertThat(graph.getTokens().size(), is(6));
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("sr").size(), is(1));
+		SNode srNode = graph.getNodesByName("sr").get(0);
+		assertThat(srNode, instanceOf(SSpan.class));
+		assertThat(graph.getOverlappedTokens(srNode).size(), is(2));
+		for (SToken tok : graph.getOverlappedTokens(srNode)) {
+			assertThat(graph.getText(tok), anyOf(is("L2"), is("L3")));
+		}
+		assertThat(srNode.getAnnotations().size(), is(1));
+		assertThat(srNode.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
+		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("SIMPLE_TARGETED L2-L3"));
+	}
+
 	/**
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
