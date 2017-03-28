@@ -30,6 +30,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CountingInputStream;
 
@@ -40,6 +43,8 @@ import com.google.common.io.CountingInputStream;
  *
  */
 class ToolboxTextSegmentationParser {
+	
+	private static final Logger log = LoggerFactory.getLogger(ToolboxTextSegmentationParser.class);
 	
 	private final File file;
 	private final String idMarker;
@@ -124,7 +129,19 @@ class ToolboxTextSegmentationParser {
 				idStructureMap.put(lastOffset, hasMorphology);
 			}
 			else {
-				idStructureMap.put(refMap.get(-1L).get(0), hasMorphology);
+//				if (idStructureMap != null && refMap != null && refMap.get(-1L) != null && refMap.get(-1L).get(0) != null) {
+					idStructureMap.put(refMap.get(-1L).get(0), hasMorphology);
+//				}
+//				else {
+//					/* FIXME: Check why orphan refs lead to idStructureMap being null!
+//					 * Cf.
+//					 * daakie-toolbox-transcriptions.txt:
+//					 * Found \refs that do not belong to any \ids!
+//					 * The following orphaned \refs will not be processed:
+//					 * \ref SmTkWell 001 
+//					 */
+//					log.error("[INTERNAL] idStructureMap or refMap or refMap contents or something else is null, trying to ignore and soldier on.");
+//				}
 			}
 		} catch (IOException e) {
 			throw new PepperModuleException("Could not read corpus file " + file.getAbsolutePath(), e);
