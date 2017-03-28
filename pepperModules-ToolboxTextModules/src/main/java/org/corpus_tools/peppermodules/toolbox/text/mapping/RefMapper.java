@@ -171,6 +171,7 @@ public class RefMapper extends AbstractBlockMapper {
 		else {
 			log.warn("The reference \"" + ref + "\" in identifier \'" + getDocName() + "\' does not contain a line with morphological items.");
 		}
+		
 		// Now that we can have consistent token lines, check the
 		// token-annotation interlinearization
 		checkTokenAnnotationInterl11n(lexData, refData);
