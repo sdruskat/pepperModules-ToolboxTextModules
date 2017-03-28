@@ -1,0 +1,11 @@
+\_sh v3.0 Test
+
+\id Document no. 1
+
+\ref subref sentence schema 2 (undefined global TARGETED) with existing mb line
+\met UNIDENTIFIED_GLOBAL_TARGETED to mb
+\subref mb 1 4
+\tx subref sentence two with one-to-four ref
+\mb m22 m23 m24 m25 m26 m27
+\sr UNIDENTIFIED_GLOBAL_TARGETED m23-m26
+\sr2 UNIDENTIFIED_GLOBAL_TARGETED m23-m26
