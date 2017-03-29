@@ -588,20 +588,17 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(6));
 		assertThat(graph.getSpans().size(), is(2));
-		Map<Integer, SSpan> spanSize2SpanMap = new HashMap<>();
-		for (SSpan span : graph.getSpans()) {
-			spanSize2SpanMap.put(graph.getOverlappedTokens(span).size(), span);
-		}
-		assertThat(spanSize2SpanMap.containsKey(3), is(true));
-		assertThat(spanSize2SpanMap.containsKey(2), is(true));
-		assertThat(spanSize2SpanMap.get(3).getAnnotations().size(), is(2));
-		SSpan subref = spanSize2SpanMap.get(2);
+		assertThat(graph.getNodesByName("subref").size(), is(1));
+		SNode subref = graph.getNodesByName("subref").get(0);
+		assertThat(subref, instanceOf(SSpan.class));
 		assertThat(subref.getAnnotations().size(), is(1));
 		for (SToken tok : graph.getOverlappedTokens(subref)) {
 			assertThat(graph.getText(tok), anyOf(is("m2"), is("m3")));
 		}
 		assertThat(subref.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
 		assertThat(subref.getAnnotations().iterator().next().getValue_STEXT(), is("SIMPLE m2-m3"));
+		assertThat(subref.getLayers().size(), is(1));
+		assertThat(subref.getLayers().iterator().next().getName(), is("mb"));
 	}
 	
 	/**
@@ -653,6 +650,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(xtNode.getAnnotation("toolbox::xt").getValue_STEXT(), is("SIMPLE_TARGETED m18-m19"));
 		assertThat(srNode.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
 		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("SIMPLE_TARGETED m17-m18"));
+		assertThat(srNode.getLayers().size(), is(1));
+		assertThat(srNode.getLayers().iterator().next().getName(), is("mb"));
 	}
 	
 	/**
@@ -682,6 +681,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(srNode.getAnnotations().size(), is(1));
 		assertThat(srNode.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
 		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("SIMPLE_TARGETED L2-L3"));
+		assertThat(srNode.getLayers().size(), is(1));
+		assertThat(srNode.getLayers().iterator().next().getName(), is("tx"));
 	}
 
 	/**
@@ -715,6 +716,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
 		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL m23-m26"));
 		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL m23-m26"));
+		assertThat(srNode.getLayers().size(), is(1));
+		assertThat(srNode.getLayers().iterator().next().getName(), is("mb"));
 	}
 
 	/**
@@ -748,6 +751,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
 		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL L2-L5"));
 		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL L2-L5"));
+		assertThat(srNode.getLayers().size(), is(1));
+		assertThat(srNode.getLayers().iterator().next().getName(), is("tx"));
 	}
 
 	/**
@@ -779,6 +784,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
 		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED m23-m26"));
 		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED m23-m26"));
+		assertThat(srNode.getLayers().size(), is(1));
+		assertThat(srNode.getLayers().iterator().next().getName(), is("mb"));
 	}
 	
 	/**
@@ -810,6 +817,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
 		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED_tx m23-m26"));
 		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED_tx m23-m26"));
+		assertThat(srNode.getLayers().size(), is(1));
+		assertThat(srNode.getLayers().iterator().next().getName(), is("tx"));
 	}
 	
 	/**
