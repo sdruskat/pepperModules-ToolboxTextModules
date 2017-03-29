@@ -1,0 +1,12 @@
+\_sh v3.0 Test
+
+\id Document no. 1
+
+\ref subref sentence schema 3 (defined global) to mb
+\met IDENTIFIED_GLOBAL to mb
+\subref 1 1 3
+\subref 2 5 6
+\tx subref with some random text just like that
+\mb m28 m29 m30 m31 m32 m33 m34 m35
+\sr 1 IDENTIFIED_GLOBAL m29-m31
+\sr 2 IDENTIFIED_GLOBAL m33-m34

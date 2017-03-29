@@ -1,0 +1,11 @@
+\_sh v3.0 Test
+
+\id Document no. 1
+
+\ref subref sentence schema 3 (defined global) to tx
+\met IDENTIFIED_GLOBAL to tx (no mb!)
+\subref 1 1 3
+\subref 2 5 6
+\tx L0 L1 L2 L3 L4 L5 L6 L7
+\sr 1 IDENTIFIED_GLOBAL L1-L3
+\sr 2 IDENTIFIED_GLOBAL L5-L6
