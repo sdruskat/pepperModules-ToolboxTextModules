@@ -53,6 +53,7 @@ import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.corpus_tools.salt.core.SNode;
 import org.eclipse.emf.common.util.URI;
 import org.hamcrest.core.IsInstanceOf;
+import org.hamcrest.core.IsNot;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -620,10 +621,22 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(7));
 		assertThat(graph.getSpans().size(), is(3));
-		assertThat(graph.getNodesByName("xt").size(), is(1));
-		assertThat(graph.getNodesByName("sr").size(), is(1));
-		SNode xtNode = graph.getNodesByName("xt").get(0);
-		SNode srNode = graph.getNodesByName("sr").get(0);
+		List<SNode> subrefNodes = graph.getNodesByName("subref"); 
+		assertThat(subrefNodes.size(), is(2));
+		SNode xtNode = null, srNode = null;
+		for (SNode subref : subrefNodes) {
+			for (SAnnotation anno : subref.getAnnotations()) {
+				if (anno.getQName().equals("toolbox::xt")) {
+					xtNode = subref;
+				}
+				else if (anno.getQName().equals("toolbox::sr")) {
+					srNode = subref;
+				}
+			}
+		}
+		assertNotNull(xtNode);
+		assertNotNull(srNode);
+		assertThat(xtNode == srNode, is(false));
 		assertThat(xtNode, instanceOf(SSpan.class));
 		assertThat(srNode, instanceOf(SSpan.class));
 		assertThat(graph.getOverlappedTokens(xtNode).size(), is(2));
@@ -659,8 +672,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(6));
 		assertThat(graph.getSpans().size(), is(2));
-		assertThat(graph.getNodesByName("sr").size(), is(1));
-		SNode srNode = graph.getNodesByName("sr").get(0);
+		assertThat(graph.getNodesByName("subref").size(), is(1));
+		SNode srNode = graph.getNodesByName("subref").get(0);
 		assertThat(srNode, instanceOf(SSpan.class));
 		assertThat(graph.getOverlappedTokens(srNode).size(), is(2));
 		for (SToken tok : graph.getOverlappedTokens(srNode)) {
@@ -687,27 +700,21 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(12));
-		assertThat(graph.getSpans().size(), is(3));
-		assertThat(graph.getNodesByName("sr").size(), is(1));
-		assertThat(graph.getNodesByName("sr2").size(), is(1));
-		SNode srNode = graph.getNodesByName("sr").get(0);
-		SNode sr2Node = graph.getNodesByName("sr2").get(0);
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("subref").size(), is(1));
+		SNode srNode = graph.getNodesByName("subref").get(0);
 		assertThat(srNode, instanceOf(SSpan.class));
-		assertThat(sr2Node, instanceOf(SSpan.class));
 		assertThat(graph.getOverlappedTokens(srNode).size(), is(4));
-		assertThat(graph.getOverlappedTokens(sr2Node).size(), is(4));
 		for (SToken tok : graph.getOverlappedTokens(srNode)) {
 			assertThat(graph.getText(tok), anyOf(is("m23"), is("m24"), is("m25"), is("m26")));
 		}
-		for (SToken tok : graph.getOverlappedTokens(srNode)) {
-			assertThat(graph.getText(tok), anyOf(is("m23"), is("m24"), is("m25"), is("m26")));
-		}
-		assertThat(srNode.getAnnotations().size(), is(1));
-		assertThat(sr2Node.getAnnotations().size(), is(1));
-		assertThat(srNode.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
+		// FIXME: Salt pull request for graphElement.hasAnnotation(String qName)
+		// and getAnnotations().contains(String annotationString)
+		assertThat(srNode.getAnnotations().size(), is(2));
+		assertNotNull(srNode.getAnnotation("toolbox::sr"));
+		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
 		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL m23-m26"));
-		assertThat(sr2Node.getAnnotations().iterator().next().getQName(), is("toolbox::sr2"));
-		assertThat(sr2Node.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL m23-m26"));
+		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL m23-m26"));
 	}
 
 	/**
@@ -726,27 +733,21 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(6));
-		assertThat(graph.getSpans().size(), is(3));
-		assertThat(graph.getNodesByName("sr").size(), is(1));
-		assertThat(graph.getNodesByName("sr2").size(), is(1));
-		SNode srNode = graph.getNodesByName("sr").get(0);
-		SNode sr2Node = graph.getNodesByName("sr2").get(0);
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("subref").size(), is(1));
+		SNode srNode = graph.getNodesByName("subref").get(0);
 		assertThat(srNode, instanceOf(SSpan.class));
-		assertThat(sr2Node, instanceOf(SSpan.class));
 		assertThat(graph.getOverlappedTokens(srNode).size(), is(4));
-		assertThat(graph.getOverlappedTokens(sr2Node).size(), is(4));
 		for (SToken tok : graph.getOverlappedTokens(srNode)) {
-			assertThat(graph.getText(tok), anyOf(is("m23"), is("m24"), is("m25"), is("m26")));
+			assertThat(graph.getText(tok), anyOf(is("L2"), is("L3"), is("L4"), is("L5")));
 		}
-		for (SToken tok : graph.getOverlappedTokens(srNode)) {
-			assertThat(graph.getText(tok), anyOf(is("m23"), is("m24"), is("m25"), is("m26")));
-		}
-		assertThat(srNode.getAnnotations().size(), is(1));
-		assertThat(sr2Node.getAnnotations().size(), is(1));
-		assertThat(srNode.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
-		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL m23-m26"));
-		assertThat(sr2Node.getAnnotations().iterator().next().getQName(), is("toolbox::sr2"));
-		assertThat(sr2Node.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL m23-m26"));
+		// FIXME: Salt pull request for graphElement.hasAnnotation(String qName)
+		// and getAnnotations().contains(String annotationString)
+		assertThat(srNode.getAnnotations().size(), is(2));
+		assertNotNull(srNode.getAnnotation("toolbox::sr"));
+		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
+		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL L2-L5"));
+		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL L2-L5"));
 	}
 
 	/**
@@ -765,27 +766,19 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(12));
-		assertThat(graph.getSpans().size(), is(3));
-		assertThat(graph.getNodesByName("sr").size(), is(1));
-		assertThat(graph.getNodesByName("sr2").size(), is(1));
-		SNode srNode = graph.getNodesByName("sr").get(0);
-		SNode sr2Node = graph.getNodesByName("sr2").get(0);
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("subref").size(), is(1));
+		SNode srNode = graph.getNodesByName("subref").get(0);
 		assertThat(srNode, instanceOf(SSpan.class));
-		assertThat(sr2Node, instanceOf(SSpan.class));
 		assertThat(graph.getOverlappedTokens(srNode).size(), is(4));
-		assertThat(graph.getOverlappedTokens(sr2Node).size(), is(4));
 		for (SToken tok : graph.getOverlappedTokens(srNode)) {
 			assertThat(graph.getText(tok), anyOf(is("m23"), is("m24"), is("m25"), is("m26")));
 		}
-		for (SToken tok : graph.getOverlappedTokens(srNode)) {
-			assertThat(graph.getText(tok), anyOf(is("m23"), is("m24"), is("m25"), is("m26")));
-		}
-		assertThat(srNode.getAnnotations().size(), is(1));
-		assertThat(sr2Node.getAnnotations().size(), is(1));
-		assertThat(srNode.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
+		assertThat(srNode.getAnnotations().size(), is(2));
+		assertNotNull(srNode.getAnnotation("toolbox::sr"));
+		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
 		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED m23-m26"));
-		assertThat(sr2Node.getAnnotations().iterator().next().getQName(), is("toolbox::sr2"));
-		assertThat(sr2Node.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED m23-m26"));
+		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED m23-m26"));
 	}
 	
 	/**
@@ -804,27 +797,19 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(6));
-		assertThat(graph.getSpans().size(), is(3));
-		assertThat(graph.getNodesByName("sr").size(), is(1));
-		assertThat(graph.getNodesByName("sr2").size(), is(1));
-		SNode srNode = graph.getNodesByName("sr").get(0);
-		SNode sr2Node = graph.getNodesByName("sr2").get(0);
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("subref").size(), is(1));
+		SNode srNode = graph.getNodesByName("subref").get(0);
 		assertThat(srNode, instanceOf(SSpan.class));
-		assertThat(sr2Node, instanceOf(SSpan.class));
 		assertThat(graph.getOverlappedTokens(srNode).size(), is(4));
-		assertThat(graph.getOverlappedTokens(sr2Node).size(), is(4));
 		for (SToken tok : graph.getOverlappedTokens(srNode)) {
 			assertThat(graph.getText(tok), anyOf(is("sentence"), is("two"), is("with"), is("one-to-four")));
 		}
-		for (SToken tok : graph.getOverlappedTokens(srNode)) {
-			assertThat(graph.getText(tok), anyOf(is("sentence"), is("two"), is("with"), is("one-to-four")));
-		}
-		assertThat(srNode.getAnnotations().size(), is(1));
-		assertThat(sr2Node.getAnnotations().size(), is(1));
-		assertThat(srNode.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
+		assertThat(srNode.getAnnotations().size(), is(2));
+		assertNotNull(srNode.getAnnotation("toolbox::sr"));
+		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
 		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED_tx m23-m26"));
-		assertThat(sr2Node.getAnnotations().iterator().next().getQName(), is("toolbox::sr2"));
-		assertThat(sr2Node.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED_tx m23-m26"));
+		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED_tx m23-m26"));
 	}
 	
 	/**
