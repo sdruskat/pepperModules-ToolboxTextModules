@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
-import java.util.ArrayList; 
+import java.util.ArrayList;  
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -27,9 +27,7 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
-import org.corpus_tools.salt.SALT_TYPE;
 import org.corpus_tools.salt.common.SDocumentGraph;
-import org.corpus_tools.salt.common.SPointingRelation;
 import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SAnnotation;
@@ -209,7 +207,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 */
 	private void mapFullRef(String fullRefAnnoLine, String marker) {
 		SSpan span = graph.createSpan(lexTokens);
-		span.setName(fullRefAnnoLine);
+		span.setName("fullref");
 		// Span *can* be null here for refs that don't have lexical tokens.
 		if (span != null) {
 			graph.getLayerByName(refData.getMarker()).get(0).addNode(span);

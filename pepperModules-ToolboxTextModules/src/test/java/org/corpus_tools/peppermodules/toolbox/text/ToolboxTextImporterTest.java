@@ -35,7 +35,6 @@ import org.corpus_tools.pepper.testFramework.PepperImporterTest;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
-import org.corpus_tools.salt.common.SOrderRelation;
 import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.common.SaltProject;
@@ -1055,6 +1054,66 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(subref.getAnnotation("toolbox::sr").getValue_STEXT(), is("DISCONTINUOUS_TARGETED L2-L3 & L5-L7"));
 		assertThat(subref.getLayers().size(), is(1));
 		assertThat(subref.getLayers().iterator().next().getName(), is("tx"));
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#NON_SUBREF}.
+	 */
+	@Test
+	public void testSubRefNON_SUBREF() {
+		setTestFile("subref_NON_SUBREF.txt");
+		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertThat(graph.getTokens().size(), is(6));
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("fullref").size(), is(1));
+		SNode subref = graph.getNodesByName("fullref").get(0);
+		assertThat(graph.getOverlappedTokens(subref).size(), is(3));
+		for (SToken tok : graph.getOverlappedTokens(subref)) {
+			assertThat(graph.getText(tok), anyOf(is("subref"), is("sentence"), is("one")));
+		}
+		assertThat(subref.getAnnotations().size(), is(1));
+		assertNotNull(subref.getAnnotation("toolbox::sr"));
+		assertThat(subref.getAnnotation("toolbox::sr").getValue_STEXT(), is("Full-ref annotation"));
+		assertThat(subref.getLayers().size(), is(1));
+		assertThat(subref.getLayers().iterator().next().getName(), is("ref"));
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#NON_SUBREF}.
+	 */
+	@Test
+	public void testSubRefNON_SUBREF_LONG_SR() {
+		setTestFile("subref_NON_SUBREF_long_sr.txt");
+		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertThat(graph.getTokens().size(), is(6));
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("fullref").size(), is(1));
+		SNode subref = graph.getNodesByName("fullref").get(0);
+		assertThat(graph.getOverlappedTokens(subref).size(), is(3));
+		for (SToken tok : graph.getOverlappedTokens(subref)) {
+			assertThat(graph.getText(tok), anyOf(is("subref"), is("sentence"), is("one")));
+		}
+		assertThat(subref.getAnnotations().size(), is(1));
+		assertNotNull(subref.getAnnotation("toolbox::sr"));
+		assertThat(subref.getAnnotation("toolbox::sr").getValue_STEXT(), is("Full-ref annotation with an annotation line that is longer than 5 units if split with \\\\s+"));
+		assertThat(subref.getLayers().size(), is(1));
+		assertThat(subref.getLayers().iterator().next().getName(), is("ref"));
 	}
 	
 	/**

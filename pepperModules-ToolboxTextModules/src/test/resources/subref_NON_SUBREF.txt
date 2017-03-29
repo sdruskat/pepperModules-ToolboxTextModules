@@ -1,0 +1,9 @@
+\_sh v3.0 Test
+
+\id Document no. 1
+
+\ref Non-subref sentence with \sr line
+\met NON-SUBREF
+\tx subref sentence one
+\mb m1 m2 m3
+\sr Full-ref annotation
