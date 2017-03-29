@@ -1,0 +1,14 @@
+\_sh v3.0 Test
+
+\id Document no. 1
+
+\ref subref sentence schema 4 (defined global with related line)
+\met IDENTIFIED_GLOBAL_TARGETED to tx & mb
+\subref 1 tx 1 3
+\subref 2 mb 5 6
+\subref 3 mb 1 3
+\tx L0 L1 L2 L3 L4 L5 L6 L7
+\mb m0 m1 m2 m3 m4 m5 m6 m7
+\sr 1 IDENTIFIED_GLOBAL_TARGETED L1-L3
+\sr 2 IDENTIFIED_GLOBAL_TARGETED m5-m6
+\sr 3 IDENTIFIED_GLOBAL_TARGETED m1-m3

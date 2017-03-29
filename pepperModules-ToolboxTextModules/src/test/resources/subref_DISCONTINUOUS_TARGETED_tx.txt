@@ -1,0 +1,9 @@
+\_sh v3.0 Test
+
+\id Document no. 1
+
+\ref subref sentence schema 5 (linked)
+\met DISCONTINUOUS_TARGETED to tx
+\subref 1 tx 2 3 5 7
+\tx L0 L1 L2 L3 L4 L5 L6 L7
+\sr 1 DISCONTINUOUS_TARGETED L2-L3 & L5-L7

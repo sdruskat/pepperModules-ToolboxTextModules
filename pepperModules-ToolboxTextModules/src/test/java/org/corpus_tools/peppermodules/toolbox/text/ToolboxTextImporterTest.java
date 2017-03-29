@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
-import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.anyOf; 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -26,34 +26,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.common.FormatDesc;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.pepper.testFramework.PepperImporterTest;
-import org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper;
-import org.corpus_tools.salt.SALT_TYPE;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.SOrderRelation;
 import org.corpus_tools.salt.common.SSpan;
-import org.corpus_tools.salt.common.STextualDS;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.common.SaltProject;
 import org.corpus_tools.salt.core.SAnnotation;
-import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.corpus_tools.salt.core.SNode;
 import org.eclipse.emf.common.util.URI;
-import org.hamcrest.core.IsInstanceOf;
-import org.hamcrest.core.IsNot;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -792,6 +781,39 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#UNIDENTIFIED_GLOBAL_TARGETED}.
+	 */
+	@Test
+	public void testSubRefUNIDENTIFIED_GLOBAL_TARGETED_TX() {
+		setTestFile("subref_UNIDENTIFIED_GLOBAL_TARGETED_tx.txt");
+		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertThat(graph.getTokens().size(), is(6));
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("subref").size(), is(1));
+		SNode srNode = graph.getNodesByName("subref").get(0);
+		assertThat(srNode, instanceOf(SSpan.class));
+		assertThat(graph.getOverlappedTokens(srNode).size(), is(4));
+		for (SToken tok : graph.getOverlappedTokens(srNode)) {
+			assertThat(graph.getText(tok), anyOf(is("sentence"), is("two"), is("with"), is("one-to-four")));
+		}
+		assertThat(srNode.getAnnotations().size(), is(2));
+		assertNotNull(srNode.getAnnotation("toolbox::sr"));
+		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
+		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED_tx m23-m26"));
+		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED_tx m23-m26"));
+		assertThat(srNode.getLayers().size(), is(1));
+		assertThat(srNode.getLayers().iterator().next().getName(), is("tx"));
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
 	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#IDENTIFIED_GLOBAL}.
 	 */
 	@Test
@@ -902,33 +924,137 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
-	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#UNIDENTIFIED_GLOBAL_TARGETED}.
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#IDENTIFIED_GLOBAL_TARGETED}.
 	 */
 	@Test
-	public void testSubRefUNIDENTIFIED_GLOBAL_TARGETED_TX() {
-		setTestFile("subref_UNIDENTIFIED_GLOBAL_TARGETED_tx.txt");
+	public void testSubRefIDENTIFIED_GLOBAL_TARGETED_MB() {
+		setTestFile("subref_IDENTIFIED_GLOBAL_TARGETED.txt");
 		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
-		assertThat(graph.getTokens().size(), is(6));
-		assertThat(graph.getSpans().size(), is(2));
-		assertThat(graph.getNodesByName("subref").size(), is(1));
-		SNode srNode = graph.getNodesByName("subref").get(0);
-		assertThat(srNode, instanceOf(SSpan.class));
-		assertThat(graph.getOverlappedTokens(srNode).size(), is(4));
-		for (SToken tok : graph.getOverlappedTokens(srNode)) {
-			assertThat(graph.getText(tok), anyOf(is("sentence"), is("two"), is("with"), is("one-to-four")));
+		assertThat(graph.getTokens().size(), is(16));
+		assertThat(graph.getSpans().size(), is(4));
+		List<SNode> subrefNodes = graph.getNodesByName("subref");
+		assertThat(subrefNodes.size(), is(3));
+		SNode subref1 = null, subref2 = null, subref3 = null;
+		for (SNode subref : subrefNodes) {
+			for (SAnnotation anno : subref.getAnnotations()) {
+				if (anno.getQName().equals("toolbox::sr")) {
+					if (anno.getValue_STEXT().equals("IDENTIFIED_GLOBAL_TARGETED L1-L3")) {
+						subref1 = subref;
+					}
+					else if (anno.getValue_STEXT().equals("IDENTIFIED_GLOBAL_TARGETED m5-m6")) {
+						subref2 = subref;
+					}
+					else if (anno.getValue_STEXT().equals("IDENTIFIED_GLOBAL_TARGETED m1-m3")) {
+						subref3 = subref;
+					}
+				}
+			}
 		}
-		assertThat(srNode.getAnnotations().size(), is(2));
-		assertNotNull(srNode.getAnnotation("toolbox::sr"));
-		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
-		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED_tx m23-m26"));
-		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED_tx m23-m26"));
-		assertThat(srNode.getLayers().size(), is(1));
-		assertThat(srNode.getLayers().iterator().next().getName(), is("tx"));
+		assertNotNull(subref1);
+		assertNotNull(subref2);
+		assertNotNull(subref3);
+		assertThat(subref1 == subref2 || subref1 == subref3 || subref2 == subref3, is(false));
+		assertThat(subref1, instanceOf(SSpan.class));
+		assertThat(subref2, instanceOf(SSpan.class));
+		assertThat(subref3, instanceOf(SSpan.class));
+		assertThat(graph.getOverlappedTokens(subref1).size(), is(3));
+		assertThat(graph.getOverlappedTokens(subref2).size(), is(2));
+		assertThat(graph.getOverlappedTokens(subref3).size(), is(3));
+		for (SToken tok : graph.getOverlappedTokens(subref1)) {
+			assertThat(graph.getText(tok), anyOf(is("L1"), is("L2"), is("L3")));
+		}
+		for (SToken tok : graph.getOverlappedTokens(subref2)) {
+			assertThat(graph.getText(tok), anyOf(is("m5"), is("m6")));
+		}
+		for (SToken tok : graph.getOverlappedTokens(subref3)) {
+			assertThat(graph.getText(tok), anyOf(is("m1"), is("m2"), is("m3")));
+		}
+		assertThat(subref1.getAnnotations().size(), is(1));
+		assertThat(subref2.getAnnotations().size(), is(1));
+		assertThat(subref3.getAnnotations().size(), is(1));
+		assertThat(subref1.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
+		assertThat(subref2.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
+		assertThat(subref3.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
+		assertThat(subref1.getAnnotation("toolbox::sr").getValue_STEXT(), is("IDENTIFIED_GLOBAL_TARGETED L1-L3"));
+		assertThat(subref2.getAnnotation("toolbox::sr").getValue_STEXT(), is("IDENTIFIED_GLOBAL_TARGETED m5-m6"));
+		assertThat(subref3.getAnnotation("toolbox::sr").getValue_STEXT(), is("IDENTIFIED_GLOBAL_TARGETED m1-m3"));
+		assertThat(subref1.getLayers().size(), is(1));
+		assertThat(subref2.getLayers().size(), is(1));
+		assertThat(subref3.getLayers().size(), is(1));
+		assertThat(subref1.getLayers().iterator().next().getName(), is("tx"));
+		assertThat(subref2.getLayers().iterator().next().getName(), is("mb"));
+		assertThat(subref3.getLayers().iterator().next().getName(), is("mb"));		
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#DISCONTINUOUS_TARGETED}.
+	 */
+	@Test
+	public void testSubRefDISCONTINUOUS_TARGETED_MB() {
+		setTestFile("subref_DISCONTINUOUS_TARGETED.txt");
+		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertThat(graph.getTokens().size(), is(16));
+		assertThat(graph.getSpans().size(), is(2));
+		List<SNode> subrefNodes = graph.getNodesByName("subref");
+		assertThat(subrefNodes.size(), is(1));
+		SNode subref = subrefNodes.get(0);
+		assertNotNull(subref);
+		assertThat(subref, instanceOf(SSpan.class));
+		assertThat(graph.getOverlappedTokens(subref).size(), is(5));
+		for (SToken tok : graph.getOverlappedTokens(subref)) {
+			assertThat(graph.getText(tok), anyOf(is("m37"), is("m38"), is("m39"), is("m41"), is("m42")));
+		}
+		assertThat(subref.getAnnotations().size(), is(1));
+		assertThat(subref.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
+		assertThat(subref.getAnnotation("toolbox::sr").getValue_STEXT(), is("subref m37-m39 & m41-m42"));
+		assertThat(subref.getLayers().size(), is(1));
+		assertThat(subref.getLayers().iterator().next().getName(), is("mb"));
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#DISCONTINUOUS_TARGETED}.
+	 */
+	@Test
+	public void testSubRefDISCONTINUOUS_TARGETED_TX() {
+		setTestFile("subref_DISCONTINUOUS_TARGETED_tx.txt");
+		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertThat(graph.getTokens().size(), is(8));
+		assertThat(graph.getSpans().size(), is(2));
+		List<SNode> subrefNodes = graph.getNodesByName("subref");
+		assertThat(subrefNodes.size(), is(1));
+		SNode subref = subrefNodes.get(0);
+		assertNotNull(subref);
+		assertThat(subref, instanceOf(SSpan.class));
+		assertThat(graph.getOverlappedTokens(subref).size(), is(5));
+		for (SToken tok : graph.getOverlappedTokens(subref)) {
+			assertThat(graph.getText(tok), anyOf(is("L2"), is("L3"), is("L5"), is("L6"), is("L7")));
+		}
+		assertThat(subref.getAnnotations().size(), is(1));
+		assertThat(subref.getAnnotations().iterator().next().getQName(), is("toolbox::sr"));
+		assertThat(subref.getAnnotation("toolbox::sr").getValue_STEXT(), is("DISCONTINUOUS_TARGETED L2-L3 & L5-L7"));
+		assertThat(subref.getLayers().size(), is(1));
+		assertThat(subref.getLayers().iterator().next().getName(), is("tx"));
 	}
 	
 	/**

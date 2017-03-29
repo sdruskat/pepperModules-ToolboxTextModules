@@ -75,7 +75,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		UNIDENTIFIED_GLOBAL_TARGETED,
 		IDENTIFIED_GLOBAL,
 		IDENTIFIED_GLOBAL_TARGETED,
-		LINKED_TARGETED, 
+		DISCONTINUOUS_TARGETED, 
 		FULL_REF_ANNOTATION
 	};
 	
@@ -175,7 +175,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 						split = new SplitResult(5, subrefAnnoLine, definedSubrefs, true, true, false, "{definition} {target marker} {int} {int}").split();
 						break;
 
-					case LINKED_TARGETED:
+					case DISCONTINUOUS_TARGETED:
 						split = new SplitResult(-1, subrefAnnoLine, definedSubrefs, true, true, true, "{identification} {target marker} {{int} {int}}*").split();
 						break;
 
@@ -225,34 +225,27 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 * @param marker
 	 */
 	private void mapSubref(SplitResult split, boolean checkAgainstMarker, String marker) {
-		if (split.getRanges() == null) {
-			Integer from = split.getSingleRange().getLeft();
-			Integer to = split.getSingleRange().getRight();
-			if (checkAgainstMarker) {
-				if (split.getTargetMarker().equals(morphMarker)) {
-					if (refHasMorphology) {
-						mapData(split, from, to, marker, true);
-					}
-					else {
-						log.warn("Found a subref annotation line (" + marker + " " + split.getAnnotation() + ") targeted at the morphology line. However, the ref \"" + refData.getPrimaryData() + "\" does not contain morphological information. Aborting mapping of subref.");
-						return;
-					}
-				}
-				else {
-					mapData(split, from, to, marker, false);
-				}
-			}
-			else {
+		Integer from = split.getSingleRange() != null ? split.getSingleRange().getLeft() : -1;
+		Integer to = split.getSingleRange() != null ? split.getSingleRange().getRight() : -1;
+		if (checkAgainstMarker) {
+			if (split.getTargetMarker().equals(morphMarker)) {
 				if (refHasMorphology) {
-					mapData(split, from, to, marker, true);
+					mapData(split, from, to, marker, true, split.getRanges() != null);
+				} else {
+					log.warn("Found a subref annotation line (" + marker + " " + split.getAnnotation()
+							+ ") targeted at the morphology line. However, the ref \"" + refData.getPrimaryData()
+							+ "\" does not contain morphological information. Aborting mapping of subref.");
+					return;
 				}
-				else {
-					mapData(split, from, to, marker, false);
-				}
+			} else {
+				mapData(split, from, to, marker, false, split.getRanges() != null);
 			}
-		}
-		else {
-			mapLinkedSubref(split, marker);
+		} else {
+			if (refHasMorphology) {
+				mapData(split, from, to, marker, true, split.getRanges() != null);
+			} else {
+				mapData(split, from, to, marker, false, split.getRanges() != null);
+			}
 		}
 	}
 
@@ -262,12 +255,22 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 * @param split
 	 * @param marker
 	 * @param mapToMorphology
+	 * @param isDiscontinuous 
 	 * @return
 	 */
-	private SSpan mapData(SplitResult split, int from, int to, String marker, boolean mapToMorphology) {
+	private SSpan mapData(SplitResult split, int from, int to, String marker, boolean mapToMorphology, boolean isDiscontinuous) {
 		SSpan subref = null;
 		List<SToken> orderedTokens = graph.getSortedTokenByText(mapToMorphology ? morphTokens : lexTokens);
-		List<SToken> subrefTokens = orderedTokens.subList(from, to);
+		List<SToken> subrefTokens = null;
+		if (!isDiscontinuous) {
+			subrefTokens = orderedTokens.subList(from, to);
+		} else {
+			subrefTokens = new ArrayList<>();
+			for (Pair<Integer, Integer> range : split.getRanges()) {
+				subrefTokens.addAll(orderedTokens.subList(range.getLeft(), range.getRight()));
+				to = range.getRight() > to ? range.getRight() : to;
+			}
+		}
 		if (orderedTokens.size() < to) {
 			log.warn("Cannot create subref as end offset is > index of tokens in " + refData.getPrimaryData() + "!");
 			return null;
@@ -281,8 +284,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			forspans: for (SSpan span : graph.getSpans()) {
 				List<SToken> sortedSpanTokens = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
 				if (sortedSpanTokens.size() == subrefTokens.size()) {
-					int lastindex = sortedSpanTokens.size() - 1;
-					if (sortedSpanTokens.get(0) == subrefTokens.get(0) && sortedSpanTokens.get(lastindex) == subrefTokens.get(lastindex)) {
+					if (sortedSpanTokens.containsAll(subrefTokens)) {
 						subref = span;
 						String name = subref.getName();
 						if (name.isEmpty()) {
@@ -294,7 +296,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			}
 		}
 		if (subref == null) {
-			subref = graph.createSpan(orderedTokens.subList(from, to));
+			subref = graph.createSpan(subrefTokens);
 			subref.setName("subref");
 		}
 		// FIXME Bug: If annotation id already exists, fails here (cf. daakaka
@@ -311,52 +313,52 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		return subref;
 	}
 
-	/**
-	 * TODO: Description
-	 *
-	 * @param split
-	 * @param marker 
-	 */
-	private void mapLinkedSubref(SplitResult split, String marker) {
-		if (split.getTargetMarker().equals(morphMarker)) {
-			if (refHasMorphology) {
-				SSpan lastSpan = null;
-				SSpan subref = null;
-				for (Pair<Integer, Integer> range : split.getRanges()) {
-					subref = mapData(split, range.getLeft(), range.getRight(), marker, true);
-					if (subref == null) {
-						return;
-					}
-					if (lastSpan != null) {
-						SPointingRelation rel = (SPointingRelation) graph.createRelation(lastSpan, subref, SALT_TYPE.SPOINTING_RELATION, null);
-						rel.setType("l");
-						graph.getLayerByName(morphMarker).get(0).addRelation(rel);
-					}
-					lastSpan = subref;
-				}
-			}
-			else {
-				log.warn("Found a subref annotation line (" + marker + " " + split.getAnnotation() + ") targeted at the morphology line. However, the ref \"" + refData.getPrimaryData() + "\" does not contain morphological information. Aborting mapping of subref.");
-			}
-		}
-		else {
-			// map to tx
-			SSpan lastSpan = null;
-			SSpan subref = null;
-			for (Pair<Integer, Integer> range : split.getRanges()) {
-				subref = mapData(split, range.getLeft(), range.getRight(), marker, false);
-				if (subref == null) {
-					return;
-				}
-				if (lastSpan != null) {
-					SPointingRelation rel = (SPointingRelation) graph.createRelation(lastSpan, subref, SALT_TYPE.SPOINTING_RELATION, null);
-					rel.setType("l");
-					graph.getLayerByName(morphMarker).get(0).addRelation(rel);
-				}
-				lastSpan = subref;
-			}
-		}
-	}
+//	/**
+//	 * TODO: Description
+//	 *
+//	 * @param split
+//	 * @param marker 
+//	 */
+//	private void mapDiscontinuousSubref(SplitResult split, String marker) {
+//		if (split.getTargetMarker().equals(morphMarker)) {
+//			if (refHasMorphology) {
+//				SSpan lastSpan = null;
+//				SSpan subref = null;
+//				for (Pair<Integer, Integer> range : split.getRanges()) {
+//					subref = mapData(split, range.getLeft(), range.getRight(), marker, true);
+//					if (subref == null) {
+//						return;
+//					}
+//					if (lastSpan != null) {
+//						SPointingRelation rel = (SPointingRelation) graph.createRelation(lastSpan, subref, SALT_TYPE.SPOINTING_RELATION, null);
+//						rel.setType("l");
+//						graph.getLayerByName(morphMarker).get(0).addRelation(rel);
+//					}
+//					lastSpan = subref;
+//				}
+//			}
+//			else {
+//				log.warn("Found a subref annotation line (" + marker + " " + split.getAnnotation() + ") targeted at the morphology line. However, the ref \"" + refData.getPrimaryData() + "\" does not contain morphological information. Aborting mapping of subref.");
+//			}
+//		}
+//		else {
+//			// map to tx
+//			SSpan lastSpan = null;
+//			SSpan subref = null;
+//			for (Pair<Integer, Integer> range : split.getRanges()) {
+//				subref = mapData(split, range.getLeft(), range.getRight(), marker, false);
+//				if (subref == null) {
+//					return;
+//				}
+//				if (lastSpan != null) {
+//					SPointingRelation rel = (SPointingRelation) graph.createRelation(lastSpan, subref, SALT_TYPE.SPOINTING_RELATION, null);
+//					rel.setType("l");
+//					graph.getLayerByName(morphMarker).get(0).addRelation(rel);
+//				}
+//				lastSpan = subref;
+//			}
+//		}
+//	}
 
 	/**
 	 * TODO: Description
@@ -391,7 +393,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		else {
 			/*
 			 * Can be UNDEFINED_GLOBAL, UNDEFINED_GLOBAL_TARGETED, 
-			 * DEFINED_GLOBAL, DEFINED_GLOBAL_TARGETED, LINKED_TARGETED,
+			 * DEFINED_GLOBAL, DEFINED_GLOBAL_TARGETED, DISCONTINUOUS_TARGETED,
 			 * with, 2, 3, 4, or more arguments
 			 */
 			int numberOfArguments = -1;
@@ -430,7 +432,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			}
 			else {
 				// Number of arguments > 4
-				return SUBREF_TYPE.LINKED_TARGETED;
+				return SUBREF_TYPE.DISCONTINUOUS_TARGETED;
 			}
 		}
 	}
@@ -447,7 +449,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		private final boolean defined;
 		private final boolean targeted;
 		private final boolean identified;
-		private final boolean linked;
+		private final boolean discontinuous;
 		private final String format;
 
 		/**
@@ -456,17 +458,17 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		 * @param definedSubrefs
 		 * @param targeted
 		 * @param identified
-		 * @param linked
+		 * @param discontinuous
 		 * @param format
 		 */
-		private SplitResult(int numberOfSplits, String subrefAnnoLine, Set<String> definedSubrefs, boolean targeted, boolean identified, boolean linked, String format) {
+		private SplitResult(int numberOfSplits, String subrefAnnoLine, Set<String> definedSubrefs, boolean targeted, boolean identified, boolean discontinuous, String format) {
 			this.numberOfSplits = numberOfSplits;
 			this.subrefAnnoLine = subrefAnnoLine;
 			this.definedSubrefs = definedSubrefs;
 			this.defined = definedSubrefs != null;
 			this.targeted = targeted;
 			this.identified = identified;
-			this.linked = linked;
+			this.discontinuous = discontinuous;
 			this.format = format;
 		}
 		
@@ -547,7 +549,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 						return null;
 					}
 					String[] split = definitionLine.split("\\s+", numberOfSplits);
-					if (!linked) {
+					if (!discontinuous) {
 						if (!targeted) {
 							// SUBREF_TYPE.IDENTIFIED_GLOBAL
 							if (split.length < 3 || annoSplit.length < 2) {
@@ -572,7 +574,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 						}
 					}
 					else {
-						// SUBREF_TYPE.LINKED_TARGETED;
+						// SUBREF_TYPE.DISCONTINUOUS_TARGETED;
 						if (annoSplit.length < 2) {
 							log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
 							return null;
