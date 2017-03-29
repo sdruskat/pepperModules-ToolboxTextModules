@@ -18,13 +18,12 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
@@ -32,10 +31,8 @@ import org.corpus_tools.salt.SALT_TYPE;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SPointingRelation;
 import org.corpus_tools.salt.common.SSpan;
-import org.corpus_tools.salt.common.STextualDS;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SAnnotation;
-import org.corpus_tools.salt.util.DataSourceSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,10 +61,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	private final String subRefDefinitionMarker;
 	private final List<String> subRefAnnotationMarkers;
 	private final boolean refHasMorphology;
-
-	private final STextualDS morphDS;
-
-	private final STextualDS lexDS;
 	
 	/**
 	 * TODO Description
@@ -102,7 +95,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 * @param morphDS
 	 * @param layers
 	 */
-	public SubrefMapper(ToolboxTextImporterProperties properties, SDocumentGraph graph, LayerData refData, List<SToken> lexTokens, List<SToken> morphTokens, ListMultimap<String,String> markerContentMap, boolean refHasMorphology, STextualDS lexDS, STextualDS morphDS) {
+	public SubrefMapper(ToolboxTextImporterProperties properties, SDocumentGraph graph, LayerData refData, List<SToken> lexTokens, List<SToken> morphTokens, ListMultimap<String,String> markerContentMap, boolean refHasMorphology) {
 		this.graph = graph;
 		this.refData = refData;
 		this.lexTokens = lexTokens;
@@ -113,8 +106,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		this.subRefDefinitionMarker = properties.getSubRefDefinitionMarker();
 		this.subRefAnnotationMarkers = properties.getSubRefAnnotationMarkers();
 		this.refHasMorphology = refHasMorphology;
-		this.morphDS = morphDS;
-		this.lexDS = lexDS;
 	}
 
 	/**
@@ -291,11 +282,12 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				List<SToken> sortedSpanTokens = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
 				if (sortedSpanTokens.size() == subrefTokens.size()) {
 					int lastindex = sortedSpanTokens.size() - 1;
-					if (sortedSpanTokens.get(0) == subrefTokens.get(0)
-							&& sortedSpanTokens.get(lastindex) == subrefTokens.get(lastindex)) {
+					if (sortedSpanTokens.get(0) == subrefTokens.get(0) && sortedSpanTokens.get(lastindex) == subrefTokens.get(lastindex)) {
 						subref = span;
 						String name = subref.getName();
-						subref.setName(name.isEmpty() ? "subref-" + marker : name + "-" + marker);
+						if (name.isEmpty()) {
+							subref.setName("subref");
+						}
 						break forspans;
 					}
 				}
@@ -303,7 +295,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		}
 		if (subref == null) {
 			subref = graph.createSpan(orderedTokens.subList(from, to));
-			subref.setName("subref-" + marker);
+			subref.setName("subref");
 		}
 		// FIXME Bug: If annotation id already exists, fails here (cf. daakaka
 		// conversion)
