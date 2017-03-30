@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
-import java.util.ArrayList;  
+import java.util.ArrayList;   
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -114,7 +114,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		for (String subrefLine : markerContentMap.get(subRefDefinitionMarker)) {
 			definedSubrefs.add(subrefLine);
 		}
-		// There can be more than one subref annotation line, hence no simmple HashMap
+		// There can be more than one subref annotation line, hence no simple HashMap
 		Multimap<String, String> subrefAnnoLines = ArrayListMultimap.create();
 		for (String subrefAnnoMarker : subRefAnnotationMarkers) {
 			if (markerContentMap.get(subrefAnnoMarker) != null) {
@@ -223,8 +223,9 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 * @param marker
 	 */
 	private void mapSubref(SplitResult split, boolean checkAgainstMarker, String marker) {
-		Integer from = split.getSingleRange() != null ? split.getSingleRange().getLeft() : -1;
-		Integer to = split.getSingleRange() != null ? split.getSingleRange().getRight() : -1;
+		Integer from = split.getSingleRange() != null ? split.getSingleRange().getLeft() : (Integer.valueOf(-1));
+		Integer to = split.getSingleRange() != null ? split.getSingleRange().getRight() : (Integer.valueOf(-1));
+		try {
 		if (checkAgainstMarker) {
 			if (split.getTargetMarker().equals(morphMarker)) {
 				if (refHasMorphology) {
@@ -244,6 +245,9 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			} else {
 				mapData(split, from, to, marker, false, split.getRanges() != null);
 			}
+		}}
+		catch (NullPointerException e) {
+			log.warn("Could not map data for subref in \'{}\'. Please check the log for details.", refData.getRef());
 		}
 	}
 
@@ -261,12 +265,28 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		List<SToken> orderedTokens = graph.getSortedTokenByText(mapToMorphology ? morphTokens : lexTokens);
 		List<SToken> subrefTokens = null;
 		if (!isDiscontinuous) {
-			subrefTokens = orderedTokens.subList(from, to);
+			try {
+				/*
+				 * NOTE: 1 is added to the second argument as the result will be
+				 * used later on in a List.subList(int, int) operation, which
+				 * excludes the index at the second int argument.
+				 * 
+				 * Cf. API for `java.util.List#subList(int, int)`.
+				 */
+				subrefTokens = orderedTokens.subList(from, to + 1);
+			} catch (IndexOutOfBoundsException e) {
+				log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", from + "-" + to, refData.getRef(), refData.getDocName(), e);
+			}
 		} else {
 			subrefTokens = new ArrayList<>();
 			for (Pair<Integer, Integer> range : split.getRanges()) {
-				subrefTokens.addAll(orderedTokens.subList(range.getLeft(), range.getRight()));
-				to = range.getRight() > to ? range.getRight() : to;
+				try {
+					subrefTokens.addAll(orderedTokens.subList(range.getLeft(), range.getRight() + 1));
+					to = range.getRight() > to ? range.getRight() : to;
+				}
+				catch (IndexOutOfBoundsException e) {
+					log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", range.getLeft() + "-" + range.getRight(), refData.getRef(), refData.getDocName(), e);
+				}
 			}
 		}
 		if (orderedTokens.size() < to) {
@@ -310,53 +330,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		}
 		return subref;
 	}
-
-//	/**
-//	 * TODO: Description
-//	 *
-//	 * @param split
-//	 * @param marker 
-//	 */
-//	private void mapDiscontinuousSubref(SplitResult split, String marker) {
-//		if (split.getTargetMarker().equals(morphMarker)) {
-//			if (refHasMorphology) {
-//				SSpan lastSpan = null;
-//				SSpan subref = null;
-//				for (Pair<Integer, Integer> range : split.getRanges()) {
-//					subref = mapData(split, range.getLeft(), range.getRight(), marker, true);
-//					if (subref == null) {
-//						return;
-//					}
-//					if (lastSpan != null) {
-//						SPointingRelation rel = (SPointingRelation) graph.createRelation(lastSpan, subref, SALT_TYPE.SPOINTING_RELATION, null);
-//						rel.setType("l");
-//						graph.getLayerByName(morphMarker).get(0).addRelation(rel);
-//					}
-//					lastSpan = subref;
-//				}
-//			}
-//			else {
-//				log.warn("Found a subref annotation line (" + marker + " " + split.getAnnotation() + ") targeted at the morphology line. However, the ref \"" + refData.getPrimaryData() + "\" does not contain morphological information. Aborting mapping of subref.");
-//			}
-//		}
-//		else {
-//			// map to tx
-//			SSpan lastSpan = null;
-//			SSpan subref = null;
-//			for (Pair<Integer, Integer> range : split.getRanges()) {
-//				subref = mapData(split, range.getLeft(), range.getRight(), marker, false);
-//				if (subref == null) {
-//					return;
-//				}
-//				if (lastSpan != null) {
-//					SPointingRelation rel = (SPointingRelation) graph.createRelation(lastSpan, subref, SALT_TYPE.SPOINTING_RELATION, null);
-//					rel.setType("l");
-//					graph.getLayerByName(morphMarker).get(0).addRelation(rel);
-//				}
-//				lastSpan = subref;
-//			}
-//		}
-//	}
 
 	/**
 	 * TODO: Description
@@ -483,10 +456,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 						log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.");
 						return null;
 					}
-					/*
-					 * 1 must be added to *to* because List#subList(from,to)
-					 * works with **exclusive** *to*!
-					 */
 					singleRange = pairify(split[0], split[1]);
 					annotation = split[2].trim();
 				}
@@ -606,15 +575,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			try {
 				int fromInt = Integer.parseInt(from);
 				int toInt = Integer.parseInt(to);
-				/* 
-				 * NOTE: 1 is added to the second argument as 
-				 * the result will be used later on in a 
-				 * List.subList(int, int) operation, which
-				 * excludes the index at the second int argument.
-				 * 
-				 * Cf. API for java.util.List#subList(int, int)
-				 */
-				pair = Pair.of(fromInt, toInt + 1);
+				pair = Pair.of(fromInt, toInt);
 			}
 			catch (NumberFormatException e) {
 				log.warn("The subref \"" + (defined ? definedSubrefs : subrefAnnoLine) + "\" is not in the correct format (" + format + ")! Ignoring it.\nIf you think this is a bug, please report it!"); // FIXME INsert bug link!
