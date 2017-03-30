@@ -43,7 +43,9 @@ import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.corpus_tools.salt.core.SNode;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  * Unit tests for {@link ToolboxTextImporter}.
@@ -52,7 +54,7 @@ import org.junit.Test;
  *
  */
 public class ToolboxTextImporterTest extends PepperImporterTest {
-
+	
 	private static final String DOC_INFO_ANNO = "A sample \"standard\" corpus in Toolbox text format. It includes use cases for most phenomena the importer tests against, such as clitics and affixes, subrefs, meta annotations, etc.";
 	private static final String DOC_NO = "Document no. ";
 	private static final String TOOLBOX = "toolbox";
@@ -606,7 +608,14 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(7));
 		assertThat(graph.getSpans().size(), is(3));
-		List<SNode> subrefNodes = graph.getNodesByName("subref"); 
+		List<SNode> subrefNodes = graph.getNodesByName("subref"); 		for (SSpan s : graph.getSpans()) {
+			System.err.println(s.toString());
+			for (SToken t : graph.getSortedTokenByText(graph.getOverlappedTokens(s))) {
+				System.err.print(graph.getText(t) + " ");
+			}
+			System.err.println("\n");
+		}
+
 		assertThat(subrefNodes.size(), is(2));
 		SNode xtNode = null, srNode = null;
 		for (SNode subref : subrefNodes) {
@@ -1116,6 +1125,199 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(subref.getLayers().iterator().next().getName(), is("ref"));
 	}
 	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#IDENTIFIED_GLOBAL}.
+	 */
+	@Test
+	public void testSubRefIDENTIFIED_GLOBAL_REAL1() {
+		setTestFile("subref_IDENTIFIED_GLOBAL_real_1.txt");
+		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertThat(graph.getTokens().size(), is(16));
+		assertThat(graph.getSpans().size(), is(3));
+		List<SNode> subrefNodes = graph.getNodesByName("subref");
+		assertThat(subrefNodes.size(), is(2));
+		SNode srNode1 = null, srNode2 = null;
+		for (SNode subref : subrefNodes) {
+			for (SAnnotation anno : subref.getAnnotations()) {
+				if (anno.getQName().equals("toolbox::clause") && anno.getValue_STEXT().equals("assertion")) {
+					srNode1 = subref;
+				}
+				else if (anno.getQName().equals("toolbox::clause") && anno.getValue_STEXT().equals("proposition")) {
+					srNode2 = subref;
+				}
+			}
+		}
+		assertNotNull(srNode1);
+		assertNotNull(srNode2);
+		assertThat(srNode1 == srNode2, is(false));
+		assertThat(srNode1, instanceOf(SSpan.class));
+		assertThat(srNode2, instanceOf(SSpan.class));
+		assertThat(graph.getOverlappedTokens(srNode1).size(), is(3));
+		assertThat(graph.getOverlappedTokens(srNode2).size(), is(6));
+		for (SToken tok : graph.getOverlappedTokens(srNode1)) {
+			assertThat(graph.getText(tok), anyOf(is("m0"), is("m1"), is("m2")));
+		}
+		for (SToken tok : graph.getOverlappedTokens(srNode2)) {
+			assertThat(graph.getText(tok), anyOf(is("m3"), is("-m4"), is("m5"), is("m6"), is("-m7"), is("m8")));
+		}
+		assertThat(srNode1.getAnnotations().size(), is(1));
+		assertThat(srNode2.getAnnotations().size(), is(1));
+		assertThat(srNode1.getAnnotations().iterator().next().getQName(), is("toolbox::clause"));
+		assertThat(srNode1.getAnnotation("toolbox::clause").getValue_STEXT(), is("assertion"));
+		assertThat(srNode2.getAnnotations().iterator().next().getQName(), is("toolbox::clause"));
+		assertThat(srNode2.getAnnotation("toolbox::clause").getValue_STEXT(), is("proposition"));
+		assertThat(srNode1.getLayers().size(), is(1));
+		assertThat(srNode1.getLayers().iterator().next().getName(), is("mb"));
+		assertThat(srNode2.getLayers().size(), is(1));
+		assertThat(srNode2.getLayers().iterator().next().getName(), is("mb"));
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#IDENTIFIED_GLOBAL}.
+	 */
+	@Test
+	public void testSubRefIDENTIFIED_GLOBAL_REAL2() {
+		setTestFile("subref_IDENTIFIED_GLOBAL_real_2.txt");
+		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertThat(graph.getTokens().size(), is(40));
+		assertThat(graph.getSpans().size(), is(2));
+		List<SNode> subrefNodes = graph.getNodesByName("subref");
+		assertThat(subrefNodes.size(), is(1));
+		SNode subref = null;
+		for (SNode sr : subrefNodes) {
+			for (SAnnotation anno : sr.getAnnotations()) {
+				if (anno.getQName().equals("toolbox::clause") && anno.getValue_STEXT().equals("assertion")) {
+					subref = sr;
+				}
+			}
+		}
+		assertNotNull(subref);
+		assertThat(subref, instanceOf(SSpan.class));
+		assertThat(graph.getOverlappedTokens(subref).size(), is(5));
+		for (SToken tok : graph.getOverlappedTokens(subref)) {
+			assertThat(graph.getText(tok), anyOf(is("m16-"), is("m17"), is("m18"), is("m19"), is("m20")));
+		}
+		assertThat(subref.getAnnotations().size(), is(1));
+		assertThat(subref.getAnnotations().iterator().next().getQName(), is("toolbox::clause"));
+		assertThat(subref.getAnnotation("toolbox::clause").getValue_STEXT(), is("assertion"));
+		assertThat(subref.getLayers().size(), is(1));
+		assertThat(subref.getLayers().iterator().next().getName(), is("mb"));
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#IDENTIFIED_GLOBAL}.
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSubRefIDENTIFIED_GLOBAL_REAL3() {
+		setTestFile("subref_IDENTIFIED_GLOBAL_real_3.txt");
+		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		for (SToken tok : graph.getSortedTokenByText(graph.getTokens())) {
+			System.err.print(graph.getText(tok) + " ");
+		}
+		assertThat(graph.getTokens().size(), is(24));
+		assertThat(graph.getSpans().size(), is(2));
+		List<SNode> subrefNodes = graph.getNodesByName("subref");
+		assertThat(subrefNodes.size(), is(1));
+		SNode subref = null;
+		for (SNode sr : subrefNodes) {
+			for (SAnnotation anno : sr.getAnnotations()) {
+				if (anno.getQName().equals("toolbox::clause") && anno.getValue_STEXT().equals("proposition")) {
+					subref = sr;
+				}
+			}
+		}
+		assertNotNull(subref);
+		assertThat(subref, instanceOf(SSpan.class));
+		assertThat(graph.getOverlappedTokens(subref).size(), is(11));
+		for (SToken tok : graph.getOverlappedTokens(subref)) {
+			assertThat(graph.getText(tok), anyOf(is("m2"), is("m3"), is("m4"), is("m5"), is("m6-"), is("m7"), is("m8"), is("m9"), is("m10"), is("-m11"), is("m12")));
+		}
+		assertThat(subref.getAnnotations().size(), is(1));
+		assertThat(subref.getAnnotations().iterator().next().getQName(), is("toolbox::clause"));
+		assertThat(subref.getAnnotation("toolbox::clause").getValue_STEXT(), is("proposition"));
+		assertThat(subref.getLayers().size(), is(1));
+		assertThat(subref.getLayers().iterator().next().getName(), is("mb"));
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#IDENTIFIED_GLOBAL}
+	 * which is bound to fail due to an `to` index which is > token index.
+	 */
+	@Test(expected=AssertionError.class)
+	public void testSubRefIDENTIFIED_GLOBAL_REAL1_FAIL() {
+		setTestFile("subref_IDENTIFIED_GLOBAL_real_1_fail.txt");
+		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getSpans().size(), is(3));
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#IDENTIFIED_GLOBAL}
+	 * which is bound to fail due to an `to` index which is > token index.
+	 */
+	@Test(expected=AssertionError.class)
+	public void testSubRefIDENTIFIED_GLOBAL_REAL2_FAIL() {
+		setTestFile("subref_IDENTIFIED_GLOBAL_real_2_fail.txt");
+		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getSpans().size(), is(2));
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#IDENTIFIED_GLOBAL}
+	 * which is bound to fail due to an `to` index which is > token index.
+	 */
+	@Test(expected=AssertionError.class)
+	public void testSubRefIDENTIFIED_GLOBAL_REAL3_FAIL() {
+		setTestFile("subref_IDENTIFIED_GLOBAL_real_3_fail.txt");
+		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getSpans().size(), is(2));
+	}
+
 	/**
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.

@@ -1,0 +1,13 @@
+\_sh v3.0 Test
+
+\id Document no. 1
+
+\ref Test ref 1 with real data
+\tx L0    L1  L2   L3          L4  L5      L6
+\mb m0    m1 m2   m3    -m4     m5  m6 -m7    m8
+
+\unitref 1 0 2
+\clause 1 assertion
+
+\unitref 2 3 9
+\clause 2 proposition

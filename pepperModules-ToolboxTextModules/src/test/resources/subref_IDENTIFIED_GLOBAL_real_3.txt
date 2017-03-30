@@ -1,0 +1,9 @@
+\_sh v3.0 Test
+
+\id Document no. 1
+
+\ref .0978
+\tx L0    L1   L2 L3         L4  L5         L6 L7    L8         L9    L10
+\mb m0    m1   m2 m3    m4    m5  m6-    m7    m8 m9    m10   -m11     m12
+\unitref 1 2 12
+\clause 1 proposition
