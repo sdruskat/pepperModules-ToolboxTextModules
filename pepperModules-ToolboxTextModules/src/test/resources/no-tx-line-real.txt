@@ -1,0 +1,9 @@
+\_sh v3.0 Test
+
+\itm ID1
+
+\id 123
+\aud 456
+\start 8910
+\end 111213
+\nt Some note, the marker can also appears in subrefs
