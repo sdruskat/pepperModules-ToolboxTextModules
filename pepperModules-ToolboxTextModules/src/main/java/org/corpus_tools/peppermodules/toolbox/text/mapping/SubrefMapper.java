@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
-import java.util.ArrayList;   
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -208,11 +208,9 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	private void mapFullRef(String fullRefAnnoLine, String marker) {
 		SSpan span = graph.createSpan(lexTokens);
 		span.setName("fullref");
-		// Span *can* be null here for refs that don't have lexical tokens.
-		if (span != null) {
-			graph.getLayerByName(refData.getMarker()).get(0).addNode(span);
-			span.createAnnotation("toolbox", marker, fullRefAnnoLine);
-		}
+		// Span *cannot* be null as method is only called when refs have lexical tokens.
+		graph.getLayerByName(refData.getMarker()).get(0).addNode(span);
+		span.createAnnotation("toolbox", marker, fullRefAnnoLine);
 	}
 
 	/**
@@ -276,6 +274,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				subrefTokens = orderedTokens.subList(from, to + 1);
 			} catch (IndexOutOfBoundsException e) {
 				log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", from + "-" + to, refData.getRef(), refData.getDocName(), e);
+				return null;
 			}
 		} else {
 			subrefTokens = new ArrayList<>();
@@ -286,6 +285,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				}
 				catch (IndexOutOfBoundsException e) {
 					log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", range.getLeft() + "-" + range.getRight(), refData.getRef(), refData.getDocName(), e);
+					return null;
 				}
 			}
 		}
