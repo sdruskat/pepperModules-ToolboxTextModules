@@ -521,6 +521,26 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
+	 * Tests against a real data example.
+	 */
+	@Test
+	public void testParseNoTxLineReal() {
+		setTestFile("no-tx-line-real.txt");
+		setProperties("no-tx-line-real.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocumentGraph graph = getGraph("ID1");
+		assertEquals(1, graph.getTextualDSs().size());
+		assertThat(graph.getTextualDSs().get(0).getText(), is (""));
+		assertThat(graph.getTokens().size(), is(0));
+		assertThat(graph.getSpans().size(), is(0));
+		assertThat(graph.getRelations().size(), is(0));
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
 	 * Tests against a minimum example, where there are 4 \id, one of which has a \ref **without** a morph line
 	 */
 	@Test
@@ -606,14 +626,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(7));
 		assertThat(graph.getSpans().size(), is(3));
-		List<SNode> subrefNodes = graph.getNodesByName("subref"); 		for (SSpan s : graph.getSpans()) {
-			System.err.println(s.toString());
-			for (SToken t : graph.getSortedTokenByText(graph.getOverlappedTokens(s))) {
-				System.err.print(graph.getText(t) + " ");
-			}
-			System.err.println("\n");
-		}
-
+		List<SNode> subrefNodes = graph.getNodesByName("subref");
 		assertThat(subrefNodes.size(), is(2));
 		SNode xtNode = null, srNode = null;
 		for (SNode subref : subrefNodes) {
