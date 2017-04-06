@@ -59,7 +59,7 @@ public class DocumentHeaderMapper extends AbstractBlockMapper {
 	 * array.
 	 */
 	@Override
-	public void map() {
+	public boolean map() {
 		for (String line : lines) {
 			if (line.startsWith("\\" + properties.getIdMarker() + " ")) {
 				graph.getDocument().setName(line.split("\\s+", 2)[1]);
@@ -76,6 +76,7 @@ public class DocumentHeaderMapper extends AbstractBlockMapper {
 				}
 			}
 		}
+		return true;
 	}
 
 }
