@@ -1247,9 +1247,6 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
-		for (SToken tok : graph.getSortedTokenByText(graph.getTokens())) {
-			System.err.print(graph.getText(tok) + " ");
-		}
 		assertThat(graph.getTokens().size(), is(24));
 		assertThat(graph.getSpans().size(), is(2));
 		List<SNode> subrefNodes = graph.getNodesByName("subref");

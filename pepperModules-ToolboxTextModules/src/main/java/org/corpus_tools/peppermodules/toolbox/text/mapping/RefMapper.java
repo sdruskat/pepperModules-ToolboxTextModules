@@ -427,7 +427,6 @@ public class RefMapper extends AbstractBlockMapper {
 					}
 					// else do nothing
 					log.warn(logMessage);
-					System.err.println(logMessage);
 				}
 				// If there are less annotations than tokens
 				else if (annosN < primaryN) {
@@ -446,7 +445,6 @@ public class RefMapper extends AbstractBlockMapper {
 					}
 					// else do nothing
 					log.warn(logMessage);
-					System.err.println(logMessage);
 				}
 			}
 		}
@@ -521,7 +519,6 @@ public class RefMapper extends AbstractBlockMapper {
 				morphData.setPrimaryData(morphsCopy);
 			}
 			log.warn(logMessage);
-			System.err.println(logMessage);
 		}
 		// If there are fewer morphological units than lexical units
 		else if (sumMorphWords < sumLex) {
@@ -555,7 +552,6 @@ public class RefMapper extends AbstractBlockMapper {
 			}
 			// else do nothing
 			log.warn(logMessage);
-			System.err.println(logMessage);
 		}
 		if (properties.recordErrors()) {
 			for (Entry<String, List<String>> error : errors.entrySet()) {
@@ -586,7 +582,6 @@ public class RefMapper extends AbstractBlockMapper {
 	private String getSingleLine(String marker) {
 		List<String> list = markerContentMap.get(marker);
 		if (list.size() > 1) {
-			System.out.println("Reference block contains two \\" + marker + " lines, which at this point shouldn't be the case. Please report this as a bug!"); 
 			throw new PepperModuleException("Reference block contains two \\" + marker + " lines, which at this point shouldn't be the case. Please report this as a bug!"); 
 			// FIXME: Provide link to final issue site
 		}
