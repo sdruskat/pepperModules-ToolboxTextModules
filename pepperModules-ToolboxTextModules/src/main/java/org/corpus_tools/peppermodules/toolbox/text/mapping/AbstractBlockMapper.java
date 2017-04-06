@@ -197,8 +197,11 @@ abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	/**
 	 * TODO: Description
 	 *
+	 * @return proceed Whether the mapping should proceed after this method has been called.
+	 * If any critical problems occur during this method (e.g., a block has no text line,
+	 * which is a minimal requirement for mapability), then the method should return `false`.
 	 */
-	public abstract void map();
+	public abstract boolean map();
 
 	/**
 	 * @return the markerContentMap
