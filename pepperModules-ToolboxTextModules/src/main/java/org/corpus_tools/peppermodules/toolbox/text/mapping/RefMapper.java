@@ -112,8 +112,11 @@ public class RefMapper extends AbstractBlockMapper {
 	 * 
 	 * @see ToolboxTextImporterProperties#PROP_FIX_INTERL11N
 	 */
+	/* (non-Javadoc)
+	 * @see org.corpus_tools.peppermodules.toolbox.text.mapping.AbstractBlockMapper#map()
+	 */
 	@Override
-	public void map() {
+	public boolean map() {
 		
 		// Single Markers
 		String refMarker = properties.getRefMarker();
@@ -151,7 +154,7 @@ public class RefMapper extends AbstractBlockMapper {
 		// Stop here if lex is empty or null
 		if (lex == null || lex.isEmpty()) {
 			log.warn("The reference \"" + ref + "\" in identifier \'" + getDocName() + "\' does not contain any primary data source (\\" + lexMarker + ") and will be ignored.");
-			return;
+			return false;
 		}
 
 		/*
@@ -188,16 +191,10 @@ public class RefMapper extends AbstractBlockMapper {
 		List<SToken> morphTokens = tokens.getRight();
 		mapRef(refData, lexTokens);
 		
-//		System.err.println("----- " + refData.toString());
-//		System.err.println(lexData.toString());
-//		if (refHasMorphology) {
-//			System.err.println(morphData.toString());
-//		}
-//		System.err.println("\n\n\n\n\n");
-		
 		this.refData = refData;
 		this.lexTokens = lexTokens;
 		this.morphTokens = morphTokens;
+		return true;
 	}
 
 	/**
