@@ -224,27 +224,27 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		Integer from = split.getSingleRange() != null ? split.getSingleRange().getLeft() : (Integer.valueOf(-1));
 		Integer to = split.getSingleRange() != null ? split.getSingleRange().getRight() : (Integer.valueOf(-1));
 		try {
-		if (checkAgainstMarker) {
-			if (split.getTargetMarker().equals(morphMarker)) {
+			if (checkAgainstMarker) {
+				if (split.getTargetMarker().equals(morphMarker)) {
+					if (refHasMorphology) {
+						mapData(split, from, to, marker, true, split.getRanges() != null);
+					} else {
+						log.info("Found a subref annotation line (" + marker + " " + split.getAnnotation()
+								+ ") targeted at the morphology line. However, the ref \"" + refData.getPrimaryData()
+								+ "\" does not contain morphological information. Aborting mapping of subref.");
+						return;
+					}
+				} else {
+					mapData(split, from, to, marker, false, split.getRanges() != null);
+				}
+			} else {
 				if (refHasMorphology) {
 					mapData(split, from, to, marker, true, split.getRanges() != null);
 				} else {
-					log.warn("Found a subref annotation line (" + marker + " " + split.getAnnotation()
-							+ ") targeted at the morphology line. However, the ref \"" + refData.getPrimaryData()
-							+ "\" does not contain morphological information. Aborting mapping of subref.");
-					return;
+					mapData(split, from, to, marker, false, split.getRanges() != null);
 				}
-			} else {
-				mapData(split, from, to, marker, false, split.getRanges() != null);
 			}
-		} else {
-			if (refHasMorphology) {
-				mapData(split, from, to, marker, true, split.getRanges() != null);
-			} else {
-				mapData(split, from, to, marker, false, split.getRanges() != null);
-			}
-		}}
-		catch (NullPointerException e) {
+		} catch (NullPointerException e) {
 			log.warn("Could not map data for subref in \'{}\'. Please check the log for details.", refData.getRef());
 		}
 	}
@@ -322,8 +322,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		graph.getLayerByName(mapToMorphology ? morphMarker : lexMarker).get(0).addNode(subref);
 		SAnnotation anno;
 		if ((anno = subref.getAnnotation("toolbox::" + marker)) != null) {
-			log.warn(
-					"Annotation {} already exists in reference {} in document {}!\nWill NOT change annotation value from {} to {}!",
+			log.warn("Annotation {} already exists in reference {} in document {}!\nWill NOT change annotation value from {} to {}!",
 					marker, refData.getRef(), refData.getDocName(), anno.getValue_STEXT(), split.getAnnotation());
 		} else {
 			subref.createAnnotation("toolbox", marker, split.getAnnotation());
@@ -453,7 +452,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				if (!targeted) {
 					// SUBREF_TYPE.SIMPLE
 					if (split.length < 3) {
-						log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.");
+						log.warn("Cannot map subref annotation \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.");
 						return null;
 					}
 					singleRange = pairify(split[0], split[1]);
@@ -462,7 +461,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				else {
 					// SUBREF_TYPE.SIMPLE_TARGETED
 					if (split.length < 4) {
-						log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.");
+						log.warn("Cannot map subref annotation \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.");
 						return null;
 					}
 					targetMarker = split[0];
@@ -520,7 +519,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 						if (!targeted) {
 							// SUBREF_TYPE.IDENTIFIED_GLOBAL
 							if (split.length < 3 || annoSplit.length < 2) {
-								log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
+								log.warn("Cannot map subref annotation \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
 								return null;
 							}
 							singleRange = pairify(split[1], split[2]);
@@ -529,7 +528,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 						else {
 							// SUBREF_TYPE.IDENTIFIED_GLOBAL_TARGETED
 							if (split.length < 4 || annoSplit.length < 2) {
-								log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
+								log.info("Cannot map subref annotation \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
 								return null;
 							}
 							targetMarker = split[1];
@@ -543,7 +542,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 					else {
 						// SUBREF_TYPE.DISCONTINUOUS_TARGETED;
 						if (annoSplit.length < 2) {
-							log.warn("Cannot map subref \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
+							log.warn("Cannot map subref annotation \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
 							return null;
 						}
 						split = definitionLine.split("\\s+");

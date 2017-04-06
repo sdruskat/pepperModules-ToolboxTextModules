@@ -153,7 +153,7 @@ public class RefMapper extends AbstractBlockMapper {
 
 		// Stop here if lex is empty or null
 		if (lex == null || lex.isEmpty()) {
-			log.warn("The reference \"" + ref + "\" in identifier \'" + getDocName() + "\' does not contain any primary data source (\\" + lexMarker + ") and will be ignored.");
+			log.info("The reference \"" + ref + "\" in identifier \'" + getDocName() + "\' does not contain any primary data source (\\" + lexMarker + ") and will be ignored.");
 			return false;
 		}
 
@@ -172,7 +172,7 @@ public class RefMapper extends AbstractBlockMapper {
 			morphData = checkLexMorphInterl11n(lexData, morphData, refData);
 		}
 		else {
-			log.warn("The reference \"" + ref + "\" in identifier \'" + getDocName() + "\' does not contain a line with morphological items.");
+			log.info("The reference \"" + ref + "\" in identifier \'" + getDocName() + "\' does not contain a line with morphological items.");
 		}
 		
 		// Now that we can have consistent token lines, check the
@@ -426,7 +426,7 @@ public class RefMapper extends AbstractBlockMapper {
 						annotations.put(key, annoCopy);
 					}
 					// else do nothing
-					log.warn(logMessage);
+					log.info(logMessage);
 				}
 				// If there are less annotations than tokens
 				else if (annosN < primaryN) {
@@ -444,7 +444,7 @@ public class RefMapper extends AbstractBlockMapper {
 						annotations.put(key, annoCopy);
 					}
 					// else do nothing
-					log.warn(logMessage);
+					log.info(logMessage);
 				}
 			}
 		}
@@ -518,7 +518,7 @@ public class RefMapper extends AbstractBlockMapper {
 				morphsCopy.set(firstExcessMorphIndex - 1, concatResult);
 				morphData.setPrimaryData(morphsCopy);
 			}
-			log.warn(logMessage);
+			log.info(logMessage);
 		}
 		// If there are fewer morphological units than lexical units
 		else if (sumMorphWords < sumLex) {
@@ -551,7 +551,7 @@ public class RefMapper extends AbstractBlockMapper {
 				}
 			}
 			// else do nothing
-			log.warn(logMessage);
+			log.info(logMessage);
 		}
 		if (properties.recordErrors()) {
 			for (Entry<String, List<String>> error : errors.entrySet()) {

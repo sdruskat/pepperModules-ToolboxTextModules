@@ -59,7 +59,7 @@ class ToolboxTextDocumentNameParser {
 			}
 			else {
 				String defaultName = "Document at offset " + offset.intValue();
-				logger.warn("The \\id marked line at offset " + offset + " does either not contain any contents, runs on over more than one line, or could not be parsed into a valid document name. Falling back to default name: " + defaultName + "!");
+				logger.info("The \\id marked line at offset " + offset + " does either not contain any contents, runs on over more than one line, or could not be parsed into a valid document name. Falling back to default name: " + defaultName + "!");
 				documentName = defaultName;
 			}
 		}

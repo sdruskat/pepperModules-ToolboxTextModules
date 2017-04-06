@@ -158,7 +158,7 @@ abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 						duplicateMarkers.add(marker);
 					}
 					else {
-						log.warn("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nDropping all but the first line marked with it.");
+						log.info("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nDropping all but the first line marked with it.");
 						iterator.remove();
 					}
 				}
