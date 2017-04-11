@@ -35,6 +35,7 @@ import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties
 import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition.SUBREF_TYPE;
+import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.SToken;
@@ -108,7 +109,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		Map<String, SubrefDefinition> subrefMap = new HashMap<>();
 		Set<String> definedSubrefs = new HashSet<>();
 		for (String subrefLine : markerContentMap.get(subRefDefinitionMarker)) {
-			SubrefDefinition subref = createSubrefFromSubrefLine(subrefLine);
+			SubrefDefinition subref = createSubrefDefinitionFromSubrefLine(subrefLine);
 			SubrefDefinition previous = subrefMap.put(subref.getIdentifier(), subref);
 			if (previous != null && (previous.getType() == SUBREF_TYPE.UNIDENTIFIED_GLOBAL || previous.getType() == SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED) &&
 					(subref.getType() == SUBREF_TYPE.UNIDENTIFIED_GLOBAL || subref.getType() == SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED)) {
@@ -209,79 +210,108 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 
 	/**
 	 * TODO: Description
-	 * FIXME: Write unit test
 	 *
 	 * @param subrefLine
 	 * @return
 	 */
-	private SubrefDefinition createSubrefFromSubrefLine(String subrefLine) {
+	public SubrefDefinition createSubrefDefinitionFromSubrefLine(String subrefLine) {
 		final String[] split = subrefLine.split("\\s+");
 		SUBREF_TYPE type = determineSubrefType(split);
 		List<Range<Integer>> ranges = new ArrayList<>();
 		String identifier = null;
 		String targetLayer = null;
-		switch (type) {
-		case UNIDENTIFIED_GLOBAL:
-			ranges.add(Range.between(Integer.parseInt(split[0]), Integer.parseInt(split[1])));
-			break;
-		
-		case UNIDENTIFIED_GLOBAL_TARGETED:
-			targetLayer = split[0];
-			ranges.add(Range.between(Integer.parseInt(split[1]), Integer.parseInt(split[2])));
-			break;
-			
-		case IDENTIFIED_GLOBAL:
-			identifier = split[0];
-			ranges.add(Range.between(Integer.parseInt(split[1]), Integer.parseInt(split[2])));
-			break;
-			
-		case IDENTIFIED_GLOBAL_TARGETED:
-			identifier = split[0];
-			targetLayer = split[1];
-			ranges.add(Range.between(Integer.parseInt(split[2]), Integer.parseInt(split[3])));
-			break;
-			
-		case DISCONTINUOUS_TARGETED:
-			identifier = split[0];
-			targetLayer = split[1];
-			for (int i = 2; i < split.length; i++) {
-				ranges.add(Range.between(Integer.parseInt(split[i]), Integer.parseInt(split[++i])));
-			}
-			break;
+		if (type != null) {
+			switch (type) {
+			case UNIDENTIFIED_GLOBAL:
+				ranges.add(Range.between(Integer.parseInt(split[0]), Integer.parseInt(split[1])));
+				break;
 
-		default:
-			break;
+			case UNIDENTIFIED_GLOBAL_TARGETED:
+				targetLayer = split[0];
+				ranges.add(Range.between(Integer.parseInt(split[1]), Integer.parseInt(split[2])));
+				break;
+
+			case IDENTIFIED_GLOBAL:
+				identifier = split[0];
+				ranges.add(Range.between(Integer.parseInt(split[1]), Integer.parseInt(split[2])));
+				break;
+
+			case IDENTIFIED_GLOBAL_TARGETED:
+				identifier = split[0];
+				targetLayer = split[1];
+				ranges.add(Range.between(Integer.parseInt(split[2]), Integer.parseInt(split[3])));
+				break;
+
+			case DISCONTINUOUS_TARGETED:
+				identifier = split[0];
+				targetLayer = split[1];
+				for (int i = 2; i < split.length; i++) {
+					ranges.add(Range.between(Integer.parseInt(split[i]), Integer.parseInt(split[++i])));
+				}
+				break;
+
+			default:
+				break;
+			}
+			return new SubrefDefinition(type, ranges, identifier, targetLayer);
 		}
-		return new SubrefDefinition(type, ranges, identifier, targetLayer);
+		return null;
 	}
 
 	/**
 	 * TODO: Description
-	 * FIXME: Write unit test
 	 *
 	 * @param split
 	 * @return
 	 */
-	private SUBREF_TYPE determineSubrefType(String[] split) {
+	public SUBREF_TYPE determineSubrefType(String[] split) {
 		switch (split.length) {
 		case 2:
-			return SUBREF_TYPE.UNIDENTIFIED_GLOBAL;
+			if (testInts(split[0], split[1])) {
+				return SUBREF_TYPE.UNIDENTIFIED_GLOBAL;
+			}
+			break;
 
 		case 3:
-			if (split[0].equals(lexMarker) || split[0].equals(morphMarker))
-				return SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED;
-			else
-				return SUBREF_TYPE.IDENTIFIED_GLOBAL;
+			if (testInts(split[1], split[2])) {
+				if (split[0].equals(lexMarker) || split[0].equals(morphMarker))
+					return SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED;
+				else
+					return SUBREF_TYPE.IDENTIFIED_GLOBAL;
+			}
+			break;
 			
 		case 4: 
-			return SUBREF_TYPE.IDENTIFIED_GLOBAL_TARGETED;
+			if (testInts(split[2], split[3])) {
+				return SUBREF_TYPE.IDENTIFIED_GLOBAL_TARGETED;
+			}
+			break;
 			
 		default:
-			if (split.length > 4 && Arrays.copyOfRange(split, 2, split.length).length % 2 == 0)
+			if (split.length > 4 && Arrays.copyOfRange(split, 2, split.length).length % 2 == 0) {
+				boolean areAllInts = false;
+				ranges:
+				for (int i = 2; i < split.length; i++) {
+					if (!testInts(split[i], split[++i])) {
+						return null;
+					}
+				}
 				return SUBREF_TYPE.DISCONTINUOUS_TARGETED;
+			}
 			break;
 		}
 		return null;
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param string
+	 * @param string2
+	 * @return
+	 */
+	private boolean testInts(String string, String string2) {
+		return (ToolboxTextModulesUtils.isInteger(string) && ToolboxTextModulesUtils.isInteger(string2));
 	}
 
 	/**
