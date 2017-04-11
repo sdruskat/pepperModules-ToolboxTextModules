@@ -20,13 +20,21 @@ package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.tuple.Pair;
+import org.corpus_tools.pepper.modules.exceptions.PepperModuleDataException;
+import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
+import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition;
+import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition.SUBREF_TYPE;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.SToken;
@@ -60,22 +68,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	private final List<String> subRefAnnotationMarkers;
 	private final boolean refHasMorphology;
 	
-	/**
-	 * TODO Description
-	 *
-	 * @author Stephan Druskat
-	 *
-	 */
-	private enum SUBREF_TYPE {
-		SIMPLE,
-		SIMPLE_TARGETED,
-		UNIDENTIFIED_GLOBAL,
-		UNIDENTIFIED_GLOBAL_TARGETED,
-		IDENTIFIED_GLOBAL,
-		IDENTIFIED_GLOBAL_TARGETED,
-		DISCONTINUOUS_TARGETED, 
-		FULL_REF_ANNOTATION
-	};
+	
 	
 	/**
 	 * @param properties
@@ -108,11 +101,26 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 
 	/**
 	 * TODO: Description
+	 * FIXME: Write unit tests for:
+	 * - Illegal subref definition
 	 */
 	public void map() {
+		Map<String, SubrefDefinition> subrefMap = new HashMap<>();
 		Set<String> definedSubrefs = new HashSet<>();
 		for (String subrefLine : markerContentMap.get(subRefDefinitionMarker)) {
-			definedSubrefs.add(subrefLine);
+			SubrefDefinition subref = createSubrefFromSubrefLine(subrefLine);
+			SubrefDefinition previous = subrefMap.put(subref.getIdentifier(), subref);
+			if (previous != null && (previous.getType() == SUBREF_TYPE.UNIDENTIFIED_GLOBAL || previous.getType() == SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED) &&
+					(subref.getType() == SUBREF_TYPE.UNIDENTIFIED_GLOBAL || subref.getType() == SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED)) {
+				/*
+				 * Client has tried to map more than one subref of type
+				 * UNIDENTIFIED_GLOBAL or UNIDENTIFIED_GLOBAL_TARGETED.
+				 * This is implicitly illegal, as there can only be exactly
+				 * one subref of either of these types in one ref. 
+				 */
+				log.error("Illegal subref definition in ref {}, document {}!\nThere can only be exactly one unidentified global subref definition per ref! Cancelling definition overwrite.", refData.getRef(), refData.getDocName(), new PepperModuleException());
+				subrefMap.put(previous.getIdentifier(), previous);
+			}
 		}
 		// There can be more than one subref annotation line, hence no simple HashMap
 		Multimap<String, String> subrefAnnoLines = ArrayListMultimap.create();
@@ -197,6 +205,83 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				log.warn("Subref type in \"\\" + refData.getMarker() + "\" block could not be determined! Ignoring subrefs in block \"" + refData.getPrimaryData() + "\"!");
 			}
 		}
+	}
+
+	/**
+	 * TODO: Description
+	 * FIXME: Write unit test
+	 *
+	 * @param subrefLine
+	 * @return
+	 */
+	private SubrefDefinition createSubrefFromSubrefLine(String subrefLine) {
+		final String[] split = subrefLine.split("\\s+");
+		SUBREF_TYPE type = determineSubrefType(split);
+		List<Range<Integer>> ranges = new ArrayList<>();
+		String identifier = null;
+		String targetLayer = null;
+		switch (type) {
+		case UNIDENTIFIED_GLOBAL:
+			ranges.add(Range.between(Integer.parseInt(split[0]), Integer.parseInt(split[1])));
+			break;
+		
+		case UNIDENTIFIED_GLOBAL_TARGETED:
+			targetLayer = split[0];
+			ranges.add(Range.between(Integer.parseInt(split[1]), Integer.parseInt(split[2])));
+			break;
+			
+		case IDENTIFIED_GLOBAL:
+			identifier = split[0];
+			ranges.add(Range.between(Integer.parseInt(split[1]), Integer.parseInt(split[2])));
+			break;
+			
+		case IDENTIFIED_GLOBAL_TARGETED:
+			identifier = split[0];
+			targetLayer = split[1];
+			ranges.add(Range.between(Integer.parseInt(split[2]), Integer.parseInt(split[3])));
+			break;
+			
+		case DISCONTINUOUS_TARGETED:
+			identifier = split[0];
+			targetLayer = split[1];
+			for (int i = 2; i < split.length; i++) {
+				ranges.add(Range.between(Integer.parseInt(split[i]), Integer.parseInt(split[++i])));
+			}
+			break;
+
+		default:
+			break;
+		}
+		return new SubrefDefinition(type, ranges, identifier, targetLayer);
+	}
+
+	/**
+	 * TODO: Description
+	 * FIXME: Write unit test
+	 *
+	 * @param split
+	 * @return
+	 */
+	private SUBREF_TYPE determineSubrefType(String[] split) {
+		switch (split.length) {
+		case 2:
+			return SUBREF_TYPE.UNIDENTIFIED_GLOBAL;
+
+		case 3:
+			if (split[0].equals(lexMarker) || split[0].equals(morphMarker))
+				return SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED;
+			else
+				return SUBREF_TYPE.IDENTIFIED_GLOBAL;
+			
+		case 4: 
+			return SUBREF_TYPE.IDENTIFIED_GLOBAL_TARGETED;
+			
+		default:
+			if (split.length > 4 && Arrays.copyOfRange(split, 2, split.length).length % 2 == 0)
+				return SUBREF_TYPE.DISCONTINUOUS_TARGETED;
+			break;
+		}
+		return null;
 	}
 
 	/**
