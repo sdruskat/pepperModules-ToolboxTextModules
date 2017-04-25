@@ -1,0 +1,13 @@
+\_sh v3.0 Test
+
+\id Document no. 1
+
+\ref subref sentence schema 2 (undefined global) with existing mb line and a mixture of other subref definitions
+\met UNIDENTIFIED_GLOBAL to mb
+\subref tx 1 4
+\subref ignored tx 5 9
+\subref ignored2 10 12
+\tx L1 L2 L3 L4 L5
+\mb m22 m23 m24 m25 m26
+\sr UNIDENTIFIED_GLOBAL_TARGETED_TX_mixed L2-L5
+\sr2 UNIDENTIFIED_GLOBAL_TARGETED_TX_mixed L2-L5

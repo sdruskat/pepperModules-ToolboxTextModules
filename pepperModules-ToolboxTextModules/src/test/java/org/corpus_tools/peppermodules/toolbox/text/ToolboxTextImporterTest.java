@@ -870,6 +870,43 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#UNIDENTIFIED_GLOBAL_TARGETED},
+	 * with several other types mixed in (which would be overriden by the global definition).
+	 */
+	@Test
+	public void testSubRefUNIDENTIFIED_GLOBAL_TARGETED_TX_MIXED() {
+		setTestFile("subref_UNIDENTIFIED_GLOBAL_TARGETED_mixed.txt");
+		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertThat(graph.getTokens().size(), is(10));
+		// All but the global definition is ignored, hence only 2 spans
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("subref").size(), is(1));
+		SNode srNode = graph.getNodesByName("subref").get(0);
+		assertThat(srNode, instanceOf(SSpan.class));
+		assertThat(graph.getOverlappedTokens(srNode).size(), is(4));
+		for (SToken tok : graph.getOverlappedTokens(srNode)) {
+			assertThat(graph.getText(tok), anyOf(is("L2"), is("L3"), is("L4"), is("L5")));
+		}
+		// FIXME: Salt pull request for graphElement.hasAnnotation(String qName)
+		// and getAnnotations().contains(String annotationString)
+		assertThat(srNode.getAnnotations().size(), is(2));
+		assertNotNull(srNode.getAnnotation("toolbox::sr"));
+		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
+		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED_TX_mixed L2-L5"));
+		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL_TARGETED_TX_mixed L2-L5"));
+		assertThat(srNode.getLayers().size(), is(1));
+		assertThat(srNode.getLayers().iterator().next().getName(), is("tx"));
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
 	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#IDENTIFIED_GLOBAL}.
 	 */
 	@Test
