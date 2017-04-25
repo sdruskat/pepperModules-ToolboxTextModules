@@ -125,7 +125,7 @@ public class LayerData {
 	/**
 	 * @return the primaryData
 	 */
-	public final List<String> getPrimaryData() {
+	public List<String> getPrimaryData() {
 		return primaryData;
 	}
 	/**
@@ -137,7 +137,7 @@ public class LayerData {
 	/**
 	 * @return the annotations
 	 */
-	public final ListMultimap<String,List<String>> getAnnotations() {
+	public ListMultimap<String,List<String>> getAnnotations() {
 		return annotations;
 	}
 	/**
@@ -167,21 +167,21 @@ public class LayerData {
 	/**
 	 * @return the marker
 	 */
-	public final String getMarker() {
+	public String getMarker() {
 		return marker;
 	}
 
 	/**
 	 * @return the docName
 	 */
-	public final String getDocName() {
+	public String getDocName() {
 		return docName;
 	}
 
 	/**
 	 * @return the ref
 	 */
-	public final String getRef() {
+	public String getRef() {
 		return ref;
 	}
 
