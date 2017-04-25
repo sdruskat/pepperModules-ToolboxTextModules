@@ -70,7 +70,7 @@ public class LayerData {
 			 * "Tokenization", i.e., a simple split on whitespace(s).
 			 * This is leaving the complexity of tokenization with
 			 * Toolbox (users), which is permissible as it should be assumed
-			 * that Toolbox provides correct data. Right.
+			 * that Toolbox provides correct data. Yea, right.
 			 */
 			primaryData.addAll(Arrays.asList(originalPrimaryData.split("\\s+")));
 		}
