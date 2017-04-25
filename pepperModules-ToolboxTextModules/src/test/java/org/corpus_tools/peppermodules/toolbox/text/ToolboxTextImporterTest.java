@@ -732,6 +732,43 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
 	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#UNIDENTIFIED_GLOBAL},
+	 * with several other types mixed in (which would be overriden by the global definition).
+	 */
+	@Test
+	public void testSubRefUNIDENTIFIED_GLOBAL_MB_MIXED() {
+		setTestFile("subref_UNIDENTIFIED_GLOBAL_mixed.txt");
+		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getTokens().size(), is(greaterThan(0)));
+		assertThat(graph.getTokens().size(), is(12));
+		// All but the global definition is ignored, hence only 2 spans
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("subref").size(), is(1));
+		SNode srNode = graph.getNodesByName("subref").get(0);
+		assertThat(srNode, instanceOf(SSpan.class));
+		assertThat(graph.getOverlappedTokens(srNode).size(), is(4));
+		for (SToken tok : graph.getOverlappedTokens(srNode)) {
+			assertThat(graph.getText(tok), anyOf(is("m23"), is("m24"), is("m25"), is("m26")));
+		}
+		// FIXME: Salt pull request for graphElement.hasAnnotation(String qName)
+		// and getAnnotations().contains(String annotationString)
+		assertThat(srNode.getAnnotations().size(), is(2));
+		assertNotNull(srNode.getAnnotation("toolbox::sr"));
+		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
+		assertThat(srNode.getAnnotation("toolbox::sr").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL m23-m26"));
+		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL m23-m26"));
+		assertThat(srNode.getLayers().size(), is(1));
+		assertThat(srNode.getLayers().iterator().next().getName(), is("mb"));
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
 	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#UNIDENTIFIED_GLOBAL}.
 	 */
 	@Test
