@@ -26,7 +26,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.common.FormatDesc;
@@ -36,9 +39,11 @@ import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SSpan;
+import org.corpus_tools.salt.common.STextualDS;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.common.SaltProject;
 import org.corpus_tools.salt.core.SAnnotation;
+import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.corpus_tools.salt.core.SNode;
 import org.eclipse.emf.common.util.URI;
@@ -63,7 +68,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	@Before
 	public void setUp() throws Exception {
 		this.setFixture(new ToolboxTextImporter());
-		this.supportedFormatsCheck.add(new FormatDesc().setFormatName("toolbox-text").setFormatVersion("3.0"));
+		this.addFormatWhichShouldBeSupported(new FormatDesc().setFormatName("toolbox-text").setFormatVersion("3.0"));
 		this.getFixture().getCorpusDesc().getFormatDesc().setFormatName("toolbox-text").setFormatVersion("3.0");
 		getFixture().getSaltProject().createCorpusGraph();
 		getFixture().setProperties(new ToolboxTextImporterProperties());
@@ -137,313 +142,564 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertEquals("Info on ID1", getDocument("ID1").getMetaAnnotations().iterator().next().getValue_STEXT());
 	}
 	
-//	/**
-//	 * Test method for
-//	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
-//	 * 
-//	 * Tests against a "standard" example, which covers most phenomena 
-//	 * the importer tests against, such as clitics and affixes, 
-//	 * subrefs, meta annotations, etc.
-//	 */
-//	@Test
-//	public void testParseStandardDocument() {
-//		setTestFile("test.txt");
-//		setProperties("test.properties");
-//		start();
-////		assertEquals((Long) 246L, getFixture().getHeaderEndOffset());
-////		assertFalse(getFixture().isMonolithic());
-//		SCorpusGraph corpusGraph = getNonEmptyCorpusGraph();
-//
-//		// Test corpora
-//		runCorpusTests(corpusGraph, "test.txt");
-//		
-//		// Test documents
-//		assertEquals(5, corpusGraph.getDocuments().size());
-//		for (SDocument doc : corpusGraph.getDocuments()) {
-//			assertThat(doc.getName(), anyOf(is(DOC_NO + "1"), is(DOC_NO + "2"), is(DOC_NO + "3"), is(DOC_NO + "4"), is(DOC_NO + "5")));
-//			assertEquals(2, doc.getMetaAnnotations().size());
-//			for (SAnnotation anno : doc.getAnnotations()) {
-//				assertThat(anno.getQName(), anyOf(is(TOOLBOX + "::idinfo"), is(TOOLBOX + "::moreidinfo")));
-//				if (anno.getQName().equals(TOOLBOX + "::idinfo")) {
-//					assertEquals("Some ".toLowerCase() + doc.getName().toLowerCase() + " info".toLowerCase(), anno.getValue_STEXT().toLowerCase());
-//				}
-//				else {
-//					assertEquals("Some more info about ".toLowerCase() + doc.getName().toLowerCase(), anno.getValue_STEXT().toLowerCase());
-//				}
-//			}
-//		}
-//		for (SDocument doc : corpusGraph.getDocuments()) {
-//			// General document tests TODO: Factor out to method?
-//			assertNotNull(doc.getDocumentGraph());
-//			SDocumentGraph graph = doc.getDocumentGraph();
-//			assertEquals(2, graph.getTextualDSs().size());
-//			// Document-respective tests
-//			String docNumber = doc.getId().substring(doc.getId().length() - 1);
-//			// FIXME switch on docNumber
-//			// Document-level
-//			assertEquals(DOC_NO + docNumber, doc.getName());
-//			assertNotNull(doc.getMetaAnnotation(TOOLBOX + "::idinfo"));
-//			assertNotNull(doc.getMetaAnnotation(TOOLBOX + "::moreidinfo"));
-//			switch (docNumber) {
-//			case "4":
-//				assertEquals("Some document no. " + docNumber + " info followed by an empty marker", doc.getMetaAnnotation(TOOLBOX + "::idinfo").getValue_STEXT());
-//				assertEquals("Some more info about document no. " + docNumber + " Duplicate 1 Duplicate 2", doc.getMetaAnnotation(TOOLBOX + "::moreidinfo").getValue_STEXT());
-//				break;
-//
-//			default:
-//				assertEquals("Some document no. " + docNumber + " info", doc.getMetaAnnotation(TOOLBOX + "::idinfo").getValue_STEXT());
-//				assertEquals("Some more info about document no. " + docNumber, doc.getMetaAnnotation(TOOLBOX + "::moreidinfo").getValue_STEXT());
-//				break;
-//			}
-//			// Data sources
-//			for (STextualDS ds : graph.getTextualDSs()) {
-//				switch (docNumber) {
-//				case "1":
-//					assertThat(ds.getText(), is(anyOf(is("Word1 -Tuple Tuple- Word2 Triple-= Word3 FreedashTuple Word4 FreecliticTuple SubRef sentence one SubRef sentence one SubRef sentence two with one-to-four ref SubRef sentence two with one-to-four ref SubRef with some random text just like that SubRef with some random text just like that SubRef with some random text just like that"), 
-//							is("m1m2-m3m4-m5m6m7-m8=m9m10m11-m12m13m14=m15m16m17m18m19m20m21m22m23m24m25m26m27m28m29m30m31m32m33m34m35m36m37m38m39m40m41m42m43"))));
-//					break;
-//
-//				case "2":
-//					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"),
-//							is("m1m2m1m2"))));
-//					break;
-//
-//				case "3":
-//					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"),
-//							is("m1m2m1m2"))));
-//					break;
-//
-//				case "4":
-//					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"),
-//							is("m1m2m1m2"))));
-//					break;
-//					
-//				case "5":
-//					assertThat(ds.getText(), is(anyOf(is("One Two Three Four"),
-//							is("m1m2m3m4"))));
-//					break;
-//
-//				default:
-//					fail();
-//					break;
-//				}
-//			}
-//			// Tokens, spans, layers
-//			switch (docNumber) {
-//			case "1":
-//				assertEquals(94, graph.getTokens().size());
-//				assertEquals(8, graph.getSpans().size());
-//				assertEquals(3, graph.getLayers().size());
-//				break;
-//
-//			case "2":
-//			case "3":
-//			case "4":
-//				assertEquals(8, graph.getTokens().size());
-//				assertEquals(2, graph.getSpans().size());
-//				assertEquals(3, graph.getLayers().size());
-//				break;
-//
-//			case "5":
-//				assertEquals(8, graph.getTokens().size());
-//				assertEquals(1, graph.getSpans().size());
-//				assertEquals(3, graph.getLayers().size());
-//				break;
-//
-//			default:
-//				fail();
-//				break;
-//			}
-//			// Layers
-//			for (SLayer l : graph.getLayers()) {
-//				switch (docNumber) {
-//				case "1":
-//					switch (l.getName()) {
-//					case "tx":
-//						assertEquals(51, l.getNodes().size());
-//						break;
-//						
-//					case "mb":
-//						assertEquals(43, l.getNodes().size());
-//						break;
-//						
-//					case "ref":
-//						assertEquals(8, l.getNodes().size());
-//						break;
-//
-//					default:
-//						fail();
-//						break;
-//					}
-//					break;
-//
-//				case "2":
-//				case "3":
-//				case "4":
-//					switch (l.getName()) {
-//					case "tx":
-//						assertEquals(4, l.getNodes().size());
-//						break;
-//						
-//					case "mb":
-//						assertEquals(4, l.getNodes().size());
-//						break;
-//						
-//					case "ref":
-//						assertEquals(2, l.getNodes().size());
-//						break;
-//
-//					default:
-//						fail();
-//						break;
-//					}
-//					break;
-//
-//				case "5":
-//					switch (l.getName()) {
-//					case "tx":
-//						assertEquals(4, l.getNodes().size());
-//						break;
-//						
-//					case "mb":
-//						assertEquals(4, l.getNodes().size());
-//						break;
-//						
-//					case "ref":
-//						assertEquals(1, l.getNodes().size());
-//						break;
-//
-//					default:
-//						fail();
-//						break;
-//					}
-//					break;
-//
-//				default:
-//					fail();
-//					break;
-//				}
-//			}
-//			// Ref-level annotations
-//			for (SSpan s : graph.getSpans()) {
-//				switch (docNumber) {
-//				case "1":
-//					assertEquals(3, s.getAnnotations().size());
-//					for (SAnnotation a : s.getAnnotations()) {
-//						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
-//					}
-//					break;
-//
-//				case "2":
-//				case "3":
-//				case "4":
-//				case "5":
-//					assertEquals(2, s.getAnnotations().size());
-//					for (SAnnotation a : s.getAnnotations()) {
-//						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"))));
-//					}
-//					break;
-//
-//				default:
-//					fail();
-//					break;
-//				}
-//			}
-//			// Token annotations
-//			String[] lexAnnos, morphAnnos;
-//			List<SToken> sortedLexToks = new ArrayList<>();
-//			List<SToken> sortedMorphToks = new ArrayList<>();
-//			switch (docNumber) {
-//			case "1":
-//				lexAnnos = new String[] { "WordOne", "TupleOne", "TupleTwo", "WordTwo", "Triple", "WordThree", "TupleThree", "WordFour", "TupleFour", "t11", "t12", "t13", "t14", "t15", "t16", "t17", "t18", "t19", "t20", "t21", "t22", "t23", "t24", "t25", "t26", "t27", "t28", "t29", "t30", "t31", "t32", "t33", "t34", "t35", "t36", "t37", "t38", "t39", "t40", "t41", "t42", "t43", "t44", "t45", "t46", "t47", "t48", "t49", "t50", "t51", "t52" };
-//				morphAnnos = new String[] { "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11", "M12", "M13", "M14", "M15", "M16", "M17", "M18", "M19", "M20", "M21", "M22", "M23", "M24", "M25", "M26", "M27", "M28", "M29", "M30", "M31", "M32", "M33", "M34", "M35", "M36", "M37", "M38", "M39", "M40", "M41", "M42", "M43" };
-//				for (SToken sortedTok : graph.getSortedTokenByText()) {
-//					if (graph.getLayerByName("tx").get(0).getNodes().contains(sortedTok)) {
-//						sortedLexToks.add(sortedTok);
-//					}
-//					else if (graph.getLayerByName("mb").get(0).getNodes().contains(sortedTok)) {
-//						sortedMorphToks.add(sortedTok);
-//					}
-//				}
-//				for (int j = 0; j < sortedLexToks.size(); j++) {
-//					assertEquals(lexAnnos[j], sortedLexToks.get(j).getAnnotation("toolbox::ta").getValue());
-//				}
-//				for (int j = 0; j < sortedMorphToks.size(); j++) {
-//					assertEquals(morphAnnos[j], sortedMorphToks.get(j).getAnnotation("toolbox::ge").getValue());
-//				}
-//				break;
-//
-//			case "2":
-//			case "3":
-//			case "4":
-//				lexAnnos = new String[] { "A", "word", "A", "word"};
-//				morphAnnos = new String[] { "M1", "M2", "M1", "M2"};
-//				for (SToken sortedTok : graph.getSortedTokenByText()) {
-//					if (graph.getLayerByName("tx").get(0).getNodes().contains(sortedTok)) {
-//						sortedLexToks.add(sortedTok);
-//					}
-//					else if (graph.getLayerByName("mb").get(0).getNodes().contains(sortedTok)) {
-//						sortedMorphToks.add(sortedTok);
-//					}
-//				}
-//				for (int j = 0; j < sortedLexToks.size(); j++) {
-//					assertEquals(lexAnnos[j], sortedLexToks.get(j).getAnnotation("toolbox::ta").getValue());
-//				}
-//				for (int j = 0; j < sortedMorphToks.size(); j++) {
-//					assertEquals(morphAnnos[j], sortedMorphToks.get(j).getAnnotation("toolbox::ge").getValue());
-//				}
-//				break;
-//
-//			case "5":
-//				lexAnnos = new String[] { "1", "2", "3", "4"};
-//				morphAnnos = new String[] { "M1", "M2", "M3", "M4"};
-//				for (SToken sortedTok : graph.getSortedTokenByText()) {
-//					if (graph.getLayerByName("tx").get(0).getNodes().contains(sortedTok)) {
-//						sortedLexToks.add(sortedTok);
-//					}
-//					else if (graph.getLayerByName("mb").get(0).getNodes().contains(sortedTok)) {
-//						sortedMorphToks.add(sortedTok);
-//					}
-//				}
-//				for (int j = 0; j < sortedLexToks.size(); j++) {
-//					assertEquals(lexAnnos[j], sortedLexToks.get(j).getAnnotation("toolbox::ta").getValue());
-//				}
-//				for (int j = 0; j < sortedMorphToks.size(); j++) {
-//					assertEquals(morphAnnos[j], sortedMorphToks.get(j).getAnnotation("toolbox::ge").getValue());
-//				}
-//				break;
-//
-//			default:
-//				fail();
-//				break;
-//			}
-//			// Spanning
-//			switch (docNumber) {
-//			case "1":
-//				for (SSpan span : graph.getSpans()) {
-//					if (span.getName().equals("Reference no. 1")) {
-//						assertEquals(9, graph.getOverlappedTokens(span).size());
-//						for (SToken tok : graph.getOverlappedTokens(span)) {
-////							FIXME CONTINUE IMPLEMENTATION graph.getTimeline().get
-//						}
-//					}
-//				}
-//				break;
-//
-//			case "2":
-//			case "3":
-//			case "4":
-//				
-//				break;
-//
-//			case "5":
-//				break;
-//
-//			default:
-//				break;
-//			}
-//		}
-//	}
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a "standard" example, which covers most phenomena 
+	 * the importer tests against, such as clitics and affixes, 
+	 * subrefs, meta annotations, etc.
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testParseStandardDocument() {
+		setTestFile("test.txt");
+		setProperties("test.properties");
+		start();
+		SCorpusGraph corpusGraph = getNonEmptyCorpusGraph();
+
+		// Test corpora
+		runCorpusTests(corpusGraph, "test.txt");
+		
+		// Test documents
+		assertEquals(5, corpusGraph.getDocuments().size());
+		for (SDocument doc : corpusGraph.getDocuments()) {
+			assertThat(doc.getName(), anyOf(is(DOC_NO + "1"), is(DOC_NO + "2"), is(DOC_NO + "3"), is(DOC_NO + "4"), is(DOC_NO + "5")));
+			assertEquals(2, doc.getMetaAnnotations().size());
+			for (SAnnotation anno : doc.getAnnotations()) {
+				assertThat(anno.getQName(), anyOf(is(TOOLBOX + "::idinfo"), is(TOOLBOX + "::moreidinfo")));
+				if (anno.getQName().equals(TOOLBOX + "::idinfo")) {
+					assertEquals("Some ".toLowerCase() + doc.getName().toLowerCase() + " info".toLowerCase(), anno.getValue_STEXT().toLowerCase());
+				}
+				else {
+					assertEquals("Some more info about ".toLowerCase() + doc.getName().toLowerCase(), anno.getValue_STEXT().toLowerCase());
+				}
+			}
+		}
+		for (SDocument doc : corpusGraph.getDocuments()) {
+			// General document tests TODO: Factor out to method?
+			assertNotNull(doc.getDocumentGraph());
+			SDocumentGraph graph = doc.getDocumentGraph();
+			assertEquals(2, graph.getTextualDSs().size());
+			// Document-respective tests
+			String docNumber = doc.getId().substring(doc.getId().length() - 1);
+			// Document-level
+			assertEquals(DOC_NO + docNumber, doc.getName());
+			assertNotNull(doc.getMetaAnnotation(TOOLBOX + "::idinfo"));
+			assertNotNull(doc.getMetaAnnotation(TOOLBOX + "::moreidinfo"));
+			switch (docNumber) {
+			case "4":
+				assertEquals("Some document no. " + docNumber + " info followed by an empty marker", doc.getMetaAnnotation(TOOLBOX + "::idinfo").getValue_STEXT());
+				assertEquals("Some more info about document no. " + docNumber + " Duplicate 1 Duplicate 2", doc.getMetaAnnotation(TOOLBOX + "::moreidinfo").getValue_STEXT());
+				break;
+
+			default:
+				assertEquals("Some document no. " + docNumber + " info", doc.getMetaAnnotation(TOOLBOX + "::idinfo").getValue_STEXT());
+				assertEquals("Some more info about document no. " + docNumber, doc.getMetaAnnotation(TOOLBOX + "::moreidinfo").getValue_STEXT());
+				break;
+			}
+			// Data sources
+			for (STextualDS ds : graph.getTextualDSs()) {
+				switch (docNumber) {
+				case "1":
+					assertThat(ds.getText(), is(anyOf(is("Word1 -Tuple Tuple- Word2 Triple-= Word3 FreedashTuple Word4 FreecliticTuple Subref sentence one Subref sentence one Subref sentence two with one-to-four ref Subref sentence two with one-to-four ref Subref with some random text just like that Subref with some random text just like that Subref with some random text just like that"), 
+							is("m1m2-m3m4-m5m6m7-m8=m9m10m11-m12m13m14=m15m16m17m18m19m20m21m22m23m24m25m26m27m28m29m30m31m32m33m34m35m36m37m38m39m40m41m42m43"))));
+					break;
+
+				case "2":
+					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"),
+							is("m1m2m1m2"))));
+					break;
+
+				case "3":
+					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"),
+							is("m1m2m1m2"))));
+					break;
+
+				case "4":
+					assertThat(ds.getText(), is(anyOf(is("A sentence A sentence"),
+							is("m1m2m1m2"))));
+					break;
+					
+				case "5":
+					assertThat(ds.getText(), is(anyOf(is("One Two Three Four"),
+							is("m1m2m3m4"))));
+					break;
+
+				default:
+					fail();
+					break;
+				}
+			}
+			// Tokens, spans, layers
+			switch (docNumber) {
+			case "1":
+				assertEquals(94, graph.getTokens().size());
+				assertEquals(18, graph.getSpans().size());
+				assertEquals(3, graph.getLayers().size());
+				break;
+
+			case "2":
+			case "3":
+			case "4":
+				assertEquals(8, graph.getTokens().size());
+				assertEquals(2, graph.getSpans().size());
+				assertEquals(3, graph.getLayers().size());
+				break;
+
+			case "5":
+				assertEquals(8, graph.getTokens().size());
+				assertEquals(1, graph.getSpans().size());
+				assertEquals(3, graph.getLayers().size());
+				break;
+
+			default:
+				fail();
+				break;
+			}
+			// Layers
+			for (SLayer l : graph.getLayers()) {
+				switch (docNumber) {
+				case "1":
+					switch (l.getName()) {
+					case "tx":
+						assertEquals(56, l.getNodes().size());
+						break;
+						
+					case "mb":
+						assertEquals(48, l.getNodes().size());
+						break;
+						
+					case "ref":
+						assertEquals(8, l.getNodes().size());
+						break;
+
+					default:
+						fail();
+						break;
+					}
+					break;
+
+				case "2":
+				case "3":
+				case "4":
+					switch (l.getName()) {
+					case "tx":
+						assertEquals(4, l.getNodes().size());
+						break;
+						
+					case "mb":
+						assertEquals(4, l.getNodes().size());
+						break;
+						
+					case "ref":
+						assertEquals(2, l.getNodes().size());
+						break;
+
+					default:
+						fail();
+						break;
+					}
+					break;
+
+				case "5":
+					switch (l.getName()) {
+					case "tx":
+						assertEquals(4, l.getNodes().size());
+						break;
+						
+					case "mb":
+						assertEquals(4, l.getNodes().size());
+						break;
+						
+					case "ref":
+						assertEquals(1, l.getNodes().size());
+						break;
+
+					default:
+						fail();
+						break;
+					}
+					break;
+
+				default:
+					fail();
+					break;
+				}
+			}
+			// Ref-level annotations
+			for (SSpan s : graph.getSpans()) {
+				SAnnotation aut = null;
+				switch (docNumber) {
+				case "1":
+					switch (s.getName()) {
+					case "Reference no. 1":
+						assertEquals(3, s.getAnnotations().size());
+						for (SAnnotation a : s.getAnnotations()) {
+							assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+						}
+						assertNotNull((aut = s.getAnnotation("toolbox::ll")));
+						assertThat(aut.getValue_STEXT(), is("A reference testing composites, clitics, and such"));
+						assertNotNull((aut = s.getAnnotation("toolbox::ref")));
+						assertThat(aut.getValue_STEXT(), is(s.getName()));
+						assertNotNull((aut = s.getAnnotation("toolbox::met")));
+						assertThat(aut.getValue_STEXT(), is("Some meta information about the first sentence"));
+						break;
+					case "Subref sentence schema 1 (line-level) to mb":
+						if (!s.getName().equals("subref")) {
+							assertEquals(3, s.getAnnotations().size());
+							for (SAnnotation a : s.getAnnotations()) {
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+							}
+							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
+							assertThat(aut.getValue_STEXT(), is("uref one-mb"));
+							assertNotNull((aut = s.getAnnotation("toolbox::ref")));
+							assertThat(aut.getValue_STEXT(), is(s.getName()));
+							assertNotNull((aut = s.getAnnotation("toolbox::met")));
+							assertThat(aut.getValue_STEXT(), is("A sentence with a line-level Subref"));
+						}
+						break;
+					case "Subref sentence schema 1 (line-level) to tx":
+						if (!s.getName().equals("subref")) {
+							assertEquals(3, s.getAnnotations().size());
+							for (SAnnotation a : s.getAnnotations()) {
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+							}
+							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
+							assertThat(aut.getValue_STEXT(), is("uref one-tx"));
+							assertNotNull((aut = s.getAnnotation("toolbox::ref")));
+							assertThat(aut.getValue_STEXT(), is(s.getName()));
+							assertNotNull((aut = s.getAnnotation("toolbox::met")));
+							assertThat(aut.getValue_STEXT(), is("A sentence with a line-level Subref"));
+						}
+						break;
+					case "Subref sentence schema 2 (undefined global) with existing mb line":
+						if (!s.getName().equals("subref")) {
+							assertEquals(3, s.getAnnotations().size());
+							for (SAnnotation a : s.getAnnotations()) {
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+							}
+							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
+							assertThat(aut.getValue_STEXT(), is("uref two-with"));
+							assertNotNull((aut = s.getAnnotation("toolbox::ref")));
+							assertThat(aut.getValue_STEXT(), is(s.getName()));
+							assertNotNull((aut = s.getAnnotation("toolbox::met")));
+							assertThat(aut.getValue_STEXT(), is("Sentence with a single global Subref (morph-level) from m23 to m26 (incl.) on \\ur and \\ur2"));
+						}
+						break;
+					case "Subref sentence schema 2 (undefined global) without mb line":
+						if (!s.getName().equals("subref")) {
+							assertEquals(3, s.getAnnotations().size());
+							for (SAnnotation a : s.getAnnotations()) {
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+							}
+							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
+							assertThat(aut.getValue_STEXT(), is("uref two-without"));
+							assertNotNull((aut = s.getAnnotation("toolbox::ref")));
+							assertThat(aut.getValue_STEXT(), is(s.getName()));
+							assertNotNull((aut = s.getAnnotation("toolbox::met")));
+							assertThat(aut.getValue_STEXT(), is("Sentence with a single global Subref (lex-level) from t24 to t27 (incl.) on \\ur and \\ur2"));
+						}
+						break;
+					case "Subref sentence schema 3 (defined global) to mb":
+						if (!s.getName().equals("subref")) {
+							assertEquals(3, s.getAnnotations().size());
+							for (SAnnotation a : s.getAnnotations()) {
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+							}
+							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
+							assertThat(aut.getValue_STEXT(), is("uref three-mb"));
+							assertNotNull((aut = s.getAnnotation("toolbox::ref")));
+							assertThat(aut.getValue_STEXT(), is(s.getName()));
+							assertNotNull((aut = s.getAnnotation("toolbox::met")));
+							assertThat(aut.getValue_STEXT(), is("Sentence with two global Subrefs (morph-level) m26-m28 and m30-m31 on \\ur"));
+						}
+						break;
+					case "Subref sentence schema 3 (defined global) to tx":
+						if (!s.getName().equals("subref")) {
+							assertEquals(3, s.getAnnotations().size());
+							for (SAnnotation a : s.getAnnotations()) {
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+							}
+							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
+							assertThat(aut.getValue_STEXT(), is("uref three-tx"));
+							assertNotNull((aut = s.getAnnotation("toolbox::ref")));
+							assertThat(aut.getValue_STEXT(), is(s.getName()));
+							assertNotNull((aut = s.getAnnotation("toolbox::met")));
+							assertThat(aut.getValue_STEXT(), is("Sentence with two global Subrefs (lex-level) t38-t40 and t43-t44 on \\ur"));
+						}
+						break;
+					case "Subref sentence schema 4 (defined global with related line)":
+						if (!s.getName().equals("subref")) {
+							assertEquals(3, s.getAnnotations().size());
+							for (SAnnotation a : s.getAnnotations()) {
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+							}
+							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
+							assertThat(aut.getValue_STEXT(), is("uref four"));
+							assertNotNull((aut = s.getAnnotation("toolbox::ref")));
+							assertThat(aut.getValue_STEXT(), is(s.getName()));
+							assertNotNull((aut = s.getAnnotation("toolbox::met")));
+							assertThat(aut.getValue_STEXT(), is("Sentence with two global Subrefs (one lex-level, one morph-level) m26-m28 and m30-m31 on \\ur"));
+						}
+						break;
+
+					default:
+						break;
+					}
+					break;
+
+				case "2":
+				case "3":
+				case "4":
+				case "5":
+					assertEquals(2, s.getAnnotations().size());
+					for (SAnnotation a : s.getAnnotations()) {
+						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"))));
+					}
+					break;
+
+				default:
+					fail();
+					break;
+				}
+			}
+			// Token annotations
+			String[] lexAnnos, morphAnnos;
+			List<SToken> sortedLexToks = new ArrayList<>();
+			List<SToken> sortedMorphToks = new ArrayList<>();
+			switch (docNumber) {
+			case "1":
+				lexAnnos = new String[] { "WordOne", "TupleOne", "TupleTwo", "WordTwo", "Triple", "WordThree", "TupleThree", "WordFour", "TupleFour", "t11", "t12", "t13", "t14", "t15", "t16", "t17", "t18", "t19", "t20", "t21", "t22", "t23", "t24", "t25", "t26", "t27", "t28", "t29", "t30", "t31", "t32", "t33", "t34", "t35", "t36", "t37", "t38", "t39", "t40", "t41", "t42", "t43", "t44", "t45", "t46", "t47", "t48", "t49", "t50", "t51", "t52" };
+				morphAnnos = new String[] { "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11", "M12", "M13", "M14", "M15", "M16", "M17", "M18", "M19", "M20", "M21", "M22", "M23", "M24", "M25", "M26", "M27", "M28", "M29", "M30", "M31", "M32", "M33", "M34", "M35", "M36", "M37", "M38", "M39", "M40", "M41", "M42", "M43" };
+				for (SToken sortedTok : graph.getSortedTokenByText()) {
+					if (graph.getLayerByName("tx").get(0).getNodes().contains(sortedTok)) {
+						sortedLexToks.add(sortedTok);
+					}
+					else if (graph.getLayerByName("mb").get(0).getNodes().contains(sortedTok)) {
+						sortedMorphToks.add(sortedTok);
+					}
+				}
+				for (int j = 0; j < sortedLexToks.size(); j++) {
+					assertEquals(lexAnnos[j], sortedLexToks.get(j).getAnnotation("toolbox::ta").getValue());
+				}
+				for (int j = 0; j < sortedMorphToks.size(); j++) {
+					assertEquals(morphAnnos[j], sortedMorphToks.get(j).getAnnotation("toolbox::ge").getValue());
+				}
+				break;
+
+			case "2":
+			case "3":
+			case "4":
+				lexAnnos = new String[] { "A", "word", "A", "word"};
+				morphAnnos = new String[] { "M1", "M2", "M1", "M2"};
+				for (SToken sortedTok : graph.getSortedTokenByText()) {
+					if (graph.getLayerByName("tx").get(0).getNodes().contains(sortedTok)) {
+						sortedLexToks.add(sortedTok);
+					}
+					else if (graph.getLayerByName("mb").get(0).getNodes().contains(sortedTok)) {
+						sortedMorphToks.add(sortedTok);
+					}
+				}
+				for (int j = 0; j < sortedLexToks.size(); j++) {
+					assertEquals(lexAnnos[j], sortedLexToks.get(j).getAnnotation("toolbox::ta").getValue());
+				}
+				for (int j = 0; j < sortedMorphToks.size(); j++) {
+					assertEquals(morphAnnos[j], sortedMorphToks.get(j).getAnnotation("toolbox::ge").getValue());
+				}
+				break;
+
+			case "5":
+				lexAnnos = new String[] { "1", "2", "3", "4"};
+				morphAnnos = new String[] { "M1", "M2", "M3", "M4"};
+				for (SToken sortedTok : graph.getSortedTokenByText()) {
+					if (graph.getLayerByName("tx").get(0).getNodes().contains(sortedTok)) {
+						sortedLexToks.add(sortedTok);
+					}
+					else if (graph.getLayerByName("mb").get(0).getNodes().contains(sortedTok)) {
+						sortedMorphToks.add(sortedTok);
+					}
+				}
+				for (int j = 0; j < sortedLexToks.size(); j++) {
+					assertEquals(lexAnnos[j], sortedLexToks.get(j).getAnnotation("toolbox::ta").getValue());
+				}
+				for (int j = 0; j < sortedMorphToks.size(); j++) {
+					assertEquals(morphAnnos[j], sortedMorphToks.get(j).getAnnotation("toolbox::ge").getValue());
+				}
+				break;
+
+			default:
+				fail();
+				break;
+			}
+			// Spanning
+			switch (docNumber) {
+			case "1":
+				assertThat(graph.getSpans().size(), is(18));
+				int subrefCheck = 0;
+				for (SSpan span : graph.getSpans()) {
+					if (span.getName().equals("Reference no. 1")) {
+						assertEquals(9, graph.getOverlappedTokens(span).size());
+						for (SToken t : graph.getOverlappedTokens(span)) {
+							assertThat(graph.getText(t),
+									anyOf(is("Word1"), is("-Tuple"), is("Tuple-"), is("Word2"), is("Triple-="),
+											is("Word3"), is(""), is("FreedashTuple"), is("Word4"),
+											is("FreecliticTuple")));
+						}
+					}
+					else if (span.getName().equals("Subref sentence schema 1 (line-level) to mb")) {
+						assertEquals(3, graph.getOverlappedTokens(span).size());
+						for (SToken t : graph.getOverlappedTokens(span)) {
+							assertThat(graph.getText(t),
+									anyOf(is("Subref"), is("sentence"), is("one")));
+						}
+					}
+					else if (span.getName().equals("Subref sentence schema 1 (line-level) to tx")) {
+						assertEquals(3, graph.getOverlappedTokens(span).size());
+						for (SToken t : graph.getOverlappedTokens(span)) {
+							assertThat(graph.getText(t),
+									anyOf(is("Subref"), is("sentence"), is("one")));
+						}
+					}
+					else if (span.getName().equals("Subref sentence schema 2 (undefined global) with existing mb line")) {
+						assertEquals(6, graph.getOverlappedTokens(span).size());
+						for (SToken t : graph.getOverlappedTokens(span)) {
+							assertThat(graph.getText(t),
+									anyOf(is("Subref"), is("sentence"), is("two"), is("with"), is("one-to-four"), is("ref")));
+						}
+					}
+					else if (span.getName().equals("Subref sentence schema 2 (undefined global) without mb line")) {
+						assertEquals(6, graph.getOverlappedTokens(span).size());
+						for (SToken t : graph.getOverlappedTokens(span)) {
+							assertThat(graph.getText(t),
+									anyOf(is("Subref"), is("sentence"), is("two"), is("with"), is("one-to-four"), is("ref")));
+						}
+					}
+					else if (span.getName().equals("Subref sentence schema 3 (defined global) to mb")) {
+						assertEquals(8, graph.getOverlappedTokens(span).size());
+						for (SToken t : graph.getOverlappedTokens(span)) {
+							assertThat(graph.getText(t),
+									anyOf(is("Subref"), is("with"), is("some"), is("random"), is("text"), is("just"), is("like"), is("that")));
+						}
+					}
+					else if (span.getName().equals("Subref sentence schema 3 (defined global) to tx")) {
+						assertEquals(8, graph.getOverlappedTokens(span).size());
+						for (SToken t : graph.getOverlappedTokens(span)) {
+							assertThat(graph.getText(t),
+									anyOf(is("Subref"), is("with"), is("some"), is("random"), is("text"), is("just"), is("like"), is("that")));
+						}
+					}
+					else if (span.getName().equals("Subref sentence schema 4 (defined global with related line)")) {
+						assertEquals(8, graph.getOverlappedTokens(span).size());
+						for (SToken t : graph.getOverlappedTokens(span)) {
+							assertThat(graph.getText(t),
+									anyOf(is("Subref"), is("with"), is("some"), is("random"), is("text"), is("just"), is("like"), is("that")));
+						}
+					}
+					// Subrefs
+					else if (span.getName().equals("subref")) {
+						for (SAnnotation a : span.getAnnotations()) {
+							if (a.getValue_STEXT().equals("Subref m29-m31")) {
+								subrefCheck++;
+								assertEquals(3, graph.getOverlappedTokens(span).size());
+								for (SToken t : graph.getOverlappedTokens(span)) {
+									assertThat(graph.getText(t),
+											anyOf(is("m30"), is("m31"), is("m29")));
+								}
+							}
+							else if (a.getValue_STEXT().equals("Subref m33-m34")) {
+								subrefCheck++;
+								assertEquals(2, graph.getOverlappedTokens(span).size());
+								for (SToken t : graph.getOverlappedTokens(span)) {
+									assertThat(graph.getText(t),
+											anyOf(is("m33"), is("m34")));
+								}
+							}
+							else if (a.getValue_STEXT().equals("Subref t38-t40")) {
+								subrefCheck++;
+								assertEquals(3, graph.getOverlappedTokens(span).size());
+								for (SToken t : graph.getOverlappedTokens(span)) {
+									assertThat(graph.getText(t),
+											anyOf(is("with"), is("some"), is("random")));
+								}
+							}
+							else if (a.getValue_STEXT().equals("Subref t42-t43")) {
+								subrefCheck++;
+								assertEquals(2, graph.getOverlappedTokens(span).size());
+								for (SToken t : graph.getOverlappedTokens(span)) {
+									assertThat(graph.getText(t),
+											anyOf(is("just"), is("like")));
+								}
+							}
+							else if (a.getValue_STEXT().equals("Subref t46-t48")) {
+								subrefCheck++;
+								assertEquals(3, graph.getOverlappedTokens(span).size());
+								for (SToken t : graph.getOverlappedTokens(span)) {
+									assertThat(graph.getText(t),
+											anyOf(is("with"), is("some"), is("random")));
+								}
+							}
+							else if (a.getValue_STEXT().equals("Subref m41-m42")) {
+								subrefCheck++;
+								assertEquals(2, graph.getOverlappedTokens(span).size());
+								for (SToken t : graph.getOverlappedTokens(span)) {
+									assertThat(graph.getText(t),
+											anyOf(is("m41"), is("m42")));
+								}
+							}
+							else if (a.getValue_STEXT().equals("Subref to morphemes m17 and m18 in a span")) {
+								subrefCheck++;
+								assertEquals(2, graph.getOverlappedTokens(span).size());
+								for (SToken t : graph.getOverlappedTokens(span)) {
+									assertThat(graph.getText(t),
+											anyOf(is("m17"), is("m18"), is("m29")));
+								}
+							}
+							else if (a.getValue_STEXT().equals("Subref to lexicals t15 and t16 in a span")) {
+								subrefCheck++;
+								assertEquals(2, graph.getOverlappedTokens(span).size());
+								for (SToken t : graph.getOverlappedTokens(span)) {
+									assertThat(graph.getText(t),
+											anyOf(is("sentence"), is("one")));
+								}
+							}
+							else if (a.getValue_STEXT().equals("Subref to morphemes m23-m26 in a span")) {
+								subrefCheck++;
+								assertEquals(4, graph.getOverlappedTokens(span).size());
+								for (SToken t : graph.getOverlappedTokens(span)) {
+									assertThat(graph.getText(t),
+											anyOf(is("m23"), is("m24"), is("m25"), is("m26")));
+								}
+							}
+							else if (a.getValue_STEXT().equals("Subref to lexicals \"sentence\"-\"one-to-four\" in a span")) {
+								subrefCheck++;
+								assertEquals(4, graph.getOverlappedTokens(span).size());
+								for (SToken t : graph.getOverlappedTokens(span)) {
+									assertThat(graph.getText(t),
+											anyOf(is("sentence"), is("two"), is("with"), is("one-to-four")));
+								}
+							}
+						}
+					}
+				}
+				assertThat(subrefCheck, is(10));
+				break;
+
+			case "2":
+			case "3":
+			case "4":
+				assertThat(graph.getSpans().size(), is(2));
+				break;
+
+			case "5":
+				assertThat(graph.getSpans().size(), is(1));
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
 	
 	/**
 	 * Test method for
@@ -1166,18 +1422,20 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(6));
-		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getSpans().size(), is(1));
 		assertThat(graph.getNodesByName("fullref").size(), is(1));
-		SNode subref = graph.getNodesByName("fullref").get(0);
-		assertThat(graph.getOverlappedTokens(subref).size(), is(3));
-		for (SToken tok : graph.getOverlappedTokens(subref)) {
+		SNode ref = graph.getNodesByName("fullref").get(0);
+		assertThat(graph.getOverlappedTokens(ref).size(), is(3));
+		for (SToken tok : graph.getOverlappedTokens(ref)) {
 			assertThat(graph.getText(tok), anyOf(is("subref"), is("sentence"), is("one")));
 		}
-		assertThat(subref.getAnnotations().size(), is(1));
-		assertNotNull(subref.getAnnotation("toolbox::sr"));
-		assertThat(subref.getAnnotation("toolbox::sr").getValue_STEXT(), is("Full-ref annotation"));
-		assertThat(subref.getLayers().size(), is(1));
-		assertThat(subref.getLayers().iterator().next().getName(), is("ref"));
+		assertThat(ref.getAnnotations().size(), is(3));
+		assertNotNull(ref.getAnnotation("toolbox::sr"));
+		assertThat(ref.getAnnotation("toolbox::sr").getValue_STEXT(), is("Full-ref annotation"));
+		assertThat(ref.getLayers().size(), is(2));
+		for (SLayer l : ref.getLayers()) {
+			assertThat(l.getName(), anyOf(is("ref"), is("tx")));
+		}
 	}
 	
 	/**
@@ -1196,18 +1454,20 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(6));
-		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getSpans().size(), is(1));
 		assertThat(graph.getNodesByName("fullref").size(), is(1));
-		SNode subref = graph.getNodesByName("fullref").get(0);
-		assertThat(graph.getOverlappedTokens(subref).size(), is(3));
-		for (SToken tok : graph.getOverlappedTokens(subref)) {
+		SNode ref = graph.getNodesByName("fullref").get(0);
+		assertThat(graph.getOverlappedTokens(ref).size(), is(3));
+		for (SToken tok : graph.getOverlappedTokens(ref)) {
 			assertThat(graph.getText(tok), anyOf(is("subref"), is("sentence"), is("one")));
 		}
-		assertThat(subref.getAnnotations().size(), is(1));
-		assertNotNull(subref.getAnnotation("toolbox::sr"));
-		assertThat(subref.getAnnotation("toolbox::sr").getValue_STEXT(), is("Full-ref annotation with an annotation line that is longer than 5 units if split with \\\\s+"));
-		assertThat(subref.getLayers().size(), is(1));
-		assertThat(subref.getLayers().iterator().next().getName(), is("ref"));
+		assertThat(ref.getAnnotations().size(), is(3));
+		assertNotNull(ref.getAnnotation("toolbox::sr"));
+		assertThat(ref.getAnnotation("toolbox::sr").getValue_STEXT(), is("Full-ref annotation with an annotation line that is longer than 5 units if split with \\\\s+"));
+		assertThat(ref.getLayers().size(), is(2));
+		for (SLayer l : ref.getLayers()) {
+			assertThat(l.getName(), anyOf(is("ref"), is("tx")));
+		}
 	}
 	
 	/**
