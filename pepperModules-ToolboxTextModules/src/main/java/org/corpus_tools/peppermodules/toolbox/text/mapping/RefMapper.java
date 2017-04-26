@@ -38,7 +38,6 @@ import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
 import org.corpus_tools.peppermodules.toolbox.text.data.MorphLayerData;
-import org.corpus_tools.peppermodules.toolbox.text.utils.MappingIndices;
 import org.corpus_tools.peppermodules.toolbox.text.utils.MarkerContentMapConsistencyChecker;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocument;
@@ -74,7 +73,6 @@ public class RefMapper extends AbstractBlockMapper {
 	private static final String ERROR_TOO_MANY = "-p";
 	private static final String ERROR_TOO_FEW = "-m";
 	private final boolean docHasMorphology;
-	private MappingIndices indices;
 	private final STextualDS lexDS;
 	private final STextualDS morphDS;
 	private final Map<String, SLayer> layers;
@@ -93,10 +91,10 @@ public class RefMapper extends AbstractBlockMapper {
 	 * @param lexDS 
 	 * @param layers 
 	 */
-	public RefMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString, boolean hasMorphology, MappingIndices indices, STextualDS lexDS, STextualDS morphDS, Map<String, SLayer> layers) {
+	public RefMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString, boolean hasMorphology, STextualDS lexDS, STextualDS morphDS, Map<String, SLayer> layers) {
 		super(properties, graph, trimmedInputString);
 		this.docHasMorphology = hasMorphology;
-		this.indices = indices;
+//		this.indices = indices;
 		this.lexDS = lexDS;
 		this.morphDS = morphDS;
 		this.layers = layers;
@@ -593,21 +591,6 @@ public class RefMapper extends AbstractBlockMapper {
 		}
 	}
 	
-	/**
-	 * @return the indices
-	 */
-	public final MappingIndices getIndices() {
-		return indices;
-	}
-
-	/**
-	 * @param indices
-	 *            the indices to set
-	 */
-	public final void setIndices(MappingIndices indices) {
-		this.indices = indices;
-	}
-
 	/**
 	 * TODO: Description
 	 *

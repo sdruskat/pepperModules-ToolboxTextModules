@@ -34,7 +34,6 @@ import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.DocumentHeaderMapper;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.RefMapper;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper;
-import org.corpus_tools.peppermodules.toolbox.text.utils.MappingIndices;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
@@ -160,8 +159,6 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 				bos.reset();
 			}
 
-			MappingIndices indices = new MappingIndices();
-			
 			// Parse refs if the document is not an orphan
 			if (!isOrphan) {
 				for (Long refOffset : refOffsets) {
@@ -177,12 +174,14 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 						bos.write(currentByte);
 					}
 					// Create and call a mapper for the \ref section
-					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology, indices, lexDS, morphDS, layers);
+					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology, /*indices, */lexDS, morphDS, layers);
 					boolean refHasLexicalTokens = refMapper.map();
 					if (refHasLexicalTokens) {
-						indices = refMapper.getIndices();
 						SubrefMapper subrefMapper = new SubrefMapper(getProperties(), graph, refMapper.getRefData(), refMapper.getLexTokens(), refMapper.getMorphTokens(), refMapper.getMarkerContentMap(), refMapper.refHasMorphology());
 						subrefMapper.map();
+					}
+					else {
+						// FIXME Catch here?
 					}
 					bos.reset();
 				}
