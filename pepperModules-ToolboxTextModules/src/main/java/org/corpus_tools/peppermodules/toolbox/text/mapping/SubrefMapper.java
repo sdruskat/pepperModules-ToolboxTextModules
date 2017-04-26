@@ -21,26 +21,19 @@ package org.corpus_tools.peppermodules.toolbox.text.mapping;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-
 import org.apache.commons.lang3.Range;
-import org.apache.commons.lang3.tuple.Pair;
-import org.corpus_tools.pepper.modules.exceptions.PepperModuleDataException;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition.SUBREF_TYPE;
 import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
-import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.SToken;
-import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,7 +103,8 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	public void map() {
 		boolean mapGlobal = false;
 		Map<String, SubrefDefinition> subrefMap = new HashMap<>();
-		Multimap<SubrefDefinition, String> subrefAnnoMap = ArrayListMultimap.create();
+		Multimap<SubrefDefinition, Entry<String, String>> subrefAnnoMap = ArrayListMultimap.create();
+		Multimap<String, String> simpleSubrefMap = ArrayListMultimap.create();
 		for (String subrefLine : markerContentMap.get(subRefDefinitionMarker)) {
 			SubrefDefinition subref = createSubrefDefinitionFromSubrefLine(subrefLine);
 			SubrefDefinition previous = subrefMap.put(subref.getIdentifier(), subref);
@@ -125,8 +119,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 					 * is implicitly illegal, as there can only be exactly one
 					 * subref of either of these types in one ref.
 					 */
-					log.warn(
-							"Illegal subref definition in ref {}, document {}!\nThere can only be exactly one unidentified global subref definition per ref! Cancelling definition overwrite.",
+					log.warn("Illegal subref definition in ref {}, document {}!\nThere can only be exactly one unidentified global subref definition per ref! Cancelling definition overwrite.",
 							refData.getRef(), refData.getDocName(), new PepperModuleException());
 					subrefMap.put(previous.getIdentifier(), previous);
 				}
@@ -136,7 +129,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		/* 
 		 * Collect all lines that are candidates for subref annotation.
 		 */
-		Map<String, String> subrefAnnoLines = new HashMap<>();
+		Multimap<String, String> subrefAnnoLines = ArrayListMultimap.create();
 		for (String subrefAnnoMarker : subRefAnnotationMarkers) {
 			if (markerContentMap.get(subrefAnnoMarker) != null) {
 				if (!markerContentMap.get(subrefAnnoMarker).isEmpty()) {
@@ -148,122 +141,137 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			}
 		}
 		
-		/* 
-		 * If there is a global subref definition, it overrides
-		 * all other definitions, hence, only proceed with resolving
-		 * the others if there is no global definition.
-		 * FIXME: TEST THIS 
-		 */
-		if (!mapGlobal) {
-			// Go through all subref annotation lines and compare against subref map // FIXME docs
-//			for (Entry<String, String> subrefAnnoLineEntry : subrefAnnoLines.entries()) {
-//				String marker = subrefAnnoLineEntry.getKey();
-//				String subrefAnnoLine = subrefAnnoLineEntry.getValue();
-//
-//				// Treat annotations targeting defined subrefs
-//				String[] definitionSplit = subrefAnnoLine.split("\\s+", 2);
-//				SubrefDefinition definition = subrefMap.get(definitionSplit[0]);
-//				if (definition != null) {
-//					subrefAnnoMap.put(definition, subrefAnnoLine);
-//					continue; // Continue with the next subrefAnnoLine
-//				}
-//
-//				// Treat annotations targeting undefined subrefs
-//
-//				SUBREF_TYPE type = null;
-//				if (type != null) {
-//					switch (type) {
-//
-//					case FULL_REF_ANNOTATION:
-//						mapFullRef(subrefAnnoLine, marker);
-//						break;
-//
-//					default:
-//						SplitResult split = null;
-//						switch (type) {
-//
-//						case SIMPLE:
-//							split = new SplitResult(3, subrefAnnoLine, null, false, false, false,
-//									"{int} {int} {annotation}").split();
-//							break;
-//
-//						case SIMPLE_TARGETED:
-//							split = new SplitResult(4, subrefAnnoLine, null, true, false, false,
-//									"{target marker} {int} {int} {annotation}").split();
-//							break;
-//
-//						case UNIDENTIFIED_GLOBAL:
-//							if (definedSubrefs.size() > 1) {
-//								log.warn("Subref type \"" + SUBREF_TYPE.UNIDENTIFIED_GLOBAL
-//										+ "\" only allows for exactly one subref definition with marker \""
-//										+ subRefDefinitionMarker + "\"!\nHowever, " + definedSubrefs.size()
-//										+ " were found. Ignoring subrefs!");
-//							}
-//							split = new SplitResult(3, subrefAnnoLine, definedSubrefs, false, false, false,
-//									"{int} {int}").split();
-//							break;
-//
-//						case UNIDENTIFIED_GLOBAL_TARGETED:
-//							if (definedSubrefs.size() > 1) {
-//								log.warn("Subref type \"" + SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED
-//										+ "\" only allows for exactly one subref definition with marker \""
-//										+ subRefDefinitionMarker + "\"!\nHowever, " + definedSubrefs.size()
-//										+ " were found. Ignoring subrefs!");
-//							}
-//							split = new SplitResult(4, subrefAnnoLine, definedSubrefs, true, false, false,
-//									"{definition} {target marker} {int} {int}").split();
-//							break;
-//
-//						case IDENTIFIED_GLOBAL:
-//							split = new SplitResult(4, subrefAnnoLine, definedSubrefs, false, true, false,
-//									"{definition} {int} {int}").split();
-//							break;
-//
-//						case IDENTIFIED_GLOBAL_TARGETED:
-//							split = new SplitResult(5, subrefAnnoLine, definedSubrefs, true, true, false,
-//									"{definition} {target marker} {int} {int}").split();
-//							break;
-//
-//						case DISCONTINUOUS_TARGETED:
-//							split = new SplitResult(-1, subrefAnnoLine, definedSubrefs, true, true, true,
-//									"{identification} {target marker} {{int} {int}}*").split();
-//							break;
-//
-//						default:
-//							log.warn("Something happened that shouldn't happen! Please report this as a bug!"); // FIXME
-//																												// Insert
-//																												// bug
-//																												// link!
-//							break;
-//						}
-//						if (split != null) {
-//							mapSubref(split, split.getTargetMarker() != null, marker);
-//						} else {
-//							log.warn("At this point, the " + SplitResult.class.getName()
-//									+ " should not be null. Please report this as a bug!"); // FIXME
-//						}
-//						break;
-//					}
-//				} else {
-//					log.warn("Subref type in \"\\" + refData.getMarker()
-//							+ "\" block could not be determined! Ignoring subrefs in block \""
-//							+ refData.getPrimaryData() + "\"!");
-//				}
-//			}
+		if (subrefMap.size() > 0) {
+			/*
+			 * If there is a global subref definition, it overrides all other
+			 * definitions, hence, only proceed with resolving the others if
+			 * there is no global definition.
+			 */
+			if (!mapGlobal) {
+				for (Entry<String, String> subrefAnnoLineEntry : subrefAnnoLines.entries()) {
+					String subrefAnnoLine = subrefAnnoLineEntry.getValue();
+
+					// Treat annotations targeting defined subrefs
+					String[] definitionSplit = subrefAnnoLine.split("\\s+", 2);
+					SubrefDefinition definition = subrefMap.get(definitionSplit[0]);
+					if (definition != null) {
+						subrefAnnoMap.put(definition, subrefAnnoLineEntry);
+						continue;
+					}
+					else {
+						simpleSubrefMap.put(subrefAnnoLineEntry.getKey(), subrefAnnoLineEntry.getValue());
+						continue;
+					}
+				}
+				if (simpleSubrefMap.size() > 0) {
+					mapSimpleCandidates(simpleSubrefMap);
+				}
+				if (subrefAnnoMap.size() > 0) {
+					mapDefined(subrefAnnoMap);
+				}
+			}
+			else {
+				// If there is a global subref definition, the subrefMap can
+				// only have size 1.
+				mapGlobal(subrefMap.values().iterator().next(), subrefAnnoLines);
+			}
 		}
 		else {
-			// If there is a global subref definition, the subrefMap can only have size 1.
-			mapGlobal(subrefMap.values().iterator().next(), subrefAnnoLines);
+			mapSimpleCandidates(subrefAnnoLines);
 		}
 	}
 
 	/**
 	 * TODO: Description
 	 *
-	 * @param subrefMap
+	 * @param subrefAnnoMap
+	 */
+	private void mapDefined(Multimap<SubrefDefinition, Entry<String, String>> subrefAnnoMap) {
+		for (Entry<SubrefDefinition, Entry<String, String>> entry : subrefAnnoMap.entries()) {
+			SubrefDefinition definition = entry.getKey();
+			String targetLayer = definition.getTargetLayer();
+			String annoKey = entry.getValue().getKey();
+			String annoLine = entry.getValue().getValue();
+			SSpan subref = null;
+			List<SToken> subrefTokens = new ArrayList<>();
+			boolean mapToMorphTokens = false;
+			if (targetLayer != null && targetLayer.equals(morphMarker)) {
+				mapToMorphTokens = true;
+			}
+			else if (targetLayer == null && refHasMorphology) {
+				mapToMorphTokens = true;
+			}
+			List<SToken> orderedTokens = graph.getSortedTokenByText(mapToMorphTokens ? morphTokens : lexTokens);
+			String annoValue = annoLine.split("\\s+", 2)[1].trim();
+			for (Range<Integer> range : definition.getRanges()) {
+				try {
+					subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));	
+				}
+				catch (IndexOutOfBoundsException e) {
+					log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", range.getMinimum() + "-" + range.getMaximum() + 1, refData.getRef(), refData.getDocName(), e);
+					return;
+				}
+			}
+			subref = getSubrefSpan(subrefTokens);
+			subref.createAnnotation("toolbox", annoKey, annoValue);
+			SLayer layer = graph.getLayerByName(mapToMorphTokens ? morphMarker : lexMarker).get(0);
+			layer.addNode(subref);
+		}
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param simpleSubrefMap
+	 */
+	private void mapSimpleCandidates(Multimap<String, String> simpleSubrefMap) {
+		for (Entry<String, String> anno : simpleSubrefMap.entries()) {
+			SSpan subref = null;
+			List<SToken> subrefTokens = new ArrayList<>();
+			List<SToken> orderedTokens = null;
+			SLayer layer = null;
+			String[] typeSplit = anno.getValue().split("\\s+", 4);
+			String annoValue = null;
+			boolean mapToMorphTokens = false;
+			Range<Integer> range = null;
+			String name = "subref";
+			if ((typeSplit[0].equals(lexMarker) || typeSplit[0].equals(morphMarker)) && ToolboxTextModulesUtils.isInteger(typeSplit[1]) && ToolboxTextModulesUtils.isInteger(typeSplit[2])) {
+				// SUBREF_TYPE.SIMPLE_TARGETED
+				mapToMorphTokens = typeSplit[0].equals(morphMarker);
+				range = Range.between(Integer.parseInt(typeSplit[1]), Integer.parseInt(typeSplit[2]) + 1);
+				annoValue = typeSplit[3];
+			}
+			else {
+				if (ToolboxTextModulesUtils.isInteger(typeSplit[0]) && ToolboxTextModulesUtils.isInteger(typeSplit[1])) {
+					// SUBREF_TYPE.SIMPLE
+					mapToMorphTokens = refHasMorphology;
+					range = Range.between(Integer.parseInt(typeSplit[0]), Integer.parseInt(typeSplit[1]) + 1);
+					annoValue = anno.getValue().split("\\s+", 3)[2];
+				}
+				else {
+					// SUBREF_TYPE.FULL_REF_ANNOTATION
+					range = Range.between(0, lexTokens.size());
+					annoValue = anno.getValue();
+					name = "fullref";
+				}
+			}
+			orderedTokens = graph.getSortedTokenByText(mapToMorphTokens ? morphTokens : lexTokens);
+			subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum()));
+			subref = getSubrefSpan(subrefTokens);
+			subref.setName(name);
+			subref.createAnnotation("toolbox", anno.getKey(), annoValue);
+			layer = graph.getLayerByName(mapToMorphTokens ? morphMarker : lexMarker).get(0);
+			layer.addNode(subref);
+		}
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param definition
 	 * @param subrefAnnoLines
 	 */
-	private SSpan mapGlobal(SubrefDefinition definition, Map<String, String> subrefAnnoLines) {
+	private void mapGlobal(SubrefDefinition definition, Multimap<String, String> subrefAnnoLines) {
 		SSpan subref = null;
 		List<SToken> subrefTokens = new ArrayList<>();
 		List<SToken> orderedTokens = null;
@@ -283,93 +291,44 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 		}
 		orderedTokens = mapToMorphTokens ? graph.getSortedTokenByText(morphTokens) : graph.getSortedTokenByText(lexTokens);
 		subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));
-		subref = graph.createSpan(subrefTokens);
-		subref.setName("subref");
-		for (Entry<String, String> anno : subrefAnnoLines.entrySet()) {
+		subref = getSubrefSpan(subrefTokens);
+		for (Entry<String, String> anno : subrefAnnoLines.entries()) {
 			subref.createAnnotation("toolbox", anno.getKey(), anno.getValue());
 		}
 		layer = graph.getLayerByName(mapToMorphTokens ? morphMarker : lexMarker).get(0);
 		layer.addNode(subref);
-		return subref;
 	}
 
 	/**
-	 * TODO: Description
+	 * TODO: Description, take from below comment
 	 *
-	 * @param definition
-	 * @param string
-	 * @param marker
+	 * @return
 	 */
-	private SSpan mapData(SubrefDefinition definition, String string, String marker) {
+	private SSpan getSubrefSpan(List<SToken> subrefTokens) {
 		SSpan subref = null;
-//		boolean mapToMorphology = definition.getType() == SUBREF_TYPE.
-//		List<SToken> orderedTokens = graph.getSortedTokenByText(mapToMorphology ? morphTokens : lexTokens);
-//		List<SToken> subrefTokens = null;
-//		if (!isDiscontinuous) {
-//			try {
-//				/*
-//				 * NOTE: 1 is added to the second argument as the result will be
-//				 * used later on in a List.subList(int, int) operation, which
-//				 * excludes the index at the second int argument.
-//				 * 
-//				 * Cf. API for `java.util.List#subList(int, int)`.
-//				 */
-//				subrefTokens = orderedTokens.subList(from, to + 1);
-//			} catch (IndexOutOfBoundsException e) {
-//				log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", from + "-" + to, refData.getRef(), refData.getDocName(), e);
-//				return null;
-//			}
-//		} else {
-//			subrefTokens = new ArrayList<>();
-//			for (Range<Integer> range : ranges) {
-//				try {
-//					subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));
-//					to = range.getMaximum() > to ? range.getMaximum() : to;
-//				}
-//				catch (IndexOutOfBoundsException e) {
-//					log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", range.getMinimum() + "-" + range.getMaximum(), refData.getRef(), refData.getDocName(), e);
-//					return null;
-//				}
-//			}
-//		}
-//		if (orderedTokens.size() < to) {
-//			log.warn("Cannot create subref as end offset is > index of tokens in " + refData.getPrimaryData() + "!");
-//			return null;
-//		} else {
-//			/*
-//			 * Compare the list of subrefTokens with the list of sorted tokens
-//			 * for each span to find out if a span spanning the same tokens
-//			 * already exists in the document graph.
-//			 * 
-//			 */
-//			forspans: for (SSpan span : graph.getSpans()) {
-//				List<SToken> sortedSpanTokens = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
-//				if (sortedSpanTokens.size() == subrefTokens.size()) {
-//					if (sortedSpanTokens.containsAll(subrefTokens)) {
-//						subref = span;
-//						String name = subref.getName();
-//						if (name.isEmpty()) {
-//							subref.setName("subref");
-//						}
-//						break forspans;
-//					}
-//				}
-//			}
-//		}
-//		if (subref == null) {
-//			subref = graph.createSpan(subrefTokens);
-//			subref.setName("subref");
-//		}
-//		// FIXME Bug: If annotation id already exists, fails here (cf. daakaka
-//		// conversion)
-//		graph.getLayerByName(mapToMorphology ? morphMarker : lexMarker).get(0).addNode(subref);
-//		SAnnotation anno;
-//		if ((anno = subref.getAnnotation("toolbox::" + marker)) != null) {
-//			log.warn("Annotation {} already exists in reference {} in document {}!\nWill NOT change annotation value from {} to {}!",
-//					marker, refData.getRef(), refData.getDocName(), anno.getValue_STEXT(), annotation);
-//		} else {
-//			subref.createAnnotation("toolbox", marker, annotation);
-//		}
+		/*
+		 * Compare the list of subrefTokens with the list of sorted tokens
+		 * for each span to find out if a span spanning the same tokens
+		 * already exists in the document graph.
+		 * 
+		 */
+		forspans: for (SSpan span : graph.getSpans()) {
+			List<SToken> sortedSpanTokens = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
+			if (sortedSpanTokens.size() == subrefTokens.size()) {
+				if (sortedSpanTokens.containsAll(subrefTokens)) {
+					subref = span;
+					String name = subref.getName();
+					if (name.isEmpty()) {
+						subref.setName("subref");
+					}
+					break forspans;
+				}
+			}
+		}
+		if (subref == null) {
+			subref = graph.createSpan(subrefTokens);
+			subref.setName("subref");
+		}
 		return subref;
 	}
 
@@ -454,8 +413,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			
 		default:
 			if (split.length > 4 && Arrays.copyOfRange(split, 2, split.length).length % 2 == 0) {
-				boolean areAllInts = false;
-				ranges:
 				for (int i = 2; i < split.length; i++) {
 					if (!testInts(split[i], split[++i])) {
 						return null;
@@ -477,420 +434,6 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 	 */
 	private boolean testInts(String string, String string2) {
 		return (ToolboxTextModulesUtils.isInteger(string) && ToolboxTextModulesUtils.isInteger(string2));
-	}
-
-	/**
-	 * TODO: Description
-	 *
-	 * @param subrefAnnoLine
-	 * @param marker
-	 */
-	private void mapFullRef(String fullRefAnnoLine, String marker) {
-		SSpan span = graph.createSpan(lexTokens);
-		span.setName("fullref");
-		// Span *cannot* be null as method is only called when refs have lexical tokens.
-		graph.getLayerByName(refData.getMarker()).get(0).addNode(span);
-		span.createAnnotation("toolbox", marker, fullRefAnnoLine);
-	}
-
-	/**
-	 * TODO: Description
-	 *
-	 * @param split
-	 * @param checkAgainstMarker
-	 * @param marker
-	 */
-	private void mapSubref(SplitResult split, boolean checkAgainstMarker, String marker) {
-		Integer from = split.getSingleRange() != null ? split.getSingleRange().getLeft() : (Integer.valueOf(-1));
-		Integer to = split.getSingleRange() != null ? split.getSingleRange().getRight() : (Integer.valueOf(-1));
-//		try {
-//			if (checkAgainstMarker) {
-//				if (split.getTargetMarker().equals(morphMarker)) {
-//					if (refHasMorphology) {
-//						mapData(split, from, to, marker, true, split.getRanges() != null);
-//					} else {
-//						log.info("Found a subref annotation line (" + marker + " " + split.getAnnotation()
-//								+ ") targeted at the morphology line. However, the ref \"" + refData.getPrimaryData()
-//								+ "\" does not contain morphological information. Aborting mapping of subref.");
-//						return;
-//					}
-//				} else {
-//					mapData(split, from, to, marker, false, split.getRanges() != null);
-//				}
-//			} else {
-//				if (refHasMorphology) {
-//					mapData(split, from, to, marker, true, split.getRanges() != null);
-//				} else {
-//					mapData(split, from, to, marker, false, split.getRanges() != null);
-//				}
-//			}
-//		} catch (NullPointerException e) {
-//			log.warn("Could not map data for subref in \'{}\'. Please check the log for details.", refData.getRef());
-//		}
-	}
-
-	/**
-	 * TODO: Description
-	 *
-	 * @param split
-	 * @param marker
-	 * @param mapToMorphology
-	 * @param isDiscontinuous 
-	 * @return
-	 */
-	private SSpan mapData(List<Range<Integer>> ranges, String annotation, String marker, boolean mapToMorphology) {
-		SSpan subref = null;
-//		List<SToken> orderedTokens = graph.getSortedTokenByText(mapToMorphology ? morphTokens : lexTokens);
-//		List<SToken> subrefTokens = null;
-//		if (!isDiscontinuous) {
-//			try {
-//				/*
-//				 * NOTE: 1 is added to the second argument as the result will be
-//				 * used later on in a List.subList(int, int) operation, which
-//				 * excludes the index at the second int argument.
-//				 * 
-//				 * Cf. API for `java.util.List#subList(int, int)`.
-//				 */
-//				subrefTokens = orderedTokens.subList(from, to + 1);
-//			} catch (IndexOutOfBoundsException e) {
-//				log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", from + "-" + to, refData.getRef(), refData.getDocName(), e);
-//				return null;
-//			}
-//		} else {
-//			subrefTokens = new ArrayList<>();
-//			for (Range<Integer> range : ranges) {
-//				try {
-//					subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));
-//					to = range.getMaximum() > to ? range.getMaximum() : to;
-//				}
-//				catch (IndexOutOfBoundsException e) {
-//					log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", range.getMinimum() + "-" + range.getMaximum(), refData.getRef(), refData.getDocName(), e);
-//					return null;
-//				}
-//			}
-//		}
-//		if (orderedTokens.size() < to) {
-//			log.warn("Cannot create subref as end offset is > index of tokens in " + refData.getPrimaryData() + "!");
-//			return null;
-//		} else {
-//			/*
-//			 * Compare the list of subrefTokens with the list of sorted tokens
-//			 * for each span to find out if a span spanning the same tokens
-//			 * already exists in the document graph.
-//			 * 
-//			 */
-//			forspans: for (SSpan span : graph.getSpans()) {
-//				List<SToken> sortedSpanTokens = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
-//				if (sortedSpanTokens.size() == subrefTokens.size()) {
-//					if (sortedSpanTokens.containsAll(subrefTokens)) {
-//						subref = span;
-//						String name = subref.getName();
-//						if (name.isEmpty()) {
-//							subref.setName("subref");
-//						}
-//						break forspans;
-//					}
-//				}
-//			}
-//		}
-//		if (subref == null) {
-//			subref = graph.createSpan(subrefTokens);
-//			subref.setName("subref");
-//		}
-//		// FIXME Bug: If annotation id already exists, fails here (cf. daakaka
-//		// conversion)
-//		graph.getLayerByName(mapToMorphology ? morphMarker : lexMarker).get(0).addNode(subref);
-//		SAnnotation anno;
-//		if ((anno = subref.getAnnotation("toolbox::" + marker)) != null) {
-//			log.warn("Annotation {} already exists in reference {} in document {}!\nWill NOT change annotation value from {} to {}!",
-//					marker, refData.getRef(), refData.getDocName(), anno.getValue_STEXT(), annotation);
-//		} else {
-//			subref.createAnnotation("toolbox", marker, annotation);
-//		}
-		return subref;
-	}
-
-	/**
-	 * TODO: Description
-	 *
-	 * @param definedSubrefs
-	 * @param split
-	 * @return
-	 */
-	private SUBREF_TYPE determineType(Set<String> definedSubrefs, String[] split) {
-		if (definedSubrefs.isEmpty()) {
-			// Can be SIMPLE, SIMPLE_TARGETED
-			if (split[0].equals(lexMarker) || split[0].equals(morphMarker)) {
-				return SUBREF_TYPE.SIMPLE_TARGETED;
-			}
-			else {
-				/*
-				 *  Catch cases, where the marker is defined as a subref annotation
-				 *  marker, but the content is not actually a subref, but should
-				 *  annotate the full ref. 
-				 */
-				try {
-					Integer.parseInt(split[0]);
-					Integer.parseInt(split[1]);
-				}
-				catch (NumberFormatException e) {
-					// This is not a subref!
-					return SUBREF_TYPE.FULL_REF_ANNOTATION;
-				}
-				return SUBREF_TYPE.SIMPLE;
-			}
-		}
-		else {
-			/*
-			 * Can be UNDEFINED_GLOBAL, UNDEFINED_GLOBAL_TARGETED, 
-			 * DEFINED_GLOBAL, DEFINED_GLOBAL_TARGETED, DISCONTINUOUS_TARGETED,
-			 * with, 2, 3, 4, or more arguments
-			 */
-			int numberOfArguments = -1;
-			for (String definedSubRefString : definedSubrefs) {
-				String[] definedSubRef = definedSubRefString.split("\\s+");
-				if (numberOfArguments == -1) {
-					numberOfArguments = definedSubRef.length;
-				}
-				else {
-					if (numberOfArguments != definedSubRef.length) {
-						log.warn("Subref types cannot be mixed within one \"\\" + refData.getMarker() + "\" block! Ignoring subrefs in block \"" + refData.getPrimaryData() + "\"!");
-						return null;
-					}
-				}
-			}
-			if (numberOfArguments < 5) {
-				switch (numberOfArguments) {
-				case 2:
-					return SUBREF_TYPE.UNIDENTIFIED_GLOBAL;
-
-				case 3:
-					String firstDefinedSubref = definedSubrefs.iterator().next().split("\\s+", 2)[0];
-					if (firstDefinedSubref.equals(lexMarker) || firstDefinedSubref.equals(morphMarker)) {
-						return SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED;
-					}
-					else {
-						return SUBREF_TYPE.IDENTIFIED_GLOBAL;
-					}
-
-				case 4:
-					return SUBREF_TYPE.IDENTIFIED_GLOBAL_TARGETED;
-
-				default:
-					return null;
-				}
-			}
-			else {
-				// Number of arguments > 4
-				return SUBREF_TYPE.DISCONTINUOUS_TARGETED;
-			}
-		}
-	}
-	
-	private class SplitResult {
-		
-		private String targetMarker = null;
-		private String annotation = null;
-		private Pair<Integer, Integer> singleRange = null;
-		private List<Pair<Integer, Integer>> ranges = null;
-		private final int numberOfSplits;
-		private final String subrefAnnoLine;
-		private final Set<String> definedSubrefs;
-		private final boolean defined;
-		private final boolean targeted;
-		private final boolean identified;
-		private final boolean discontinuous;
-		private final String format;
-
-		/**
-		 * @param numberOfSplits
-		 * @param subrefAnnoLine
-		 * @param definedSubrefs
-		 * @param targeted
-		 * @param identified
-		 * @param discontinuous
-		 * @param format
-		 */
-		private SplitResult(int numberOfSplits, String subrefAnnoLine, Set<String> definedSubrefs, boolean targeted, boolean identified, boolean discontinuous, String format) {
-			this.numberOfSplits = numberOfSplits;
-			this.subrefAnnoLine = subrefAnnoLine;
-			this.definedSubrefs = definedSubrefs;
-			this.defined = definedSubrefs != null;
-			this.targeted = targeted;
-			this.identified = identified;
-			this.discontinuous = discontinuous;
-			this.format = format;
-		}
-		
-		protected SplitResult split() {
-			if (!defined) {
-				String[] split = subrefAnnoLine.split("\\s+", numberOfSplits);
-				/*
-				 * Not necessary to check for identified, as undefined
-				 * subrefs cannot be identified.
-				 */
-				if (!targeted) {
-					// SUBREF_TYPE.SIMPLE
-					if (split.length < 3) {
-						log.warn("Cannot map subref annotation \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.");
-						return null;
-					}
-					singleRange = pairify(split[0], split[1]);
-					annotation = split[2].trim();
-				}
-				else {
-					// SUBREF_TYPE.SIMPLE_TARGETED
-					if (split.length < 4) {
-						log.warn("Cannot map subref annotation \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.");
-						return null;
-					}
-					targetMarker = split[0];
-					singleRange = pairify(split[1], split[2]);
-					annotation = split[3];
-				}
-				if (singleRange == null) {
-					return null;
-				}
-			}
-			else {
-				if (definedSubrefs == null || definedSubrefs.isEmpty()) {
-					log.warn("Found an annotation on a defined subref in ref " + refData.getPrimaryData() + ", but could not find any definitions!");
-					return null;
-				}
-				if (!identified) {
-					String[] split = definedSubrefs.iterator().next().split("\\s+", numberOfSplits);
-					if (!targeted) {
-						// SUBREF_TYPE.UNIDENTIFIED_GLOBAL
-						if (split.length < 2) {
-							log.warn("Subref definition line is too short: \"" + Arrays.toString(split) + "\" in ref " + refData.getPrimaryData() + "!");
-							return null;
-						}
-						singleRange = pairify(split[0], split[1]);
-						annotation = subrefAnnoLine.trim();
-					}
-					else {
-						// SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED
-						if (split.length < 3) {
-							log.warn("Subref definition line is too short: \"" + Arrays.toString(split) + "\" in ref " + refData.getPrimaryData() + "!");
-							return null;
-						}
-						targetMarker = split[0];
-						singleRange = pairify(split[1], split[2]);
-						annotation = subrefAnnoLine.trim();
-					}
-					if (singleRange == null) {
-						return null;
-					}
-				}
-				else {
-					String[] annoSplit = subrefAnnoLine.split("\\s+", 2);
-					String definitionLine = null;
-					for (String definedSubref : definedSubrefs) {
-						if (definedSubref.split("\\s+", 2)[0].equals(annoSplit[0])) {
-							definitionLine = definedSubref;
-						}
-					}
-					if (definitionLine == null) {
-						log.warn("There is no subref definition \"" + annoSplit[0] + "\" in " + refData.getPrimaryData() + " for annotation line \"\\" + subrefAnnoLine + "\"! Ignoring subref!\nIf you think this is a bug, please report it!"); // FIXME Bug link!
-						return null;
-					}
-					String[] split = definitionLine.split("\\s+", numberOfSplits);
-					if (!discontinuous) {
-						if (!targeted) {
-							// SUBREF_TYPE.IDENTIFIED_GLOBAL
-							if (split.length < 3 || annoSplit.length < 2) {
-								log.warn("Cannot map subref annotation \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
-								return null;
-							}
-							singleRange = pairify(split[1], split[2]);
-							annotation = annoSplit[1].trim();
-						}
-						else {
-							// SUBREF_TYPE.IDENTIFIED_GLOBAL_TARGETED
-							if (split.length < 4 || annoSplit.length < 2) {
-								log.info("Cannot map subref annotation \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
-								return null;
-							}
-							targetMarker = split[1];
-							singleRange = pairify(split[2], split[3]);
-							annotation = annoSplit[1].trim();
-						}
-						if (singleRange == null) {
-							return null;
-						}
-					}
-					else {
-						// SUBREF_TYPE.DISCONTINUOUS_TARGETED;
-						if (annoSplit.length < 2) {
-							log.warn("Cannot map subref annotation \"" + subrefAnnoLine + "\" in ref " + refData.getPrimaryData() + "! Line is too short.\n(definition: " + definitionLine + ", annotation: " + Arrays.toString(annoSplit) + ").");
-							return null;
-						}
-						split = definitionLine.split("\\s+");
-						targetMarker = split[1];
-						ranges = new ArrayList<>();
-						for (int firstProbInt = 2; firstProbInt < split.length; firstProbInt += 2) {
-							Pair<Integer, Integer> range = pairify(split[firstProbInt], split[firstProbInt + 1]);
-							if (range == null) {
-								return null;
-							}
-							ranges.add(range);
-						}
-						annotation = annoSplit[1].trim();
-					}
-				}
-			}
-			return this;
-		}
-
-		/**
-		 * TODO: Description
-		 *
-		 * @param string
-		 * @param string2
-		 * @return
-		 */
-		private Pair<Integer, Integer> pairify(String from, String to) {
-			Pair<Integer, Integer> pair = null;
-			try {
-				int fromInt = Integer.parseInt(from);
-				int toInt = Integer.parseInt(to);
-				pair = Pair.of(fromInt, toInt);
-			}
-			catch (NumberFormatException e) {
-				log.warn("The subref \"" + (defined ? definedSubrefs : subrefAnnoLine) + "\" is not in the correct format (" + format + ")! Ignoring it.\nIf you think this is a bug, please report it!"); // FIXME INsert bug link!
-				return null;
-			}
-			return pair;
-		}
-
-		/**
-		 * @return the targetMarker
-		 */
-		public final String getTargetMarker() {
-			return targetMarker;
-		}
-
-		/**
-		 * @return the singleRange
-		 */
-		public final Pair<Integer, Integer> getSingleRange() {
-			return singleRange;
-		}
-
-		/**
-		 * @return the ranges
-		 */
-		public final List<Pair<Integer, Integer>> getRanges() {
-			return ranges;
-		}
-
-		/**
-		 * @return the annotation
-		 */
-		public final String getAnnotation() {
-			return annotation;
-		}
-		
 	}
 
 }
