@@ -1,0 +1,52 @@
+\_sh v3.0  752  Text
+
+\id test
+
+\ref Aiben2.010
+\tx nam      longbini ka      adop                kukuo
+\mb na  -m   longbini ka      a-    - do     -p   kuo
+\ge $1s -$re want     $cp.nre $fut- - $1d.in -$ir race
+\ps sm  -ms  v.tr     comp    tam-  - sm     -ms  v
+
+\ft mi wantem bae yumitu resis
+\fe "I want us to race.
+\ELANBegin 45.530
+\ELANEnd 49.830
+\unitref 1 0 1
+\clause 1 assertion
+\time 1 present
+\mood 1 factual
+\event 1 stative
+\polarity 1 positive
+\keywords 2 REPORT
+\unitref 2 2 4
+\clause 2 proposition
+\time 2 future, S < R
+\mood 2 possible
+\event 2 ongoing
+\polarity 2 positive
+\keywords 2 REPORT
+
+\ref Aiben2.019
+\tx yovo   mwe    kie ka      moo
+\mb yovo   mwe    kie ka      moo
+\ge turtle $3s.re say $cp.nre o.k.
+\ps n      tam    v   comp    interj
+\ft totel i talem, o.k.
+\fe The turtle said, o.k.
+\ELANBegin 74.220
+\ELANEnd 76.120
+\unitref 1 0 2
+\clause 1 assertion
+\time 1 past
+\mood 1 factual
+\event 1 completed
+\polarity 1 positive
+\unitref 2 3 4
+\clause 1 other
+\time 1 
+\mood 1 
+\event 1 
+\polarity 1 
+\keywords REPORT
+

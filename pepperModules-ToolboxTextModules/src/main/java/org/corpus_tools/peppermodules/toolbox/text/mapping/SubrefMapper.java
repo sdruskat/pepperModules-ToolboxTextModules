@@ -37,6 +37,7 @@ import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
+import org.corpus_tools.salt.exceptions.SaltInsertionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -204,7 +205,14 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 				mapToMorphTokens = true;
 			}
 			List<SToken> orderedTokens = graph.getSortedTokenByText(mapToMorphTokens ? morphTokens : lexTokens);
-			String annoValue = annoLine.split("\\s+", 2)[1].trim();
+			String annoValue = null;
+			if (annoLine.split("\\s+").length > 1) {
+				annoValue = annoLine.split("\\s+", 2)[1].trim();
+			}
+			else {
+				log.info("There is no annotation value for subref '{}' with key '{}' in document '{}', ref '{}'. Ignoring this line.", definition.getIdentifier(), annoKey, refData.getDocName(), refData.getRef());
+				return;
+			}
 			for (Range<Integer> range : definition.getRanges()) {
 				try {
 					subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));	
@@ -215,7 +223,12 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 				}
 			}
 			subref = getSubrefSpan(subrefTokens);
-			subref.createAnnotation("toolbox", annoKey, annoValue);
+			try {
+				subref.createAnnotation("toolbox", annoKey, annoValue);
+			}
+			catch (SaltInsertionException e) {
+				log.warn("Duplicate annotation in '{}'-'{}'! There already exists an annotation with the key \"{}\". This might be an error in the source data. If it is not, please file a bug report.", refData.getDocName(), refData.getRef(), annoKey);
+			}
 			SLayer layer = graph.getLayerByName(mapToMorphTokens ? morphMarker : lexMarker).get(0);
 			layer.addNode(subref);
 		}
@@ -319,7 +332,13 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			}
 		}
 		orderedTokens = mapToMorphTokens ? graph.getSortedTokenByText(morphTokens) : graph.getSortedTokenByText(lexTokens);
-		subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));
+		try {
+			subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));
+		}
+		catch (IndexOutOfBoundsException e) {
+			log.warn("Document '{}', reference '{}': The indices defined in the global subdef are outside of the index range of the target tokens. Please fix the source data! Ignoring this subref ...", refData.getDocName(), refData.getRef());
+			return;
+		}
 		subref = getSubrefSpan(subrefTokens);
 		for (Entry<String, String> anno : subrefAnnoLines.entries()) {
 			subref.createAnnotation("toolbox", anno.getKey(), anno.getValue());

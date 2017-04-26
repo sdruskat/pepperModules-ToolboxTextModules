@@ -1838,6 +1838,12 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * ╚═════╝  ╚═════╝  ╚═════╝ ╚══════╝
 	 */
 	
+	/**
+	 * Two lines with the same marker included in subrefAnnotationMarkers
+	 * throw an exception because they're not concatenated.
+	 * 
+	 * @see SuprefMapper#mapSimpleCandidates
+	 */
 	@Test
 	public void test1() {
 		setTestFile("bugs/1.txt");
@@ -1851,6 +1857,20 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SAnnotation a = null;
 		assertNotNull(a = refSpan.getAnnotation("toolbox::nt"));
 		assertThat(a.getValue_STEXT(), is("\"blokem\" as second element in a complex verb construction expresses an action resulting in something getting in the way or: the sea goes (went) in his way / the sea goes (went), thereby getting in his way"));
+	}
+	
+	/**
+	 * Wrong subref identification
+	 */
+	@Test
+	public void test2() {
+		setTestFile("bugs/2.txt");
+		setProperties("bugs/2.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		assertThat(graph.getSpans().size(), is(5));
 	}
                                   
 }
