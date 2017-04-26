@@ -30,10 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
-import org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.io.CountingInputStream;
 
 /**
@@ -43,8 +39,6 @@ import com.google.common.io.CountingInputStream;
  *
  */
 class ToolboxTextSegmentationParser {
-	
-	private static final Logger log = LoggerFactory.getLogger(ToolboxTextSegmentationParser.class);
 	
 	private final File file;
 	private final String idMarker;

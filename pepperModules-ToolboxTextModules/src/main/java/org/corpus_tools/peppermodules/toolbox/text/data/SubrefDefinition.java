@@ -18,11 +18,9 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Range;
-import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition.SUBREF_TYPE;
 
 /**
  * TODO Description

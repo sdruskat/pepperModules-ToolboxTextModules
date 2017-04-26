@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1493209921113
+Bnd-LastModified: 1493209953003
 Build-Jdk: 1.8.0_121
 Built-By: stephan
 Bundle-Description: Provides shared POM-data.
@@ -26,13 +26,12 @@ Export-Package: org.corpus_tools.peppermodules.toolbox.text;uses:="org.c
 Import-Package: com.google.common.collect;version="[19.0,20)",com.google
  .common.io;version="[19.0,20)",org.apache.commons.io.output;version="[1
  .4,2)",org.apache.commons.lang3;version="[3.4,4)",org.apache.commons.la
- ng3.tuple;version="[3.4,4)",org.corpus_tools.pepper.common;version="[3.
- 1,4)",org.corpus_tools.pepper.impl;version="[3.1,4)",org.corpus_tools.p
- epper.modules;version="[3.1,4)",org.corpus_tools.pepper.modules.excepti
- ons;version="[3.1,4)",org.corpus_tools.salt;version="[3.3,4)",org.corpu
- s_tools.salt.common;version="[3.3,4)",org.corpus_tools.salt.core;versio
- n="[3.3,4)",org.corpus_tools.salt.graph;version="[3.3,4)",org.eclipse.e
- mf.common.util,org.slf4j;version="[1.7,2)"
+ ng3.tuple;version="[3.4,4)",org.corpus_tools.pepper.common,org.corpus_t
+ ools.pepper.impl,org.corpus_tools.pepper.modules,org.corpus_tools.peppe
+ r.modules.exceptions,org.corpus_tools.salt;version="[3.3,4)",org.corpus
+ _tools.salt.common;version="[3.3,4)",org.corpus_tools.salt.core;version
+ ="[3.3,4)",org.corpus_tools.salt.graph;version="[3.3,4)",org.eclipse.em
+ f.common.util,org.slf4j;version="[1.7,2)"
 META-INF: /home/stephan/src/toolbox-text-importer/pepperModules-ToolboxT
  extModules/META-INF
 OSGI-INF: OSGI-INF
