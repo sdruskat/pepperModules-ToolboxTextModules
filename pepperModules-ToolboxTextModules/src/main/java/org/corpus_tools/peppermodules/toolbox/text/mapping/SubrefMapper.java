@@ -218,7 +218,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 					subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));	
 				}
 				catch (IndexOutOfBoundsException e) {
-					log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", range.getMinimum() + "-" + range.getMaximum() + 1, refData.getRef(), refData.getDocName(), e);
+					log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", range.getMinimum() + "-" + range.getMaximum() + 1, refData.getRef(), refData.getDocName());
 					return;
 				}
 			}
@@ -261,8 +261,20 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 				if (ToolboxTextModulesUtils.isInteger(typeSplit[0]) && ToolboxTextModulesUtils.isInteger(typeSplit[1])) {
 					// SUBREF_TYPE.SIMPLE
 					mapToMorphTokens = refHasMorphology;
-					range = Range.between(Integer.parseInt(typeSplit[0]), Integer.parseInt(typeSplit[1]) + 1);
-					annoValue = anno.getValue().split("\\s+", 3)[2];
+//					try {
+						range = Range.between(Integer.parseInt(typeSplit[0]), Integer.parseInt(typeSplit[1]) + 1);
+//					}
+//					catch (Exception e) {
+//						log.warn("\n\n---------------\nREF: {}\ntype plit: {}", refData.getRef(), Arrays.toString(typeSplit));
+//						return;
+//					}
+					try {
+						annoValue = anno.getValue().split("\\s+", 3)[2];
+					}
+					catch (Exception e) {
+						log.info("No value for annotation with key \"{}\" in document '{}', reference '{}'. Ignoring ...", anno.getKey(), refData.getDocName(), refData.getRef());
+						return;
+					}
 				}
 				else {
 					// SUBREF_TYPE.FULL_REF_ANNOTATION
@@ -273,7 +285,13 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 				}
 			}
 			orderedTokens = graph.getSortedTokenByText(mapToMorphTokens ? morphTokens : lexTokens);
-			subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum()));
+			try {
+				subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum()));
+			}
+			catch (Exception e) {
+				log.warn("The maximum of subref range {}..{} in document '{}', reference '{}' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", range.getMinimum(), range.getMaximum() - 1, refData.getDocName(), refData.getRef());
+				return;
+			}
 			subref = getSubrefSpan(subrefTokens);
 			subref.setName(name);
 			/* 
