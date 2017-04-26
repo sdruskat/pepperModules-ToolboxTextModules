@@ -22,15 +22,11 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import org.apache.commons.lang3.Range;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition.SUBREF_TYPE;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper;
-import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -55,15 +51,7 @@ public class SubrefMapperTest {
 		SubrefMapper subrefMapper = new SubrefMapper(props, null, null, null, null, null, true);
 		setFixture(subrefMapper);
 	}
-
-	/**
-	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper#map()}.
-	 */
-	@Test
-	public void testMap() {
-		fail("Not yet implemented");
-	}
-
+	
 	/**
 	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper#createSubrefFromSubrefLine(java.lang.String)}.
 	 */
