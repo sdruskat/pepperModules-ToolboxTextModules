@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.Range;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition;
@@ -34,6 +35,7 @@ import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.SToken;
+import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +51,7 @@ import com.google.common.collect.Multimap;
  * @author Stephan Druskat
  *
  */
-public class SubrefMapper /*extends AbstractBlockMapper*/ {
+public class SubrefMapper extends AbstractToolboxTextMapper {
 	
 	private static final Logger log = LoggerFactory.getLogger(SubrefMapper.class);
 
@@ -233,6 +235,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			String[] typeSplit = anno.getValue().split("\\s+", 4);
 			String annoValue = null;
 			boolean mapToMorphTokens = false;
+			boolean fullref = false;
 			Range<Integer> range = null;
 			String name = "subref";
 			if ((typeSplit[0].equals(lexMarker) || typeSplit[0].equals(morphMarker)) && ToolboxTextModulesUtils.isInteger(typeSplit[1]) && ToolboxTextModulesUtils.isInteger(typeSplit[2])) {
@@ -250,6 +253,7 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 				}
 				else {
 					// SUBREF_TYPE.FULL_REF_ANNOTATION
+					fullref = true;
 					range = Range.between(0, lexTokens.size());
 					annoValue = anno.getValue();
 					name = "fullref";
@@ -259,7 +263,32 @@ public class SubrefMapper /*extends AbstractBlockMapper*/ {
 			subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum()));
 			subref = getSubrefSpan(subrefTokens);
 			subref.setName(name);
-			subref.createAnnotation("toolbox", anno.getKey(), annoValue);
+			/* 
+			 * Full refs (i.e., annotations marked with a subref marker but without a subref definition
+			 * or identifier contained in the annotation) can at this time be spread over multiple
+			 * lines. This is correct because in this case, subref annotation lines starting with the
+			 * same marker can potentially occur more than once in a ref, e.g., when they point to
+			 * different subref definitions.
+			 * 
+			 * During mapping, however, the content of the second line would not be mapped, but instead
+			 * a SaltInsertionException would be thrown because the combination of namespace and annotation
+			 * key for the annotation already exists on the respective node. Hence, check if we're
+			 * dealing with a fullref here, and append if the annotation already exists.
+			 */
+			if (fullref) {
+				SAnnotation skeletonAnno = subref.getAnnotation(SALT_NAMESPACE_TOOLBOX + "::" + anno.getKey());
+				if (skeletonAnno != null) {
+					String oldValue = skeletonAnno.getValue_STEXT();
+					String newValue = oldValue.concat(" " + annoValue).trim();
+					skeletonAnno.setValue(newValue);
+				}
+				else {
+					subref.createAnnotation("toolbox", anno.getKey(), annoValue);
+				}
+			}
+			else {
+				subref.createAnnotation("toolbox", anno.getKey(), annoValue);
+			}
 			layer = graph.getLayerByName(mapToMorphTokens ? morphMarker : lexMarker).get(0);
 			layer.addNode(subref);
 		}

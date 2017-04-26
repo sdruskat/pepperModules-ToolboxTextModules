@@ -174,7 +174,7 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 						bos.write(currentByte);
 					}
 					// Create and call a mapper for the \ref section
-					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology, /*indices, */lexDS, morphDS, layers);
+					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology, lexDS, morphDS, layers);
 					boolean refHasLexicalTokens = refMapper.map();
 					if (refHasLexicalTokens) {
 						SubrefMapper subrefMapper = new SubrefMapper(getProperties(), graph, refMapper.getRefData(), refMapper.getLexTokens(), refMapper.getMorphTokens(), refMapper.getMarkerContentMap(), refMapper.refHasMorphology());

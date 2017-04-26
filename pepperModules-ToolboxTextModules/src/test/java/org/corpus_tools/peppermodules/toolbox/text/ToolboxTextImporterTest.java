@@ -1712,6 +1712,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_MORPH_ANNOTATION_MARKERS, "ge");
 		setTestFile("duplicate-markers.txt");
+		setProperties("duplicate-markers.properties");
 		start();
 		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
 		assertEquals(1, graph.getDocument().getMetaAnnotations().size());
@@ -1719,13 +1720,20 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertEquals("A sentence another sentence", graph.getTextualDSs().get(0).getText());
 		assertEquals("m1m2m3m4", graph.getTextualDSs().get(1).getText());
 		for (SNode node : graph.getLayerByName("tx").get(0).getNodes()) {
-			assertEquals(1, node.getAnnotations().size());
-			assertThat(node.getAnnotation("toolbox::ta").getValue_STEXT(), anyOf(is("A"), is("word"), is("another")));
+			if (node instanceof SToken) {
+				assertEquals(1, node.getAnnotations().size());
+				assertThat(node.getAnnotation("toolbox::ta").getValue_STEXT(), anyOf(is("A"), is("word"), is("another")));
+			}
 		}
 		for (SNode node : graph.getLayerByName("mb").get(0).getNodes()) {
 			assertEquals(1, node.getAnnotations().size());
 			assertThat(node.getAnnotation("toolbox::ge").getValue_STEXT(), anyOf(is("M1"), is("M2"), is("M3"), is("M4")));
 		}
+		SSpan refSpan = null;
+		assertNotNull(refSpan = graph.getSpans().get(0));
+		SAnnotation subrefAnno = null; 
+		assertNotNull(subrefAnno = refSpan.getAnnotation("toolbox::nt"));
+		assertThat(subrefAnno.getValue_STEXT(), is("This is the first part of a note, and this is the second."));
 	}
 
 	/**
@@ -1820,4 +1828,29 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		}
 		return null;
 	}
+	
+	/*
+	 * ██████╗ ██╗   ██╗ ██████╗ ███████╗
+	 * ██╔══██╗██║   ██║██╔════╝ ██╔════╝
+	 * ██████╔╝██║   ██║██║  ███╗███████╗
+	 * ██╔══██╗██║   ██║██║   ██║╚════██║
+	 * ██████╔╝╚██████╔╝╚██████╔╝███████║
+	 * ╚═════╝  ╚═════╝  ╚═════╝ ╚══════╝
+	 */
+	
+	@Test
+	public void test1() {
+		setTestFile("bugs/1.txt");
+		setProperties("bugs/1.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		SSpan refSpan = null;
+		assertNotNull(refSpan = graph.getSpans().get(0));
+		SAnnotation a = null;
+		assertNotNull(a = refSpan.getAnnotation("toolbox::nt"));
+		assertThat(a.getValue_STEXT(), is("\"blokem\" as second element in a complex verb construction expresses an action resulting in something getting in the way or: the sea goes (went) in his way / the sea goes (went), thereby getting in his way"));
+	}
+                                  
 }

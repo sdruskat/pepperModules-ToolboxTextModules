@@ -10,6 +10,8 @@
 \ta A word
 \mb m1 m2
 \ge M1 M2
+\nt This is the first part of a note,
+\nt and this is the second.
 
 \tx another sentence
 \ta another word

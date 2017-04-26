@@ -1,0 +1,21 @@
+\_sh v3.0 Test
+
+\id Document no. 1
+
+\ref Bong1.085
+\bug-description Throws SaltInsertionException: Cannot insert object 'toolbox::nt=or: the sea goes (went) in his way / the sea goes (went), thereby getting in his way' into container 'SSpanImpl(salt:/conversion-reactor/daakie-toolbox-transcriptions/22-05-10_Bong1.wav#sSpan85)[toolbox::ELANEnd=266.230], toolbox::fe=the sea blocks (blocked) him], salt::SNAME=fullref], toolbox::ft=solwata i go blokem], toolbox::ref=Bong1.085], toolbox::ELANBegin=264.990]], toolbox::nt="blokem" as second element in a complex verb construction expresses an action resulting in something getting in the way]'.  Because an id already exists: toolbox::nt="blokem" as second element in a complex verb construction expresses an action resulting in something getting in the way.
+\tx teh me  van    golÃ³
+\mb teh mwe    van golÃ³
+\ge sea $3s.re go  dry
+\ps n   tam    v   adj
+\ft solwata i go blokem
+\nt "blokem" as second element in a complex verb construction expresses an action resulting in something getting in the way
+\nt or: the sea goes (went) in his way / the sea goes (went), thereby getting in his way 
+\fe the sea blocks (blocked) him
+\ELANBegin 264.990
+\ELANEnd 266.230
+\clause
+\time
+\mood
+\event
+\polarity 

@@ -94,7 +94,6 @@ public class RefMapper extends AbstractBlockMapper {
 	public RefMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString, boolean hasMorphology, STextualDS lexDS, STextualDS morphDS, Map<String, SLayer> layers) {
 		super(properties, graph, trimmedInputString);
 		this.docHasMorphology = hasMorphology;
-//		this.indices = indices;
 		this.lexDS = lexDS;
 		this.morphDS = morphDS;
 		this.layers = layers;
