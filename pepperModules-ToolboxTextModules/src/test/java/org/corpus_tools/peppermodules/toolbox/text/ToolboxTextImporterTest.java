@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -833,6 +834,22 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			assertThat(span.getName(), anyOf(is("Sentence 2 *without* mb line"), is("Sentence 1 with mb line")));
 			assertEquals(2, span.getAnnotations().size());
 		}
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where there is an annotation line just containing a marker, and no annotation.
+	 */
+	@Test
+	public void testLinesWithoutAnnotation() {
+		setTestFile("lines-without-annotation.txt");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocumentGraph graph = getGraph("Document no. 1");
+		SAnnotation geAnno = graph.getAnnotation("toolbox::ge");
+		assertNull((geAnno));
 	}
 
 	/**

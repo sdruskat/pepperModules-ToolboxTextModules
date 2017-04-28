@@ -1,0 +1,16 @@
+\_sh v3.0 Test
+\info A sample "standard" corpus in Toolbox text format. It includes use cases for most phenomena the importer tests against, such as clitics and affixes, unitrefs, meta annotations, etc.
+\moreinfo Some more info about the corpus
+
+\id Document no. 1
+\idinfo Some document no. 1 info
+\moreidinfo Some more info about document no. 1
+
+\ref Reference no. 1
+\met Some meta information about the first sentence
+\tx Word1 -Tuple Tuple- Word2 Triple-= Word3  FreedashTuple Word4 FreecliticTuple
+\ta WordOne TupleOne TupleTwo WordTwo Triple WordThree TupleThree WordFour TupleFour
+\mb m1    m2 -m3 m4- m5 m6    m7 -m8 =m9 m10  m11 - m12 m13 m14 = m15
+\ge 
+\ll A reference testing composites, clitics, and such
+
