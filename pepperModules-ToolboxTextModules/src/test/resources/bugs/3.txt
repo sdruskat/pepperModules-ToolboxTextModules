@@ -1,0 +1,22 @@
+\_sh v3.0 Test
+
+\itm Document no. 1
+
+\id 059.022
+\aud
+\tx Go chief ipam̃ori ikerkerai nen ke festafir.
+\mr Go chief i=pam̃ori i=kerkerai nen ke=festafir.
+\mg and chief 3S.RS=find 3S.RS=hard COMP 3S.IR=talk.to
+\gd
+\gdc
+\fg The chief finds it hard to talk to talk to them.
+
+\unitref tx 6 6
+\clause proposition
+\time present
+\mood factual
+\event bounded
+\polarity positive
+\nt glossed by Ana
+\ct
+\keywords R = S

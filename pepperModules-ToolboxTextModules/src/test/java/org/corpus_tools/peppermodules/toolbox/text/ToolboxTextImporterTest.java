@@ -31,6 +31,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.common.FormatDesc;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
@@ -1872,5 +1873,27 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocumentGraph graph = doc.getDocumentGraph();
 		assertThat(graph.getSpans().size(), is(5));
 	}
-                                  
+    
+	/**
+	 * Single token subrefs
+	 *
+	 * `\subref tx 6 6`
+	 */
+	@Test
+	public void test3() {
+		setTestFile("bugs/3.txt");
+		setProperties("bugs/3.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		SNode subrefNode = null;
+		assertNotNull(subrefNode = graph.getNodesByName("subref").get(0));
+		assertThat(subrefNode, instanceOf(SSpan.class));
+		SSpan subref = (SSpan) subrefNode;
+		List<SToken> tokens = null;
+		assertThat((tokens = graph.getOverlappedTokens(subref)).size(), is(1));
+		assertThat(graph.getText(tokens.get(0)), is("festafir."));
+	}
+    
 }
