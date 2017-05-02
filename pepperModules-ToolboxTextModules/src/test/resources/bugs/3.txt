@@ -20,3 +20,115 @@
 \nt glossed by Ana
 \ct
 \keywords R = S
+
+\id 101.071	
+\aud WitGoKusu.mp4
+\start 246.733
+\end 251.047
+\tx Me  na,   imaetki          kusu teflan  go  ipuetlu
+\mr me  na    i=     maet  -ki kusu teflan  go  i=     puet.lu
+\mg but hesit 3S.RS= angry -TR rat  similar and 3S.RS= pull.out_of
+\tx nlap̃wen             me  ifis,
+\mr nlap̃   -w -e -n     me  i=     fis
+\mg tentacle -C -V -3S.DP and 3S.RS= whip
+\gd ## pro.d:A=v:pred np.d:P # pro.d:A=v:pred np:P-pro.d:poss # pro.d:S=v:pred
+\gd2 ## pro.d:A=v:pred np.d:P # pro.d:A=v:pred np:P-pro.d:poss # pro.d:S=v:pred
+\gdc
+\fg It got angry with the rat, and it took off a tentacle and whipped,
+\unitref 1 0 6
+\unitref 2 7 14
+\unitref 3 15 17
+\clause 1 assertion
+\time 1 past
+\mood 1 factual
+\event 1 cos
+\polarity 1 positive
+\nt 1
+\ct 1
+\keywords 1
+
+\clause 2 assertion
+\time 2 past
+\mood 2 factual
+\event 2 bounded
+\polarity 2 positive
+\nt 2 
+\ct 2 
+\keywords 2 
+
+\clause 3 assertion
+\time 3 past
+\mood 3 factual
+\event 3 bounded
+\polarity 3 positive
+\nt 3
+\ct 3
+\keywords 3 
+
+\id 101.075
+\aud WitGoKusu.mp4
+\start 263.312
+\end 268.293
+\tx Me  ina         ipuetlu            iskei       na   ipul         kusu
+\mr me  i=     na   i=     puet.lu     i=     skei na   i=     pul   kusu
+\mg and 3S.RS= want 3S.RS= pull.out_of 3S.RS= one  PURP 3S.RS= sling rat
+\tx kin.       Go  kusu iof         napwen         iskei
+\mr ki   -n    go  kusu i=     of   napu -e -n     i=     skei
+\mg PREP -3S.O and rat  3S.RS= wear tail -V -3S.DP 3S.RS= one
+\tx ipi       napwen         me,
+\mr i=     pi napu -e -n     me
+\mg 3S.RS= be tail -V -3S.DP but
+\gd ## pro.d:S=v:pred #cc pro.d:A=v:pred np:P # pro.d:A=v:pred np.d:P adp-pro:P #
+np.d:A=v:pred np:P-pro.d:poss # pro:S=cop np:pred-pro.d:poss
+\gd2 ## pro.d:S=v:pred #cc pro.d:A=v:pred np:P # pro.d:A=v:pred np.d:  adp-pro:P # np.d:A=v:pred np:P-pro.d:poss # pro:S=cop np:pred-pro.d:poss
+\gdc
+\fg But it wanted to take off one of them to sling it at the rat. And the rat put on its tail, it became its tail,
+\unitref 1 0 2
+\unitref 2 3 8
+\unitref 3 9 13
+\unitref 4 14 22
+\unitref 5 23 28
+\clause 1 assertion
+\time 1 past
+\mood 1 factual
+\event 1 stative
+\polarity 1 positive
+\nt 1
+\ct 1
+\keywords 1
+
+\clause 2 proposition
+\time 2 future
+\mood 2 possible
+\event 2 bounded
+\polarity 2 positive
+\nt 2 
+\ct 2 
+\keywords 2 R<S
+
+\clause 3 adverbial
+\time 3 future
+\mood 3 possible
+\event 3 bounded
+\polarity 3 positive
+\nt 3
+\ct 3
+\keywords 3 R<S purpose
+
+\clause 4 assertion
+\time 4 past
+\mood 4 factual
+\event 4 bounded
+\polarity 4 positive
+\nt 4 
+\ct 4 
+\keywords 4 
+
+\clause 5 assertion
+\time 5 past
+\mood 5 factual
+\event 5 cos
+\polarity 5 positive
+\nt 5 
+\ct 5 
+\keywords 5 
