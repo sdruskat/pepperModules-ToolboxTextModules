@@ -93,7 +93,6 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 		this.lexMarker = properties.getLexMarker();
 		this.morphMarker = properties.getMorphMarker();
 		this.subRefDefinitionMarker = properties.getSubrefDefinitionMarker();
-		System.err.println(subRefDefinitionMarker);
 		this.subRefAnnotationMarkers = properties.getSubRefAnnotationMarkers();
 		this.refHasMorphology = refHasMorphology;
 	}
@@ -257,6 +256,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			boolean fullref = false;
 			Range<Integer> range = null;
 			String name = subRefDefinitionMarker;
+
 			if ((typeSplit[0].equals(lexMarker) || typeSplit[0].equals(morphMarker)) && ToolboxTextModulesUtils.isInteger(typeSplit[1]) && ToolboxTextModulesUtils.isInteger(typeSplit[2])) {
 				// SUBREF_TYPE.SIMPLE_TARGETED
 				mapToMorphTokens = typeSplit[0].equals(morphMarker);

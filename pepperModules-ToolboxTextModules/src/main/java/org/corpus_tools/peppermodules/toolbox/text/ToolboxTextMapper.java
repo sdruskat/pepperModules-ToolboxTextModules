@@ -37,9 +37,12 @@ import org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.STextualDS;
+import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
+import org.corpus_tools.salt.core.SNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -197,7 +200,74 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		catch (IOException e) {
 			throw new PepperModuleException("Error while parsing the corpus file " + getResourceURI().toFileString() + "!", e);
 		}
+		if (getProperties().normalizeMarkers()) {
+			normalizeMarkers(graph);
+		}
 		return DOCUMENT_STATUS.COMPLETED;
+	}
+
+	/**
+	 * TODO: Description
+	 *
+	 * @param graph
+	 */
+	private void normalizeMarkers(SDocumentGraph graph) {
+		String oldRef = getProperties().getRefMarker();
+		String newRef = getProperties().getProperty(ToolboxTextImporterProperties.PROP_REF_MARKER).getDefaultValue().toString();
+		String oldSubref = getProperties().getSubrefDefinitionMarker();
+		String newSubref = getProperties().getProperty(ToolboxTextImporterProperties.PROP_SUB_REF_DEFINITION_MARKER).getDefaultValue().toString();
+		String oldTx = getProperties().getLexMarker();
+		String newTx = getProperties().getProperty(ToolboxTextImporterProperties.PROP_LEX_MARKER).getDefaultValue().toString();
+		String oldMb = getProperties().getMorphMarker();
+		String newMb = getProperties().getProperty(ToolboxTextImporterProperties.PROP_MORPH_MARKER).getDefaultValue().toString();
+		for (SLayer l : graph.getLayers()) {
+			if (l.getName().equals(oldRef)) {
+				l.setName(newRef);
+			}
+			else if (l.getName().equals(oldSubref)) {
+				l.setName(newSubref);
+			}
+			else if (l.getName().equals(oldTx)) {
+				l.setName(newTx);
+			}
+			else if (l.getName().equals(oldMb)) {
+				l.setName(newMb);
+			}
+		}
+		for (SNode n : graph.getNodes()) {
+			for (SAnnotation a : n.getAnnotations()) {
+				if (a.getName().equals(oldRef)) {
+					a.setName(newRef);
+				}
+				else if (a.getName().equals(oldSubref)) {
+					a.setName(newSubref);
+				}
+				else if (a.getName().equals(oldTx)) {
+					a.setName(newTx);
+				}
+				else if (a.getName().equals(oldMb)) {
+					a.setName(newMb);
+				}
+			}
+		}
+		for (SSpan s : graph.getSpans()) {
+			if (s.getName().equals(oldRef)) {
+				s.setName(newRef);
+			}
+			else if (s.getName().equals(oldSubref)) {
+				s.setName(newSubref);
+			}
+			else if (s.getName().equals(oldTx)) {
+				s.setName(newTx);
+			}
+			else if (s.getName().equals(oldMb)) {
+				s.setName(newMb);
+			}
+		}
+//		for (Label lb : graph.getLabels()) {
+//			if (lb.getName().equals(anObject))
+//		}
+		
 	}
 
 	/**
