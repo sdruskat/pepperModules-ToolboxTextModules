@@ -290,11 +290,11 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 				case "1":
 					switch (l.getName()) {
 					case "tx":
-						assertEquals(56, l.getNodes().size());
+						assertEquals(57, l.getNodes().size());
 						break;
 						
 					case "mb":
-						assertEquals(48, l.getNodes().size());
+						assertEquals(49, l.getNodes().size());
 						break;
 						
 					case "ref":
@@ -312,11 +312,11 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 				case "4":
 					switch (l.getName()) {
 					case "tx":
-						assertEquals(4, l.getNodes().size());
+						assertEquals(5, l.getNodes().size());
 						break;
 						
 					case "mb":
-						assertEquals(4, l.getNodes().size());
+						assertEquals(5, l.getNodes().size());
 						break;
 						
 					case "ref":
@@ -332,11 +332,11 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 				case "5":
 					switch (l.getName()) {
 					case "tx":
-						assertEquals(4, l.getNodes().size());
+						assertEquals(5, l.getNodes().size());
 						break;
 						
 					case "mb":
-						assertEquals(4, l.getNodes().size());
+						assertEquals(5, l.getNodes().size());
 						break;
 						
 					case "ref":
@@ -895,8 +895,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(6));
 		assertThat(graph.getSpans().size(), is(2));
-		assertThat(graph.getNodesByName("subref").size(), is(1));
-		SNode subref = graph.getNodesByName("subref").get(0);
+		assertThat(graph.getNodesByName("unitref").size(), is(1));
+		SNode subref = graph.getNodesByName("unitref").get(0);
 		assertThat(subref, instanceOf(SSpan.class));
 		assertThat(subref.getAnnotations().size(), is(1));
 		for (SToken tok : graph.getOverlappedTokens(subref)) {
@@ -925,7 +925,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(7));
 		assertThat(graph.getSpans().size(), is(3));
-		List<SNode> subrefNodes = graph.getNodesByName("subref");
+		List<SNode> subrefNodes = graph.getNodesByName("unitref");
 		assertThat(subrefNodes.size(), is(2));
 		SNode xtNode = null, srNode = null;
 		for (SNode subref : subrefNodes) {
@@ -978,8 +978,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(6));
 		assertThat(graph.getSpans().size(), is(2));
-		assertThat(graph.getNodesByName("subref").size(), is(1));
-		SNode srNode = graph.getNodesByName("subref").get(0);
+		assertThat(graph.getNodesByName("unitref").size(), is(1));
+		SNode srNode = graph.getNodesByName("unitref").get(0);
 		assertThat(srNode, instanceOf(SSpan.class));
 		assertThat(graph.getOverlappedTokens(srNode).size(), is(2));
 		for (SToken tok : graph.getOverlappedTokens(srNode)) {
@@ -1530,7 +1530,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(16));
 		assertThat(graph.getSpans().size(), is(3));
-		List<SNode> subrefNodes = graph.getNodesByName("subref");
+		List<SNode> subrefNodes = graph.getNodesByName("unitref");
 		assertThat(subrefNodes.size(), is(2));
 		SNode srNode1 = null, srNode2 = null;
 		for (SNode subref : subrefNodes) {
@@ -1585,7 +1585,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(40));
 		assertThat(graph.getSpans().size(), is(2));
-		List<SNode> subrefNodes = graph.getNodesByName("subref");
+		List<SNode> subrefNodes = graph.getNodesByName("unitref");
 		assertThat(subrefNodes.size(), is(1));
 		SNode subref = null;
 		for (SNode sr : subrefNodes) {
@@ -1626,7 +1626,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getTokens().size(), is(greaterThan(0)));
 		assertThat(graph.getTokens().size(), is(24));
 		assertThat(graph.getSpans().size(), is(2));
-		List<SNode> subrefNodes = graph.getNodesByName("subref");
+		List<SNode> subrefNodes = graph.getNodesByName("unitref");
 		assertThat(subrefNodes.size(), is(1));
 		SNode subref = null;
 		for (SNode sr : subrefNodes) {
@@ -1770,14 +1770,65 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			}
 		}
 		for (SNode node : graph.getLayerByName("mb").get(0).getNodes()) {
-			assertEquals(1, node.getAnnotations().size());
-			assertThat(node.getAnnotation("toolbox::ge").getValue_STEXT(), anyOf(is("M1"), is("M2"), is("M3"), is("M4")));
+			if (!(node instanceof STextualDS)) {
+				assertEquals(1, node.getAnnotations().size());
+				assertThat(node.getAnnotation("toolbox::ge").getValue_STEXT(), anyOf(is("M1"), is("M2"), is("M3"), is("M4")));
+			}
 		}
 		SSpan refSpan = null;
 		assertNotNull(refSpan = graph.getSpans().get(0));
 		SAnnotation subrefAnno = null; 
 		assertNotNull(subrefAnno = refSpan.getAnnotation("toolbox::nt"));
 		assertThat(subrefAnno.getValue_STEXT(), is("This is the first part of a note, and this is the second."));
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where the markers should be normalized back to defaults
+	 */
+	@Test
+	public void testNormalizeMarkers() {
+		setTestFile("normalized-markers.txt");
+		setProperties("normalized-markers.properties");
+		start();
+		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
+		assertThat(graph.getTextualDSs().size(), is(2));
+		boolean containsDS = false;
+		for (SNode n : graph.getLayerByName("xt").get(0).getNodes()) {
+			if (n instanceof STextualDS) {
+				containsDS = true;
+				assertThat(((STextualDS) n).getText(), is ("One Two Three Four"));
+			}
+		}
+		assertThat(containsDS, is(true));
+		containsDS = false;
+		for (SNode n : graph.getLayerByName("bm").get(0).getNodes()) {
+			if (n instanceof STextualDS) {
+				containsDS = true;
+				assertThat(((STextualDS) n).getText(), is ("m1-m2m3m4-m5m6"));
+			}
+		}
+		assertTrue(containsDS);
+		assertThat(graph.getDocument().getName(), is("Document no. 1"));
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::fer").getValue_STEXT(), is("Reference no. 1"));
+		assertThat(graph.getNodesByName("customref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where the markers should *not* be normalized back to defaults
+	 */
+	@Test
+	public void testNormalizeMarkersFalse() {
+		setTestFile("unnormalized-markers.txt");
+		setProperties("unnormalized-markers.properties");
+		start();
+		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
 	}
 
 	/**
@@ -1931,7 +1982,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
 		SDocumentGraph graph = doc.getDocumentGraph();
 		SNode subrefNode = null;
-		assertNotNull(subrefNode = graph.getNodesByName("subref").get(0));
+		assertNotNull(subrefNode = graph.getNodesByName("unitref").get(0));
 		assertThat(subrefNode, instanceOf(SSpan.class));
 		SSpan subref = (SSpan) subrefNode;
 		List<SToken> tokens = null;
@@ -1960,8 +2011,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getLayerByName("mb").size(), is(1));
 		assertNotNull(txLayer = graph.getLayerByName("tx").get(0));
 		assertNotNull(mbLayer = graph.getLayerByName("mb").get(0));
-		assertThat(txLayer.getNodes().size(), is(9));
-		assertThat(mbLayer.getNodes().size(), is(11));
+		assertThat(txLayer.getNodes().size(), is(10));
+		assertThat(mbLayer.getNodes().size(), is(12));
 		int spancount = 0;
 		for (SNode txn : txLayer.getNodes()) {
 			if (txn instanceof SSpan) {
@@ -2007,8 +2058,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getLayerByName("mb").size(), is(1));
 		assertNotNull(txLayer = graph.getLayerByName("tx").get(0));
 		assertNotNull(mbLayer = graph.getLayerByName("mb").get(0));
-		assertThat(txLayer.getNodes().size(), is(7));
-		assertThat(mbLayer.getNodes().size(), is(12));
+		assertThat(txLayer.getNodes().size(), is(8));
+		assertThat(mbLayer.getNodes().size(), is(13));
 		int spancount = 0;
 		for (SNode mbn : mbLayer.getNodes()) {
 			if (mbn instanceof SSpan) {
@@ -2044,8 +2095,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getLayerByName("mb").size(), is(1));
 		assertNotNull(txLayer = graph.getLayerByName("tx").get(0));
 		assertNotNull(mbLayer = graph.getLayerByName("mb").get(0));
-		assertThat(txLayer.getNodes().size(), is(7));
-		assertThat(mbLayer.getNodes().size(), is(10));
+		assertThat(txLayer.getNodes().size(), is(8));
+		assertThat(mbLayer.getNodes().size(), is(11));
 		int spancount = 0;
 		for (SNode mbn : mbLayer.getNodes()) {
 			if (mbn instanceof SSpan) {
@@ -2077,8 +2128,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getLayerByName("mb").size(), is(1));
 		assertNotNull(txLayer = graph.getLayerByName("tx").get(0));
 		assertNotNull(mbLayer = graph.getLayerByName("mb").get(0));
-		assertThat(txLayer.getNodes().size(), is(8));
-		assertThat(mbLayer.getNodes().size(), is(11));
+		assertThat(txLayer.getNodes().size(), is(9));
+		assertThat(mbLayer.getNodes().size(), is(12));
 		int spancount = 0;
 		for (SNode txn : txLayer.getNodes()) {
 			if (txn instanceof SSpan) {

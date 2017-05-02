@@ -185,6 +185,10 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 					}
 					bos.reset();
 				}
+				getLayer(getProperties().getLexMarker()).addNode(lexDS);
+				if (morphDS != null) {
+					getLayer(getProperties().getMorphMarker()).addNode(morphDS);
+				}
 			}
 		}
 		catch (FileNotFoundException e) {

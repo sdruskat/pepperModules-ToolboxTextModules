@@ -152,12 +152,12 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * The marker which precedes lines with annotations that can potentially span
 	 * subranges of the complete morphological data source.
 	 */
-	private static final String PROP_SUB_REF_ANNOTATION_MARKERS = "subRefAnnotationMarkers";
+	private static final String PROP_SUB_REF_ANNOTATION_MARKERS = "subrefAnnotationMarkers";
 	
 	/**
 	 * The marker used to define unit refs.
 	 */
-	private static final String PROP_SUB_REF_DEFINITION_MARKER = "subRefDefinitionMarker";
+	private static final String PROP_SUB_REF_DEFINITION_MARKER = "subrefDefinitionMarker";
 	
 	/**
 	 * Whether detached morphology delimiters (as in "item - item" or similar) should be attached to the previous or
@@ -200,6 +200,18 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * `false`: Errors will not be recorded. 
 	 */
 	private static final String PROP_RECORD_ERRORS = "recordErrors";
+
+	/**
+	 * Whether the importer should record errors.
+	 * 
+	 * `true` (default): Errors in the data model will be recorded, i.e., annotations
+	 * on an error layer (called `err`) will be added for each line which
+	 * seems to contain an error. Additionally, another annotation will be added
+	 * to discrete layers, recording the original faulty line.
+	 * 
+	 * `false`: Errors will not be recorded. 
+	 */
+	private static final String PROP_NORMALIZE_MARKERS = "normalizeMarkers";
 
 	/**
 	 * Whether the importer should fix interlinearization.
@@ -322,6 +334,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"Whether the importer should fix interlinearization errors.",
 				true,
 				true));
+		addProperty(new PepperModuleProperty<>(PROP_NORMALIZE_MARKERS,
+				Boolean.class,
+				"Whether the importer should rename layers and annotations to defaults.",
+				true,
+				true));
 	}
 	
 	// Getter methods for the different property values.
@@ -362,7 +379,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return new ArrayList<>(Arrays.asList(((String) getProperty(PROP_SUB_REF_ANNOTATION_MARKERS).getValue()).split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)));
 	}
 	
-	public String getSubRefDefinitionMarker() {
+	public String getSubrefDefinitionMarker() {
 		return (String) getProperty(PROP_SUB_REF_DEFINITION_MARKER).getValue();
 	}
 	
@@ -405,5 +422,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public String getLiaisonDelim() {
 		return (String) getProperty(PROP_LIAISON_DELIMITER).getValue();
 	}
+	
+	public boolean normalizeMarkers() {
+		return (Boolean) getProperty(PROP_NORMALIZE_MARKERS).getValue();
+	}
+	
+
 }
 

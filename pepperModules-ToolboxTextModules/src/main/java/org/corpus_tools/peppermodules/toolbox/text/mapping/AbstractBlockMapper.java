@@ -142,7 +142,7 @@ abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 				 * attempting to re-work lines.
 				 */
 				boolean hasSubRefAnnoMarkers = properties.getSubRefAnnotationMarkers() != null;
-				String subrefMarker = properties.getSubRefDefinitionMarker();
+				String subrefMarker = properties.getSubrefDefinitionMarker();
 				/* 
 				 * If no subref annotation markers have been defined, set the boolean 
 				 * depending on the subref marker only, else use both the latter and

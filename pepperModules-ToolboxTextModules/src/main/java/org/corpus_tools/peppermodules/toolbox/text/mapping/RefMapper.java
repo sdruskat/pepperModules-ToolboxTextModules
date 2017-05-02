@@ -119,7 +119,7 @@ public class RefMapper extends AbstractBlockMapper {
 		String refMarker = properties.getRefMarker();
 		String lexMarker = properties.getLexMarker();
 		String morphMarker = properties.getMorphMarker();
-		String subrefMarker = properties.getSubRefDefinitionMarker();
+		String subrefMarker = properties.getSubrefDefinitionMarker();
 
 		// Marker groups
 		String mks;
@@ -233,7 +233,6 @@ public class RefMapper extends AbstractBlockMapper {
 		if (docHasMorphology) {
 			boolean hasLiaisonDelimiter = false;
 			if (hasMorphology) {
-//				boolean isLexInfoMappable = true;
 				STimeline timeline = graph.getTimeline();
 				int morphTimelineEnd = timeline.getEnd() == null ? 0 : timeline.getEnd();
 				int lexTimelineEnd = morphTimelineEnd;
