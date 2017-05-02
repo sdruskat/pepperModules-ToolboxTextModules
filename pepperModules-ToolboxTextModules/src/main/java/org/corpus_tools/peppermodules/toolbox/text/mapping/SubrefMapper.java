@@ -190,6 +190,8 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	 * @param subrefAnnoMap
 	 */
 	private void mapDefined(Multimap<SubrefDefinition, Entry<String, String>> subrefAnnoMap) {
+		// FIXME TEST THIS (All lines mapped when error?)
+		subrefannotationlines:
 		for (Entry<SubrefDefinition, Entry<String, String>> entry : subrefAnnoMap.entries()) {
 			SubrefDefinition definition = entry.getKey();
 			String targetLayer = definition.getTargetLayer();
@@ -210,17 +212,21 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 				annoValue = annoLine.split("\\s+", 2)[1].trim();
 			}
 			else {
-				log.info("There is no annotation value for subref '{}' with key '{}' in document '{}', ref '{}'. Ignoring this line.", definition.getIdentifier(), annoKey, refData.getDocName(), refData.getRef());
-				return;
+				log.debug("There is no annotation value for subref '{}' with key '{}' in document '{}', ref '{}'. Ignoring this line.", definition.getIdentifier(), annoKey, refData.getDocName(), refData.getRef());
+				continue subrefannotationlines;
 			}
+			ranges:
 			for (Range<Integer> range : definition.getRanges()) {
 				try {
 					subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));	
 				}
 				catch (IndexOutOfBoundsException e) {
-					log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", range.getMinimum() + "-" + range.getMaximum() + 1, refData.getRef(), refData.getDocName());
-					return;
+					log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", range.getMinimum() + "-" + range.getMaximum(), refData.getRef(), refData.getDocName());
+					continue ranges;
 				}
+			}
+			if (subrefTokens.isEmpty()) {
+				continue subrefannotationlines;
 			}
 			subref = getSubrefSpan(subrefTokens);
 			try {
@@ -240,6 +246,8 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	 * @param simpleSubrefMap
 	 */
 	private void mapSimpleCandidates(Multimap<String, String> simpleSubrefMap) {
+		// FIXME TEST THIS (All lines mapped when error?)
+		subrefannotationlines:
 		for (Entry<String, String> anno : simpleSubrefMap.entries()) {
 			SSpan subref = null;
 			List<SToken> subrefTokens = new ArrayList<>();
@@ -261,19 +269,13 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 				if (ToolboxTextModulesUtils.isInteger(typeSplit[0]) && ToolboxTextModulesUtils.isInteger(typeSplit[1])) {
 					// SUBREF_TYPE.SIMPLE
 					mapToMorphTokens = refHasMorphology;
-//					try {
-						range = Range.between(Integer.parseInt(typeSplit[0]), Integer.parseInt(typeSplit[1]) + 1);
-//					}
-//					catch (Exception e) {
-//						log.warn("\n\n---------------\nREF: {}\ntype plit: {}", refData.getRef(), Arrays.toString(typeSplit));
-//						return;
-//					}
+					range = Range.between(Integer.parseInt(typeSplit[0]), Integer.parseInt(typeSplit[1]) + 1);
 					try {
 						annoValue = anno.getValue().split("\\s+", 3)[2];
 					}
 					catch (Exception e) {
-						log.info("No value for annotation with key \"{}\" in document '{}', reference '{}'. Ignoring ...", anno.getKey(), refData.getDocName(), refData.getRef());
-						return;
+						log.debug("No value for annotation with key \"{}\" in document '{}', reference '{}'. Ignoring ...", anno.getKey(), refData.getDocName(), refData.getRef());
+						continue subrefannotationlines;
 					}
 				}
 				else {
@@ -290,7 +292,10 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			}
 			catch (Exception e) {
 				log.warn("The maximum of subref range {}..{} in document '{}', reference '{}' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", range.getMinimum(), range.getMaximum() - 1, refData.getDocName(), refData.getRef());
-				return;
+				continue subrefannotationlines;
+			}
+			if (subrefTokens.isEmpty()) {
+				continue subrefannotationlines;
 			}
 			subref = getSubrefSpan(subrefTokens);
 			subref.setName(name);

@@ -104,7 +104,7 @@ abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 						lines.add(line);
 					}
 					else {
-						log.info("Ignoring the following line in candidacy to be included in '" + graph.getDocument().getName() + "' as it contains only a marker: '" + line + "'!");
+						log.debug("Ignoring the following line in candidacy to be included in '" + graph.getDocument().getName() + "' as it contains only a marker: '" + line + "'!");
 					}
 				}
 				/*
@@ -154,11 +154,11 @@ abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 						(!marker.substring(1).equals(subrefMarker)) ;
 				if (doProcessMarker) {
 					if (properties.mergeDuplicateMarkers()) {
-						log.info("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nAttempting to concatenate all lines with the same marker in the next step.");
+						log.debug("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nAttempting to concatenate all lines with the same marker in the next step.");
 						duplicateMarkers.add(marker);
 					}
 					else {
-						log.info("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nDropping all but the first line marked with it.");
+						log.debug("Found more than one line marked with '" + marker + "':\n\"" + l + "\"\nDropping all but the first line marked with it.");
 						iterator.remove();
 					}
 				}

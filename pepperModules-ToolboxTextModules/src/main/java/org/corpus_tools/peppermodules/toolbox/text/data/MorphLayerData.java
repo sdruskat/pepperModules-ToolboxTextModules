@@ -130,7 +130,7 @@ public class MorphLayerData extends LayerData {
 				iterator.remove();
 				}
 				else {
-					log.info("Reference {} in document {} does not contain suffixed morphemes, hence skipping concatenation.", ref, docName);
+					log.debug("Reference {} in document {} does not contain suffixed morphemes, hence skipping concatenation.", ref, docName);
 				}
 			}
 		}
