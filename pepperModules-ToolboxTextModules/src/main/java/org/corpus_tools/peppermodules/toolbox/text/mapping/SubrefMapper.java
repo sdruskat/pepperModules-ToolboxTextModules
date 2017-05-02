@@ -18,14 +18,13 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.Range;
-import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
@@ -123,7 +122,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 					 * subref of either of these types in one ref.
 					 */
 					log.warn("Illegal subref definition in ref {}, document {}!\nThere can only be exactly one unidentified global subref definition per ref! Cancelling definition overwrite.",
-							refData.getRef(), refData.getDocName(), new PepperModuleException());
+							refData.getRef(), refData.getDocName());
 					subrefMap.put(previous.getIdentifier(), previous);
 				}
 			}
@@ -190,7 +189,6 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	 * @param subrefAnnoMap
 	 */
 	private void mapDefined(Multimap<SubrefDefinition, Entry<String, String>> subrefAnnoMap) {
-		// FIXME TEST THIS (All lines mapped when error?)
 		subrefannotationlines:
 		for (Entry<SubrefDefinition, Entry<String, String>> entry : subrefAnnoMap.entries()) {
 			SubrefDefinition definition = entry.getKey();
@@ -246,7 +244,6 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	 * @param simpleSubrefMap
 	 */
 	private void mapSimpleCandidates(Multimap<String, String> simpleSubrefMap) {
-		// FIXME TEST THIS (All lines mapped when error?)
 		subrefannotationlines:
 		for (Entry<String, String> anno : simpleSubrefMap.entries()) {
 			SSpan subref = null;

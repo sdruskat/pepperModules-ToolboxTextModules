@@ -1,0 +1,9 @@
+\_sh v3.0 Test
+
+\itm Document no. X
+
+\ref Test ref x
+\tx T1 		T2 T3 T4 	 	 T5 T6 T7
+\mb m1 -m2  m3 m4 m5- m6 -m7 m8 m9 m10
+\subref mb 1 13
+\test Test

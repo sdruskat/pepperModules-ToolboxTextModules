@@ -49,8 +49,17 @@ import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.corpus_tools.salt.core.SNode;
 import org.eclipse.emf.common.util.URI;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link ToolboxTextImporter}.
@@ -63,10 +72,14 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	private static final String DOC_INFO_ANNO = "A sample \"standard\" corpus in Toolbox text format. It includes use cases for most phenomena the importer tests against, such as clitics and affixes, subrefs, meta annotations, etc.";
 	private static final String DOC_NO = "Document no. ";
 	private static final String TOOLBOX = "toolbox";
+	private Logger rootLogger;
+	@SuppressWarnings("rawtypes")
+	private Appender mockAppender;
 
 	/**
 	 * @throws java.lang.Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
 		this.setFixture(new ToolboxTextImporter());
@@ -74,6 +87,19 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		this.getFixture().getCorpusDesc().getFormatDesc().setFormatName("toolbox-text").setFormatVersion("3.0");
 		getFixture().getSaltProject().createCorpusGraph();
 		getFixture().setProperties(new ToolboxTextImporterProperties());
+		
+		// Logging
+		rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+	    mockAppender = mock(Appender.class);
+	    when(mockAppender.getName()).thenReturn("MOCK");
+	    rootLogger.addAppender(mockAppender);
+
+	}
+	
+	@SuppressWarnings("unchecked")
+	@After
+	public void teardown() {
+		rootLogger.detachAppender(mockAppender);
 	}
 
 	/**
@@ -1912,5 +1938,186 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat((tokens = graph.getOverlappedTokens(subref)).size(), is(1));
 		assertThat(graph.getText(tokens.get(0)), is("festafir."));
 	}
+	
+	/**
+	 * Multiple defined targeted subrefs in one ref
+	 */
+	@Test
+	public void test4() {
+		setTestFile("bugs/4.txt");
+		setProperties("bugs/4.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		for (SNode n : graph.getNodes()) {
+			if (n instanceof STextualDS) {
+				assertThat(((STextualDS) n).getText(), anyOf(is("T1 T2 T3 T4 T5 T6 T7"), is("m1-m2m3m4m5-m6-m7m8m9m10")));
+			}
+		}
+		SLayer txLayer, mbLayer;
+		assertThat(graph.getLayerByName("tx").size(), is(1));
+		assertThat(graph.getLayerByName("mb").size(), is(1));
+		assertNotNull(txLayer = graph.getLayerByName("tx").get(0));
+		assertNotNull(mbLayer = graph.getLayerByName("mb").get(0));
+		assertThat(txLayer.getNodes().size(), is(9));
+		assertThat(mbLayer.getNodes().size(), is(11));
+		int spancount = 0;
+		for (SNode txn : txLayer.getNodes()) {
+			if (txn instanceof SSpan) {
+				spancount++;
+				assertThat(graph.getText(txn), anyOf(is("T1 T2 T3"), is("T5 T6")));
+				assertThat(txn.getAnnotations().size(), is(1));
+				assertThat(txn.getAnnotations().iterator().next().getValue_STEXT(), anyOf(is("test1"), is("test2")));
+			}
+		}
+		assertThat(spancount, is(2));
+		spancount = 0;
+		for (SNode mbn : mbLayer.getNodes()) {
+			if (mbn instanceof SSpan) {
+				spancount++;
+				assertThat(graph.getText(mbn), is("m1-m2"));
+				assertThat(mbn.getAnnotations().size(), is(1));
+				assertThat(mbn.getAnnotations().iterator().next().getValue_STEXT(), is("test4"));
+			}
+		}
+		assertThat(spancount, is(1));
+		checkLog("Subref 4-10 in segment 'Testref' in document \"4\" could not be resolved, as one or more subref token indices were outside of the range of token indices.");
+		checkLog("Subref 6-7 in segment 'Testref' in document \"4\" could not be resolved, as one or more subref token indices were outside of the range of token indices.");
+	}
+	
+	/**
+	 * Multiple defined (untargeted) subrefs in one ref
+	 */
+	@Test
+	public void test5() {
+		setTestFile("bugs/5.txt");
+		setProperties("bugs/5.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		for (SNode n : graph.getNodes()) {
+			if (n instanceof STextualDS) {
+				assertThat(((STextualDS) n).getText(), anyOf(is("T1 T2 T3 T4 T5 T6 T7"), is("m1-m2m3m4m5-m6-m7m8m9m10")));
+			}
+		}
+		SLayer txLayer, mbLayer;
+		assertThat(graph.getLayerByName("tx").size(), is(1));
+		assertThat(graph.getLayerByName("mb").size(), is(1));
+		assertNotNull(txLayer = graph.getLayerByName("tx").get(0));
+		assertNotNull(mbLayer = graph.getLayerByName("mb").get(0));
+		assertThat(txLayer.getNodes().size(), is(7));
+		assertThat(mbLayer.getNodes().size(), is(12));
+		int spancount = 0;
+		for (SNode mbn : mbLayer.getNodes()) {
+			if (mbn instanceof SSpan) {
+				spancount++;
+				assertThat(graph.getText(mbn), anyOf(is("m1-m2m3"), is("m5-m6")));
+				assertThat(mbn.getAnnotations().size(), is(1));
+				assertThat(mbn.getAnnotations().iterator().next().getValue_STEXT(), anyOf(is("test1"), is("test2")));
+			}
+		}
+		assertThat(spancount, is(2));
+		checkLog("Subref 4-10 in segment 'Test ref' in document \"5\" could not be resolved, as one or more subref token indices were outside of the range of token indices.");
+		checkLog("Subref 11-19 in segment 'Test ref' in document \"5\" could not be resolved, as one or more subref token indices were outside of the range of token indices.");
+	}
+	
+	/**
+	 * Erratic global targeted subref
+	 */
+	@Test
+	public void test6() {
+		setTestFile("bugs/6.txt");
+		setProperties("bugs/6.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		for (SNode n : graph.getNodes()) {
+			if (n instanceof STextualDS) {
+				assertThat(((STextualDS) n).getText(), anyOf(is("T1 T2 T3 T4 T5 T6 T7"), is("m1-m2m3m4m5-m6-m7m8m9m10")));
+			}
+		}
+		SLayer txLayer, mbLayer;
+		assertThat(graph.getLayerByName("tx").size(), is(1));
+		assertThat(graph.getLayerByName("mb").size(), is(1));
+		assertNotNull(txLayer = graph.getLayerByName("tx").get(0));
+		assertNotNull(mbLayer = graph.getLayerByName("mb").get(0));
+		assertThat(txLayer.getNodes().size(), is(7));
+		assertThat(mbLayer.getNodes().size(), is(10));
+		int spancount = 0;
+		for (SNode mbn : mbLayer.getNodes()) {
+			if (mbn instanceof SSpan) {
+				spancount++;
+			}
+		}
+		assertThat(spancount, is(0));
+		checkLog("Document '6', reference 'Test ref x': The indices defined in the global subdef are outside of the index range of the target tokens. Please fix the source data! Ignoring this subref ...");
+	}
+	
+	/**
+	 * Erratic simple (targeted and untargeted) subrefs
+	 */
+	@Test
+	public void test7() {
+		setTestFile("bugs/7.txt");
+		setProperties("bugs/7.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		for (SNode n : graph.getNodes()) {
+			if (n instanceof STextualDS) {
+				assertThat(((STextualDS) n).getText(), anyOf(is("T1 T2 T3 T4 T5 T6 T7"), is("m1-m2m3m4m5-m6-m7m8m9m10")));
+			}
+		}
+		SLayer txLayer, mbLayer;
+		assertThat(graph.getLayerByName("tx").size(), is(1));
+		assertThat(graph.getLayerByName("mb").size(), is(1));
+		assertNotNull(txLayer = graph.getLayerByName("tx").get(0));
+		assertNotNull(mbLayer = graph.getLayerByName("mb").get(0));
+		assertThat(txLayer.getNodes().size(), is(8));
+		assertThat(mbLayer.getNodes().size(), is(11));
+		int spancount = 0;
+		for (SNode txn : txLayer.getNodes()) {
+			if (txn instanceof SSpan) {
+				spancount++;
+				assertThat(graph.getText(txn), is("T1 T2 T3 T4 T5"));
+				assertThat(txn.getAnnotations().size(), is(1));
+				assertThat(txn.getAnnotations().iterator().next().getValue_STEXT(), is("TestTX"));
+			}
+		}
+		assertThat(spancount, is(1));
+		spancount = 0;
+		for (SNode mbn : mbLayer.getNodes()) {
+			if (mbn instanceof SSpan) {
+				spancount++;
+				assertThat(graph.getText(mbn), is("m1-m2m3m4m5-"));
+				assertThat(mbn.getAnnotations().size(), is(1));
+				assertThat(mbn.getAnnotations().iterator().next().getValue_STEXT(), is("TestMB"));
+			}
+		}
+		assertThat(spancount, is(1));
+		checkLog("The maximum of subref range 9..10 in document '7', reference 'Test ref y' is larger than the highest token index. Please fix source data! Ignoring this annotation ...");
+		checkLog("The maximum of subref range 13..19 in document '7', reference 'Test ref y' is larger than the highest token index. Please fix source data! Ignoring this annotation ...");
+	}
+
+	/**
+	 * Verifies whether the log contains a specific message.
+	 *
+	 * @param string
+	 * @return
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void checkLog(final String string) {
+		verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
+		      @Override
+		      public boolean matches(final Object argument) {
+		        return ((LoggingEvent) argument).getFormattedMessage().contains(string);
+		      }
+		    }));
+	}
+
     
 }
