@@ -65,10 +65,13 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	private final String subRefDefinitionMarker;
 	private final List<String> subRefAnnotationMarkers;
 	private final boolean refHasMorphology;
+
+	private final Map<String, String> markerMap;
 	
 	
 	
 	/**
+	 * @param markerMap 
 	 * @param properties
 	 * @param graph
 	 * @param morphTokens 
@@ -84,7 +87,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	 * @param morphDS
 	 * @param layers
 	 */
-	public SubrefMapper(ToolboxTextImporterProperties properties, SDocumentGraph graph, LayerData refData, List<SToken> lexTokens, List<SToken> morphTokens, ListMultimap<String,String> markerContentMap, boolean refHasMorphology) {
+	public SubrefMapper(Map<String, String> markerMap, ToolboxTextImporterProperties properties, SDocumentGraph graph, LayerData refData, List<SToken> lexTokens, List<SToken> morphTokens, ListMultimap<String,String> markerContentMap, boolean refHasMorphology) {
 		this.graph = graph;
 		this.refData = refData;
 		this.lexTokens = lexTokens;
@@ -95,6 +98,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 		this.subRefDefinitionMarker = properties.getSubrefDefinitionMarker();
 		this.subRefAnnotationMarkers = properties.getSubRefAnnotationMarkers();
 		this.refHasMorphology = refHasMorphology;
+		this.markerMap = markerMap;
 	}
 
 	/**
@@ -233,7 +237,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			catch (SaltInsertionException e) {
 				log.warn("Duplicate annotation in '{}'-'{}'! There already exists an annotation with the key \"{}\". This might be an error in the source data. If it is not, please file a bug report.", refData.getDocName(), refData.getRef(), annoKey);
 			}
-			SLayer layer = graph.getLayerByName(mapToMorphTokens ? morphMarker : lexMarker).get(0);
+			SLayer layer = graph.getLayerByName(mapToMorphTokens ? markerMap.get(morphMarker) : markerMap.get(lexMarker)).get(0);
 			layer.addNode(subref);
 		}
 	}
@@ -309,6 +313,10 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			 * key for the annotation already exists on the respective node. Hence, check if we're
 			 * dealing with a fullref here, and append if the annotation already exists.
 			 */
+			String key = anno.getKey();
+			if (key.equals(refData.getMarker()) || key.equals(subRefDefinitionMarker) || key.equals(lexMarker) || key.equals(morphMarker)) {
+				key = markerMap.get(key);
+			}
 			if (fullref) {
 				SAnnotation skeletonAnno = subref.getAnnotation(SALT_NAMESPACE_TOOLBOX + "::" + anno.getKey());
 				if (skeletonAnno != null) {
@@ -317,13 +325,13 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 					skeletonAnno.setValue(newValue);
 				}
 				else {
-					subref.createAnnotation("toolbox", anno.getKey(), annoValue);
+					subref.createAnnotation("toolbox", key, annoValue);
 				}
 			}
 			else {
-				subref.createAnnotation("toolbox", anno.getKey(), annoValue);
+				subref.createAnnotation("toolbox", key, annoValue);
 			}
-			layer = graph.getLayerByName(mapToMorphTokens ? morphMarker : lexMarker).get(0);
+			layer = graph.getLayerByName(mapToMorphTokens ? markerMap.get(morphMarker) : markerMap.get(lexMarker)).get(0);
 			layer.addNode(subref);
 		}
 	}
@@ -362,9 +370,13 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 		}
 		subref = getSubrefSpan(subrefTokens);
 		for (Entry<String, String> anno : subrefAnnoLines.entries()) {
-			subref.createAnnotation("toolbox", anno.getKey(), anno.getValue());
+			String key = anno.getKey();
+			if (key.equals(refData.getMarker()) || key.equals(subRefDefinitionMarker) || key.equals(lexMarker) || key.equals(morphMarker)) {
+				key = markerMap.get(key);
+			}
+			subref.createAnnotation("toolbox", key, anno.getValue());
 		}
-		layer = graph.getLayerByName(mapToMorphTokens ? morphMarker : lexMarker).get(0);
+		layer = graph.getLayerByName(mapToMorphTokens ? markerMap.get(morphMarker) : markerMap.get(lexMarker)).get(0);
 		layer.addNode(subref);
 	}
 
@@ -388,7 +400,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 					subref = span;
 					String name = subref.getName();
 					if (name.isEmpty()) {
-						subref.setName(subRefDefinitionMarker);
+						subref.setName(markerMap.get(subRefDefinitionMarker));
 					}
 					break forspans;
 				}
@@ -396,7 +408,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 		}
 		if (subref == null) {
 			subref = graph.createSpan(subrefTokens);
-			subref.setName(subRefDefinitionMarker);
+			subref.setName(markerMap.get(subRefDefinitionMarker));
 		}
 		return subref;
 	}

@@ -37,12 +37,9 @@ import org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
-import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.STextualDS;
-import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
-import org.corpus_tools.salt.core.SNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +61,12 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	private final Range<Long> idRange;
 	
 	private final boolean hasMorphology;
+	/**
+	 * A map mapping the defined marker to its target marker,
+	 * for normalization purposes.
+	 */
+	private final Map<String, String> markerMap = new HashMap<>(4);
+	private ToolboxTextImporterProperties properties = null;
 	
 	/**
 	 * Maps marker {@link String}s to {@link SLayer}s belonging to that marker.
@@ -90,6 +93,23 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	 */
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
+		// Set up marker map
+		if (getProperties() instanceof ToolboxTextImporterProperties) {
+			this.properties = (ToolboxTextImporterProperties) getProperties();
+		}
+		if (properties.normalizeMarkers()) {
+			markerMap.put(properties.getRefMarker(), properties.getProperty(ToolboxTextImporterProperties.PROP_REF_MARKER).getDefaultValue().toString());
+			markerMap.put(properties.getSubrefDefinitionMarker(), properties.getProperty(ToolboxTextImporterProperties.PROP_SUB_REF_DEFINITION_MARKER).getDefaultValue().toString());
+			markerMap.put(properties.getLexMarker(), properties.getProperty(ToolboxTextImporterProperties.PROP_LEX_MARKER).getDefaultValue().toString());
+			markerMap.put(properties.getMorphMarker(), properties.getProperty(ToolboxTextImporterProperties.PROP_MORPH_MARKER).getDefaultValue().toString());
+		}
+		else {
+			markerMap.put(properties.getRefMarker(), properties.getRefMarker());
+			markerMap.put(properties.getSubrefDefinitionMarker(), properties.getSubrefDefinitionMarker());
+			markerMap.put(properties.getLexMarker(), properties.getLexMarker());
+			markerMap.put(properties.getMorphMarker(), properties.getMorphMarker());
+		}
+
 		final boolean eDM = getProperties().errorDetectionMode();
 		SDocumentGraph graph = getDocument().getDocumentGraph();
 		if (graph == null) {
@@ -99,9 +119,9 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		File file = new File(getResourceURI().toFileString());
 		
 		// Create layers
-		getLayer(getProperties().getLexMarker());
-		getLayer(getProperties().getMorphMarker());
-		getLayer(getProperties().getRefMarker());
+		getLayer(markerMap.get(getProperties().getLexMarker()));
+		getLayer(markerMap.get(getProperties().getMorphMarker()));
+		getLayer(markerMap.get(getProperties().getRefMarker()));
 		
 		// Create a timeline to linearize lexical and morphological tokens
 		if (!eDM) {
@@ -110,11 +130,11 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		
 		// Create primary data sources
 		final STextualDS lexDS = graph.createTextualDS("");
-		lexDS.setName(getProperties().getLexMarker());
+		lexDS.setName(markerMap.get(getProperties().getLexMarker()));
 		STextualDS morphDS = null;
 		if (hasMorphology) {
 			morphDS = graph.createTextualDS("");
-			morphDS.setName(getProperties().getMorphMarker());
+			morphDS.setName(markerMap.get(getProperties().getMorphMarker()));
 		}
  
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r"); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
@@ -177,10 +197,10 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 						bos.write(currentByte);
 					}
 					// Create and call a mapper for the \ref section
-					RefMapper refMapper = new RefMapper(getProperties(), graph, bos.toString().trim(), hasMorphology, lexDS, morphDS, layers);
+					RefMapper refMapper = new RefMapper(markerMap, getProperties(), graph, bos.toString().trim(), hasMorphology, lexDS, morphDS, layers);
 					boolean refHasLexicalTokens = refMapper.map();
 					if (refHasLexicalTokens) {
-						SubrefMapper subrefMapper = new SubrefMapper(getProperties(), graph, refMapper.getRefData(), refMapper.getLexTokens(), refMapper.getMorphTokens(), refMapper.getMarkerContentMap(), refMapper.refHasMorphology());
+						SubrefMapper subrefMapper = new SubrefMapper(markerMap, getProperties(), graph, refMapper.getRefData(), refMapper.getLexTokens(), refMapper.getMorphTokens(), refMapper.getMarkerContentMap(), refMapper.refHasMorphology());
 						subrefMapper.map();
 					}
 					else {
@@ -188,9 +208,9 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 					}
 					bos.reset();
 				}
-				getLayer(getProperties().getLexMarker()).addNode(lexDS);
+				getLayer(markerMap.get(getProperties().getLexMarker())).addNode(lexDS);
 				if (morphDS != null) {
-					getLayer(getProperties().getMorphMarker()).addNode(morphDS);
+					getLayer(markerMap.get(getProperties().getMorphMarker())).addNode(morphDS);
 				}
 			}
 		}
@@ -200,75 +220,75 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 		catch (IOException e) {
 			throw new PepperModuleException("Error while parsing the corpus file " + getResourceURI().toFileString() + "!", e);
 		}
-		if (getProperties().normalizeMarkers()) {
-			normalizeMarkers(graph);
-		}
+//		if (getProperties().normalizeMarkers()) {
+//			normalizeMarkers(graph);
+//		}
 		return DOCUMENT_STATUS.COMPLETED;
 	}
 
-	/**
-	 * TODO: Description
-	 *
-	 * @param graph
-	 */
-	private void normalizeMarkers(SDocumentGraph graph) {
-		String oldRef = getProperties().getRefMarker();
-		String newRef = getProperties().getProperty(ToolboxTextImporterProperties.PROP_REF_MARKER).getDefaultValue().toString();
-		String oldSubref = getProperties().getSubrefDefinitionMarker();
-		String newSubref = getProperties().getProperty(ToolboxTextImporterProperties.PROP_SUB_REF_DEFINITION_MARKER).getDefaultValue().toString();
-		String oldTx = getProperties().getLexMarker();
-		String newTx = getProperties().getProperty(ToolboxTextImporterProperties.PROP_LEX_MARKER).getDefaultValue().toString();
-		String oldMb = getProperties().getMorphMarker();
-		String newMb = getProperties().getProperty(ToolboxTextImporterProperties.PROP_MORPH_MARKER).getDefaultValue().toString();
-		for (SLayer l : graph.getLayers()) {
-			if (l.getName().equals(oldRef)) {
-				l.setName(newRef);
-			}
-			else if (l.getName().equals(oldSubref)) {
-				l.setName(newSubref);
-			}
-			else if (l.getName().equals(oldTx)) {
-				l.setName(newTx);
-			}
-			else if (l.getName().equals(oldMb)) {
-				l.setName(newMb);
-			}
-		}
-		for (SNode n : graph.getNodes()) {
-			for (SAnnotation a : n.getAnnotations()) {
-				if (a.getName().equals(oldRef)) {
-					a.setName(newRef);
-				}
-				else if (a.getName().equals(oldSubref)) {
-					a.setName(newSubref);
-				}
-				else if (a.getName().equals(oldTx)) {
-					a.setName(newTx);
-				}
-				else if (a.getName().equals(oldMb)) {
-					a.setName(newMb);
-				}
-			}
-		}
-		for (SSpan s : graph.getSpans()) {
-			if (s.getName().equals(oldRef)) {
-				s.setName(newRef);
-			}
-			else if (s.getName().equals(oldSubref)) {
-				s.setName(newSubref);
-			}
-			else if (s.getName().equals(oldTx)) {
-				s.setName(newTx);
-			}
-			else if (s.getName().equals(oldMb)) {
-				s.setName(newMb);
-			}
-		}
-//		for (Label lb : graph.getLabels()) {
-//			if (lb.getName().equals(anObject))
+//	/**
+//	 * TODO: Description
+//	 *
+//	 * @param graph
+//	 */
+//	private void normalizeMarkers(SDocumentGraph graph) {
+//		String oldRef = getProperties().getRefMarker();
+//		String newRef = getProperties().getProperty(ToolboxTextImporterProperties.PROP_REF_MARKER).getDefaultValue().toString();
+//		String oldSubref = getProperties().getSubrefDefinitionMarker();
+//		String newSubref = getProperties().getProperty(ToolboxTextImporterProperties.PROP_SUB_REF_DEFINITION_MARKER).getDefaultValue().toString();
+//		String oldTx = getProperties().getLexMarker();
+//		String newTx = getProperties().getProperty(ToolboxTextImporterProperties.PROP_LEX_MARKER).getDefaultValue().toString();
+//		String oldMb = getProperties().getMorphMarker();
+//		String newMb = getProperties().getProperty(ToolboxTextImporterProperties.PROP_MORPH_MARKER).getDefaultValue().toString();
+//		for (SLayer l : graph.getLayers()) {
+//			if (l.getName().equals(oldRef)) {
+//				l.setName(newRef);
+//			}
+//			else if (l.getName().equals(oldSubref)) {
+//				l.setName(newSubref);
+//			}
+//			else if (l.getName().equals(oldTx)) {
+//				l.setName(newTx);
+//			}
+//			else if (l.getName().equals(oldMb)) {
+//				l.setName(newMb);
+//			}
 //		}
-		
-	}
+//		for (SNode n : graph.getNodes()) {
+//			for (SAnnotation a : n.getAnnotations()) {
+//				if (a.getName().equals(oldRef)) {
+//					a.setName(newRef);
+//				}
+//				else if (a.getName().equals(oldSubref)) {
+//					a.setName(newSubref);
+//				}
+//				else if (a.getName().equals(oldTx)) {
+//					a.setName(newTx);
+//				}
+//				else if (a.getName().equals(oldMb)) {
+//					a.setName(newMb);
+//				}
+//			}
+//		}
+//		for (SSpan s : graph.getSpans()) {
+//			if (s.getName().equals(oldRef)) {
+//				s.setName(newRef);
+//			}
+//			else if (s.getName().equals(oldSubref)) {
+//				s.setName(newSubref);
+//			}
+//			else if (s.getName().equals(oldTx)) {
+//				s.setName(newTx);
+//			}
+//			else if (s.getName().equals(oldMb)) {
+//				s.setName(newMb);
+//			}
+//		}
+////		for (Label lb : graph.getLabels()) {
+////			if (lb.getName().equals(anObject))
+////		}
+//		
+//	}
 
 	/**
 	 * {@inheritDoc PepperMapper#setCorpus(SCorpus)}

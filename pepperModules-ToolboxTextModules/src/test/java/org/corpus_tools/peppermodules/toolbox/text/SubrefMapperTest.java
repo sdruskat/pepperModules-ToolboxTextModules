@@ -22,6 +22,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.util.HashMap;
+
 import org.apache.commons.lang3.Range;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition;
@@ -48,7 +50,7 @@ public class SubrefMapperTest {
 	@Before
 	public void setUp() throws Exception {
 		ToolboxTextImporterProperties props = setProperties("subref.properties");
-		SubrefMapper subrefMapper = new SubrefMapper(props, null, null, null, null, null, true);
+		SubrefMapper subrefMapper = new SubrefMapper(new HashMap<String, String>(), props, null, null, null, null, null, true);
 		setFixture(subrefMapper);
 	}
 	
