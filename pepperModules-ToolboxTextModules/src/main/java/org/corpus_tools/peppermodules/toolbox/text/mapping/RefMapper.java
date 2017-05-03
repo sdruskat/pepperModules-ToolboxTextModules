@@ -373,8 +373,9 @@ public class RefMapper extends AbstractBlockMapper {
 							key = markerMap.get(key);
 						}
 						else if (split.length == 2 && (split[0].equals(properties.getRefMarker()) || split[0].equals(properties.getSubrefDefinitionMarker()) || split[0].equals(properties.getLexMarker()) || split[0].equals(properties.getMorphMarker()))) {
-							((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, markerMap.get(split[0]).concat("-").concat(split[1]), sb.toString().trim());
+							key = markerMap.get(split[0]).concat("-").concat(split[1]);
 						}
+						((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, key, sb.toString().trim());
 					}
 					else {
 						if (hasLiaisonDelimiter && annotation.getValue().get(i).startsWith(properties.getLiaisonDelim())) {
@@ -459,8 +460,16 @@ public class RefMapper extends AbstractBlockMapper {
 		}
 		if (properties.recordErrors()) {
 			for (Entry<String, List<String>> error : errors.entrySet()) {
-				refData.addAnnotation(error.getKey(), error.getValue());
-				refData.addToAnnotation(ERROR_LAYER_NAME, error.getKey());
+				String key = error.getKey();
+				String[] split = key.split("-");
+				if (key.equals(properties.getRefMarker()) || key.equals(properties.getSubrefDefinitionMarker()) || key.equals(properties.getLexMarker()) || key.equals(properties.getMorphMarker())) {
+					key = markerMap.get(key);
+				}
+				else if (split.length == 2 && (split[0].equals(properties.getRefMarker()) || split[0].equals(properties.getSubrefDefinitionMarker()) || split[0].equals(properties.getLexMarker()) || split[0].equals(properties.getMorphMarker()))) {
+					key = markerMap.get(split[0]).concat("-").concat(split[1]);
+				}
+				refData.addAnnotation(key, error.getValue());
+				refData.addToAnnotation(ERROR_LAYER_NAME, key);
 			}
 		}
 	}
@@ -564,8 +573,16 @@ public class RefMapper extends AbstractBlockMapper {
 		}
 		if (properties.recordErrors()) {
 			for (Entry<String, List<String>> error : errors.entrySet()) {
-				refData.addAnnotation(error.getKey(), error.getValue());
-				refData.addToAnnotation(ERROR_LAYER_NAME, error.getKey());
+				String key = error.getKey();
+				String[] split = key.split("-");
+				if (key.equals(properties.getRefMarker()) || key.equals(properties.getSubrefDefinitionMarker()) || key.equals(properties.getLexMarker()) || key.equals(properties.getMorphMarker())) {
+					key = markerMap.get(key);
+				}
+				else if (split.length == 2 && (split[0].equals(properties.getRefMarker()) || split[0].equals(properties.getSubrefDefinitionMarker()) || split[0].equals(properties.getLexMarker()) || split[0].equals(properties.getMorphMarker()))) {
+					key = markerMap.get(split[0]).concat("-").concat(split[1]);
+				}
+				refData.addAnnotation(key, error.getValue());
+				refData.addToAnnotation(ERROR_LAYER_NAME, key);
 			}
 		}
 		/*

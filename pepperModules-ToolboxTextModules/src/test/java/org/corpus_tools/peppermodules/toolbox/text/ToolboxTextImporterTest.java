@@ -1820,6 +1820,92 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::ref").getValue_STEXT(), is("Reference no. 1"));
 		assertThat(graph.getNodesByName("subref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
 	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where the markers should be normalized back to defaults
+	 */
+	@Test
+	public void testNormalizeMarkersTrueErr() {
+		setTestFile("normalized-markers-err.txt");
+		setProperties("normalized-markers.properties");
+		start();
+		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
+		assertThat(graph.getTextualDSs().size(), is(2));
+		boolean containsDS = false;
+		for (SNode n : graph.getLayerByName("tx").get(0).getNodes()) {
+			if (n instanceof STextualDS) {
+				containsDS = true;
+				assertThat(((STextualDS) n).getText(), is ("One Two Three Four"));
+			}
+		}
+		assertThat(containsDS, is(true));
+		containsDS = false;
+		for (SNode n : graph.getLayerByName("mb").get(0).getNodes()) {
+			if (n instanceof STextualDS) {
+				containsDS = true;
+				assertThat(((STextualDS) n).getText(), is ("m1-m2m3m4-m5m6"));
+			}
+		}
+		for (SToken t : graph.getTokens()) {
+			assertThat(t.getLayers().size(), is(1));
+			assertThat(t.getLayers().iterator().next().getName(), anyOf(is("tx"), is("mb")));
+		}
+		assertTrue(containsDS);
+		assertThat(graph.getDocument().getName(), is("Document no. 1"));
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::ref").getValue_STEXT(), is("Reference no. 1"));
+		assertThat(graph.getNodesByName("subref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
+		SSpan ref = (SSpan) graph.getNodesByName("Reference no. 1").get(0);
+		assertNotNull(ref.getAnnotation("toolbox::err"));
+		assertThat(ref.getAnnotation("toolbox::err").getValue_STEXT(), is("mb-p"));
+		assertNotNull(ref.getAnnotation("toolbox::mb-p"));
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where the markers should be normalized back to defaults
+	 */
+	@Test
+	public void testNormalizeMarkersTrueAnnoErr() {
+		setTestFile("normalized-markers-annoerr.txt");
+		setProperties("normalized-markers.properties");
+		start();
+		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
+		assertThat(graph.getTextualDSs().size(), is(2));
+		boolean containsDS = false;
+		for (SNode n : graph.getLayerByName("tx").get(0).getNodes()) {
+			if (n instanceof STextualDS) {
+				containsDS = true;
+				assertThat(((STextualDS) n).getText(), is ("One Two Three Four"));
+			}
+		}
+		assertThat(containsDS, is(true));
+		containsDS = false;
+		for (SNode n : graph.getLayerByName("mb").get(0).getNodes()) {
+			if (n instanceof STextualDS) {
+				containsDS = true;
+				assertThat(((STextualDS) n).getText(), is ("m1-m2m3m4-m5m6"));
+			}
+		}
+		for (SToken t : graph.getTokens()) {
+			assertThat(t.getLayers().size(), is(1));
+			assertThat(t.getLayers().iterator().next().getName(), anyOf(is("tx"), is("mb")));
+		}
+		assertTrue(containsDS);
+		assertThat(graph.getDocument().getName(), is("Document no. 1"));
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::ref").getValue_STEXT(), is("Reference no. 1"));
+		assertThat(graph.getNodesByName("subref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
+		SSpan ref = (SSpan) graph.getNodesByName("Reference no. 1").get(0);
+		assertNotNull(ref.getAnnotation("toolbox::err"));
+		assertThat(ref.getAnnotation("toolbox::err").getValue_STEXT(), is("ge-m"));
+		assertNotNull(ref.getAnnotation("toolbox::ge-m"));
+	}
 
 	/**
 	 * Test method for
@@ -1858,6 +1944,92 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(graph.getSpans().size(), is(2));
 		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::fer").getValue_STEXT(), is("Reference no. 1"));
 		assertThat(graph.getNodesByName("customref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where the markers should *not* be normalized back to defaults
+	 */
+	@Test
+	public void testNormalizeMarkersDefaultWithErrors() {
+		setTestFile("unnormalized-markers-err.txt");
+		setProperties("unnormalized-markers.properties");
+		start();
+		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
+		assertThat(graph.getTextualDSs().size(), is(2));
+		boolean containsDS = false;
+		for (SNode n : graph.getLayerByName("xt").get(0).getNodes()) {
+			if (n instanceof STextualDS) {
+				containsDS = true;
+				assertThat(((STextualDS) n).getText(), is ("One Two Three Four"));
+			}
+		}
+		assertThat(containsDS, is(true));
+		containsDS = false;
+		for (SNode n : graph.getLayerByName("bm").get(0).getNodes()) {
+			if (n instanceof STextualDS) {
+				containsDS = true;
+				assertThat(((STextualDS) n).getText(), is ("m1-m2m3m4-m5m6"));
+			}
+		}
+		for (SToken t : graph.getTokens()) {
+			assertThat(t.getLayers().size(), is(1));
+			assertThat(t.getLayers().iterator().next().getName(), anyOf(is("xt"), is("bm")));
+		}
+		assertTrue(containsDS);
+		assertThat(graph.getDocument().getName(), is("Document no. 1"));
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::fer").getValue_STEXT(), is("Reference no. 1"));
+		assertThat(graph.getNodesByName("customref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
+		SSpan ref = (SSpan) graph.getNodesByName("Reference no. 1").get(0);
+		assertNotNull(ref.getAnnotation("toolbox::err"));
+		assertThat(ref.getAnnotation("toolbox::err").getValue_STEXT(), is("bm-p"));
+		assertNotNull(ref.getAnnotation("toolbox::bm-p"));
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a minimum example, where the markers should *not* be normalized back to defaults
+	 */
+	@Test
+	public void testNormalizeMarkersDefaultWithAnnoErrors() {
+		setTestFile("unnormalized-markers-annoerr.txt");
+		setProperties("unnormalized-markers.properties");
+		start();
+		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
+		assertThat(graph.getTextualDSs().size(), is(2));
+		boolean containsDS = false;
+		for (SNode n : graph.getLayerByName("xt").get(0).getNodes()) {
+			if (n instanceof STextualDS) {
+				containsDS = true;
+				assertThat(((STextualDS) n).getText(), is ("One Two Three Four"));
+			}
+		}
+		assertThat(containsDS, is(true));
+		containsDS = false;
+		for (SNode n : graph.getLayerByName("bm").get(0).getNodes()) {
+			if (n instanceof STextualDS) {
+				containsDS = true;
+				assertThat(((STextualDS) n).getText(), is ("m1-m2m3m4-m5m6"));
+			}
+		}
+		for (SToken t : graph.getTokens()) {
+			assertThat(t.getLayers().size(), is(1));
+			assertThat(t.getLayers().iterator().next().getName(), anyOf(is("xt"), is("bm")));
+		}
+		assertTrue(containsDS);
+		assertThat(graph.getDocument().getName(), is("Document no. 1"));
+		assertThat(graph.getSpans().size(), is(2));
+		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::fer").getValue_STEXT(), is("Reference no. 1"));
+		assertThat(graph.getNodesByName("customref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
+		SSpan ref = (SSpan) graph.getNodesByName("Reference no. 1").get(0);
+		assertNotNull(ref.getAnnotation("toolbox::err"));
+		assertThat(ref.getAnnotation("toolbox::err").getValue_STEXT(), is("ge-m"));
+		assertNotNull(ref.getAnnotation("toolbox::ge-m"));
 	}
 
 	/**
