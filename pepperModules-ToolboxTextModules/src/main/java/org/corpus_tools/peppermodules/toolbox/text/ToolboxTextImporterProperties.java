@@ -235,8 +235,8 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * of token layer they refer to will, respectively, be concatenated to the last element
 	 * on their line, and separated by whitespaces.
 	 * 
-	 * **NOTE:** If the property is set to `false`, unfixed interl11n errors amy
-	 * cause an exception during be thrown during runtime!
+	 * **NOTE:** If the property is set to `false`, unfixed interl11n errors may
+	 * cause an exception to be thrown during runtime!
 	 */
 	private static final String PROP_FIX_INTERL11N = "fixInterl11n";
 
