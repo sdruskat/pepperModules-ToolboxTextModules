@@ -52,7 +52,9 @@ import org.eclipse.emf.common.util.URI;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
+import org.mockito.Captor;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Logger;
@@ -75,6 +77,9 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	private Logger rootLogger;
 	@SuppressWarnings("rawtypes")
 	private Appender mockAppender;
+	
+	@Captor
+	private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
 	/**
 	 * @throws java.lang.Exception
@@ -1256,6 +1261,29 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(srNode2.getLayers().size(), is(1));
 		assertThat(srNode2.getLayers().iterator().next().getName(), is("mb"));
 	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#IDENTIFIED_GLOBAL}.
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSubRefIDENTIFIED_GLOBAL_MB_DUPLICATE_ANNO() {
+		setTestFile("subref_IDENTIFIED_GLOBAL_DUPLICATE_ANNOTATION.txt");
+		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		start();
+
+		verify(mockAppender).doAppend(argThat(new ArgumentMatcher<Object>() {
+			@Override
+			public boolean matches(final Object argument) {
+				return ((LoggingEvent) argument).getFormattedMessage().contains(
+						"Duplicate annotation in 'Document_no__1'-'subref sentence schema 3 (defined global) to mb'! There already exists an annotation with the key \"sr\". This might be an error in the source data. If it is not, please file a bug report.");
+			}
+		}));
+	}
+	
 	
 	/**
 	 * Test method for
