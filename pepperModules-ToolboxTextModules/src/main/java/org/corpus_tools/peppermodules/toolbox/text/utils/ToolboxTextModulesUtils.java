@@ -20,10 +20,10 @@
 package org.corpus_tools.peppermodules.toolbox.text.utils;
 
 /**
- * TODO Description
+ * // TODO Add description
  *
- * @author Stephan Druskat
- *
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
+ * 
  */
 public class ToolboxTextModulesUtils {
 	

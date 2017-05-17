@@ -43,6 +43,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Range;
 
+/**
+ * // TODO Add description
+ *
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
+ * 
+ */
 @Component(name = "ToolboxTextImporterComponent", factory = "PepperImporterComponentFactory")
 public class ToolboxTextImporter extends PepperImporterImpl implements PepperImporter {
 
@@ -281,11 +287,11 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	}
 
 	/**
-		 * TODO Description
-		 *
-		 * @author Stephan Druskat
-		 *
-		 */
+	 * // TODO Add description
+	 *
+	 * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
+	 * 
+	 */
 	private class ToolboxParseBean {
 	
 		private final List<Long> idOffsets;

@@ -45,11 +45,11 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 
 /**
- * TODO Description
+ * // TODO Add description
  * Subrefs are described here: [MelaTAMP wiki](https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation).
  *
- * @author Stephan Druskat
- *
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
+ * 
  */
 public class SubrefMapper extends AbstractToolboxTextMapper {
 	

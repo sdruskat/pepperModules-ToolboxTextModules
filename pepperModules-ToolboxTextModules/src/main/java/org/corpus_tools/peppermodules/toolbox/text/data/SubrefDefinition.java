@@ -24,18 +24,17 @@ import java.util.List;
 import org.apache.commons.lang3.Range;
 
 /**
- * TODO Description
+ * // TODO Add description
  *
- * @author Stephan Druskat
- *
+ * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  */
 public class SubrefDefinition {
 
 	/**
-	 * TODO Description
+	 * // TODO Add description
 	 *
-	 * @author Stephan Druskat
-	 *
+	 * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
+	 * 
 	 */
 	public enum SUBREF_TYPE {
 		SIMPLE, SIMPLE_TARGETED, UNIDENTIFIED_GLOBAL, UNIDENTIFIED_GLOBAL_TARGETED, IDENTIFIED_GLOBAL, IDENTIFIED_GLOBAL_TARGETED, DISCONTINUOUS_TARGETED, FULL_REF_ANNOTATION
