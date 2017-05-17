@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright 2016 Humboldt-Universität zu Berlin
+ * Copyright (c) 2017 Stephan Druskat
+ * Exploitation rights belong exclusively to Humboldt-Universität zu Berlin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +20,6 @@
 package org.corpus_tools.peppermodules.toolbox.text;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -275,84 +273,12 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	}
 
 	/**
-	 * Extracts orphaned \refs by streaming the input file from offset to offset
-	 * for recorded \ref orphans taken from the parameter list (or the next \id
-	 * or EOF in case of the last orphaned \ref offset in the list), and
-	 * building them into a string that will be logged at level warn (which in
-	 * Pepper versions >= 3.1 will append a separate file containing war-level
-	 * logs only).
-	 *
 	 * @param orphanRefOffsets
+	 * @param file
 	 */
 	private void warnAboutOrphanRefs(List<Long> orphanRefOffsets, File file) {
-		// FIXME Change to one-line logging message
-		StringBuilder warningBuilder = new StringBuilder("====================================================\n" + "================= W A R N I N G ! ==================\n" + "====================================================\n" + file.getName() + ":\nFound \\refs that do not belong to any \\ids!\n" + "The following orphaned \\refs will not be processed:\n\n" + "====================================================\n");
-		for (Long orphanRefOffset : orphanRefOffsets) {
-			int offsetIndex = orphanRefOffsets.indexOf(orphanRefOffset);
-			Long nextOffset = null;
-			if (orphanRefOffsets.size() == offsetIndex + 1) {
-				// offsetIndex is the last index in the list, so leave
-				// nextOffset == null
-			} else {
-				nextOffset = orphanRefOffsets.get(offsetIndex + 1);
-			}
-			try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-				if (nextOffset != null) {
-					// Read until the next offset and append text to warning
-					// message
-					byte[] buf = new byte[nextOffset.intValue() - orphanRefOffset.intValue()];
-					raf.seek(orphanRefOffset);
-					raf.readFully(buf);
-					String readRef = new String(buf, StandardCharsets.UTF_8);
-					warningBuilder.append(readRef + "====================================================\n");
-				} else {
-					// Read until the next instance of \id (or EOF) and append
-					// text to warning message
-					raf.seek(orphanRefOffset);
-					String line, marker;
-					while ((line = raf.readLine()) != null) {
-						if (!line.trim().isEmpty()) {
-							// Extract the marker from the line and check
-							// whether it is an \id marker
-							marker = line.split("\\s+")[0].trim().substring(1);
-							if (!(marker.equals(getProperties().getIdMarker()))) {
-								// Append line to warning message
-								warningBuilder.append(line + "\n");
-							} else {
-								break;
-							}
-						}
-					}
-				}
-			} catch (IOException e) {
-				throw new PepperModuleException("Could not read file " + file.getAbsolutePath() + "!", e);
-			}
-		}
-		// Log warning
-		logger.warn(warningBuilder.toString() + "====================================================\n====================================================\n====================================================\n");
+		logger.warn(file.getName() + ": Found \\refs that do not belong to any \\ids! Those will not be processed.");
 	}
-
-//	/**
-//	 * @return the headerEndOffset
-//	 */
-//	public Long getHeaderEndOffset() {
-//		return headerEndOffset;
-//	}
-//
-//	/**
-//	 * @return the monolithic
-//	 */
-//	boolean isMonolithic() {
-//		return monolithic;
-//	}
-//
-//	/**
-//	 * @param monolithic
-//	 *            the monolithic to set
-//	 */
-//	private void setMonolithic(boolean monolithic) {
-//		this.monolithic = monolithic;
-//	}
 
 	/**
 		 * TODO Description

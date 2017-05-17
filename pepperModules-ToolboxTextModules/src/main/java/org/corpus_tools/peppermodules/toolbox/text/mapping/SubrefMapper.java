@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright 2016 Humboldt-Universität zu Berlin
+ * Copyright (c) 2017 Stephan Druskat
+ * Exploitation rights belong exclusively to Humboldt-Universität zu Berlin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,8 +103,6 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 
 	/**
 	 * TODO: Description
-	 * FIXME: Write unit tests for:
-	 * - Illegal subref definition
 	 */
 	public void map() {
 		boolean mapGlobal = false;
@@ -124,7 +123,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 					 * is implicitly illegal, as there can only be exactly one
 					 * subref of either of these types in one ref.
 					 */
-					log.warn("Illegal subref definition in ref {}, document {}!\nThere can only be exactly one unidentified global subref definition per ref! Cancelling definition overwrite.",
+					log.warn("Illegal subref definition in ref '{}', document '{}'!\nThere can only be exactly one unidentified global subref definition per ref! Cancelling definition overwrite.",
 							refData.getRef(), refData.getDocName());
 					subrefMap.put(previous.getIdentifier(), previous);
 				}

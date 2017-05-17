@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright 2016 Humboldt-Universität zu Berlin
+ * Copyright (c) 2017 Stephan Druskat
+ * Exploitation rights belong exclusively to Humboldt-Universität zu Berlin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -767,6 +768,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertEquals("Info on ORID2", getDocument("ORPHANID2").getMetaAnnotations().iterator().next().getValue_STEXT());
 		assertEquals(0, getGraph("ORPHANID2").getTokens().size());
 		assertEquals(0, getGraph("ORPHANID2").getSpans().size());
+		checkLog("orphan-ids-and-refs.txt: Found \\refs that do not belong to any \\ids! Those will not be processed.", Level.WARN);
 	}
 	
 	/**
@@ -1112,6 +1114,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(srNode.getAnnotation("toolbox::sr2").getValue_STEXT(), is("UNIDENTIFIED_GLOBAL m23-m26"));
 		assertThat(srNode.getLayers().size(), is(1));
 		assertThat(srNode.getLayers().iterator().next().getName(), is("mb"));
+		checkLog("Illegal subref definition in ref 'subref sentence schema 2 (undefined global) with existing mb line and a mixture of other subref definitions', document 'Document_no__1'!\nThere can only be exactly one unidentified global subref definition per ref! Cancelling definition overwrite.", Level.WARN);
 	}
 
 	/**
