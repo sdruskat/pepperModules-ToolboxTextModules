@@ -36,7 +36,6 @@ import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
-import org.corpus_tools.salt.exceptions.SaltInsertionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,23 +218,23 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			}
 			ranges:
 			for (Range<Integer> range : definition.getRanges()) {
-				try {
-					subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));	
-				}
-				catch (IndexOutOfBoundsException e) {
+				if (orderedTokens.size() < range.getMaximum() + 1) {
 					log.warn("Subref {} in segment \'{}\' in document \"{}\" could not be resolved, as one or more subref token indices were outside of the range of token indices.\nNote that this may be due to earlier modification of the ref (excess tokens, etc.).\nTherefore please check previous warnings for this ref.\nIgnoring subref, please fix the source data.", range.getMinimum() + "-" + range.getMaximum(), refData.getRef(), refData.getDocName());
 					continue ranges;
+				}
+				else {
+					subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));	
 				}
 			}
 			if (subrefTokens.isEmpty()) {
 				continue subrefannotationlines;
 			}
 			subref = getSubrefSpan(subrefTokens);
-			try {
-				subref.createAnnotation("toolbox", annoKey, annoValue);
-			}
-			catch (SaltInsertionException e) {
+			if (subref.getAnnotation("toolbox::" + annoKey) != null) {
 				log.warn("Duplicate annotation in '{}'-'{}'! There already exists an annotation with the key \"{}\". This might be an error in the source data. If it is not, please file a bug report.", refData.getDocName(), refData.getRef(), annoKey);
+			}
+			else {
+				subref.createAnnotation("toolbox", annoKey, annoValue);
 			}
 			SLayer layer = graph.getLayerByName(mapToMorphTokens ? markerMap.get(morphMarker) : markerMap.get(lexMarker)).get(0);
 			layer.addNode(subref);

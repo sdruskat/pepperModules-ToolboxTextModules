@@ -346,7 +346,7 @@ public class RefMapper extends AbstractBlockMapper {
 			for (int i = 0; i < nodes.size(); i++) {
 				Object node = nodes.get(i);
 				if (!(node instanceof SNode)) {
-					throw new PepperModuleException("Cannot add an annotation to an object that is not of type " + SNode.class.getSimpleName() + " (here: " + node.getClass().getName() + ")!");
+					log.warn("Cannot add an annotation to an object that is not of type " + SNode.class.getSimpleName() + " (here: " + node.getClass().getName() + ")! Skipping the annotation.");
 				}
 				else {
 					String annotationValue = null;
