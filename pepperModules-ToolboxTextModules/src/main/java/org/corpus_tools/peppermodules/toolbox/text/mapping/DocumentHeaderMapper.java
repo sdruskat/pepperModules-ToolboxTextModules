@@ -70,7 +70,9 @@ public class DocumentHeaderMapper extends AbstractBlockMapper {
 					String d4 = d3.replaceAll(":", "_");
 					String d5 = d4.replaceAll(",", "_");
 					String d6 = d5.replaceAll("-", "_");
-					name = d6;
+					String d7 = d6.replaceAll("(", "");
+					String d8 = d7.replaceAll(")", "");
+					name = d8;
 				}
 				graph.getDocument().setName(name);
 			}
