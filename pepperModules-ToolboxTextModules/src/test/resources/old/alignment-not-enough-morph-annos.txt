@@ -1,7 +1,0 @@
-\_sh v3.0 Test
-\info Some Info
-
-\ref Missing morphological annotations
-\tx Wort Kompositum Wort
-\mb m1   m2     	m3
-\ge M1   M2 

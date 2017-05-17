@@ -1,6 +1,0 @@
-\_sh v3.0 Test
-\info Some Info
-
-\ref More morphological units than lexical ones
-\tx Wort Kompositum Wort
-\mb m1   m2     -m3 m4   m5
