@@ -290,7 +290,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			}
 			orderedTokens = graph.getSortedTokenByText(mapToMorphTokens ? morphTokens : lexTokens);
 			if (orderedTokens.size() < range.getMaximum()) {
-				log.debug("The maximum of subref range {}..{} in document '{}', reference '{}' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", range.getMinimum(), range.getMaximum() - 1, refData.getDocName(), refData.getRef());
+				log.warn("The maximum of subref range {}..{} in document '{}', reference '{}' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", range.getMinimum(), range.getMaximum() - 1, refData.getDocName(), refData.getRef());
 				continue subrefannotationlines;
 			}
 			else {
@@ -361,12 +361,12 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			}
 		}
 		orderedTokens = mapToMorphTokens ? graph.getSortedTokenByText(morphTokens) : graph.getSortedTokenByText(lexTokens);
-		try {
-			subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));
-		}
-		catch (IndexOutOfBoundsException e) {
+		if (orderedTokens.size() < range.getMaximum() + 1) {
 			log.warn("Document '{}', reference '{}': The indices defined in the global subdef are outside of the index range of the target tokens. Please fix the source data! Ignoring this subref ...", refData.getDocName(), refData.getRef());
 			return;
+		}
+		else {
+			subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum() + 1));
 		}
 		subref = getSubrefSpan(subrefTokens);
 		for (Entry<String, String> anno : subrefAnnoLines.entries()) {
