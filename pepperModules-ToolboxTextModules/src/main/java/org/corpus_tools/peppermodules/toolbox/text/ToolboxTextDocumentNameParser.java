@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.regex.Pattern;
 
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.slf4j.Logger;
@@ -63,8 +64,8 @@ class ToolboxTextDocumentNameParser {
 					String d4 = d3.replaceAll(":", "_");
 					String d5 = d4.replaceAll(",", "_");
 					String d6 = d5.replaceAll("-", "_");
-					String d7 = d6.replaceAll("(", "");
-					String d8 = d7.replaceAll(")", "");
+					String d7 = d6.replaceAll(Pattern.quote("("), "");
+					String d8 = d7.replaceAll(Pattern.quote(")"), "");
 					documentName = d8;
 				}
 			}

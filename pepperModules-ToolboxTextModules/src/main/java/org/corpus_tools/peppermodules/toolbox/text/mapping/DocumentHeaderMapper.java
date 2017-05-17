@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
+import java.util.regex.Pattern;
+
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
@@ -70,8 +72,8 @@ public class DocumentHeaderMapper extends AbstractBlockMapper {
 					String d4 = d3.replaceAll(":", "_");
 					String d5 = d4.replaceAll(",", "_");
 					String d6 = d5.replaceAll("-", "_");
-					String d7 = d6.replaceAll("(", "");
-					String d8 = d7.replaceAll(")", "");
+					String d7 = d6.replaceAll(Pattern.quote("("), "");
+					String d8 = d7.replaceAll(Pattern.quote(")"), "");
 					name = d8;
 				}
 				graph.getDocument().setName(name);
