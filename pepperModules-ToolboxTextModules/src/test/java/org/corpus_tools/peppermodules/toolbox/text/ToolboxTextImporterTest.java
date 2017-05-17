@@ -57,6 +57,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
@@ -98,7 +99,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	    mockAppender = mock(Appender.class);
 	    when(mockAppender.getName()).thenReturn("MOCK");
 	    rootLogger.addAppender(mockAppender);
-
+	    rootLogger.setLevel(Level.WARN);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -167,7 +168,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			assertEquals(0, graph.getTokens().size());
 			assertEquals(0, graph.getSpans().size());
 		}
-		assertEquals(0, getDocument("ID4 (no further info)").getMetaAnnotations().size());
+		assertEquals(0, getDocument("ID4_(no_further_info)").getMetaAnnotations().size());
 		assertEquals(1, getDocument("ID1").getMetaAnnotations().size());
 		assertEquals(1, getDocument("ID2").getMetaAnnotations().size());
 		assertEquals(1, getDocument("ID3").getMetaAnnotations().size());
@@ -855,7 +856,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		setProperties("test-mixed-with-without-mb.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
-		SDocumentGraph graph = getGraph("Document no. 1");
+		SDocumentGraph graph = getGraph("Document_no__1");
 		assertEquals(2, graph.getTextualDSs().size());
 		assertEquals("Word1 Word2 Word3 Word4 Word5 Word6", graph.getTextualDSs().get(0).getText());
 		assertEquals("m1m2m5m6", graph.getTextualDSs().get(1).getText());
@@ -878,7 +879,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		setTestFile("lines-without-annotation.txt");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
-		SDocumentGraph graph = getGraph("Document no. 1");
+		SDocumentGraph graph = getGraph("Document_no__1");
 		SAnnotation geAnno = graph.getAnnotation("toolbox::ge");
 		assertNull((geAnno));
 	}
@@ -911,6 +912,21 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(subref.getAnnotations().iterator().next().getValue_STEXT(), is("SIMPLE m2-m3"));
 		assertThat(subref.getLayers().size(), is(1));
 		assertThat(subref.getLayers().iterator().next().getName(), is("mb"));
+	}
+	
+	/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#SIMPLE}.
+	 */
+	@Test
+	public void testSubRefSIMPLE_NO_ANNOTATION_VALUE() {
+		rootLogger.setLevel(Level.DEBUG);
+		setTestFile("subref_SIMPLE_NO_ANNOTATION_VALUE.txt");
+		setProperties("subref_SIMPLE.properties");
+		start();
+		checkLog("No value for annotation with key \"sr\" in document 'Document_no__1', reference 'subref sentence schema 1 (line-level) with no defined target line'. Ignoring ...", Level.DEBUG);
 	}
 	
 	/**
@@ -1268,20 +1284,12 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * 
 	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#IDENTIFIED_GLOBAL}.
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testSubRefIDENTIFIED_GLOBAL_MB_DUPLICATE_ANNO() {
 		setTestFile("subref_IDENTIFIED_GLOBAL_DUPLICATE_ANNOTATION.txt");
 		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
-
-		verify(mockAppender).doAppend(argThat(new ArgumentMatcher<Object>() {
-			@Override
-			public boolean matches(final Object argument) {
-				return ((LoggingEvent) argument).getFormattedMessage().contains(
-						"Duplicate annotation in 'Document_no__1'-'subref sentence schema 3 (defined global) to mb'! There already exists an annotation with the key \"sr\". This might be an error in the source data. If it is not, please file a bug report.");
-			}
-		}));
+		checkLog("Duplicate annotation in 'Document_no__1'-'subref sentence schema 3 (defined global) to mb'! There already exists an annotation with the key \"sr\". This might be an error in the source data. If it is not, please file a bug report.", Level.WARN);
 	}
 	
 	
@@ -1882,7 +1890,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			assertThat(t.getLayers().iterator().next().getName(), anyOf(is("tx"), is("mb")));
 		}
 		assertTrue(containsDS);
-		assertThat(graph.getDocument().getName(), is("Document no. 1"));
+		assertThat(graph.getDocument().getName(), is("Document_no__1"));
 		assertThat(graph.getSpans().size(), is(2));
 		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::ref").getValue_STEXT(), is("Reference no. 1"));
 		assertThat(graph.getNodesByName("subref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
@@ -2262,8 +2270,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			}
 		}
 		assertThat(spancount, is(1));
-		checkLog("Subref 4-10 in segment 'Testref' in document \"4\" could not be resolved, as one or more subref token indices were outside of the range of token indices.");
-		checkLog("Subref 6-7 in segment 'Testref' in document \"4\" could not be resolved, as one or more subref token indices were outside of the range of token indices.");
+		checkLog("Subref 4-10 in segment 'Testref' in document \"4\" could not be resolved, as one or more subref token indices were outside of the range of token indices.", Level.WARN);
+		checkLog("Subref 6-7 in segment 'Testref' in document \"4\" could not be resolved, as one or more subref token indices were outside of the range of token indices.", Level.WARN);
 	}
 	
 	/**
@@ -2299,8 +2307,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			}
 		}
 		assertThat(spancount, is(2));
-		checkLog("Subref 4-10 in segment 'Test ref' in document \"5\" could not be resolved, as one or more subref token indices were outside of the range of token indices.");
-		checkLog("Subref 11-19 in segment 'Test ref' in document \"5\" could not be resolved, as one or more subref token indices were outside of the range of token indices.");
+		checkLog("Subref 4-10 in segment 'Test ref' in document \"5\" could not be resolved, as one or more subref token indices were outside of the range of token indices.", Level.WARN);
+		checkLog("Subref 11-19 in segment 'Test ref' in document \"5\" could not be resolved, as one or more subref token indices were outside of the range of token indices.", Level.WARN);
 	}
 	
 	/**
@@ -2333,7 +2341,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			}
 		}
 		assertThat(spancount, is(0));
-		checkLog("Document '6', reference 'Test ref x': The indices defined in the global subdef are outside of the index range of the target tokens. Please fix the source data! Ignoring this subref ...");
+		checkLog("Document '6', reference 'Test ref x': The indices defined in the global subdef are outside of the index range of the target tokens. Please fix the source data! Ignoring this subref ...", Level.WARN);
 	}
 	
 	/**
@@ -2379,8 +2387,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			}
 		}
 		assertThat(spancount, is(1));
-		checkLog("The maximum of subref range 9..10 in document '7', reference 'Test ref y' is larger than the highest token index. Please fix source data! Ignoring this annotation ...");
-		checkLog("The maximum of subref range 13..19 in document '7', reference 'Test ref y' is larger than the highest token index. Please fix source data! Ignoring this annotation ...");
+		checkLog("The maximum of subref range 9..10 in document '7', reference 'Test ref y' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", Level.WARN);
+		checkLog("The maximum of subref range 13..19 in document '7', reference 'Test ref y' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", Level.WARN);
 	}
 
 	/**
@@ -2390,11 +2398,16 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void checkLog(final String string) {
+	private void checkLog(final String string, final Level level) {
 		verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
 		      @Override
 		      public boolean matches(final Object argument) {
-		        return ((LoggingEvent) argument).getFormattedMessage().contains(string);
+		    	  if (level == null) {
+		    		  return ((LoggingEvent) argument).getFormattedMessage().contains(string);
+		    	  }
+		    	  else {
+		    		  return ((LoggingEvent) argument).getFormattedMessage().contains(string) && ((LoggingEvent) argument).getLevel().equals(level);
+		    	  }
 		      }
 		    }));
 	}

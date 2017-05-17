@@ -271,12 +271,13 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 					// SUBREF_TYPE.SIMPLE
 					mapToMorphTokens = refHasMorphology;
 					range = Range.between(Integer.parseInt(typeSplit[0]), Integer.parseInt(typeSplit[1]) + 1);
-					try {
-						annoValue = anno.getValue().split("\\s+", 3)[2];
-					}
-					catch (Exception e) {
+					String[] split = anno.getValue().split("\\s+", 3);
+					if (split.length < 3) {
 						log.debug("No value for annotation with key \"{}\" in document '{}', reference '{}'. Ignoring ...", anno.getKey(), refData.getDocName(), refData.getRef());
 						continue subrefannotationlines;
+					}
+					else {
+						annoValue = split[2];
 					}
 				}
 				else {
@@ -292,7 +293,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 				subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum()));
 			}
 			catch (Exception e) {
-				log.warn("The maximum of subref range {}..{} in document '{}', reference '{}' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", range.getMinimum(), range.getMaximum() - 1, refData.getDocName(), refData.getRef());
+				log.debug("The maximum of subref range {}..{} in document '{}', reference '{}' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", range.getMinimum(), range.getMaximum() - 1, refData.getDocName(), refData.getRef());
 				continue subrefannotationlines;
 			}
 			if (subrefTokens.isEmpty()) {
