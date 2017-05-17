@@ -200,7 +200,6 @@ public class RefMapper extends AbstractBlockMapper {
 
 	/**
 	 * TODO: Description
-	 * FIXME: Declare why spans are always over lex tokens!
 	 *
 	 * @param refData
 	 * @param lexTokens 

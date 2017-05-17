@@ -124,19 +124,7 @@ class ToolboxTextSegmentationParser {
 				idStructureMap.put(lastOffset, hasMorphology);
 			}
 			else {
-//				if (idStructureMap != null && refMap != null && refMap.get(-1L) != null && refMap.get(-1L).get(0) != null) {
-					idStructureMap.put(refMap.get(-1L).get(0), hasMorphology);
-//				}
-//				else {
-//					/* FIXME: Check why orphan refs lead to idStructureMap being null!
-//					 * Cf.
-//					 * daakie-toolbox-transcriptions.txt:
-//					 * Found \refs that do not belong to any \ids!
-//					 * The following orphaned \refs will not be processed:
-//					 * \ref SmTkWell 001 
-//					 */
-//					log.error("[INTERNAL] idStructureMap or refMap or refMap contents or something else is null, trying to ignore and soldier on.");
-//				}
+				idStructureMap.put(refMap.get(-1L).get(0), hasMorphology);
 			}
 		} catch (IOException e) {
 			throw new PepperModuleException("Could not read corpus file " + file.getAbsolutePath(), e);
