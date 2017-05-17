@@ -70,7 +70,7 @@ import static org.mockito.Mockito.*;
 public class ToolboxTextImporterTest extends PepperImporterTest {
 	
 	private static final String DOC_INFO_ANNO = "A sample \"standard\" corpus in Toolbox text format. It includes use cases for most phenomena the importer tests against, such as clitics and affixes, subrefs, meta annotations, etc.";
-	private static final String DOC_NO = "Document no. ";
+	private static final String DOC_NO = "Document_no__";
 	private static final String TOOLBOX = "toolbox";
 	private Logger rootLogger;
 	@SuppressWarnings("rawtypes")
