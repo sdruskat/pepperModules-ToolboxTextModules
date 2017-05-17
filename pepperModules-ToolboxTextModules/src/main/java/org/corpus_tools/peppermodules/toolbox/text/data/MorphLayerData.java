@@ -167,7 +167,10 @@ public class MorphLayerData extends LayerData {
 						// Process annotations accordingly
 						for (Entry<String, List<String>> anno : getAnnotations().entries()) {
 							String delimValue = null;
-							try {
+							if (index >= anno.getValue().size()) {
+								log.warn("Mismatch between no. of morphemes and no. of annotations on layer \"" + anno.getKey() + "\" in document \"" + getDocName() + "\", reference \"" + getRef() + "\". Ignoring annotation.");
+							}
+							else {
 								delimValue = anno.getValue().get(index);
 								if (delimValue.equals(affix) || delimValue.equals(clitic)) {
 									String nextValue = anno.getValue().get(index + 1);
@@ -175,9 +178,6 @@ public class MorphLayerData extends LayerData {
 									anno.getValue().remove(index);
 									anno.getValue().set(index, newNextValue);
 								}
-							}
-							catch (IndexOutOfBoundsException e) {
-								log.warn("Mismatch between no. of morphemes and no. of annotations on layer \"" + anno.getKey() + "\" in document \"" + getDocName() + "\", reference \"" + getRef() + "\". Ignoring annotation.");
 							}
 						}
 					}
@@ -217,7 +217,10 @@ public class MorphLayerData extends LayerData {
 					// Process annotations accordingly
 					for (Entry<String, List<String>> anno : getAnnotations().entries()) {
 						String delimValue = null;
-						try {
+						if (index >= anno.getValue().size()) {
+							log.warn("Mismatch between no. of morphemes and no. of annotations on layer \"" + anno.getKey() + "\" in document \"" + getDocName() + "\", reference \"" + getRef() + "\". Ignoring annotation.");
+						}
+						else {
 							delimValue = anno.getValue().get(index);
 							if (delimValue.equals(affix) || delimValue.equals(clitic)) {
 								String nextValue = anno.getValue().get(index + 1);
@@ -225,9 +228,6 @@ public class MorphLayerData extends LayerData {
 								anno.getValue().remove(index);
 								anno.getValue().set(index, newNextValue);
 							}
-						}
-						catch (IndexOutOfBoundsException e) {
-							log.warn("Mismatch between no. of morphemes and no. of annotations on layer \"" + anno.getKey() + "\" in document \"" + getDocName() + "\", reference \"" + getRef() + "\". Ignoring annotation.");
 						}
 					}					
 				}
