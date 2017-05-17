@@ -1054,8 +1054,6 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		for (SToken tok : graph.getOverlappedTokens(srNode)) {
 			assertThat(graph.getText(tok), anyOf(is("m23"), is("m24"), is("m25"), is("m26")));
 		}
-		// FIXME: Salt pull request for graphElement.hasAnnotation(String qName)
-		// and getAnnotations().contains(String annotationString)
 		assertThat(srNode.getAnnotations().size(), is(2));
 		assertNotNull(srNode.getAnnotation("toolbox::sr"));
 		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
@@ -1105,8 +1103,6 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		for (SToken tok : graph.getOverlappedTokens(srNode)) {
 			assertThat(graph.getText(tok), anyOf(is("m23"), is("m24"), is("m25"), is("m26")));
 		}
-		// FIXME: Salt pull request for graphElement.hasAnnotation(String qName)
-		// and getAnnotations().contains(String annotationString)
 		assertThat(srNode.getAnnotations().size(), is(2));
 		assertNotNull(srNode.getAnnotation("toolbox::sr"));
 		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
@@ -1141,8 +1137,6 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		for (SToken tok : graph.getOverlappedTokens(srNode)) {
 			assertThat(graph.getText(tok), anyOf(is("L2"), is("L3"), is("L4"), is("L5")));
 		}
-		// FIXME: Salt pull request for graphElement.hasAnnotation(String qName)
-		// and getAnnotations().contains(String annotationString)
 		assertThat(srNode.getAnnotations().size(), is(2));
 		assertNotNull(srNode.getAnnotation("toolbox::sr"));
 		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
@@ -1244,8 +1238,6 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		for (SToken tok : graph.getOverlappedTokens(srNode)) {
 			assertThat(graph.getText(tok), anyOf(is("L2"), is("L3"), is("L4"), is("L5")));
 		}
-		// FIXME: Salt pull request for graphElement.hasAnnotation(String qName)
-		// and getAnnotations().contains(String annotationString)
 		assertThat(srNode.getAnnotations().size(), is(2));
 		assertNotNull(srNode.getAnnotation("toolbox::sr"));
 		assertNotNull(srNode.getAnnotation("toolbox::sr2"));
