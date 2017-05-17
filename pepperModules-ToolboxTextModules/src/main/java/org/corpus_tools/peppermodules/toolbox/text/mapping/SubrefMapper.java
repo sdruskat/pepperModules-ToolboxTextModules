@@ -289,12 +289,12 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 				}
 			}
 			orderedTokens = graph.getSortedTokenByText(mapToMorphTokens ? morphTokens : lexTokens);
-			try {
-				subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum()));
-			}
-			catch (Exception e) {
+			if (orderedTokens.size() < range.getMaximum()) {
 				log.debug("The maximum of subref range {}..{} in document '{}', reference '{}' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", range.getMinimum(), range.getMaximum() - 1, refData.getDocName(), refData.getRef());
 				continue subrefannotationlines;
+			}
+			else {
+				subrefTokens.addAll(orderedTokens.subList(range.getMinimum(), range.getMaximum()));
 			}
 			if (subrefTokens.isEmpty()) {
 				continue subrefannotationlines;

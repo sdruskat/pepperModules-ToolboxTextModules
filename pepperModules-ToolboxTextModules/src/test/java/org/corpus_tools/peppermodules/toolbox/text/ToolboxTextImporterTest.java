@@ -989,6 +989,22 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#SIMPLE_TARGETED}.
 	 */
 	@Test
+	public void testSubRefSIMPLE_TARGETED_MB_INDEX_EXCEEDED() {
+		rootLogger.setLevel(Level.DEBUG);
+		setTestFile("subref_SIMPLE_TARGETED_INDEX_EXCEEDED.txt");
+		setProperties("subref_SIMPLE_TARGETED.properties");
+		start();
+		checkLog("The maximum of subref range 2..4 in document 'Document_no__1', reference 'subref sentence schema 1 (line-level) to mb' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", Level.DEBUG);
+	}
+	
+		
+		/**
+	 * Test method for
+	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
+	 * 
+	 * Tests against a subref of type {@link org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper.SUBREF_TYPE#SIMPLE_TARGETED}.
+	 */
+	@Test
 	public void testSubRefSIMPLE_TARGETED_TX() {
 		setTestFile("subref_SIMPLE_TARGETED_tx.txt");
 		setProperties("subref_SIMPLE_TARGETED.properties");
