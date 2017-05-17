@@ -204,9 +204,6 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 						SubrefMapper subrefMapper = new SubrefMapper(markerMap, getProperties(), graph, refMapper.getRefData(), refMapper.getLexTokens(), refMapper.getMorphTokens(), refMapper.getMarkerContentMap(), refMapper.refHasMorphology());
 						subrefMapper.map();
 					}
-					else {
-						// FIXME Catch here?
-					}
 					bos.reset();
 				}
 				getLayer(markerMap.get(getProperties().getLexMarker())).addNode(lexDS);
