@@ -48,7 +48,7 @@ class ToolboxTextDocumentNameParser {
 	 *
 	 * @return the document name
 	 */
-	static String parseId(Long offset, String idMarker, File file) {
+	static String parseId(Long offset, String idMarker, File file, boolean normalizeDocNames) {
 		String documentName = null;
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			raf.seek(offset);
@@ -56,6 +56,15 @@ class ToolboxTextDocumentNameParser {
 			String[] markerAndLine = rawLine.split("\\\\" + idMarker);
 			if (markerAndLine.length == 2) {
 				documentName = markerAndLine[1].trim();
+				if (normalizeDocNames) {
+					String d1 = documentName.replaceAll(" ", "-");
+					String d2 = d1.replaceAll("\\.", "_");
+					String d3 = d2.replaceAll("\\n", "_");
+					String d4 = d3.replaceAll(":", "_");
+					String d5 = d4.replaceAll(",", "_");
+					String d6 = d5.replaceAll("-", "_");
+					documentName = d6;
+				}
 			}
 			else {
 				String defaultName = "Document at offset " + offset.intValue();

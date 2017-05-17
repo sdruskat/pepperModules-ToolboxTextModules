@@ -62,7 +62,17 @@ public class DocumentHeaderMapper extends AbstractBlockMapper {
 	public boolean map() {
 		for (String line : lines) {
 			if (line.startsWith("\\" + properties.getIdMarker() + " ")) {
-				graph.getDocument().setName(line.split("\\s+", 2)[1]);
+				String name = line.split("\\s+", 2)[1];
+				if (properties.normalizeDocNames()) {
+					String d1 = name.replaceAll(" ", "-");
+					String d2 = d1.replaceAll("\\.", "_");
+					String d3 = d2.replaceAll("\\n", "_");
+					String d4 = d3.replaceAll(":", "_");
+					String d5 = d4.replaceAll(",", "_");
+					String d6 = d5.replaceAll("-", "_");
+					name = d6;
+				}
+				graph.getDocument().setName(name);
 			}
 			else {
 				String[] markerContent = line.split("\\s+", 2);

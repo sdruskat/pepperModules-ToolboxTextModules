@@ -170,7 +170,8 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			// Create documents for \ids in file
 			if (!monolithic) {
 				for (Long idOffset : idOffsets) {
-					SDocument doc = corpusGraph.createDocument(subCorpus, ToolboxTextDocumentNameParser.parseId(idOffset, getProperties().getIdMarker(), corpusFile));
+					String name = ToolboxTextDocumentNameParser.parseId(idOffset, getProperties().getIdMarker(), corpusFile, getProperties().normalizeDocNames());
+					SDocument doc = corpusGraph.createDocument(subCorpus, name);
 					getIdentifier2ResourceTable().put(doc.getIdentifier(), corpusFileURI);
 					offsetMap.put(doc.getIdentifier(), idOffset);
 					parseMap .put(doc.getIdentifier(), new ToolboxParseBean(idOffsets, refMap, headerEndOffset, monolithic, offsetMap, idStructureMap));

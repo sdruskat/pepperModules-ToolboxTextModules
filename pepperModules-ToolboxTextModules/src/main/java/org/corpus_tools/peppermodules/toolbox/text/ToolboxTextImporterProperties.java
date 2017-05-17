@@ -87,7 +87,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * The Toolbox marker that precedes lines with IDs,
 	 * without the preceding backslash.
 	 */
-	static final String PROP_ID_MARKER = "idMarker";
+	private static final String PROP_ID_MARKER = "idMarker";
 
 	
 	/**
@@ -113,7 +113,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * the first element is the <strong>affix</strong> delimiter, and the second element is the
 	 * <strong>clitics</strong> delimiter.
 	 */
-	static final String PROP_MORPHEME_DELIMITERS = "morphemeDelimiters";
+	private static final String PROP_MORPHEME_DELIMITERS = "morphemeDelimiters";
 	
 	/**
 	 * The morpheme delimiter used in the Toolbox files to mark words (represented on the
@@ -136,7 +136,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * morph: | ta | wane |
 	 * ```
 	 */
-	static final String PROP_LIAISON_DELIMITER = "liaisonDelimiter";
+	private static final String PROP_LIAISON_DELIMITER = "liaisonDelimiter";
 	
 	/**
 	 * The marker used for references, i.e., usually "ref" or "id".
@@ -146,13 +146,13 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	/**
 	 * The file extensions that corpus files can have as a comma-separated list.
 	 */
-	static final String PROP_FILE_EXTENSIONS = "fileExtensions";
+	private static final String PROP_FILE_EXTENSIONS = "fileExtensions";
 	
 	/**
 	 * The marker which precedes lines with annotations that can potentially span
 	 * subranges of the complete morphological data source.
 	 */
-	static final String PROP_SUB_REF_ANNOTATION_MARKERS = "subrefAnnotationMarkers";
+	private static final String PROP_SUB_REF_ANNOTATION_MARKERS = "subrefAnnotationMarkers";
 	
 	/**
 	 * The marker used to define unit refs.
@@ -166,7 +166,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * whether the delimiter should be attached to the **subsequent** item (if `true`
 	 * it will be attached to the subsequent item, making the latter a suffix).
 	 */
-	static final String PROP_ATTACH_DETACHED_MORPHEME_DELIMITER = "attachDelimiter";
+	private static final String PROP_ATTACH_DETACHED_MORPHEME_DELIMITER = "attachDelimiter";
 	
 	/**
 	 * Whether lines with the same marker in the same block should be merged into one line.
@@ -176,7 +176,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * 
 	 * `false`: all lines but the first line marked with {marker} are dropped.
 	 */
-	static final String PROP_MERGE_DUPL_MARKERS = "mergeDuplMarkers";
+	private static final String PROP_MERGE_DUPL_MARKERS = "mergeDuplMarkers";
 
 	/**
 	 * Whether the importer should be run in **error detection mode**.
@@ -187,7 +187,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * 
 	 * `false` (default): Corpora and documents will be mapped in full. 
 	 */
-	static final String PROP_DETECTION_MODE = "errorDetectionMode";
+	private static final String PROP_DETECTION_MODE = "errorDetectionMode";
 
 	/**
 	 * Whether the importer should record errors.
@@ -199,19 +199,17 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * 
 	 * `false`: Errors will not be recorded. 
 	 */
-	static final String PROP_RECORD_ERRORS = "recordErrors";
+	private static final String PROP_RECORD_ERRORS = "recordErrors";
 
 	/**
-	 * Whether the importer should record errors.
-	 * 
-	 * `true` (default): Errors in the data model will be recorded, i.e., annotations
-	 * on an error layer (called `err`) will be added for each line which
-	 * seems to contain an error. Additionally, another annotation will be added
-	 * to discrete layers, recording the original faulty line.
-	 * 
-	 * `false`: Errors will not be recorded. 
+	 * TODO Documentation 
 	 */
-	static final String PROP_NORMALIZE_MARKERS = "normalizeMarkers";
+	private static final String PROP_NORMALIZE_MARKERS = "normalizeMarkers";
+	
+	/**
+	 * TODO Documentation 
+	 */
+	private static final String PROP_NORMALIZE_DOC_NAMES = "normalizeDocNames";
 
 	/**
 	 * Whether the importer should fix interlinearization.
@@ -240,14 +238,14 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * **NOTE:** If the property is set to `false`, unfixed interl11n errors amy
 	 * cause an exception during be thrown during runtime!
 	 */
-	static final String PROP_FIX_INTERL11N = "fixInterl11n";
+	private static final String PROP_FIX_INTERL11N = "fixInterl11n";
 
 	/**
 	 * A {@link String} used to fill interlinearization gaps.
 	 * 
 	 * Default: *\*\*\**
 	 */
-	static final String PROP_MISSING_ANNO_STRING = "missingAnnoString";
+	private static final String PROP_MISSING_ANNO_STRING = "missingAnnoString";
 	
 	public ToolboxTextImporterProperties() {
 		addProperty(new PepperModuleProperty<>(PROP_LEX_MARKER, 
@@ -339,6 +337,11 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				"Whether the importer should rename layers and annotations to defaults.",
 				false,
 				true));
+		addProperty(new PepperModuleProperty<>(PROP_NORMALIZE_DOC_NAMES,
+				Boolean.class,
+				"Whether the importer should rename documents to defaults (no special characters).",
+				true,
+				true));
 	}
 	
 	// Getter methods for the different property values.
@@ -425,6 +428,10 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	
 	public boolean normalizeMarkers() {
 		return (Boolean) getProperty(PROP_NORMALIZE_MARKERS).getValue();
+	}
+
+	public boolean normalizeDocNames() {
+		return (Boolean) getProperty(PROP_NORMALIZE_DOC_NAMES).getValue();
 	}
 	
 
