@@ -168,7 +168,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			assertEquals(0, graph.getTokens().size());
 			assertEquals(0, graph.getSpans().size());
 		}
-		assertEquals(0, getDocument("ID4_(no_further_info)").getMetaAnnotations().size());
+		assertEquals(0, getDocument("ID4_no_further_info").getMetaAnnotations().size());
 		assertEquals(1, getDocument("ID1").getMetaAnnotations().size());
 		assertEquals(1, getDocument("ID2").getMetaAnnotations().size());
 		assertEquals(1, getDocument("ID3").getMetaAnnotations().size());
@@ -1880,7 +1880,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			assertThat(t.getLayers().iterator().next().getName(), anyOf(is("tx"), is("mb")));
 		}
 		assertTrue(containsDS);
-		assertThat(graph.getDocument().getName(), is("Document no. 1"));
+		assertThat(graph.getDocument().getName(), is("Document_no__1"));
 		assertThat(graph.getSpans().size(), is(2));
 		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::ref").getValue_STEXT(), is("Reference no. 1"));
 		assertThat(graph.getNodesByName("subref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
@@ -1962,7 +1962,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			assertThat(t.getLayers().iterator().next().getName(), anyOf(is("tx"), is("mb")));
 		}
 		assertTrue(containsDS);
-		assertThat(graph.getDocument().getName(), is("Document no. 1"));
+		assertThat(graph.getDocument().getName(), is("Document_no__1"));
 		assertThat(graph.getSpans().size(), is(2));
 		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::ref").getValue_STEXT(), is("Reference no. 1"));
 		assertThat(graph.getNodesByName("subref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
@@ -2005,7 +2005,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			assertThat(t.getLayers().iterator().next().getName(), anyOf(is("xt"), is("bm")));
 		}
 		assertTrue(containsDS);
-		assertThat(graph.getDocument().getName(), is("Document no. 1"));
+		assertThat(graph.getDocument().getName(), is("Document_no__1"));
 		assertThat(graph.getSpans().size(), is(2));
 		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::fer").getValue_STEXT(), is("Reference no. 1"));
 		assertThat(graph.getNodesByName("customref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
@@ -2044,7 +2044,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			assertThat(t.getLayers().iterator().next().getName(), anyOf(is("xt"), is("bm")));
 		}
 		assertTrue(containsDS);
-		assertThat(graph.getDocument().getName(), is("Document no. 1"));
+		assertThat(graph.getDocument().getName(), is("Document_no__1"));
 		assertThat(graph.getSpans().size(), is(2));
 		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::fer").getValue_STEXT(), is("Reference no. 1"));
 		assertThat(graph.getNodesByName("customref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
@@ -2087,7 +2087,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			assertThat(t.getLayers().iterator().next().getName(), anyOf(is("xt"), is("bm")));
 		}
 		assertTrue(containsDS);
-		assertThat(graph.getDocument().getName(), is("Document no. 1"));
+		assertThat(graph.getDocument().getName(), is("Document_no__1"));
 		assertThat(graph.getSpans().size(), is(2));
 		assertThat(graph.getNodesByName("Reference no. 1").get(0).getAnnotation("toolbox::fer").getValue_STEXT(), is("Reference no. 1"));
 		assertThat(graph.getNodesByName("customref").get(0).getAnnotation("toolbox::test").getValue_STEXT(), is("Test"));
