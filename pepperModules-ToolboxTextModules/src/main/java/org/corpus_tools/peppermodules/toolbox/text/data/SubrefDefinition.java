@@ -24,20 +24,60 @@ import java.util.List;
 import org.apache.commons.lang3.Range;
 
 /**
- * // TODO Add description
+ * The definition of a subref. In brief, a subref is a unit within a
+ * Toolbox reference block (usually a sentence), that can be
+ * annotated independently from both tokens and the complete
+ * ref. It is defined via a span of token indices.
+ * 
+ * For comprehensive documentation on subrefs, 
+ * see <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation>.
+ * 
+ * A subref has a type and one or more ranges of token indices which it
+ * spans. It can have a specified target layer (the lexical or morphological
+ * token layer) and an identifier.
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  */
 public class SubrefDefinition {
 
 	/**
-	 * // TODO Add description
+	 * Subref *type* enumerations.
 	 *
 	 * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
-	 * 
 	 */
 	public enum SUBREF_TYPE {
-		SIMPLE, SIMPLE_TARGETED, UNIDENTIFIED_GLOBAL, UNIDENTIFIED_GLOBAL_TARGETED, IDENTIFIED_GLOBAL, IDENTIFIED_GLOBAL_TARGETED, DISCONTINUOUS_TARGETED, FULL_REF_ANNOTATION
+		/**
+		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#SIMPLE>.
+		 */
+		SIMPLE, 
+		/**
+		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#SIMPLE_TARGETED>.
+		 */
+		SIMPLE_TARGETED, 
+		/**
+		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#UNIDENTIFIED_GLOBAL>.		 
+		 */
+		UNIDENTIFIED_GLOBAL, 
+		/**
+		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#UNIDENTIFIED_GLOBAL_TARGETED>.		 
+		 */
+		UNIDENTIFIED_GLOBAL_TARGETED, 
+		/**
+		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#IDENTIFIED_GLOBAL>.		 
+		 */
+		IDENTIFIED_GLOBAL, 
+		/**
+		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#IDENTIFIED_GLOBAL_TARGETED>.		 
+		 */
+		IDENTIFIED_GLOBAL_TARGETED, 
+		/**
+		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#DISCONTINUOUS_TARGETED>.		 
+		 */
+		DISCONTINUOUS_TARGETED, 
+		/**
+		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#FULL_REF_ANNOTATION>.		 
+		 */
+		FULL_REF_ANNOTATION
 	};
 
 	private SUBREF_TYPE type;

@@ -25,13 +25,18 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map.Entry;
 
+import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
+import org.corpus_tools.peppermodules.toolbox.text.mapping.RefMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ListMultimap;
 
 /**
- * TODO Description
+ * An extension of {@link LayerData}, specifically targeted at
+ * compiling morphological data, which needs extra functionality
+ * such as the linking of groups of morphemes to lexical units,
+ * delimiter handling, etc.
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
@@ -49,11 +54,11 @@ public class MorphLayerData extends LayerData {
 	 * @param marker
 	 * @param originalPrimaryData
 	 * @param annoMarkers
+	 * @param segmented 
 	 * @param ref 
-	 * @param string 
 	 * @param fixErrors 
 	 * @param missingAnnoString 
-	 * @param b 
+	 * @param docName 
 	 */
 	public MorphLayerData(ListMultimap<String, String> markerContentMap, String marker, String originalPrimaryData, List<String> annoMarkers, boolean segmented, String missingAnnoString, boolean fixErrors, String docName, String ref) {
 		super(markerContentMap, marker, originalPrimaryData, annoMarkers, segmented, missingAnnoString, fixErrors, docName, ref);
@@ -64,6 +69,29 @@ public class MorphLayerData extends LayerData {
 		return (MorphLayerData) super.compile();
 	}
 
+	/**
+	 * Compiles "morphological words", i.e., groups of morphemes
+	 * belonging to a lexical unit ("word").
+	 * 
+	 * First, any free affix delimiters are concatenated to the respective morpheme
+	 * so that affixes can be used to group morphemes into "morphological words"
+	 * downstream. Also, "liaison delimiters" are detected and memorized for later 
+	 * deletion (during token mapping).
+	 * 
+	 * Then, the "morphological words are inferred and mapped to
+	 * their lexical counterparts. 
+	 * 
+	 * @param affix The affix delimiter string
+	 * @param clitic The clitic delimiter string
+	 * @param liaison The liaison delimiter string
+	 * @param attach Whether to attach delimiters
+	 * @param attachToNext Whether to attach delimiters to the next morpheme per default
+	 * @return The {@link MorphLayerData} object containing the compiled morphological layer data.
+	 * 
+	 * @see RefMapper#map()
+	 * @see ToolboxTextImporterProperties#attachDelimiter()
+	 * @see ToolboxTextImporterProperties#attachDelimiterToNext()
+	 */
 	public MorphLayerData compileMorphWords(String affix, String clitic, String liaison, boolean attach, boolean attachToNext) {
 		List<String> morphs = getPrimaryData();
 		attachDelimiters(affix, clitic, liaison, attach, attachToNext, morphs);
@@ -135,22 +163,22 @@ public class MorphLayerData extends LayerData {
 				}
 			}
 		}
-//		for (Integer liaisonIndex : liaisonIndices) {
-//			String oldLiaisonWord = getPrimaryData().get(liaisonIndex);
-//			getPrimaryData().set(liaisonIndex, oldLiaisonWord.substring(1));
-//		}
 		this.morphWords = morphWords;
 		return this;
 	}
 
 	/**
-	 * TODO: Description
+	 * Attaches any free delimiters to the respective morphemes, 
+	 * based on whether and where to attach. 
 	 *
-	 * @param affix
-	 * @param clitic
-	 * @param attach
-	 * @param attachToNext
-	 * @param morphs
+	 * @param affix The affix delimiter string
+	 * @param clitic The clitic delimiter string 
+	 * @param attach Whether to attach delimiters
+	 * @param attachToNext Whether to attach delimiters to the next morpheme per default
+	 * @param morphs A list of morphemes
+	 * 
+	 * @see ToolboxTextImporterProperties#attachDelimiter()
+	 * @see ToolboxTextImporterProperties#attachDelimiterToNext()
 	 */
 	private void attachDelimiters(String affix, String clitic, String liaison, boolean attach, boolean attachToNext, List<String> morphs) {
 		// Attach delimiters if specified

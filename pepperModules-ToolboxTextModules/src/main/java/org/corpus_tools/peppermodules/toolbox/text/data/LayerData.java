@@ -28,7 +28,16 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
 /**
- * TODO Description
+ * A creator type for specific annotation layer data.
+ * 
+ * The constructor is passed raw data, which by {@link #compile()}
+ * is subsequently compiled to data processable downstream, i.e.,
+ * 
+ * - Primary data
+ * - Annotations on the primary data
+ * - Reference data for the reference (Toolbox' \ref) governing the data
+ * - The respective annotation layer marker
+ * - The name of the document containing the data
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
@@ -48,12 +57,13 @@ public class LayerData {
 	/**
 	 * @param markerContentMap
 	 * @param marker
+	 * @param originalPrimaryData 
 	 * @param annoMarkers
-	 * @param ref2 
-	 * @param string 
-	 * @param fixErrors2 
-	 * @param missingAnnoString2 
-	 * @param b 
+	 * @param segmented 
+	 * @param missingAnnoString 
+	 * @param fixErrors 
+	 * @param docName 
+	 * @param ref 
 	 */
 	public LayerData(ListMultimap<String, String> markerContentMap, String marker, String originalPrimaryData, List<String> annoMarkers, boolean segmented, String missingAnnoString, boolean fixErrors, String docName, String ref) {
 		this.map = markerContentMap;
@@ -65,6 +75,12 @@ public class LayerData {
 		this.ref = ref;
 	}
 	
+	/**
+	 * Compiles the primary data and annotations for
+	 * the annotation layer.
+	 * 
+	 * @return The compiled {@link LayerData} object containing all relevant data.
+	 */
 	public LayerData compile() {
 		if (segmented) {
 			/*
@@ -90,15 +106,15 @@ public class LayerData {
 				}
 			}
 		}
-		setEmpty(primaryData.isEmpty());
 		return this;
 	}
 
 	/**
-	 * TODO: Description
+	 * Adds an annotation key and its value to the map
+	 * of annotations for this layer.
 	 *
-	 * @param key
-	 * @param value
+	 * @param key The annotation key
+	 * @param value The value for this annotation
 	 */
 	public void addAnnotation(String key, List<String> value) {
 		annotations.put(key, value);
@@ -106,10 +122,13 @@ public class LayerData {
 	}
 
 	/**
-	 * TODO: Description
+	 * Adds an annotation to a layer's annotations.
+	 * 
+	 * This method is used for ad hoc additions to the
+	 * annotations, e.g., for adding a layer recording errors.
 	 *
-	 * @param key
-	 * @param value
+	 * @param key The annotation key
+	 * @param value The value for this annotation
 	 */
 	public void addToAnnotation(String key, String value) {
 		if (annotations.get(key).size() > 0) {
@@ -148,12 +167,9 @@ public class LayerData {
 		this.annotations = annotations;
 	}
 
-	/**
-	 * @param isEmpty the isEmpty to set
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
 	 */
-	public final void setEmpty(boolean isEmpty) {
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
