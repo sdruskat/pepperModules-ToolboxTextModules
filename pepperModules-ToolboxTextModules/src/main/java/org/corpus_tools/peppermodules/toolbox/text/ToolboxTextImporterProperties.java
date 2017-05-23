@@ -30,7 +30,10 @@ import org.corpus_tools.pepper.modules.PepperModuleProperty;
  * Properties for the ToolboxTextImporter.
  * 
  * The single properties are explained in the respective field Javadoc.
-
+ * 
+ * **Note:** The properties should be considered the central API for this
+ * and other Pepper modules. 
+ *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  */
 public class ToolboxTextImporterProperties extends PepperModuleProperties {

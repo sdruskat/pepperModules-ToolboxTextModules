@@ -32,6 +32,7 @@ import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition.SUBREF_TYPE;
 import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
+import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.SToken;
@@ -45,11 +46,16 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 
 /**
- * // TODO Add description
- * Subrefs are described here: [MelaTAMP wiki](https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation).
+ * This class provides mapping functionality for *subreferences*, 
+ * i.e., annotatable entities spanning one or more (lexical or
+ * morphological) tokens.
+ * 
+ * Subreferences are always mapped to {@link SSpan}s in the target 
+ * {@link SDocument}'s {@link SDocumentGraph}. 
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  * 
+ * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation">Description of subreferences in the MelaTAMP wiki</a>
  */
 public class SubrefMapper extends AbstractToolboxTextMapper {
 	
@@ -71,21 +77,14 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	
 	
 	/**
-	 * @param markerMap 
-	 * @param properties
-	 * @param graph
-	 * @param morphTokens 
-	 * @param lexTokens 
-	 * @param refData 
-	 * @param markerContentMap 
-	 * @param morphDS 
-	 * @param lexDS 
-	 * @param trimmedInputString
-	 * @param hasMorphology
-	 * @param indices
-	 * @param lexDS
-	 * @param morphDS
-	 * @param layers
+	 * @param markerMap A map mapping markers to their target markers for normalization purposes.
+	 * @param properties The {@link ToolboxTextImporterProperties} instance for the current mapping.
+	 * @param graph The target {@link SDocument}'s {@link SDocumentGraph}.
+	 * @param morphTokens A list of {@link SToken}s which represent morphological tokens.
+	 * @param lexTokens A list of {@link SToken}s which represent lexical tokens.
+	 * @param refData The data object of the currently mapped reference.
+	 * @param markerContentMap A {@link Multimap} mapping Toolbox markers to their respective line contents.
+	 * @param refHasMorphology Whether the currently mapped reference contains morphological tokens.
 	 */
 	public SubrefMapper(Map<String, String> markerMap, ToolboxTextImporterProperties properties, SDocumentGraph graph, LayerData refData, List<SToken> lexTokens, List<SToken> morphTokens, ListMultimap<String,String> markerContentMap, boolean refHasMorphology) {
 		this.graph = graph;
@@ -102,13 +101,32 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
-	 * TODO: Description
+	 * Maps the raw data of all subreferences in a single Toolbox reference
+	 * to an {@link SDocumentGraph}.
+	 * 
+	 * The process works roughly as follows.
+	 * 
+	 * ## Mapping process
+	 *
+	 * 1. For each defined subreference in the currently mapped reference, 
+	 * retrieve its type and map type to subreference.
+	 * 2. Collect all lines that *can* contain subreference annotations, and
+	 * map subreference to annotations.
+	 * 3. Trigger the actual mapping depending on type per subreference.
+	 * 
+	 * @see ToolboxTextImporterProperties#PROP_SUB_REF_DEFINITION_MARKER
+	 * @see ToolboxTextImporterProperties#PROP_SUB_REF_ANNOTATION_MARKERS
+	 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation">Description of subreferences in the MelaTAMP wiki</a>
 	 */
 	public void map() {
 		boolean mapGlobal = false;
 		Map<String, SubrefDefinition> subrefMap = new HashMap<>();
 		Multimap<SubrefDefinition, Entry<String, String>> subrefAnnoMap = ArrayListMultimap.create();
 		Multimap<String, String> simpleSubrefMap = ArrayListMultimap.create();
+		/*
+		 * For each line marked with a subref definition marker, retrieve the subref type
+		 * and - if it has an identifier - put it in the subref map.
+		 */
 		for (String subrefLine : markerContentMap.get(subRefDefinitionMarker)) {
 			SubrefDefinition subref = createSubrefDefinitionFromSubrefLine(subrefLine);
 			SubrefDefinition previous = subrefMap.put(subref.getIdentifier(), subref);
@@ -144,7 +162,6 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 
 			}
 		}
-		
 		if (subrefMap.size() > 0) {
 			/*
 			 * If there is a global subref definition, it overrides all other
@@ -186,9 +203,11 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
-	 * TODO: Description
-	 *
-	 * @param subrefAnnoMap
+	 * Maps *defined* subreferences and their annotations.
+	 * 
+	 * @param subrefAnnoMap The map linking subreference definitions to subreference annotations.
+	 * 
+	 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation">Description of subreferences in the MelaTAMP wiki</a>
 	 */
 	private void mapDefined(Multimap<SubrefDefinition, Entry<String, String>> subrefAnnoMap) {
 		subrefannotationlines:
@@ -241,9 +260,11 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
-	 * TODO: Description
-	 *
-	 * @param simpleSubrefMap
+	 * Maps subreferences of the *simple* types and their annotations.
+	 * 
+	 * @param simpleSubrefMap The map linking the markers for *simple* subreferences to their annotations.
+	 * 
+	 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation">Description of subreferences in the MelaTAMP wiki</a>
 	 */
 	private void mapSimpleCandidates(Multimap<String, String> simpleSubrefMap) {
 		subrefannotationlines:
@@ -336,10 +357,12 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
-	 * TODO: Description
+	 * Maps subreferences of any of the *global* types and their annotations. 
 	 *
-	 * @param definition
-	 * @param subrefAnnoLines
+	 * @param definition The definition object of the currently mapped subreference.
+	 * @param subrefAnnoLines The map linking subreference annotation markers to the actual annotations.
+	 * 
+	 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation">Description of subreferences in the MelaTAMP wiki</a>
 	 */
 	private void mapGlobal(SubrefDefinition definition, Multimap<String, String> subrefAnnoLines) {
 		SSpan subref = null;
@@ -380,18 +403,14 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
-	 * TODO: Description, take from below comment
+	 * Compares the list of subrefTokens with the list of sorted tokens
+	 * for each span to find out if a span spanning the same tokens
+	 * already exists in the document graph.
 	 *
-	 * @return
+	 * @return The span for the subref tokens, either the preexisting one or a newly created one.
 	 */
 	private SSpan getSubrefSpan(List<SToken> subrefTokens) {
 		SSpan subref = null;
-		/*
-		 * Compare the list of subrefTokens with the list of sorted tokens
-		 * for each span to find out if a span spanning the same tokens
-		 * already exists in the document graph.
-		 * 
-		 */
 		forspans: for (SSpan span : graph.getSpans()) {
 			List<SToken> sortedSpanTokens = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
 			if (sortedSpanTokens.size() == subrefTokens.size()) {
@@ -413,10 +432,15 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
-	 * TODO: Description
+	 * Creates a {@link SubrefDefinition} object for a subreference line, i.e.,
+	 * a line that defines a subreference.
+	 * 
+	 * The {@link SubrefDefinition} is compiled from the subreference's *type*,
+	 * its *identifier* (if applicable), and the range or ranges of tokens it
+	 * spans.
 	 *
-	 * @param subrefLine
-	 * @return
+	 * @param subrefLine The line of the subreference definition to process.
+	 * @return The compiled {@link SubrefDefinition} for the input.
 	 */
 	public SubrefDefinition createSubrefDefinitionFromSubrefLine(String subrefLine) {
 		final String[] split = subrefLine.split("\\s+");
@@ -463,21 +487,22 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
-	 * TODO: Description
+	 * Determines the type of a subreference by processing the
+	 * structure of its defining line.
 	 *
-	 * @param split
-	 * @return
+	 * @param split A {@link String} array representation of the subreference definition line split at whitespaces. 
+	 * @return The {@link SUBREF_TYPE} enum pertaining to the respective structure pattern of the input.
 	 */
-	public SUBREF_TYPE determineSubrefType(String[] split) {
+	private SUBREF_TYPE determineSubrefType(String[] split) {
 		switch (split.length) {
 		case 2:
-			if (testInts(split[0], split[1])) {
+			if (areInts(split[0], split[1])) {
 				return SUBREF_TYPE.UNIDENTIFIED_GLOBAL;
 			}
 			break;
 
 		case 3:
-			if (testInts(split[1], split[2])) {
+			if (areInts(split[1], split[2])) {
 				if (split[0].equals(lexMarker) || split[0].equals(morphMarker))
 					return SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED;
 				else
@@ -486,7 +511,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			break;
 			
 		case 4: 
-			if (testInts(split[2], split[3])) {
+			if (areInts(split[2], split[3])) {
 				return SUBREF_TYPE.IDENTIFIED_GLOBAL_TARGETED;
 			}
 			break;
@@ -494,7 +519,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 		default:
 			if (split.length > 4 && Arrays.copyOfRange(split, 2, split.length).length % 2 == 0) {
 				for (int i = 2; i < split.length; i++) {
-					if (!testInts(split[i], split[++i])) {
+					if (!areInts(split[i], split[++i])) {
 						return null;
 					}
 				}
@@ -506,13 +531,13 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
-	 * TODO: Description
+	 * Util method to test whether two {@link String}s represent valid `int`s.
 	 *
-	 * @param string
-	 * @param string2
-	 * @return
+	 * @param string The first parameter to test.
+	 * @param string2 The second parameter to test.
+	 * @return Whether both input {@link String}s can be mapped to valid `int`s.
 	 */
-	private boolean testInts(String string, String string2) {
+	private boolean areInts(String string, String string2) {
 		return (ToolboxTextModulesUtils.isInteger(string) && ToolboxTextModulesUtils.isInteger(string2));
 	}
 

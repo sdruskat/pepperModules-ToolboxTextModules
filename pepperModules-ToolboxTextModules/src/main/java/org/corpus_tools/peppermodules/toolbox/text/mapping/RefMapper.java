@@ -84,14 +84,14 @@ public class RefMapper extends AbstractBlockMapper {
 	private final Map<String, String> markerMap;
 
 	/**
-	 * @param markerMap 
-	 * @param properties
-	 * @param graph
-	 * @param trimmedInputString
-	 * @param hasMorphology
-	 * @param morphDS 
-	 * @param lexDS 
-	 * @param layers 
+	 * @param markerMap A map mapping markers to their target markers for normalization purposes.
+	 * @param properties The {@link ToolboxTextImporterProperties} instance for the current mapping. 
+	 * @param graph The currently processed {@link SDocument}'s {@link SDocumentGraph}.
+	 * @param trimmedInputString The input {@link String}, with trimmed whitespaces (and line breaks).
+	 * @param hasMorphology Whether the currently mapped reference contains morphological tokens.
+	 * @param morphDS The {@link STextualDS} object containing the data source for the currently mapped reference's *morphological* tokens.
+	 * @param lexDS The {@link STextualDS} object containing the data source for the currently mapped reference's *lexical* tokens.
+	 * @param layers The map linking layer names to their respective {@link SLayer} objects.
 	 */
 	public RefMapper(Map<String, String> markerMap, PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString, boolean hasMorphology, STextualDS lexDS, STextualDS morphDS, Map<String, SLayer> layers) {
 		super(properties, graph, trimmedInputString);
