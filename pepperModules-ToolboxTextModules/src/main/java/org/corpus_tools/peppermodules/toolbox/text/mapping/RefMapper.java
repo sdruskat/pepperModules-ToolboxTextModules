@@ -89,7 +89,6 @@ public class RefMapper extends AbstractBlockMapper {
 	 * @param graph
 	 * @param trimmedInputString
 	 * @param hasMorphology
-	 * @param indices
 	 * @param morphDS 
 	 * @param lexDS 
 	 * @param layers 
@@ -104,14 +103,37 @@ public class RefMapper extends AbstractBlockMapper {
 	}
 
 	/**
-	 * TODO Complete this with a general decription of the method.
+	 * Maps the raw data of a single Toolbox reference (i.e.,
+	 * metadata, primary data and annotations) to an {@link SDocumentGraph}.
+	 * 
+	 * The process works roughly as follows.
+	 * 
+	 * ## Mapping process
+	 * 
+	 * 1. Get the relevant properties from the {@link ToolboxTextImporterProperties}
+	 * object attached to the converter module.
+	 * 2. Run some basic validity tests on the raw data.
+	 * 3. Extract the single consolidated content lines from the map
+	 * mapping markers to respective line content.
+	 * 4. Fix interlinearization issues (cf. below).
+	 * 5. Trigger the actual mapping process.
 	 * 
 	 * ## Fixing interlinearization (interl11n) problems
 	 * 
-	 * Interlinearization problems are fixed depending on the value of
-	 * {@link ToolboxTextImporterProperties#PROP_FIX_INTERL11N}.
+	 * One of Toolbox' main features is interl11n between
+	 * lexical tokens, morphological tokens, and their respective
+	 * annotations. Unfortunately, interl11n errors occur
+	 * regularly in exported files, which leads to errors in the
+	 * mapping process.
+	 * 
+	 * The Toolbox Text Importer module can attempt to fix/document
+	 * interl11n errors. Interlinearization problems are fixed depending 
+	 * on the value of the repective {@link ToolboxTextImporterProperties#PROP_FIX_INTERL11N} 
+	 * (default: `true`). The actual fixing happens during the compilation
+	 * of {@link LayerData}/{@link MorphLayerData} objects.
 	 * 
 	 * @see ToolboxTextImporterProperties#PROP_FIX_INTERL11N
+	 * @see <a href="http://software.sil.org/toolbox/download/">Toolbox documentation</a>
 	 */
 	/* (non-Javadoc)
 	 * @see org.corpus_tools.peppermodules.toolbox.text.mapping.AbstractBlockMapper#map()
@@ -170,7 +192,7 @@ public class RefMapper extends AbstractBlockMapper {
 		if (docHasMorphology && refHasMorphology) {
 			morphData = new MorphLayerData(markerContentMap, morphMarker, morph, morphAnnoMarkers, true, missingAnnoString, fixErrors, getDocName(), ref).compile();
 			morphData.compileMorphWords(properties.getAffixDelim(), properties.getCliticDelim(), properties.getLiaisonDelim(), properties.attachDelimiter(), properties.attachDelimiterToNext());
-			morphData = checkLexMorphInterl11n(lexData, morphData, refData);
+			morphData = fixLexMorphInterl11n(lexData, morphData, refData);
 		}
 		else {
 			log.debug("The reference \"" + ref + "\" in identifier \'" + getDocName() + "\' does not contain a line with morphological items.");
@@ -178,9 +200,9 @@ public class RefMapper extends AbstractBlockMapper {
 		
 		// Now that we can have consistent token lines, check the
 		// token-annotation interlinearization
-		checkTokenAnnotationInterl11n(lexData, refData);
+		fixTokenAnnotationInterl11n(lexData, refData);
 		if (refHasMorphology) {
-			checkTokenAnnotationInterl11n(morphData, refData);
+			fixTokenAnnotationInterl11n(morphData, refData);
 		}
 
 		/*
@@ -199,11 +221,13 @@ public class RefMapper extends AbstractBlockMapper {
 	}
 
 	/**
-	 * TODO: Description
+	 * Maps primary data for the whole reference to an
+	 * {@link SSpan} object dedicate to the reference in 
+	 * question.
 	 *
-	 * @param refData
-	 * @param lexTokens 
-	 * @return 
+	 * @param refData The primary data for the reference.
+	 * @param lexTokens The list of lexical tokens contained in this reference. 
+	 * @return The reference span.
 	 */
 	private SSpan mapRef(LayerData refData, List<SToken> lexTokens) {
 		SSpan span = graph.createSpan(lexTokens);
@@ -221,13 +245,14 @@ public class RefMapper extends AbstractBlockMapper {
 	}
 
 	/**
-	 * TODO: Description
+	 * Maps primary data for lexical and morphological tokens
+	 * to {@link SToken} objects.
 	 *
-	 * @param hasMorphology
-	 * @param lexData
-	 * @param morphData
-	 * @param refData 
-	 * @return 
+	 * @param hasMorphology Whether the processed reference contains morphological tokens at all.
+	 * @param lexData The compiled data object for the lexical information in this reference.
+	 * @param morphData The compiled data object for the morphological information in this reference.
+	 * @param refData The compiled data object for the reference iteself.
+	 * @return A {@link Pair} of {@link List}s containing the lexical and morphological {@link SToken}s respectively.
 	 */
 	private Pair<List<SToken>,List<SToken>> mapTokens(boolean hasMorphology, LayerData lexData, MorphLayerData morphData, LayerData refData) {
 		List<SToken> lexTokens = new ArrayList<>();
@@ -311,6 +336,7 @@ public class RefMapper extends AbstractBlockMapper {
 				addAnnotations(lexData, lexTokens, false);
 			}
 		}
+		// Simply map the lexical tokens.
 		else {				
 			STimeline timeline = graph.getTimeline();
 			int timelineEnd = timeline.getEnd() == null ? 0 : timeline.getEnd();
@@ -334,11 +360,13 @@ public class RefMapper extends AbstractBlockMapper {
 	}
 
 	/**
-	 * TODO: Description
+	 * Adds annotations to all annotated entities (references, tokens).
 	 *
-	 * @param data
-	 * @param nodes
-	 * @param hasLiaisonDelimiter 
+	 * @param data The data object for the reference or tokens, which also includes the respective primary annotation data.
+	 * @param nodes The list of nodes pertaining the data object.
+	 * @param hasLiaisonDelimiter Whether the primary data contains a liaison delimiter.
+	 * 
+	 * @see ToolboxTextImporterProperties#PROP_LIAISON_DELIMITER
 	 */
 	private void addAnnotations(LayerData data, List<?> nodes, boolean hasLiaisonDelimiter) {
 		for (Entry<String, List<String>> annotation : data.getAnnotations().entries()) {
@@ -395,12 +423,15 @@ public class RefMapper extends AbstractBlockMapper {
 	}
 
 	/**
-	 * TODO: Description
+	 * Fixes/documents any interlinearization errors between a token
+	 * line and its annotations, e.g., missing or excess annotations.
 	 *
-	 * @param data
-	 * @param refData
+	 * @param data The data object for which interl11n errors should be fixed.
+	 * @param refData The data object for the parent reference of `data`.
+	 * 
+	 * @see ToolboxTextImporterProperties#PROP_FIX_INTERL11N
 	 */
-	private void checkTokenAnnotationInterl11n(LayerData data, LayerData refData) {
+	private void fixTokenAnnotationInterl11n(LayerData data, LayerData refData) {
 		Map<String, List<String>> errors = new HashMap<>();
 		List<String> primaryData = data.getPrimaryData();
 		ListMultimap<String, List<String>> annotations = data.getAnnotations();
@@ -475,14 +506,22 @@ public class RefMapper extends AbstractBlockMapper {
 	}
 
 	/**
-	 * TODO: Description
-	 *
-	 * @param lexData
-	 * @param morphData
-	 * @param ref
-	 * @return
+	 * Fixes/documents any interlinearization errors between the
+	 * lexical and morphological tokens, i.e., missing or excess
+	 * morphological tokens.
+	 * 
+	 * **Note:** As Toolbox data is generally governed by lexical
+	 * information, only the morphological data is changed in the
+	 * process.
+	 * 
+	 * @param lexData The data object containing the lexical data.
+	 * @param morphData The data object containing the morphological data.
+	 * @param refData The data object for the parent reference of `lexData` and `morphData`.
+	 * @return The data object containing the fixed morphological data.
+	 * 
+	 * @see ToolboxTextImporterProperties#PROP_FIX_INTERL11N
 	 */
-	private MorphLayerData checkLexMorphInterl11n(LayerData lexData, MorphLayerData morphData, LayerData refData) {
+	private MorphLayerData fixLexMorphInterl11n(LayerData lexData, MorphLayerData morphData, LayerData refData) {
 		boolean isInterl11nFaulty = false;
 		Map<String, List<String>> errors = new HashMap<>();
 		int sumLex = lexData.getPrimaryData().size();
@@ -620,9 +659,9 @@ public class RefMapper extends AbstractBlockMapper {
 	}
 	
 	/**
-	 * TODO: Description
-	 *
-	 * @return
+	 * @return Utility method returning the name of the
+	 * {@link SDocument} containing the currently processed
+	 * {@link SDocumentGraph}.
 	 */
 	private String getDocName() {
 		return graph.getDocument().getName();
@@ -650,9 +689,8 @@ public class RefMapper extends AbstractBlockMapper {
 	}
 
 	/**
-	 * TODO: Description
-	 *
-	 * @return
+	 * @return Whether the currently processed reference
+	 * contains morphological data.
 	 */
 	public boolean refHasMorphology() {
 		return refHasMorphology;

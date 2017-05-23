@@ -44,13 +44,17 @@ import com.google.common.collect.ListMultimap;
 /**
  * This class can be extended to avoid re-duplication of the methods for
  * compiling a list of trimmed marker lines from the
- * {@link #trimmedInputString}.
+ * trimmed input string that the constructor {@link #AbstractBlockMapper(PepperModuleProperties, SDocumentGraph, String)}
+ * takes as its last argument.
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
 abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	
+	/**
+	 * A logger for log messages from {@link AbstractBlockMapper}.
+	 */
 	private static final Logger log = LoggerFactory.getLogger(AbstractBlockMapper.class);
 	
 	protected final SDocumentGraph graph;
@@ -60,9 +64,9 @@ abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	protected final ListMultimap<String, String> markerContentMap = ArrayListMultimap.create();
 
 	/**
-	 * @param properties 
-	 * @param graph
-	 * @param trimmedInputString
+	 * @param properties The respective instance of {@link ToolboxTextImporterProperties} used for the conversion. 
+	 * @param graph The active {@link SDocumentGraph} on which operations are performed.
+	 * @param trimmedInputString The raw input that will be processed during the mapping.
 	 */
 	AbstractBlockMapper(PepperModuleProperties properties, SDocumentGraph graph, String trimmedInputString) {
 		this.graph = graph;
@@ -81,17 +85,12 @@ abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	/**
 	 * Prepares the {@link #trimmedInputString} for mapping:
 	 * 
-	 * <ul>
-	 * <li>Reads the {@link #trimmedInputString} line by line.</li>
-	 * <li>Trims the lines.</li>
-	 * <li>Adds the lines to the {@link #lines} {@link List}:
-	 * <ul>
-	 * <li>If the lines starts with a marker ("\"), add it</li>
-	 * <li>If it doesn't, add it to the last line in {@link #lines}</li>
-	 * </ul>
-	 * </li>
-	 * <li>Removes all empty and <code>null</code> lines</li>
-	 * </ul>
+	 * - Reads the {@link #trimmedInputString} line by line.
+	 * - Trims the lines.
+	 * - Adds the lines to the {@link #lines} {@link List}:
+	 *     - If the lines starts with a marker ("\"), add it.
+	 *     - If it doesn't, add it to the last line in {@link #lines}.
+	 * - Removes all empty and <code>null</code> lines.
 	 */
 	private void prepare() {
 		// Break input string up into lines
@@ -196,7 +195,9 @@ abstract class AbstractBlockMapper extends AbstractToolboxTextMapper {
 	}
 	
 	/**
-	 * TODO: Description
+	 * The central mapping method.
+	 * 
+	 * Clients must implement it in order to process the raw data.
 	 *
 	 * @return proceed Whether the mapping should proceed after this method has been called.
 	 * If any critical problems occur during this method (e.g., a block has no text line,
