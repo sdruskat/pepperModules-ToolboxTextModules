@@ -61,5 +61,19 @@ public class ToolboxTextModulesUtils {
 	    }
 	    return true;
 	}
+	
+	/**
+	 * Trims any whitespaces pre- and suffixing a
+	 * {@link String} and replaces all string-internal
+	 * spaces (including linebreaks) with a single 
+	 * whitespace.
+	 * 
+	 * @param string The {@link String} to trim and condense spaces on 
+	 * @return A {@link String} not affixed with spaces, and containing only single whitespaces and no line breaks.
+	 */
+	public static String trimAndCondense(String string) {
+		final String[] stringArr = string.trim().split("\\s+");
+		return String.join(" ", stringArr);
+	}
 
 }

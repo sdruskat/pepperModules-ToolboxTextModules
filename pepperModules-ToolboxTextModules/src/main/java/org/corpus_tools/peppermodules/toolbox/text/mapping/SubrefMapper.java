@@ -156,7 +156,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			if (markerContentMap.get(subrefAnnoMarker) != null) {
 				if (!markerContentMap.get(subrefAnnoMarker).isEmpty()) {
 					for (String subrefLine : markerContentMap.get(subrefAnnoMarker)) {
-						subrefAnnoLines.put(subrefAnnoMarker, subrefLine);
+						subrefAnnoLines.put(subrefAnnoMarker, ToolboxTextModulesUtils.trimAndCondense(subrefLine));
 					}
 				}
 

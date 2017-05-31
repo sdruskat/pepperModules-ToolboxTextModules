@@ -2416,7 +2416,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	}
 	
 	/**
-	 * Untrimmed metadata points, linebreaks.
+	 * Untrimmed metadata points, line breaks.
 	 */
 	@Test
 	public void test8() {

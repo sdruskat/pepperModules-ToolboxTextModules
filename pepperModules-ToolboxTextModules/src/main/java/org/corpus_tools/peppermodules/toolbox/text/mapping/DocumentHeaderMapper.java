@@ -22,6 +22,7 @@ package org.corpus_tools.peppermodules.toolbox.text.mapping;
 import java.util.regex.Pattern;
 
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
+import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.core.SMetaAnnotation;
@@ -81,9 +82,7 @@ public class DocumentHeaderMapper extends AbstractBlockMapper {
 			}
 			else {
 				String[] markerContent = line.split("\\s+", 2);
-				// "Normalize" annotation value, i.e. remove multiple whitespaces and line breaks, etc.
-				String[] nonEmptyArray = markerContent[1].split("\\s+");
-				String cleanedAnnotationString = String.join(" ", nonEmptyArray);
+				String cleanedAnnotationString = ToolboxTextModulesUtils.trimAndCondense(markerContent[1]);
 				if (graph.getDocument().getMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX + "::" + markerContent[0].substring(1)) != null) {
 					String oldVal = graph.getDocument().getMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX + "::" + markerContent[0].substring(1)).getValue_STEXT();
 					String newVal = oldVal + " " + cleanedAnnotationString;

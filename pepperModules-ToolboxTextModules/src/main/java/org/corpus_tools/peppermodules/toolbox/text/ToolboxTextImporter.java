@@ -223,7 +223,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			if (parse != null) {
 				mapper = new ToolboxTextMapper(parse.headerEndOffset, null, null, false);
 			}
-			else { // If there is no parse, we are dealing woth a directory!
+			else { // If there is no parse, we are dealing with a directory!
 				mapper = new ToolboxTextMapper(null, null, null, false);
 			}
 		}
