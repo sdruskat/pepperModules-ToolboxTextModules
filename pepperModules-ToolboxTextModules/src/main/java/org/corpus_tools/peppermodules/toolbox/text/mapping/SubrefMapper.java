@@ -487,13 +487,15 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
+	 * FIXME Make private and mock in repsective tests 
+	 * 
 	 * Determines the type of a subreference by processing the
 	 * structure of its defining line.
 	 *
 	 * @param split A {@link String} array representation of the subreference definition line split at whitespaces. 
 	 * @return The {@link SUBREF_TYPE} enum pertaining to the respective structure pattern of the input.
 	 */
-	private SUBREF_TYPE determineSubrefType(String[] split) {
+	public SUBREF_TYPE determineSubrefType(String[] split) {
 		switch (split.length) {
 		case 2:
 			if (areInts(split[0], split[1])) {
