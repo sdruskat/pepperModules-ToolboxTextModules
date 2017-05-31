@@ -107,7 +107,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	/**
 	 * The marker used for references, i.e., usually "ref" or "id".
 	 */
-	public final String PROP_REF_MARKER = "refMarker";
+	public final static String PROP_REF_MARKER = "refMarker";
 
 	/**
 	 * The file extensions that corpus files can have as a comma-separated list.
