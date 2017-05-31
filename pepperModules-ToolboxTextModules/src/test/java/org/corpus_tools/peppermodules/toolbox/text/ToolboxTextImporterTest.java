@@ -2186,12 +2186,12 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	}
 	
 	/*
-	 * ██████╗ ██╗   ██╗ ██████╗ ███████╗
-	 * ██╔══██╗██║   ██║██╔════╝ ██╔════╝
-	 * ██████╔╝██║   ██║██║  ███╗███████╗
-	 * ██╔══██╗██║   ██║██║   ██║╚════██║
-	 * ██████╔╝╚██████╔╝╚██████╔╝███████║
-	 * ╚═════╝  ╚═════╝  ╚═════╝ ╚══════╝
+	 * ██████╗ ██╗   ██╗ ██████╗ ███████╗██╗██╗  ██╗███████╗███████╗
+	 * ██╔══██╗██║   ██║██╔════╝ ██╔════╝██║╚██╗██╔╝██╔════╝██╔════╝
+	 * ██████╔╝██║   ██║██║  ███╗█████╗  ██║ ╚███╔╝ █████╗  ███████╗
+	 * ██╔══██╗██║   ██║██║   ██║██╔══╝  ██║ ██╔██╗ ██╔══╝  ╚════██║
+	 * ██████╔╝╚██████╔╝╚██████╔╝██║     ██║██╔╝ ██╗███████╗███████║
+	 * ╚═════╝  ╚═════╝  ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝
 	 */
 	
 	/**
@@ -2413,6 +2413,46 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(spancount, is(1));
 		checkLog("The maximum of subref range 9..10 in document '7', reference 'Test ref y' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", Level.WARN);
 		checkLog("The maximum of subref range 13..19 in document '7', reference 'Test ref y' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", Level.WARN);
+	}
+	
+	/**
+	 * Untrimmed metadata points, linebreaks.
+	 */
+	@Test
+	public void test8() {
+		setTestFile("bugs/8.txt");
+		setProperties("bugs/8.properties");
+		start();
+		assertEquals(9, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocumentGraph graph = null;
+		for (SDocument d : getNonEmptyCorpusGraph().getDocuments()) {
+			for (SMetaAnnotation ma : d.getMetaAnnotations()) {
+				if (ma.getName().equals("pt")) {
+					assertEquals(2, ma.getValue_STEXT().length());
+					assertEquals("XX", ma.getValue_STEXT());
+				}
+				else {
+					if (ma.getName().equals("syn")) {
+						assertEquals("One line second line", ma.getValue_STEXT());
+					}
+				}
+			}
+			graph = d.getDocumentGraph();
+			for (STextualDS ds : graph.getTextualDSs()) {
+				if (graph.getLayerByName("tx").get(0).getNodes().contains(ds)) {
+					if (d.getName().equals("linebreaks_in_tokens")) {
+						assertEquals("One Two Three Four Five Six Seven Eight", ds.getText());
+					}
+				}
+			}
+			for (SSpan s : graph.getSpans()) {
+				if (s.getName().equals("subref")) {
+					for (SAnnotation a : s.getAnnotations()) {
+						assertEquals("Subref annotation across many lines", a.getValue_STEXT());
+					}
+				}
+			}
+		}
 	}
 
 	/**

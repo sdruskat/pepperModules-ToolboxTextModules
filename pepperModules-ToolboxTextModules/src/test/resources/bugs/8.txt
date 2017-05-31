@@ -1,0 +1,129 @@
+\_sh v3.0 Test
+
+\id 0
+\pt XX
+
+\ref 1
+\tx test
+\mb test
+
+\id 1a
+\pt XX 
+
+\ref 1
+\tx test
+\mb test
+
+\id 3a
+\pt XX   
+
+\ref 1
+\tx test
+\mb test
+
+\id 1b
+\pt  XX 
+
+\ref 1
+\tx test
+\mb test
+\sr 0 0         	      Subref                                 
+
+   annotation
+   					across
+
+
+
+
+
+many	 	 	 	 	 	
+
+
+
+				lines
+				
+
+
+
+\id 4b
+\pt     XX 
+
+\ref 1
+\tx test
+\mb test
+
+\id 1a1b
+\pt  XX 
+
+\ref 1
+\tx test
+\mb test
+
+\id 4a3b
+\pt    XX    
+
+
+\syn One line
+
+
+
+
+second line
+
+\ref 1
+\tx test
+\mb test
+
+\id l2
+\pt XX
+
+
+\syn One
+
+
+
+
+
+
+
+line
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                  second
+                                  
+                                  
+                                  
+                                  
+		line
+
+\ref 1
+\tx test
+\mb test
+
+\id linebreaks in tokens
+\ref 1
+\tx One Two
+Three
+
+Four
+
+
+                          Five						Six                              	
+                          
+	Seven	
+	
+Eight                            
+
+\mb test
