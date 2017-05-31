@@ -81,13 +81,16 @@ public class DocumentHeaderMapper extends AbstractBlockMapper {
 			}
 			else {
 				String[] markerContent = line.split("\\s+", 2);
+				// "Normalize" annotation value, i.e. remove multiple whitespaces and line breaks, etc.
+				String[] nonEmptyArray = markerContent[1].split("\\s+");
+				String cleanedAnnotationString = String.join(" ", nonEmptyArray);
 				if (graph.getDocument().getMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX + "::" + markerContent[0].substring(1)) != null) {
 					String oldVal = graph.getDocument().getMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX + "::" + markerContent[0].substring(1)).getValue_STEXT();
-					String newVal = oldVal + " " + markerContent[1];
+					String newVal = oldVal + " " + cleanedAnnotationString;
 					graph.getDocument().getMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX + "::" + markerContent[0].substring(1)).setValue(newVal);
 				}
 				else {
-					graph.getDocument().createMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX, markerContent[0].substring(1), markerContent[1]);
+					graph.getDocument().createMetaAnnotation(super.SALT_NAMESPACE_TOOLBOX, markerContent[0].substring(1), cleanedAnnotationString);
 				}
 			}
 		}
