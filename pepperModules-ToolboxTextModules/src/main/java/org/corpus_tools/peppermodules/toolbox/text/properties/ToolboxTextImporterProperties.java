@@ -17,7 +17,7 @@
  * Contributors:
  *     Stephan Druskat - initial API and implementation
  *******************************************************************************/
-package org.corpus_tools.peppermodules.toolbox.text;
+package org.corpus_tools.peppermodules.toolbox.text.properties;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.PepperModuleProperty;
+import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter;
 
 /**
  * Properties for the ToolboxTextImporter.
@@ -356,7 +357,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return (Boolean) getProperty(PROP_MERGE_DUPL_MARKERS).getValue();
 	}
 
-	boolean errorDetectionMode() {
+	public boolean errorDetectionMode() {
 		return (Boolean) getProperty(PROP_DETECTION_MODE).getValue();
 	}
 	

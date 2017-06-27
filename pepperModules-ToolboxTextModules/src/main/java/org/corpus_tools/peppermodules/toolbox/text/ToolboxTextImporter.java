@@ -31,6 +31,8 @@ import org.corpus_tools.pepper.modules.PepperModule;
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleNotReadyException;
+import org.corpus_tools.peppermodules.toolbox.text.mapping.ToolboxTextImportMapper;
+import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextImporterProperties;
 import org.corpus_tools.salt.common.SCorpus;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
@@ -165,7 +167,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 					}
 					else {
 						// Corpus has ids, of which some might be orphans!
-						// Orphans must be caught in ToolboxTextMapper.
+						// Orphans must be caught in ToolboxTextImportMapper.
 					}
 
 				}
@@ -217,14 +219,14 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 				}
 				idRange = Range.closed(parse.offsetMap.get(identifier), nextIdOffset);
 			}
-			mapper = new ToolboxTextMapper(null, parse.refMap, idRange, parse.idStructureMap.get(idRange.lowerEndpoint()));
+			mapper = new ToolboxTextImportMapper(null, parse.refMap, idRange, parse.idStructureMap.get(idRange.lowerEndpoint()));
 		}
 		else if (element instanceof SCorpus) {
 			if (parse != null) {
-				mapper = new ToolboxTextMapper(parse.headerEndOffset, null, null, false);
+				mapper = new ToolboxTextImportMapper(parse.headerEndOffset, null, null, false);
 			}
 			else { // If there is no parse, we are dealing with a directory!
-				mapper = new ToolboxTextMapper(null, null, null, false);
+				mapper = new ToolboxTextImportMapper(null, null, null, false);
 			}
 		}
 		else {

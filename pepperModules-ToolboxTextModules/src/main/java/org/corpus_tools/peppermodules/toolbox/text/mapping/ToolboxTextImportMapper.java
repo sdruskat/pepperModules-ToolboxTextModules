@@ -17,7 +17,7 @@
  * Contributors:
  *     Stephan Druskat - initial API and implementation
  *******************************************************************************/
-package org.corpus_tools.peppermodules.toolbox.text;
+package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -32,9 +32,8 @@ import java.util.Map;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
-import org.corpus_tools.peppermodules.toolbox.text.mapping.DocumentHeaderMapper;
-import org.corpus_tools.peppermodules.toolbox.text.mapping.RefMapper;
-import org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper;
+import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
+import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextImporterProperties;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
@@ -53,9 +52,9 @@ import com.google.common.io.CountingInputStream;
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
-class ToolboxTextMapper extends AbstractToolboxTextMapper {
+public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 	
-	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextMapper.class);
+	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextImportMapper.class);
 	
 	private final Long headerEndOffset;
 	private final Map<Long, List<Long>> refMap;
@@ -80,7 +79,7 @@ class ToolboxTextMapper extends AbstractToolboxTextMapper {
 	 * @param idRange
 	 * @param hasMorphology 
 	 */
-	ToolboxTextMapper(Long headerEndOffset, Map<Long, List<Long>> refMap, Range<Long> idRange, boolean hasMorphology) {
+	public ToolboxTextImportMapper(Long headerEndOffset, Map<Long, List<Long>> refMap, Range<Long> idRange, boolean hasMorphology) {
 		this.idRange = idRange;
 		this.refMap = refMap;
 		this.headerEndOffset = headerEndOffset;

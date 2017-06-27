@@ -26,10 +26,10 @@ import java.io.File;
 import java.util.HashMap;
 
 import org.apache.commons.lang3.Range;
-import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition;
 import org.corpus_tools.peppermodules.toolbox.text.data.SubrefDefinition.SUBREF_TYPE;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.SubrefMapper;
+import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextImporterProperties;
 import org.junit.Before;
 import org.junit.Test;
 

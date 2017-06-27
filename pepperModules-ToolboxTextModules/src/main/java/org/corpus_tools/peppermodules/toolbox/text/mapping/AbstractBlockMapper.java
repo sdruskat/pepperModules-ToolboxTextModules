@@ -33,7 +33,7 @@ import java.util.Set;
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
-import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporterProperties;
+import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextImporterProperties;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
