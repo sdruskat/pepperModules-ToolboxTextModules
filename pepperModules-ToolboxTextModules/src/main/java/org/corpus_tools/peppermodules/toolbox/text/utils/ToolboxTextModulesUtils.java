@@ -19,6 +19,17 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.SSpan;
+import org.corpus_tools.salt.common.STextualRelation;
+import org.corpus_tools.salt.common.SToken;
+import org.corpus_tools.salt.core.SRelation;
+
 /**
  * // TODO Add description
  *
@@ -74,6 +85,33 @@ public class ToolboxTextModulesUtils {
 	public static String trimAndCondense(String string) {
 		final String[] stringArr = string.trim().split("\\s+");
 		return String.join(" ", stringArr);
+	}
+	
+	/**
+	 * // TODO Add description
+	 * 
+	 * @param unorderedSpans
+	 * @return
+	 */
+	public static List<SSpan> sortSpansByTextCoverageOfIncludedToken(Set<SSpan> unorderedSpans) {
+		final List<SSpan> sortedSpans = new ArrayList<>(); 
+		TreeMap<Integer, SSpan> indexMap = new TreeMap<>();
+		for (SSpan span : unorderedSpans) {
+			SDocumentGraph graph = span.getGraph();
+			List<SToken> sortedTokens = graph.getSortedTokenByText(graph.getOverlappedTokens(span));
+			SToken firstToken = sortedTokens.get(0);
+			List<STextualRelation> textualRels = new ArrayList<>(); 
+			for (SRelation<?, ?> rel : firstToken.getOutRelations()) {
+				if (rel instanceof STextualRelation) {
+					textualRels.add((STextualRelation) rel);
+				}
+			}
+			assert textualRels.size() == 1;
+			indexMap.put(textualRels.get(0).getStart(), span);
+		}
+		sortedSpans.addAll(indexMap.values());
+		return sortedSpans;
+		
 	}
 
 }
