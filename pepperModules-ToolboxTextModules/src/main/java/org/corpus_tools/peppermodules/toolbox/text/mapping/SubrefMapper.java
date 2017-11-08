@@ -129,6 +129,13 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 		 */
 		for (String subrefLine : markerContentMap.get(subRefDefinitionMarker)) {
 			SubrefDefinition subref = createSubrefDefinitionFromSubrefLine(subrefLine);
+			if (subref == null) {
+				log.error(
+						"Something has gone wrong: The subref defined in {} is null. It has probably be defined badly. Please fix the"
+								+ " source data and re-run conversion.",
+						refData.getRef());
+				continue;
+			}
 			SubrefDefinition previous = subrefMap.put(subref.getIdentifier(), subref);
 			if (subref.getType() == SUBREF_TYPE.UNIDENTIFIED_GLOBAL
 					|| subref.getType() == SUBREF_TYPE.UNIDENTIFIED_GLOBAL_TARGETED) {
