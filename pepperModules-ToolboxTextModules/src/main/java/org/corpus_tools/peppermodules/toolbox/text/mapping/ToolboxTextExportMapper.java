@@ -5,8 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
@@ -16,6 +18,8 @@ import org.corpus_tools.salt.SALT_TYPE;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SSpan;
+import org.corpus_tools.salt.common.SToken;
+import org.corpus_tools.salt.core.SAbstractAnnotation;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
@@ -74,16 +78,31 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		final List<String> lines = new ArrayList<>();
 
 		// Write Toolbox header line
-		// Until I have found out what the integer bit is for: 🍀Eh 'mon the Hoops!🍀
-		lines.add("\\_sh v3.0 1888 Pepper ToolboxTextExporter");
+		/*
+		 * Explanation of Toolbox header line from https://groups.google.com/forum/#!topic/shoeboxtoolbox-field-linguists-toolbox/JunMJ4COtJA
+		 * 
+		 * The \_sh and the v3.0 are not related to export; in fact, Toolbox export removes this whole line. Your export, of course, must add it.
+		 *
+		 * The items in this first line are in fixed positions.
+		 * The \_sh is a flag that the data on this line is Toolbox's information, not user data. This line must be the very first line.
+		 * The \_sh is followed by a single space.
+		 * The v3.0 is the version the settings files (I think). Don't change that number.
+		 * The separation here is two spaces.
+		 * The 400 or whatever is the "wrap" length for lines in that database. 400 is a fine number if you are making a new file from something else -- it is the number Toolbox defaults to when creating a new file or bringing in some non-Toolbox data.
+		 * If the wrap is less than 1000, there are two space; if larger, there is only one.
+		 * The last item is indeed the internal name of the database type. This name may include spaces.
+		 * 
+		 * Toolbox database types (and other settings files) have an internal name distinct from the file name of the settings file. Toolbox was written when file names were restricted to an 8.3 format. We felt this was too limiting and created the concept of an internal name.
+		 */
+		lines.add("\\_sh v3.0 400 Text");
 		lines.add("");
 		
 		// Add document annotations and meta annotations
 		for (SAnnotation a : getDocument().getAnnotations()) {
-			lines.add("\\" + a.getName() + " " + a.getValue_STEXT());
+			lines.add(createMarkerAnnoString(a));
 		}
 		for (SMetaAnnotation ma : getDocument().getMetaAnnotations()) {
-			lines.add("\\" + ma.getName() + " " + ma.getValue_STEXT());
+			lines.add(createMarkerAnnoString(ma));
 		}
 		lines.add("");
 		
@@ -92,6 +111,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		 */
 		// Get \id spans
 		String idSpanName = properties.getIdSpanLayer();
+		// TODO Document that we're using the first layer, issues with > 1 layers of the same name
 		SLayer layer = graph.getLayerByName(idSpanName).get(0);
 		Set<SNode> potentialIdNodes = layer.getNodes();
 		Set<SSpan> idSpans = new HashSet<>();
@@ -103,14 +123,21 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		// Order \id spans by indices of tokens they're covering
 		List<SSpan> orderedIdSpans = ToolboxTextModulesUtils.sortSpansByTextCoverageOfIncludedToken(idSpans);
 		for (SSpan idSpan : orderedIdSpans) {
+			// FIXME Externalize \\id, etc. to properties for use here
 			lines.add("\\id " + idSpan.getAnnotation(properties.getIdIdentifierAnnotation()).getValue_STEXT());
-			System.err.println(idSpan.getAnnotations());
 			for (SAnnotation a : idSpan.getAnnotations()) {
 				if (!a.getQName().equals(properties.getIdIdentifierAnnotation())) {
-					lines.add("\\" + a.getName() + " " + a.getValue_STEXT());
+					lines.add(createMarkerAnnoString(a));
+				}
+			}
+			for (SMetaAnnotation ma : idSpan.getMetaAnnotations()) {
+				if (!ma.getQName().equals(properties.getIdIdentifierAnnotation())) {
+					lines.add(createMarkerAnnoString(ma));
 				}
 			}
 			lines.add(" ");
+			
+			// Map \refs
 			// Get refs per id
 			List<DataSourceSequence> dsSequences = graph.getOverlappedDataSourceSequence(idSpan, SALT_TYPE.STEXT_OVERLAPPING_RELATION);
 			// We are currently working with only 1 data source! TODO Add this info to docs
@@ -119,6 +146,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			List<SNode> allNodes = graph.getNodesBySequence(dsSequence);
 			Set<SSpan> refSpans = new HashSet<>();
 			for (SNode node : allNodes) {
+				// TODO Document that we're using the first layer, issues with > 1 layers of the same name
 				if (node instanceof SSpan && node.getLayers().contains(graph.getLayerByName(properties.getRefSpanLayer()).get(0))) {
 					refSpans.add((SSpan) node);
 				}
@@ -128,10 +156,83 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 				lines.add("\\ref " + refSpan.getAnnotation(properties.getRefIdentifierAnnotation()).getValue_STEXT());
 				for (SAnnotation a : refSpan.getAnnotations()) {
 					if (!a.getQName().equals(properties.getRefIdentifierAnnotation())) {
-						lines.add("\\" + a.getName() + " " + a.getValue_STEXT());
+						lines.add(createMarkerAnnoString(a));
 					}
 				}
+				for (SMetaAnnotation ma : refSpan.getMetaAnnotations()) {
+					if (!ma.getQName().equals(properties.getRefIdentifierAnnotation())) {
+						lines.add(createMarkerAnnoString(ma));
+					}
+				}
+				
+				// Map \tx
+				String txLine = "\\tx";
+				List<SToken> txTokens = new ArrayList<>();
+				List<SToken> tokens = graph.getOverlappedTokens(refSpan);
+				Set<SNode> txLayerNodes = graph.getLayerByName(properties.getTxSpanLayer()).get(0).getNodes();
+				for (SToken token : tokens) {
+					if (txLayerNodes.contains(token)) {
+						txTokens.add(token);
+					}
+				}
+				List<SToken> orderedTxTokens = graph.getSortedTokenByText(txTokens);
+				// Build list of tx token annotations
+				Set<String> txTokenAnnotations = new HashSet<>();
+				for (SToken txToken : orderedTxTokens) {
+					for (SAnnotation a : txToken.getAnnotations()) {
+						txTokenAnnotations.add(a.getQName());
+					}
+					for (SMetaAnnotation ma : txToken.getMetaAnnotations()) {
+						txTokenAnnotations.add(ma.getQName());
+					}
+				}
+				// Create annotation line for each annotation in the set
+				Map<String, String> annotationLines = new HashMap<>();
+				for (String annoQName : txTokenAnnotations) {
+					String[] split = annoQName.split("::");
+					String namespace = null;
+					String name = null;
+					if (split.length > 1) {
+						namespace = split[0];
+						name = split[1];
+					}
+					else if (split.length == 1) {
+						name = split[0];
+					}
+					String marker = "\\" + (namespace == null ? name : name + "_[" + namespace + "]");
+					annotationLines.put(annoQName, marker);
+				}
+				// Clean list from annotations that contain primary lexical or morphological material
+				for (String txa : properties.getTxMaterialAnnotations()) {
+					annotationLines.remove(txa);
+				}
+				for (String mba : properties.getMbMaterialAnnotations()) {
+					annotationLines.remove(mba);
+				}
+				// Build tx text
+				for (SToken txToken : orderedTxTokens) {
+					txLine += " " + graph.getText(txToken);
+					for (String aKey : annotationLines.keySet()) {
+						if (txToken.getAnnotation(aKey) != null) {
+							String oldValue = annotationLines.get(aKey); 
+							annotationLines.put(aKey, oldValue += " " + txToken.getAnnotation(aKey).getValue_STEXT());
+						}
+						else if (txToken.getMetaAnnotation(aKey) != null) {
+							String oldValue = annotationLines.get(aKey); 
+							annotationLines.put(aKey, oldValue += " " + txToken.getMetaAnnotation(aKey).getValue_STEXT());
+						}
+
+					}
+				}
+				lines.add(txLine);
+				
+				for (String al : annotationLines.values()) {
+					lines.add(al);
+				}
+				
 				lines.add("");
+				
+				// Map \mb
 			}
 		}
 		
@@ -177,5 +278,10 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 //			}
 //		}
 		return (DOCUMENT_STATUS.COMPLETED);
+	}
+
+	private String createMarkerAnnoString(SAbstractAnnotation a) {
+		String line = "\\" + a.getName().replaceAll("\\s", "-") + (a.getNamespace() != null ? "_[" + a.getNamespace().replaceAll("\\s", "-") : "") + "] " + a.getValue_STEXT();
+		return line;
 	}
 }

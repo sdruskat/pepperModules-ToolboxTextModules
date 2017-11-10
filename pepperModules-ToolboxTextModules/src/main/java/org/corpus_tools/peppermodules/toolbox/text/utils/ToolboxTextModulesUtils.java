@@ -39,6 +39,11 @@ import org.corpus_tools.salt.core.SRelation;
 public class ToolboxTextModulesUtils {
 	
 	/**
+	 * A regex to be used when splitting a String with a comma-delimited list of values with {@link String#split(String)}.
+	 */
+	public static final String COMMA_DELIM_SPLIT_REGEX = "\\s*,\\s*";
+
+	/**
 	 * A utility method to determine whether a
 	 * {@link String} represents a valid `int`.
 	 * 

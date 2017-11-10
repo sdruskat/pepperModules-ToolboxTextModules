@@ -26,6 +26,7 @@ import java.util.List;
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.PepperModuleProperty;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter;
+import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
 
 /**
  * Properties for the ToolboxTextImporter.
@@ -346,7 +347,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	}
 	
 	public List<String> getSubRefAnnotationMarkers() {
-		return new ArrayList<>(Arrays.asList(((String) getProperty(PROP_SUB_REF_ANNOTATION_MARKERS).getValue()).split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)));
+		return new ArrayList<>(Arrays.asList(((String) getProperty(PROP_SUB_REF_ANNOTATION_MARKERS).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
 	}
 	
 	public String getSubrefDefinitionMarker() {
@@ -374,19 +375,19 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	}
 	
 	public Boolean attachDelimiter() {
-		return Boolean.valueOf(getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString().trim().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)[0]);
+		return Boolean.valueOf(getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString().trim().split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)[0]);
 	}
 	
 	public Boolean attachDelimiterToNext() {
-		return Boolean.valueOf(getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString().trim().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)[1]);
+		return Boolean.valueOf(getProperty(PROP_ATTACH_DETACHED_MORPHEME_DELIMITER).getValue().toString().trim().split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)[1]);
 	}
 	
 	public String getAffixDelim() {
-		return getProperty(PROP_MORPHEME_DELIMITERS).getValue().toString().trim().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)[0];
+		return getProperty(PROP_MORPHEME_DELIMITERS).getValue().toString().trim().split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)[0];
 	}
 	
 	public String getCliticDelim() {
-		return getProperty(PROP_MORPHEME_DELIMITERS).getValue().toString().trim().split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)[1];
+		return getProperty(PROP_MORPHEME_DELIMITERS).getValue().toString().trim().split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)[1];
 	}
 
 	public String getLiaisonDelim() {

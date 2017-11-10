@@ -19,7 +19,7 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
-import java.math.BigInteger;
+import java.math.BigInteger; 
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,11 +35,11 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
-import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter;
 import org.corpus_tools.peppermodules.toolbox.text.data.LayerData;
 import org.corpus_tools.peppermodules.toolbox.text.data.MorphLayerData;
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextImporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.utils.MarkerContentMapConsistencyChecker;
+import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
@@ -149,8 +149,8 @@ public class RefMapper extends AbstractBlockMapper {
 
 		// Marker groups
 		String mks;
-		List<String> lexAnnoMarkers = (mks = properties.getLexAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
-		List<String> morphAnnoMarkers = (mks = properties.getMorphAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextImporter.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
+		List<String> lexAnnoMarkers = (mks = properties.getLexAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
+		List<String> morphAnnoMarkers = (mks = properties.getMorphAnnotationMarkers()) != null ? Arrays.asList(mks.split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)) : new ArrayList<String>();
 		List<String> subrefAnnoMarkers = properties.getSubRefAnnotationMarkers() != null ? properties.getSubRefAnnotationMarkers() : new ArrayList<String>();
 		List<String> refAnnoMarkers = new ArrayList<>();
 		for (String key : markerContentMap.keySet()) {
