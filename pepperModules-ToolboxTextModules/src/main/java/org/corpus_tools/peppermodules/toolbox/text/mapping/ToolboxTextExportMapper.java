@@ -168,9 +168,9 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 				// Map \tx
 				String txLine = "\\tx";
 				List<SToken> txTokens = new ArrayList<>();
-				List<SToken> tokens = graph.getOverlappedTokens(refSpan);
-				Set<SNode> txLayerNodes = graph.getLayerByName(properties.getTxSpanLayer()).get(0).getNodes();
-				for (SToken token : tokens) {
+				List<SToken> txCandidateTokens = graph.getOverlappedTokens(refSpan);
+				Set<SNode> txLayerNodes = graph.getLayerByName(properties.getTxTokenLayer()).get(0).getNodes();
+				for (SToken token : txCandidateTokens) {
 					if (txLayerNodes.contains(token)) {
 						txTokens.add(token);
 					}
@@ -187,7 +187,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 					}
 				}
 				// Create annotation line for each annotation in the set
-				Map<String, String> annotationLines = new HashMap<>();
+				Map<String, String> txAnnotationLines = new HashMap<>();
 				for (String annoQName : txTokenAnnotations) {
 					String[] split = annoQName.split("::");
 					String namespace = null;
@@ -200,39 +200,112 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 						name = split[0];
 					}
 					String marker = "\\" + (namespace == null ? name : name + "_[" + namespace + "]");
-					annotationLines.put(annoQName, marker);
+					txAnnotationLines.put(annoQName, marker);
 				}
 				// Clean list from annotations that contain primary lexical or morphological material
 				for (String txa : properties.getTxMaterialAnnotations()) {
-					annotationLines.remove(txa);
+					txAnnotationLines.remove(txa);
 				}
 				for (String mba : properties.getMbMaterialAnnotations()) {
-					annotationLines.remove(mba);
+					txAnnotationLines.remove(mba);
 				}
 				// Build tx text
 				for (SToken txToken : orderedTxTokens) {
 					txLine += " " + graph.getText(txToken);
-					for (String aKey : annotationLines.keySet()) {
+					for (String aKey : txAnnotationLines.keySet()) {
 						if (txToken.getAnnotation(aKey) != null) {
-							String oldValue = annotationLines.get(aKey); 
-							annotationLines.put(aKey, oldValue += " " + txToken.getAnnotation(aKey).getValue_STEXT());
+							String oldValue = txAnnotationLines.get(aKey); 
+							// Sanitize lexical annotations, as these may include spaces that break the item count
+							String sanitizedValue = txToken.getAnnotation(aKey).getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
+							txAnnotationLines.put(aKey, oldValue += " " + sanitizedValue);
 						}
 						else if (txToken.getMetaAnnotation(aKey) != null) {
-							String oldValue = annotationLines.get(aKey); 
-							annotationLines.put(aKey, oldValue += " " + txToken.getMetaAnnotation(aKey).getValue_STEXT());
+							String oldValue = txAnnotationLines.get(aKey); 
+							// Sanitize lexical annotations, as these may include spaces that break the item count
+							String sanitizedValue = txToken.getMetaAnnotation(aKey).getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
+							txAnnotationLines.put(aKey, oldValue += " " + sanitizedValue);
 						}
 
 					}
 				}
 				lines.add(txLine);
 				
-				for (String al : annotationLines.values()) {
+				for (String al : txAnnotationLines.values()) {
 					lines.add(al);
 				}
 				
-				lines.add("");
 				
 				// Map \mb
+				String mbLine = "\\mb";
+				List<SToken> mbTokens = new ArrayList<>();
+				List<SToken> mbCandidateTokens = graph.getOverlappedTokens(refSpan);
+				Set<SNode> mbLayerNodes = graph.getLayerByName(properties.getMbTokenLayer()).get(0).getNodes();
+				for (SToken token : mbCandidateTokens) {
+					if (mbLayerNodes.contains(token)) {
+						mbTokens.add(token);
+					}
+				}
+				List<SToken> orderedMbTokens = graph.getSortedTokenByText(mbTokens);
+				
+				// Build list of mb token annotations
+				Set<String> mbTokenAnnotations = new HashSet<>();
+				for (SToken mbToken : orderedMbTokens) {
+					for (SAnnotation a : mbToken.getAnnotations()) {
+						mbTokenAnnotations.add(a.getQName());
+					}
+					for (SMetaAnnotation ma : mbToken.getMetaAnnotations()) {
+						mbTokenAnnotations.add(ma.getQName());
+					}
+				}
+				// Create annotation line for each annotation in the set
+				Map<String, String> mbAnnotationLines = new HashMap<>();
+				for (String annoQName : mbTokenAnnotations) {
+					String[] split = annoQName.split("::");
+					String namespace = null;
+					String name = null;
+					if (split.length > 1) {
+						namespace = split[0];
+						name = split[1];
+					}
+					else if (split.length == 1) {
+						name = split[0];
+					}
+					String marker = "\\" + (namespace == null ? name : name + "_[" + namespace + "]");
+					mbAnnotationLines.put(annoQName, marker);
+				}
+				// Clean list from annotations that contain primary lexical or morphological material
+				for (String mba : properties.getMbMaterialAnnotations()) {
+					mbAnnotationLines.remove(mba);
+				}
+				for (String mbmba : properties.getMbMaterialAnnotations()) {
+					mbAnnotationLines.remove(mbmba);
+				}
+				// Build mb text
+				for (SToken mbToken : orderedMbTokens) {
+					mbLine += " " + graph.getText(mbToken);
+					for (String aKey : mbAnnotationLines.keySet()) {
+						if (mbToken.getAnnotation(aKey) != null) {
+							String oldValue = mbAnnotationLines.get(aKey);
+							// Sanitize morphological annotations, as these may include spaces that break the item count
+							String sanitizedValue = mbToken.getAnnotation(aKey).getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
+							mbAnnotationLines.put(aKey, oldValue += " " + sanitizedValue);
+						}
+						else if (mbToken.getMetaAnnotation(aKey) != null) {
+							String oldValue = mbAnnotationLines.get(aKey);
+							// Sanitize morphological annotations, as these may include spaces that break the item count
+							String sanitizedValue = mbToken.getMetaAnnotation(aKey).getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
+							mbAnnotationLines.put(aKey, oldValue += " " + sanitizedValue);
+						}
+
+					}
+				}
+				lines.add(mbLine);
+				
+				for (String al : mbAnnotationLines.values()) {
+					lines.add(al);
+				}
+
+				lines.add("");
 			}
 		}
 		

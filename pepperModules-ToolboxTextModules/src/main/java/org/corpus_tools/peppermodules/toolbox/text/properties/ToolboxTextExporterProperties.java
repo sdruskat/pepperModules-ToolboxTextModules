@@ -35,7 +35,9 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	
 	public static final String ID_SPAN_LAYER = "idSpanLayer";
 	
-	public static final String TX_SPAN_LAYER = "txSpanLayer";
+	public static final String TX_TOKEN_LAYER = "txTokenLayer";
+	
+	public static final String MB_TOKEN_LAYER = "mbTokenLayer";
 	
 	/*
 	 * Identifier annotations
@@ -50,6 +52,7 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	public static final String ID_IDENT_ANNOTATION = "idIdentifierAnnotation";
 	public static final String REF_IDENT_ANNOTATION = "refIdentifierAnnotation";
 	public static final String TX_IDENT_ANNOTATION = "txIdentifierAnnotation";
+	public static final String MB_IDENT_ANNOTATION = "mbIdentifierAnnotation";
 	
 	/*
 	 * Annotations which contain primary data, i.e., lexical or morphological material
@@ -59,6 +62,13 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	 */
 	public static final String TX_ANNOTATIONS_TO_IGNORE = "ignoreTxAnnotations";
 	public static final String MB_ANNOTATIONS_TO_IGNORE = "ignoreMbAnnotations";
+	
+	// Other properties
+	/*
+	 * The replacement String to be used for replacing whitespaces in
+	 * annotation values which may break the item count if not replaced.
+	 */
+	public static final String SPACE_REPLACEMENT = "spaceReplacement";
 	
 	/**
 	 * // TODO Add description
@@ -80,12 +90,18 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 		addProperty(PepperModuleProperty.create().withName(TX_IDENT_ANNOTATION).withType(String.class)
 				.withDescription("The annotation (namespace::name) that contains the (partial) content of \\tx lines.")
 				.withDefaultValue("").isRequired(true).build());
+		addProperty(PepperModuleProperty.create().withName(MB_IDENT_ANNOTATION).withType(String.class)
+				.withDescription("The annotation (namespace::name) that contains the (partial) content of \\mb lines.")
+				.withDefaultValue("").isRequired(true).build());
 		addProperty(PepperModuleProperty.create().withName(TX_ANNOTATIONS_TO_IGNORE).withType(String.class)
 				.withDescription("Annotations (namespace::name) on lexical tokens which should be ignored, as a comma-separated list.")
 				.withDefaultValue("").isRequired(false).build());
 		addProperty(PepperModuleProperty.create().withName(MB_ANNOTATIONS_TO_IGNORE).withType(String.class)
 				.withDescription("Annotations (namespace::name) on lexical tokens which should be ignored, as a comma-separated list.")
 				.withDefaultValue("").isRequired(false).build());
+		addProperty(PepperModuleProperty.create().withName(SPACE_REPLACEMENT).withType(String.class)
+				.withDescription("String to replace whitespaces in annotation values with, as these whitespaces may break the item count in Toolbox interlinearization.")
+				.withDefaultValue("-").isRequired(false).build());
 	}
 	
 	/**
@@ -101,8 +117,12 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 		return (String) getProperty(ID_SPAN_LAYER).getValue();
 	}
 	
-	public String getTxSpanLayer() {
-		return (String) getProperty(TX_SPAN_LAYER).getValue();
+	public String getTxTokenLayer() {
+		return (String) getProperty(TX_TOKEN_LAYER).getValue();
+	}
+	
+	public String getMbTokenLayer() {
+		return (String) getProperty(MB_TOKEN_LAYER).getValue();
 	}
 	
 	public String getIdIdentifierAnnotation() {
@@ -125,4 +145,8 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 		return new ArrayList<>(Arrays.asList(((String) getProperty(MB_ANNOTATIONS_TO_IGNORE).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
 	}
 
+	public String getSpaceReplacement() {
+		return (String) getProperty(SPACE_REPLACEMENT).getValue();
+	}
+	
 }
