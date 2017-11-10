@@ -101,7 +101,7 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 				.withDefaultValue("").isRequired(false).build());
 		addProperty(PepperModuleProperty.create().withName(SPACE_REPLACEMENT).withType(String.class)
 				.withDescription("String to replace whitespaces in annotation values with, as these whitespaces may break the item count in Toolbox interlinearization.")
-				.withDefaultValue("-").isRequired(false).build());
+				.withDefaultValue("-").isRequired(true).build());
 	}
 	
 	/**

@@ -216,13 +216,21 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 						if (txToken.getAnnotation(aKey) != null) {
 							String oldValue = txAnnotationLines.get(aKey); 
 							// Sanitize lexical annotations, as these may include spaces that break the item count
-							String sanitizedValue = txToken.getAnnotation(aKey).getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
+							SAnnotation annotation = txToken.getAnnotation(aKey);
+							if (annotation.getValue_STEXT() == null) {
+								annotation.setValue("[missing-annotation]");
+							}
+							String sanitizedValue = annotation.getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
 							txAnnotationLines.put(aKey, oldValue += " " + sanitizedValue);
 						}
 						else if (txToken.getMetaAnnotation(aKey) != null) {
 							String oldValue = txAnnotationLines.get(aKey); 
 							// Sanitize lexical annotations, as these may include spaces that break the item count
-							String sanitizedValue = txToken.getMetaAnnotation(aKey).getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
+							SMetaAnnotation annotation = txToken.getMetaAnnotation(aKey);
+							if (annotation.getValue_STEXT() == null) {
+								annotation.setValue("[missing-annotation]");
+							}
+							String sanitizedValue = annotation.getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
 							txAnnotationLines.put(aKey, oldValue += " " + sanitizedValue);
 						}
 
@@ -287,13 +295,21 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 						if (mbToken.getAnnotation(aKey) != null) {
 							String oldValue = mbAnnotationLines.get(aKey);
 							// Sanitize morphological annotations, as these may include spaces that break the item count
-							String sanitizedValue = mbToken.getAnnotation(aKey).getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
+							SAnnotation annotation = mbToken.getAnnotation(aKey);
+							if (annotation.getValue_STEXT() == null) {
+								annotation.setValue("[missing-annotation]");
+							}
+							String sanitizedValue = annotation.getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
 							mbAnnotationLines.put(aKey, oldValue += " " + sanitizedValue);
 						}
 						else if (mbToken.getMetaAnnotation(aKey) != null) {
 							String oldValue = mbAnnotationLines.get(aKey);
 							// Sanitize morphological annotations, as these may include spaces that break the item count
-							String sanitizedValue = mbToken.getMetaAnnotation(aKey).getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
+							SMetaAnnotation annotation = mbToken.getMetaAnnotation(aKey);
+							if (annotation.getValue_STEXT() == null) {
+								annotation.setValue("[missing-annotation]");
+							}
+							String sanitizedValue = annotation.getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
 							mbAnnotationLines.put(aKey, oldValue += " " + sanitizedValue);
 						}
 
