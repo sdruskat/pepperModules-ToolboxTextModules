@@ -40,9 +40,11 @@ public class ToolboxTextExporter extends PepperExporterImpl implements PepperExp
 	 * @see org.corpus_tools.pepper.impl.PepperModuleImpl#createPepperMapper(org.corpus_tools.salt.graph.Identifier)
 	 */
 	@Override
-	public PepperMapper createPepperMapper(Identifier Identifier) {
+	public PepperMapper createPepperMapper(Identifier identifier) {
 		PepperMapper mapper = new ToolboxTextExportMapper();
-		mapper.setResourceURI(getIdentifier2ResourceTable().get(Identifier));
+		URI resourceURI = getIdentifier2ResourceTable().get(identifier);
+		// TODO: Customize document file name by changing the resourceURI!
+		mapper.setResourceURI(resourceURI);
 		return (mapper);
 	}
 
