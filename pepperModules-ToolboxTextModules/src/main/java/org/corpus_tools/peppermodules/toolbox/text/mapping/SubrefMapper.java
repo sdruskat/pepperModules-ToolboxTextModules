@@ -403,7 +403,13 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			if (key.equals(refData.getMarker()) || key.equals(subRefDefinitionMarker) || key.equals(lexMarker) || key.equals(morphMarker)) {
 				key = markerMap.get(key);
 			}
-			subref.createAnnotation("toolbox", key, anno.getValue());
+			try {
+				subref.createAnnotation("toolbox", key, anno.getValue());
+			}
+			catch (Exception e) {
+				log.warn("Could not add annotation to subref with ranges {} in reference {} (document {}), as an annotation already exists! Ignoring this subref.", definition.getRanges(), refData.getRef(), refData.getDocName(), e);
+				return;
+			}
 		}
 		layer = graph.getLayerByName(mapToMorphTokens ? markerMap.get(morphMarker) : markerMap.get(lexMarker)).get(0);
 		layer.addNode(subref);
