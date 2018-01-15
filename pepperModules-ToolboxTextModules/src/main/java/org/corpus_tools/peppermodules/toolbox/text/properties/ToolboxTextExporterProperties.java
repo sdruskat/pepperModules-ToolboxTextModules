@@ -5,12 +5,17 @@ package org.corpus_tools.peppermodules.toolbox.text.properties;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.PepperModuleProperty;
-import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter;
 import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * // TODO Add description
@@ -19,6 +24,10 @@ import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils
  * 
  */
 public class ToolboxTextExporterProperties extends PepperModuleProperties {
+	
+	private static final Set<String> mdfKeys = new HashSet<>(Arrays.asList("an", "bb", "bw", "ce", "cf", "cn", "cr", "de", "dn", "dr", "dt", "dv", "ec", "ee", "eg", "en", "er", "es", "et", "ev", "ge", "gn", "gr", "gv", "hm", "is", "lc", "le", "lf", "ln", "lr", "lt", "lx", "mn", "mr", "na", "nd", "ng", "np", "nq", "ns", "nt", "oe", "on", "or", "ov", "pc", "pd", "ph", "pl", "pn", "ps", "rd", "re", "rf", "rn", "rr", "sc", "sd", "se", "sg", "sn", "so", "st", "sy", "tb", "th", "ue", "un", "ur", "uv", "va", "ve", "vn", "vr", "we", "wn", "wr", "xe", "xg", "xn", "xr", "xv", "1d", "1e", "1i", "1p", "1s", "2d", "2p", "2s", "3d", "3p", "3s", "4d", "4p", "4s"));
+	
+	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextExporterProperties.class);
 	
 	/**
 	 * 
@@ -39,7 +48,7 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	
 	public static final String MB_TOKEN_LAYER = "mbTokenLayer";
 	
-	/*
+	/**
 	 * Identifier annotations
 	 * 
 	 * These would be annotations which identify Toolbox'
@@ -54,7 +63,7 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	public static final String TX_IDENT_ANNOTATION = "txIdentifierAnnotation";
 	public static final String MB_IDENT_ANNOTATION = "mbIdentifierAnnotation";
 	
-	/*
+	/**
 	 * Annotations which contain primary data, i.e., lexical or morphological material
 	 * which will already be mapped to tokens but still exists as annotation
 	 * and should thus be left out during export to annotations (as they will
@@ -64,11 +73,13 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	public static final String MB_ANNOTATIONS_TO_IGNORE = "ignoreMbAnnotations";
 	
 	// Other properties
-	/*
+	/**
 	 * The replacement String to be used for replacing whitespaces in
 	 * annotation values which may break the item count if not replaced.
 	 */
 	public static final String SPACE_REPLACEMENT = "spaceReplacement";
+	
+	public static final String MDF_MAP = "mdfMap";
 	
 	/**
 	 * // TODO Add description
@@ -102,6 +113,9 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 		addProperty(PepperModuleProperty.create().withName(SPACE_REPLACEMENT).withType(String.class)
 				.withDescription("String to replace whitespaces in annotation values with, as these whitespaces may break the item count in Toolbox interlinearization.")
 				.withDefaultValue("-").isRequired(true).build());
+		addProperty(PepperModuleProperty.create().withName(MDF_MAP).withType(String.class)
+				.withDescription("Map mapping existing annotation keys to MDF markers.")
+				.isRequired(false).build());
 	}
 	
 	/**
@@ -147,6 +161,29 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 
 	public String getSpaceReplacement() {
 		return (String) getProperty(SPACE_REPLACEMENT).getValue();
+	}
+	
+	public Map<String, String> getMDFMap() {
+		Map<String, String> mdfMap = new HashMap<>();
+		List<String> entries = new ArrayList<>(Arrays.asList(((String) getProperty(MDF_MAP).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
+		for (String entry : entries) {
+			try {
+				String[] split = entry.split(":");
+				String mdf = split[0].trim();
+				String key = split[1].trim();
+				if (!mdfKeys.contains(mdf)) {
+					logger.error("MDF Map: The key \'{}\' is not a valid MDF marker! Please refer to the following reference for a list of valid MDF markers: "
+							+ "Coward, David F.; Grimes, Charles E. (2000): \"Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter\"."
+							+ "SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.", mdf);
+					continue;
+				}
+				mdfMap.put(mdf, key);
+			}
+			catch (ArrayIndexOutOfBoundsException e) {
+				logger.error("Map of annotation keys to MDF markers produced an error. Please check the syntactical correctness and re-try conversion.");
+			}
+		}
+		return mdfMap;
 	}
 	
 }
