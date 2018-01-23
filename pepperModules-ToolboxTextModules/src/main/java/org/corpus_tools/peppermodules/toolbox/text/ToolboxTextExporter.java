@@ -3,6 +3,7 @@ package org.corpus_tools.peppermodules.toolbox.text;
 import org.corpus_tools.pepper.impl.PepperExporterImpl;
 import org.corpus_tools.pepper.modules.PepperExporter;
 import org.corpus_tools.pepper.modules.PepperMapper;
+import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleNotReadyException;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.ToolboxTextExportMapper;
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties;
@@ -18,6 +19,15 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(name = "ToolboxTextExporterComponent", factory = "PepperExporterComponentFactory")
 public class ToolboxTextExporter extends PepperExporterImpl implements PepperExporter {
+
+	/**
+	 * TODO
+	 */
+	public static final String FORMAT_NAME = "toolbox-text";
+	/**
+	 * TODO
+	 */
+	public static final String FORMAT_VERSION = "3.0";
 
 	/**
 	 * // TODO Add description
@@ -53,7 +63,8 @@ public class ToolboxTextExporter extends PepperExporterImpl implements PepperExp
 	 */
 	@Override
 	public boolean isReadyToStart() throws PepperModuleNotReadyException {
-		// TODO make some initializations if necessary
+		PepperModuleProperties properties = getProperties();
+		properties.checkProperties();
 		return (super.isReadyToStart());
 	}
 }
