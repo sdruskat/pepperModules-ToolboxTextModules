@@ -95,22 +95,29 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	public static final String SPACE_REPLACEMENT = "spaceReplacement";
 	
 	/**
-	 * A map whose keys are MDF markers, and whose values are {@link SAnnotation}s
-	 * with the pattern `namespace::name`.
+	 * A map whose keys are {@link SAnnotation}s
+	 * with the pattern `namespace::name`, and whose values
+	 * are MDF markers.
 	 * 
 	 * In the export process, the value for the defined {@link SAnnotation} will
 	 * be mapped to the line marked with the respective MDF pattern.
+	 * 
+	 * - Example: `morph::gloss:ge` will map an {@link SAnnotation}
+	 * `morph::gloss:myglossvalue` to `\ge myglossvalue`.
 	 * 
 	 * @see Coward, David F.; Grimes, Charles E. (2000): "Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter". SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.
 	 */
 	public static final String MDF_MAP = "mdfMap";
 	
 	/**
-	 * A map whose keys are custom markers, and whose values are {@link SAnnotation}s
-	 * with the pattern `namespace::name`.
+	 * A map whose keys are {@link SAnnotation}s
+	 * with the pattern `namespace::name`, and whose
+	 * values are custom markers.
 	 * 
 	 * In the export process, the value for the defined {@link SAnnotation} will
 	 * be mapped to the line marked with the respective custom pattern.
+	 * 
+	 * @see #MDF_MAP
 	 */
 	public static final String CUSTOM_MARKERS = "customMarkers";
 	
@@ -226,21 +233,21 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 			for (String entry : entries) {
 				try {
 					String[] split = entry.split(":");
-					String mdf = split[0].trim();
-					String key = split[1].trim();
+					String key = split[0].trim();
+					String mdf = split[1].trim();
 					if (!mdfKeys.contains(mdf)) {
 						logger.error(
-								"MDF Map: The key \'{}\' is not a valid MDF marker! Please refer to the following reference for a list of valid MDF markers: "
+								"MDF Map: The value \'{}\' is not a valid MDF marker! Please refer to the following reference for a list of valid MDF markers: "
 										+ "Coward, David F.; Grimes, Charles E. (2000): \"Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter\"."
 										+ "SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.",
 								mdf);
 						continue;
 					}
-					mdfMap.put(mdf, key);
+					mdfMap.put(key, mdf);
 				}
 				catch (ArrayIndexOutOfBoundsException e) {
 					logger.error(
-							"Map of MDF markers to annotation keys produced an error. Please check the syntactical correctness and re-try conversion.");
+							"Map of annotation keys to MDF markers produced an error. Please check the syntactical correctness and re-try conversion.");
 					throw e;
 				}
 			}
@@ -261,13 +268,13 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 			for (String entry : entries) {
 				try {
 					String[] split = entry.split(":");
-					String marker = split[0].trim();
-					String key = split[1].trim();
-					customMarkerMap.put(marker, key);
+					String key = split[0].trim();
+					String marker = split[1].trim();
+					customMarkerMap.put(key, marker);
 				}
 				catch (ArrayIndexOutOfBoundsException e) {
 					logger.error(
-							"Map of custom markers to annotation keys produced an error. Please check the syntactical correctness and re-try conversion.",
+							"Map of annotation keys to custom markers produced an error. Please check the syntactical correctness and re-try conversion.",
 							e);
 					throw e;
 				}

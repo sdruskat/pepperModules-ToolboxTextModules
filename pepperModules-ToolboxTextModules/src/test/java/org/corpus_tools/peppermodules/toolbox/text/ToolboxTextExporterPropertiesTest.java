@@ -73,10 +73,10 @@ public class ToolboxTextExporterPropertiesTest {
 	@Test
 	public final void testGetValidMDFMap() {
 		Map<String, String> testMDFMap = new HashMap<>();
-		testMDFMap.put("nt", "ntTest");
-		testMDFMap.put("an", "anTest");
-		testMDFMap.put("bb", "bbTest");
-		getFixture().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "nt:ntTest, an : anTest , bb    :       bbTest   ");
+		testMDFMap.put("ntTest", "nt");
+		testMDFMap.put("anTest", "an");
+		testMDFMap.put("bbTest", "bb");
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "ntTest:nt, anTest : an , bbTest    :       bb   ");
 		assertEquals(testMDFMap, getFixture().getMDFMap());
 	}
 	
@@ -86,11 +86,11 @@ public class ToolboxTextExporterPropertiesTest {
 	@Test
 	public final void testGetInvalidMDFMap() {
 		Map<String, String> invalidMDFMap = new HashMap<>();
-		invalidMDFMap.put("nt", "ntTest");
-		invalidMDFMap.put("an", "anTest");
-		getFixture().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "nt:ntTest, an : anTest , invalid    :       bbTest   ");
+		invalidMDFMap.put("ntTest", "nt");
+		invalidMDFMap.put("anTest", "an");
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "ntTest:nt, anTest : an  , bbTest    :       invalid   ");
 		assertEquals(invalidMDFMap, getFixture().getMDFMap());
-		checkLog("MDF Map: The key \'invalid\' is not a valid MDF marker! Please refer to the following reference for a list of valid MDF markers: " + 
+		checkLog("MDF Map: The value \'invalid\' is not a valid MDF marker! Please refer to the following reference for a list of valid MDF markers: " + 
 				"Coward, David F.; Grimes, Charles E. (2000): \"Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter\"." + 
 				"SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.", Level.ERROR);
 	}
@@ -101,10 +101,10 @@ public class ToolboxTextExporterPropertiesTest {
 	@Test
 	public final void testGetValidCustomMarkerMap() {
 		Map<String, String> testCustomMarkerMap = new HashMap<>();
-		testCustomMarkerMap.put("va", "vaTest");
-		testCustomMarkerMap.put("li", "liTest");
-		testCustomMarkerMap.put("d", "dTest");
-		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "va:vaTest, li : liTest , d    :       dTest   ");
+		testCustomMarkerMap.put("vaTest", "va");
+		testCustomMarkerMap.put("liTest", "li");
+		testCustomMarkerMap.put("dTest", "d");
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "vaTest:va, liTest : li  , dTest    :       d   ");
 		assertEquals(testCustomMarkerMap, getFixture().getCustomMarkerMap());
 	}
 	
@@ -113,7 +113,7 @@ public class ToolboxTextExporterPropertiesTest {
 	 */
 	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public final void testGetInvalidCustomMarkerMap() {
-		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "nt:ntTest, an : anTest , invalid    ");
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "ntTest:nt, anTest : an , invalid    ");
 		getFixture().getCustomMarkerMap();
 	}
 
