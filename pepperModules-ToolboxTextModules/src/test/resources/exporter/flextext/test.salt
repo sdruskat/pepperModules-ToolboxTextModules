@@ -1,0 +1,188 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<sDocumentStructure:SDocumentGraph xmlns:sDocumentStructure="sDocumentStructure" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:saltCore="saltCore" xmi:version="2.0">
+	<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test"/>
+	
+	<nodes xsi:type="sDocumentStructure:STimeline">
+		<labels xsi:type="saltCore:SFeature" namespace="saltCommon" name="SDATA" value="N::28"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTimeline1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTimeline1"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:STextualDS">
+		<labels xsi:type="saltCore:SFeature" namespace="saltCommon" name="SDATA" value="T::mb_txt_Börsdaemb_txt_pou-nie"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sText1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::morphological-data"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:STextualDS">
+		<labels xsi:type="saltCore:SFeature" namespace="saltCommon" name="SDATA" value="T::Börsdae pounie"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sText2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::lexical-data"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:SToken" layers="//@layers.1">
+		<labels xsi:type="saltCore:SAnnotation" namespace="morpheme" name="guid" value="T::d7f713e5-e8cf-11d3-9764-00c04f186933"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="morpheme" name="type" value="T::root"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTok1"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="morph_gls" value="T::birthday-root"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTok1"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="fictional" name="morph_cf" value="T::cf_birthday"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:SToken" layers="//@layers.3">
+		<labels xsi:type="saltCore:SAnnotation" namespace="word" name="guid" value="T::35e2a00b-6e7b-42ec-8908-d5bea86c3c99"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTok2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTok2"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="fictional" name="word_txt" value="T::Börsdae"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="word_gls" value="T::Word 1"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:SToken" layers="//@layers.1">
+		<labels xsi:type="saltCore:SAnnotation" namespace="morpheme" name="guid" value="T::d7f713e5-e8cf-11d3-9764-00c04f186933"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="morpheme" name="type" value="T::root"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTok3"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="morph_gls" value="T::pou-root"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTok3"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="fictional" name="morph_cf" value="T::cf_pou"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:SToken" layers="//@layers.1">
+		<labels xsi:type="saltCore:SAnnotation" namespace="morpheme" name="guid" value="T::d7f713dd-e8cf-11d3-9764-00c04f186933"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="morpheme" name="type" value="T::suffix"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTok4"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="morph_gls" value="T::nie-suffix"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTok4"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="fictional" name="morph_cf" value="T::cf_-nie"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:SToken" layers="//@layers.3">
+		<labels xsi:type="saltCore:SAnnotation" namespace="word" name="guid" value="T::de92acc4-1d29-4167-9c4a-9b994b48818a"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTok5"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTok5"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="fictional" name="word_txt" value="T::pounie"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="word_gls" value="T::Word 2"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:SSpan" layers="//@layers.0">
+		<labels xsi:type="saltCore:SAnnotation" namespace="phrase" name="guid" value="T::10c0409c-6189-424f-aa8b-74e7eeef6cfe"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="second" name="phrase_gls" value="T::Börsdae pounie (phrase gloss)"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="phrase_segnum" value="T::1.1"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpan1"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="phrase_gls" value="T::Birthday pony (phrase gloss)"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpan1"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:SSpan" layers="//@layers.2">
+		<labels xsi:type="saltCore:SAnnotation" namespace="paragraph" name="seqnum" value="T::1"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="paragraph" name="guid" value="T::091f3010-2a9c-4721-aabf-af4931a3b318"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpan2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpan2"/>
+	</nodes>
+	<edges xsi:type="sDocumentStructure:STextualRelation" source="//@nodes.3" target="//@nodes.1">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::14"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTextRel1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::0"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTextRel1"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STimelineRelation" source="//@nodes.3" target="//@nodes.0">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::14"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTimeRel1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::0"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTimeRel1"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STextualRelation" source="//@nodes.4" target="//@nodes.2">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::7"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTextRel2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::0"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTextRel2"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STimelineRelation" source="//@nodes.4" target="//@nodes.0">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::14"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTimeRel2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::0"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTimeRel2"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STextualRelation" source="//@nodes.5" target="//@nodes.1">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::24"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTextRel3"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::14"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTextRel3"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STimelineRelation" source="//@nodes.5" target="//@nodes.0">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::24"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTimeRel3"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::14"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTimeRel3"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STextualRelation" source="//@nodes.6" target="//@nodes.1">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::28"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTextRel4"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::24"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTextRel4"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STimelineRelation" source="//@nodes.6" target="//@nodes.0">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::28"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTimeRel4"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::24"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTimeRel4"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STextualRelation" source="//@nodes.7" target="//@nodes.2">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::14"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTextRel5"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::8"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTextRel5"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STimelineRelation" source="//@nodes.7" target="//@nodes.0">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::28"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTimeRel5"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::14"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTimeRel5"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.8" target="//@nodes.4">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpanRel1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel1"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.8" target="//@nodes.7">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpanRel2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel2"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.8" target="//@nodes.3">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpanRel3"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel3"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.8" target="//@nodes.5">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpanRel4"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel4"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.8" target="//@nodes.6">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpanRel5"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel5"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.9" target="//@nodes.4">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpanRel6"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel6"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.9" target="//@nodes.5">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpanRel7"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel7"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.9" target="//@nodes.6">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpanRel8"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel8"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.9" target="//@nodes.3">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpanRel9"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel9"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.9" target="//@nodes.7">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpanRel10"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel10"/>
+	</edges>
+	<layers xsi:type="saltCore:SLayer" nodes="//@nodes.8">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::l1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::phrases"/>
+	</layers>
+	<layers xsi:type="saltCore:SLayer" nodes="//@nodes.6 //@nodes.3 //@nodes.5">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::l3"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::morphemes"/>
+	</layers>
+	<layers xsi:type="saltCore:SLayer" nodes="//@nodes.9">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::l0"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::paragraphs"/>
+	</layers>
+	<layers xsi:type="saltCore:SLayer" nodes="//@nodes.7 //@nodes.4">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::l2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::words"/>
+	</layers>
+</sDocumentStructure:SDocumentGraph>

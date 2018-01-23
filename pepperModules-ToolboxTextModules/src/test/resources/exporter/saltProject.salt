@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<saltCommon:SaltProject xmlns:sCorpusStructure="sCorpusStructure" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:saltCore="saltCore" xmlns:saltCommon="saltCommon" xmi:version="2.0">
+	<sCorpusGraphs>
+	<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::flextext"/>
+	<nodes xsi:type="sCorpusStructure:SCorpus">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::flextext"/>
+	</nodes>
+	<nodes xsi:type="sCorpusStructure:SDocument">
+		<labels xsi:type="saltCore:SAnnotation" namespace="interlinear-text" name="guid" value="T::5c7ca17a-c656-42ec-bf17-XXX"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="fictional" name="interlinear-text_source" value="T::Stephan Druskat"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="languages" name="fictional" value="T::encoding=null,vernacular=true,font=Times New Roman"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="interlinear-text_title" value="T::Birthday pony"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="second" name="interlinear-text_title" value="T::Börsday pony text"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SDOCUMENT_GRAPH"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="fictional" name="interlinear-text_title" value="T::Brsd pn"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::test"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="languages" name="second" value="T::encoding=null,vernacular=null,font=Times New Roman"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SDOCUMENT_GRAPH_LOCATION" value="T::file:/tmp/pepper_stephan/workspace/sh54cb6a/test4027246262261359584.salt"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="languages" name="en" value="T::encoding=null,vernacular=null,font=Times New Roman"/>
+	</nodes>
+	<edges xsi:type="sCorpusStructure:SCorpusDocumentRelation" source="//@nodes.0" target="//@nodes.1">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/corpDocRel1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::corpDocRel1"/>
+	</edges>
+	</sCorpusGraphs>
+</saltCommon:SaltProject>
