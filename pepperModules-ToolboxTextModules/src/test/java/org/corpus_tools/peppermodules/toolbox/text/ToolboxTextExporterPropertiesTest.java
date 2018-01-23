@@ -95,6 +95,27 @@ public class ToolboxTextExporterPropertiesTest {
 				"SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.", Level.ERROR);
 	}
 
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getMDFMap()}.
+	 */
+	@Test
+	public final void testGetValidCustomMarkerMap() {
+		Map<String, String> testCustomMarkerMap = new HashMap<>();
+		testCustomMarkerMap.put("va", "vaTest");
+		testCustomMarkerMap.put("li", "liTest");
+		testCustomMarkerMap.put("d", "dTest");
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "va:vaTest, li : liTest , d    :       dTest   ");
+		assertEquals(testCustomMarkerMap, getFixture().getCustomMarkerMap());
+	}
+	
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getMDFMap()}.
+	 */
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
+	public final void testGetInvalidCustomMarkerMap() {
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "nt:ntTest, an : anTest , invalid    ");
+		getFixture().getCustomMarkerMap();
+	}
 
 	/**
 	 * @return the fixture

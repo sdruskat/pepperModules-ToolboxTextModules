@@ -14,6 +14,7 @@ import java.util.Set;
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.PepperModuleProperty;
 import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
+import org.corpus_tools.salt.core.SAnnotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,14 +39,23 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	 * Layer names
 	 */
 	/**
-	 * TODO
+	 * TODO Document that these layers are needed!
 	 */
 	public static final String REF_SPAN_LAYER = "refSpanLayer";
 	
+	/**
+	 * 
+	 */
 	public static final String ID_SPAN_LAYER = "idSpanLayer";
 	
+	/**
+	 * 
+	 */
 	public static final String TX_TOKEN_LAYER = "txTokenLayer";
 	
+	/**
+	 * 
+	 */
 	public static final String MB_TOKEN_LAYER = "mbTokenLayer";
 	
 	/**
@@ -59,9 +69,10 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	 * \ref 123.5746
 	 */
 	public static final String ID_IDENT_ANNOTATION = "idIdentifierAnnotation";
+	/**
+	 * 
+	 */
 	public static final String REF_IDENT_ANNOTATION = "refIdentifierAnnotation";
-	public static final String TX_IDENT_ANNOTATION = "txIdentifierAnnotation";
-	public static final String MB_IDENT_ANNOTATION = "mbIdentifierAnnotation";
 	
 	/**
 	 * Annotations which contain primary data, i.e., lexical or morphological material
@@ -69,8 +80,12 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	 * and should thus be left out during export to annotations (as they will
 	 * already be mapped to \tx or \mb).
 	 */
-	public static final String TX_ANNOTATIONS_TO_IGNORE = "ignoreTxAnnotations";
-	public static final String MB_ANNOTATIONS_TO_IGNORE = "ignoreMbAnnotations";
+	public static final String TX_ANNOTATIONS_TO_IGNORE = "txMaterialAnnotations";
+	
+	/**
+	 * TODO 
+	 */
+	public static final String MB_ANNOTATIONS_TO_IGNORE = "mbMaterialAnnotations";
 	
 	// Other properties
 	/**
@@ -79,7 +94,25 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	 */
 	public static final String SPACE_REPLACEMENT = "spaceReplacement";
 	
+	/**
+	 * A map whose keys are MDF markers, and whose values are {@link SAnnotation}s
+	 * with the pattern `namespace::name`.
+	 * 
+	 * In the export process, the value for the defined {@link SAnnotation} will
+	 * be mapped to the line marked with the respective MDF pattern.
+	 * 
+	 * @see Coward, David F.; Grimes, Charles E. (2000): "Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter". SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.
+	 */
 	public static final String MDF_MAP = "mdfMap";
+	
+	/**
+	 * A map whose keys are custom markers, and whose values are {@link SAnnotation}s
+	 * with the pattern `namespace::name`.
+	 * 
+	 * In the export process, the value for the defined {@link SAnnotation} will
+	 * be mapped to the line marked with the respective custom pattern.
+	 */
+	public static final String CUSTOM_MARKERS = "customMarkers";
 	
 	/**
 	 * // TODO Add description
@@ -92,29 +125,32 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 		addProperty(PepperModuleProperty.create().withName(ID_SPAN_LAYER).withType(String.class)
 				.withDescription("The Salt layer that contains the spans to be mapped to Toolbox \\ids.")
 				.withDefaultValue("id").isRequired(true).build());
+		addProperty(PepperModuleProperty.create().withName(TX_TOKEN_LAYER).withType(String.class)
+				.withDescription("The Salt layer that contains the tokens to be mapped to Toolbox' \\tx lines.")
+				.withDefaultValue("id").isRequired(true).build());
+		addProperty(PepperModuleProperty.create().withName(MB_TOKEN_LAYER).withType(String.class)
+				.withDescription("The Salt layer that contains the tokens to be mapped to Toolbox' \\mb lines.")
+				.withDefaultValue("id").isRequired(true).build());
 		addProperty(PepperModuleProperty.create().withName(ID_IDENT_ANNOTATION).withType(String.class)
 				.withDescription("The annotation (namespace::name) that contains the identifier of \\ids.")
-				.withDefaultValue("").isRequired(true).build());
+				.isRequired(true).build());
 		addProperty(PepperModuleProperty.create().withName(REF_IDENT_ANNOTATION).withType(String.class)
 				.withDescription("The annotation (namespace::name) that contains the identifier of \\refs.")
-				.withDefaultValue("").isRequired(true).build());
-		addProperty(PepperModuleProperty.create().withName(TX_IDENT_ANNOTATION).withType(String.class)
-				.withDescription("The annotation (namespace::name) that contains the (partial) content of \\tx lines.")
-				.withDefaultValue("").isRequired(true).build());
-		addProperty(PepperModuleProperty.create().withName(MB_IDENT_ANNOTATION).withType(String.class)
-				.withDescription("The annotation (namespace::name) that contains the (partial) content of \\mb lines.")
-				.withDefaultValue("").isRequired(true).build());
+				.isRequired(true).build());
 		addProperty(PepperModuleProperty.create().withName(TX_ANNOTATIONS_TO_IGNORE).withType(String.class)
 				.withDescription("Annotations (namespace::name) on lexical tokens which should be ignored, as a comma-separated list.")
-				.withDefaultValue("").isRequired(false).build());
+				.isRequired(false).build());
 		addProperty(PepperModuleProperty.create().withName(MB_ANNOTATIONS_TO_IGNORE).withType(String.class)
 				.withDescription("Annotations (namespace::name) on lexical tokens which should be ignored, as a comma-separated list.")
-				.withDefaultValue("").isRequired(false).build());
+				.isRequired(false).build());
 		addProperty(PepperModuleProperty.create().withName(SPACE_REPLACEMENT).withType(String.class)
 				.withDescription("String to replace whitespaces in annotation values with, as these whitespaces may break the item count in Toolbox interlinearization.")
 				.withDefaultValue("-").isRequired(true).build());
 		addProperty(PepperModuleProperty.create().withName(MDF_MAP).withType(String.class)
 				.withDescription("Map mapping existing annotation keys to MDF markers.")
+				.isRequired(false).build());
+		addProperty(PepperModuleProperty.create().withName(CUSTOM_MARKERS).withType(String.class)
+				.withDescription("Map mapping existing annotation keys to custom Toolbox markers supplementing the official MDF markers.")
 				.isRequired(false).build());
 	}
 	
@@ -147,43 +183,98 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 		return (String) getProperty(REF_IDENT_ANNOTATION).getValue();
 	}
 	
-	public String getTxIdentifierAnnotation() {
-		return (String) getProperty(TX_IDENT_ANNOTATION).getValue();
-	}
-	
+	/**
+	 * // TODO Add description
+	 * 
+	 * @return TODO list or empty list
+	 */
 	public List<String> getTxMaterialAnnotations() {
-		return new ArrayList<>(Arrays.asList(((String) getProperty(TX_ANNOTATIONS_TO_IGNORE).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
+		if (getProperty(TX_ANNOTATIONS_TO_IGNORE).getValue() != null) {
+			return new ArrayList<>(Arrays.asList(((String) getProperty(TX_ANNOTATIONS_TO_IGNORE).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
+		}
+		else return new ArrayList<String>();
 	}
 	
+	/**
+	 * // TODO Add description
+	 * 
+	 * @return TODO list or empty list
+	 */
 	public List<String> getMbMaterialAnnotations() {
-		return new ArrayList<>(Arrays.asList(((String) getProperty(MB_ANNOTATIONS_TO_IGNORE).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
+		if (getProperty(MB_ANNOTATIONS_TO_IGNORE).getValue() != null) {
+			return new ArrayList<>(Arrays.asList(((String) getProperty(MB_ANNOTATIONS_TO_IGNORE).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
+		}
+		else {
+			return new ArrayList<String>();
+		}
 	}
 
 	public String getSpaceReplacement() {
 		return (String) getProperty(SPACE_REPLACEMENT).getValue();
 	}
 	
+	/**
+	 * // TODO Add description
+	 * 
+	 * @return TODO map or empty map
+	 */
 	public Map<String, String> getMDFMap() {
 		Map<String, String> mdfMap = new HashMap<>();
-		List<String> entries = new ArrayList<>(Arrays.asList(((String) getProperty(MDF_MAP).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
-		for (String entry : entries) {
-			try {
-				String[] split = entry.split(":");
-				String mdf = split[0].trim();
-				String key = split[1].trim();
-				if (!mdfKeys.contains(mdf)) {
-					logger.error("MDF Map: The key \'{}\' is not a valid MDF marker! Please refer to the following reference for a list of valid MDF markers: "
-							+ "Coward, David F.; Grimes, Charles E. (2000): \"Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter\"."
-							+ "SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.", mdf);
-					continue;
+		if (getProperty(MDF_MAP).getValue() != null) {
+			List<String> entries = new ArrayList<>(Arrays.asList(
+					((String) getProperty(MDF_MAP).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
+			for (String entry : entries) {
+				try {
+					String[] split = entry.split(":");
+					String mdf = split[0].trim();
+					String key = split[1].trim();
+					if (!mdfKeys.contains(mdf)) {
+						logger.error(
+								"MDF Map: The key \'{}\' is not a valid MDF marker! Please refer to the following reference for a list of valid MDF markers: "
+										+ "Coward, David F.; Grimes, Charles E. (2000): \"Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter\"."
+										+ "SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.",
+								mdf);
+						continue;
+					}
+					mdfMap.put(mdf, key);
 				}
-				mdfMap.put(mdf, key);
-			}
-			catch (ArrayIndexOutOfBoundsException e) {
-				logger.error("Map of annotation keys to MDF markers produced an error. Please check the syntactical correctness and re-try conversion.");
+				catch (ArrayIndexOutOfBoundsException e) {
+					logger.error(
+							"Map of MDF markers to annotation keys produced an error. Please check the syntactical correctness and re-try conversion.");
+					throw e;
+				}
 			}
 		}
 		return mdfMap;
 	}
+	
+	/**
+	 * // TODO Add description
+	 * 
+	 * @return TODO map or empty map
+	 */
+	public Map<String, String> getCustomMarkerMap() {
+		Map<String, String> customMarkerMap = new HashMap<>();
+		if (getProperty(CUSTOM_MARKERS).getValue() != null) {
+			List<String> entries = new ArrayList<>(Arrays.asList(((String) getProperty(CUSTOM_MARKERS).getValue())
+					.split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
+			for (String entry : entries) {
+				try {
+					String[] split = entry.split(":");
+					String marker = split[0].trim();
+					String key = split[1].trim();
+					customMarkerMap.put(marker, key);
+				}
+				catch (ArrayIndexOutOfBoundsException e) {
+					logger.error(
+							"Map of custom markers to annotation keys produced an error. Please check the syntactical correctness and re-try conversion.",
+							e);
+					throw e;
+				}
+			}
+		}
+		return customMarkerMap;
+	}
+
 	
 }
