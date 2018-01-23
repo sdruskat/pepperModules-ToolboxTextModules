@@ -17,7 +17,10 @@ import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils
 import org.corpus_tools.salt.SALT_TYPE;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.SSequentialDS;
 import org.corpus_tools.salt.common.SSpan;
+import org.corpus_tools.salt.common.STextualDS;
+import org.corpus_tools.salt.common.STimeline;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SAbstractAnnotation;
 import org.corpus_tools.salt.core.SAnnotation;
@@ -81,7 +84,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		/*
 		 * Explanation of Toolbox header line from https://groups.google.com/forum/#!topic/shoeboxtoolbox-field-linguists-toolbox/JunMJ4COtJA
 		 * 
-		 * The \_sh and the v3.0 are not related to export; in fact, Toolbox export removes this whole line. Your export, of course, must add it.
+		 * "The \_sh and the v3.0 are not related to export; in fact, Toolbox export removes this whole line. Your export, of course, must add it.
 		 *
 		 * The items in this first line are in fixed positions.
 		 * The \_sh is a flag that the data on this line is Toolbox's information, not user data. This line must be the very first line.
@@ -92,7 +95,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		 * If the wrap is less than 1000, there are two space; if larger, there is only one.
 		 * The last item is indeed the internal name of the database type. This name may include spaces.
 		 * 
-		 * Toolbox database types (and other settings files) have an internal name distinct from the file name of the settings file. Toolbox was written when file names were restricted to an 8.3 format. We felt this was too limiting and created the concept of an internal name.
+		 * Toolbox database types (and other settings files) have an internal name distinct from the file name of the settings file. Toolbox was written when file names were restricted to an 8.3 format. We felt this was too limiting and created the concept of an internal name."
 		 */
 		lines.add("\\_sh v3.0 400 Text");
 		lines.add("");
@@ -112,6 +115,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		// Get \id spans
 		String idSpanName = properties.getIdSpanLayer();
 		// TODO Document that we're using the first layer, issues with > 1 layers of the same name
+		// TODO Document that SLayers NEED TO BE PRESENT for the conversion to work at all
 		SLayer layer = graph.getLayerByName(idSpanName).get(0);
 		Set<SNode> potentialIdNodes = layer.getNodes();
 		Set<SSpan> idSpans = new HashSet<>();
@@ -140,8 +144,15 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			// Map \refs
 			// Get refs per id
 			List<DataSourceSequence> dsSequences = graph.getOverlappedDataSourceSequence(idSpan, SALT_TYPE.STEXT_OVERLAPPING_RELATION);
-			// We are currently working with only 1 data source! TODO Add this info to docs
-			assert dsSequences.size() == 1;
+			/*
+			 *  We are currently working with only 1 data source! TODO Add this info to docs.
+			 *  Spans should arguably only overlap one data source anyway, but some
+			 *  importers (notably the FLExImporter) will tie "phrase" spans (i.e., Toolbox refs)
+			 *  to both morphological and lexical tokens. Here it is assumed, that the spanned
+			 *  lexical tokens exactly overlap the spanned morphological tokens, and hence any
+			 *  DataSourceSequence of the two (or possibly more) will have the same effect
+			 *  on the Toolbox ref.
+			 */
 			DataSourceSequence dsSequence = dsSequences.get(0);
 			List<SNode> allNodes = graph.getNodesBySequence(dsSequence);
 			Set<SSpan> refSpans = new HashSet<>();
