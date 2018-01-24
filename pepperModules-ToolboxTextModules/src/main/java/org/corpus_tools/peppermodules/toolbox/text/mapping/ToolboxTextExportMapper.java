@@ -17,10 +17,7 @@ import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils
 import org.corpus_tools.salt.SALT_TYPE;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocumentGraph;
-import org.corpus_tools.salt.common.SSequentialDS;
 import org.corpus_tools.salt.common.SSpan;
-import org.corpus_tools.salt.common.STextualDS;
-import org.corpus_tools.salt.common.STimeline;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SAbstractAnnotation;
 import org.corpus_tools.salt.core.SAnnotation;
@@ -143,6 +140,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			
 			// Map \refs
 			// Get refs per id
+			@SuppressWarnings("rawtypes")
 			List<DataSourceSequence> dsSequences = graph.getOverlappedDataSourceSequence(idSpan, SALT_TYPE.STEXT_OVERLAPPING_RELATION);
 			/*
 			 *  We are currently working with only 1 data source! TODO Add this info to docs.
@@ -153,6 +151,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			 *  DataSourceSequence of the two (or possibly more) will have the same effect
 			 *  on the Toolbox ref.
 			 */
+			@SuppressWarnings("rawtypes")
 			DataSourceSequence dsSequence = dsSequences.get(0);
 			List<SNode> allNodes = graph.getNodesBySequence(dsSequence);
 			Set<SSpan> refSpans = new HashSet<>();
@@ -210,7 +209,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 					else if (split.length == 1) {
 						name = split[0];
 					}
-					String marker = "\\" + (namespace == null ? name : name + "_[" + namespace + "]");
+					String marker = createMarkerString(namespace, name);
 					txAnnotationLines.put(annoQName, marker);
 				}
 				// Clean list from annotations that contain primary lexical or morphological material
@@ -289,7 +288,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 					else if (split.length == 1) {
 						name = split[0];
 					}
-					String marker = "\\" + (namespace == null ? name : name + "_[" + namespace + "]");
+					String marker = createMarkerString(namespace, name);
 					mbAnnotationLines.put(annoQName, marker);
 				}
 				// Clean list from annotations that contain primary lexical or morphological material
@@ -367,21 +366,34 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
-	 * Storing the corpus-structure once
+	 * // TODO Add description
+	 * 
+	 * @param a
+	 * @return
 	 */
-	@Override
-	public DOCUMENT_STATUS mapSCorpus() {
-//		List<SNode> roots = getCorpus().getGraph().getRoots();
-//		if ((roots != null) && (!roots.isEmpty())) {
-//			if (getCorpus().equals(roots.get(0))) {
-////				SaltUtil.save_DOT(getCorpus().getGraph(), getResourceURI());
-//			}
-//		}
-		return (DOCUMENT_STATUS.COMPLETED);
+	private String createMarkerAnnoString(SAbstractAnnotation a) {
+		String marker = createMarkerString(a.getNamespace(), a.getName());
+		return marker + " " + a.getValue_STEXT();
 	}
 
-	private String createMarkerAnnoString(SAbstractAnnotation a) {
-		String line = "\\" + a.getName().replaceAll("\\s", "-") + (a.getNamespace() != null ? "_[" + a.getNamespace().replaceAll("\\s", "-") : "") + "] " + a.getValue_STEXT();
+	/**
+	 * // TODO Add description
+	 * 
+	 * @param namespace
+	 * @param name
+	 * @return
+	 */
+	private String createMarkerString(String namespace, String name) {
+		String nsn = namespace != null ? namespace + "::" + name : name;
+		String marker = properties.getAnnotationMarkerMap().get(nsn);
+		String line = "MISSING " + nsn;
+		if (marker != null) {
+			line = "\\" + marker;
+		}
+		else {
+			line = "\\" + name.replaceAll("\\s", "-")
+					+ (namespace != null ? "_[" + namespace.replaceAll("\\s", "-") : "") + "]";
+		}
 		return line;
 	}
 }
