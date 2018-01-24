@@ -123,6 +123,11 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	 * @see #MDF_MAP
 	 */
 	public static final String CUSTOM_MARKERS = "customMarkers";
+
+	/**
+	 * 
+	 */
+	public static final String MARKER_SPLIT_REGEX = "(?<!:):(?!:)";
 	
 	/**
 	 * // TODO Add description
@@ -237,7 +242,7 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 					((String) getProperty(MDF_MAP).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
 			for (String entry : entries) {
 				try {
-					String[] split = entry.split(":");
+					String[] split = entry.split(MARKER_SPLIT_REGEX, 2);
 					String key = split[0].trim(); // Salt annotation
 					String mdf = split[1].trim(); // MDF marker
 					// Check if key exists
@@ -284,7 +289,7 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 					.split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
 			for (String entry : entries) {
 				try {
-					String[] split = entry.split(":");
+					String[] split = entry.split(MARKER_SPLIT_REGEX, 2);
 					String key = split[0].trim();
 					String marker = split[1].trim();
 					// Check if key exists

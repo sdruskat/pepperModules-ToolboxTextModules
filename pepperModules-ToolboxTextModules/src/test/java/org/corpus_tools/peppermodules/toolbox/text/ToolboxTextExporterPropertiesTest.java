@@ -9,6 +9,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties;
 import org.junit.After;
 import org.junit.Before;
@@ -242,7 +245,29 @@ public class ToolboxTextExporterPropertiesTest {
 		assertEquals(testMap, resultMap);
 	}
 	
-
+	/**
+	 * Test method for the marker split regex
+	 * {@link ToolboxTextExporterProperties#MARKER_SPLIT_REGEX}
+	 */
+	@Test
+	public final void testMarkerSplitRegex() {
+		String regex = ToolboxTextExporterProperties.MARKER_SPLIT_REGEX;
+		String s1 = "ns::n:val"; // [ns::n, val]
+		String s2 = "ns::n1::n2:val"; // [ns::n1::n2, val]
+		String s3 = "ns::n:val1:val2"; // [ns::n, val1:val2]
+		String s4 = "ns::n:val1:val2:val3"; // [ns::n, val1:val2:val3]
+		String s5 = "ns::n:val1:val2::val3"; // [ns::n, val1:val2::val3]
+		String[] a1 = new String[] {"ns::n", "val"};
+		String[] a2 = new String[] {"ns::n1::n2", "val"};
+		String[] a3 = new String[] {"ns::n", "val1:val2"};
+		String[] a4 = new String[] {"ns::n", "val1:val2:val3"};
+		String[] a5 = new String[] {"ns::n", "val1:val2::val3"};
+		assertThat(s1.split(regex, 2), is(a1));
+		assertThat(s2.split(regex, 2), is(a2));
+		assertThat(s3.split(regex, 2), is(a3));
+		assertThat(s4.split(regex, 2), is(a4));
+		assertThat(s5.split(regex, 2), is(a5));
+	}
 
 
 
