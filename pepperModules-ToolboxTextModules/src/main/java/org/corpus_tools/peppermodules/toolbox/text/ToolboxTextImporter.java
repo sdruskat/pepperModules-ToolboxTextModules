@@ -96,21 +96,26 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	 * @param corpusFile
 	 */
 	private void importCorpusStructure(SCorpusGraph corpusGraph, SCorpus parent, File corpusFile) {
+		if (corpusFile == null) {
+			throw new PepperModuleException("Corpus file is null. Exiting!");
+		}
 		List<Long> idOffsets;
 		Map<Long, List<Long>> refMap;
 		Long headerEndOffset = null;
 		boolean monolithic = false;
 		final Map<Identifier, Long> offsetMap = new HashMap<>();
 		Map<Long, Boolean> idStructureMap;
-		URI corpusFileURI = URI.createFileURI(corpusFile != null ? corpusFile.getAbsolutePath() : null);
+		URI corpusFileURI = URI.createFileURI(corpusFile.getAbsolutePath());
 		String corpusFileName = corpusFile.getName();
 		if (corpusFile.isDirectory()) {
 			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName);
 			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), corpusFileURI);
-			if (corpusFile != null) {
-				for (File child : corpusFile.listFiles()) {
-					importCorpusStructure(corpusGraph, subCorpus, child);
-				}
+			File[] files = corpusFile.listFiles();
+			if (files == null) {
+				throw new PepperModuleException("Corpus file " + corpusFile.getName() + " has no children!");
+			}
+			for (File child : files) {
+				importCorpusStructure(corpusGraph, subCorpus, child);
 			}
 		}
 		else if (corpusFile.isFile()) {
@@ -190,12 +195,16 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	public PepperMapper createPepperMapper(Identifier identifier) {
 		ToolboxParseBean parse = parseMap.get(identifier);
 		PepperMapper mapper = null;
-		URI resource = getIdentifier2ResourceTable().get(identifier);
-		if (identifier == null) {
+		URI resource = null;
+		try {
+			resource = getIdentifier2ResourceTable().get(identifier);
+		}
+		catch (NullPointerException e) {
 			throw new PepperModuleException("Cannot create a Pepper mapper! The identifier is null!");
 		}
-		else if (identifier.getIdentifiableElement() == null) {
-			throw new PepperModuleException("Cannot create a Pepper mapper! The identifier " + identifier + "'s identifiable element is null!");
+		if (identifier.getIdentifiableElement() == null) {
+			throw new PepperModuleException(
+					"Cannot create a Pepper mapper! The identifier " + identifier + "'s identifiable element is null!");
 		}
 		IdentifiableElement element = identifier.getIdentifiableElement();
 		if (element instanceof SDocument) {

@@ -50,7 +50,7 @@ public class SubrefMapperTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		ToolboxTextImporterProperties props = setProperties("subref.properties");
+		ToolboxTextImporterProperties props = setProperties("importer/subref.properties");
 		SubrefMapper subrefMapper = new SubrefMapper(new HashMap<String, String>(), props, null, null, null, null, null, true);
 		setFixture(subrefMapper);
 	}

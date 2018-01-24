@@ -49,6 +49,19 @@
 		</dependency>
 	</dependencies>
 	
+	<reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.6-SNAPSHOT</version>
+        <configuration>
+          <excludeFilterFile>${basedir}src/findbugs/excludeFilter.xml</excludeFilterFile>
+          </configuration>
+      </plugin>
+    </plugins>
+	</reporting>
+	
 	<build>
 		<plugins>
 			<!-- start: creation of bundle jar -->

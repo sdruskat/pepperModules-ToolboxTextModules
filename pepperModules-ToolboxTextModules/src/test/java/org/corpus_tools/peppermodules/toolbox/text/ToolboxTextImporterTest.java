@@ -31,6 +31,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,7 @@ import org.corpus_tools.pepper.common.FormatDesc;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.pepper.testFramework.PepperImporterTest;
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextImporterProperties;
+import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
 import org.corpus_tools.salt.common.SDocumentGraph;
@@ -50,6 +52,7 @@ import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.corpus_tools.salt.core.SNode;
+import org.corpus_tools.salt.graph.Identifier;
 import org.eclipse.emf.common.util.URI;
 import org.junit.After;
 import org.junit.Before;
@@ -109,7 +112,36 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	public void teardown() {
 		rootLogger.detachAppender(mockAppender);
 	}
-
+	
+	/**
+	 * // TODO Add description
+	 * 
+	 */
+	@Test(expected = PepperModuleException.class)
+	public void testCorpusFileIsDirectory() {
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("importer"))));
+		start();
+	}
+	
+	/**
+	 * // TODO Add description
+	 * 
+	 */
+	@Test(expected = PepperModuleException.class)
+	public void testPepperMapperNull() {
+		getFixture().createPepperMapper(null);
+	}
+	
+	/**
+	 * // TODO Add description
+	 * 
+	 */
+	@Test(expected = PepperModuleException.class)
+	public void testPepperMapperIdentifiableElementNull() {
+		Identifier id = SaltFactory.createIdentifier(null, "TADA");
+		getFixture().createPepperMapper(id);
+	}
+	
 	/**
 	 * Test method for
 	 * {@link org.corpus_tools.peppermodules.toolbox.text.ToolboxTextImporter#importCorpusStructure(org.corpus_tools.salt.common.SCorpusGraph)}.
@@ -119,7 +151,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test(expected=PepperModuleException.class)
 	public void testParseQuasiEmptyCorpus() {
-		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("empty-corpus.txt"))));
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("importer/empty-corpus.txt"))));
 		start();
 	}
 	
@@ -132,7 +164,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testParseMonolithicDocument() {
-		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("no-ids.txt"))));
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("importer/no-ids.txt"))));
 		start();
 		SCorpusGraph corpusGraph = getNonEmptyCorpusGraph();
 		
@@ -162,7 +194,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testParseDocumentWithJustIds() {
-		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("just-ids.txt"))));
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile("importer/just-ids.txt"))));
 		start();
 		assertEquals(4, getNonEmptyCorpusGraph().getDocuments().size());
 		for (int i = 0; i < getNonEmptyCorpusGraph().getDocuments().size(); i++) {
@@ -188,13 +220,13 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testParseStandardDocument() {
-		setTestFile("test.txt");
-		setProperties("test.properties");
+		setTestFile("importer/test.txt");
+		setProperties("importer/test.properties");
 		start();
 		SCorpusGraph corpusGraph = getNonEmptyCorpusGraph();
 
 		// Test corpora
-		runCorpusTests(corpusGraph, "test.txt");
+		runCorpusTests(corpusGraph, "importer/test.txt");
 		
 		// Test documents
 		assertEquals(5, corpusGraph.getDocuments().size());
@@ -744,7 +776,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testParseOrphanRefs() {
-		setTestFile("orphan-ids-and-refs.txt");
+		setTestFile("importer/orphan-ids-and-refs.txt");
 		start();
 		assertEquals(5, getNonEmptyCorpusGraph().getDocuments().size());
 		assertEquals("Wort1 Wort2", getGraph("ID1").getTextualDSs().get(0).getText());
@@ -780,7 +812,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testParseEmptyRefs() {
-		setTestFile("empty-refs.txt");
+		setTestFile("importer/empty-refs.txt");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocumentGraph graph = getGraph("empty-refs");
@@ -799,7 +831,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testParseNoTxLine() {
-		setTestFile("no-tx-line.txt");
+		setTestFile("importer/no-tx-line.txt");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocumentGraph graph = getGraph("ID1");
@@ -817,8 +849,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testParseNoTxLineReal() {
-		setTestFile("no-tx-line-real.txt");
-		setProperties("no-tx-line-real.properties");
+		setTestFile("importer/no-tx-line-real.txt");
+		setProperties("importer/no-tx-line-real.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocumentGraph graph = getGraph("ID1");
@@ -837,7 +869,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testParseNoMbLine() {
-		setTestFile("id-without-morph-line.txt");
+		setTestFile("importer/id-without-morph-line.txt");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocumentGraph graph = getGraph("id-without-morph-line");
@@ -855,8 +887,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testMixedWithWithoutMbLines() {
-		setTestFile("test-mixed-with-without-mb.txt");
-		setProperties("test-mixed-with-without-mb.properties");
+		setTestFile("importer/test-mixed-with-without-mb.txt");
+		setProperties("importer/test-mixed-with-without-mb.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocumentGraph graph = getGraph("Document_no__1");
@@ -879,7 +911,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testLinesWithoutAnnotation() {
-		setTestFile("lines-without-annotation.txt");
+		setTestFile("importer/lines-without-annotation.txt");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocumentGraph graph = getGraph("Document_no__1");
@@ -895,8 +927,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefSIMPLE() {
-		setTestFile("subref_SIMPLE.txt");
-		setProperties("subref_SIMPLE.properties");
+		setTestFile("importer/subref_SIMPLE.txt");
+		setProperties("importer/subref_SIMPLE.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -926,8 +958,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	@Test
 	public void testSubRefSIMPLE_NO_ANNOTATION_VALUE() {
 		rootLogger.setLevel(Level.DEBUG);
-		setTestFile("subref_SIMPLE_NO_ANNOTATION_VALUE.txt");
-		setProperties("subref_SIMPLE.properties");
+		setTestFile("importer/subref_SIMPLE_NO_ANNOTATION_VALUE.txt");
+		setProperties("importer/subref_SIMPLE.properties");
 		start();
 		checkLog("No value for annotation with key \"sr\" in document 'Document_no__1', reference 'subref sentence schema 1 (line-level) with no defined target line'. Ignoring ...", Level.DEBUG);
 	}
@@ -940,8 +972,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefSIMPLE_TARGETED_MB() {
-		setTestFile("subref_SIMPLE_TARGETED.txt");
-		setProperties("subref_SIMPLE_TARGETED.properties");
+		setTestFile("importer/subref_SIMPLE_TARGETED.txt");
+		setProperties("importer/subref_SIMPLE_TARGETED.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -993,8 +1025,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefSIMPLE_TARGETED_MB_INDEX_EXCEEDED() {
-		setTestFile("subref_SIMPLE_TARGETED_INDEX_EXCEEDED.txt");
-		setProperties("subref_SIMPLE_TARGETED.properties");
+		setTestFile("importer/subref_SIMPLE_TARGETED_INDEX_EXCEEDED.txt");
+		setProperties("importer/subref_SIMPLE_TARGETED.properties");
 		start();
 		checkLog("The maximum of subref range 2..4 in document 'Document_no__1', reference 'subref sentence schema 1 (line-level) to mb' is larger than the highest token index. Please fix source data! Ignoring this annotation ...", Level.WARN);
 	}
@@ -1008,8 +1040,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefSIMPLE_TARGETED_TX() {
-		setTestFile("subref_SIMPLE_TARGETED_tx.txt");
-		setProperties("subref_SIMPLE_TARGETED.properties");
+		setTestFile("importer/subref_SIMPLE_TARGETED_tx.txt");
+		setProperties("importer/subref_SIMPLE_TARGETED.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1039,8 +1071,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefUNIDENTIFIED_GLOBAL_MB() {
-		setTestFile("subref_UNIDENTIFIED_GLOBAL.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_UNIDENTIFIED_GLOBAL.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1072,8 +1104,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefUNIDENTIFIED_GLOBAL_MB_INDEX_EXCEEDED() {
-		setTestFile("subref_UNIDENTIFIED_GLOBAL_INDEX_EXCEEDED.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_UNIDENTIFIED_GLOBAL_INDEX_EXCEEDED.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		checkLog("Document 'Document_no__1', reference 'subref sentence schema 2 (undefined global) with existing mb line': The indices defined in the global subdef are outside of the index range of the target tokens. Please fix the source data! Ignoring this subref ...", Level.WARN);
 	}
@@ -1087,8 +1119,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefUNIDENTIFIED_GLOBAL_MB_MIXED() {
-		setTestFile("subref_UNIDENTIFIED_GLOBAL_mixed.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_UNIDENTIFIED_GLOBAL_mixed.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1122,8 +1154,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefUNIDENTIFIED_GLOBAL_TX() {
-		setTestFile("subref_UNIDENTIFIED_GLOBAL_tx.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_UNIDENTIFIED_GLOBAL_tx.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1155,8 +1187,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefUNIDENTIFIED_GLOBAL_TARGETED_MB() {
-		setTestFile("subref_UNIDENTIFIED_GLOBAL_TARGETED.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_UNIDENTIFIED_GLOBAL_TARGETED.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1188,8 +1220,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefUNIDENTIFIED_GLOBAL_TARGETED_TX() {
-		setTestFile("subref_UNIDENTIFIED_GLOBAL_TARGETED_tx.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_UNIDENTIFIED_GLOBAL_TARGETED_tx.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1222,8 +1254,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefUNIDENTIFIED_GLOBAL_TARGETED_TX_MIXED() {
-		setTestFile("subref_UNIDENTIFIED_GLOBAL_TARGETED_mixed.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_UNIDENTIFIED_GLOBAL_TARGETED_mixed.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1256,8 +1288,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefIDENTIFIED_GLOBAL_MB() {
-		setTestFile("subref_IDENTIFIED_GLOBAL.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_IDENTIFIED_GLOBAL.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1311,8 +1343,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefIDENTIFIED_GLOBAL_MB_DUPLICATE_ANNO() {
-		setTestFile("subref_IDENTIFIED_GLOBAL_DUPLICATE_ANNOTATION.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_IDENTIFIED_GLOBAL_DUPLICATE_ANNOTATION.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		checkLog("Duplicate annotation in 'Document_no__1'-'subref sentence schema 3 (defined global) to mb'! There already exists an annotation with the key \"sr\". This might be an error in the source data. If it is not, please file a bug report.", Level.WARN);
 	}
@@ -1326,8 +1358,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefIDENTIFIED_GLOBAL_TX() {
-		setTestFile("subref_IDENTIFIED_GLOBAL_tx.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_IDENTIFIED_GLOBAL_tx.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1381,8 +1413,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefIDENTIFIED_GLOBAL_TARGETED_MB() {
-		setTestFile("subref_IDENTIFIED_GLOBAL_TARGETED.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_IDENTIFIED_GLOBAL_TARGETED.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1452,8 +1484,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefDISCONTINUOUS_TARGETED_MB() {
-		setTestFile("subref_DISCONTINUOUS_TARGETED.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_DISCONTINUOUS_TARGETED.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1485,8 +1517,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefDISCONTINUOUS_TARGETED_TX() {
-		setTestFile("subref_DISCONTINUOUS_TARGETED_tx.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_DISCONTINUOUS_TARGETED_tx.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1518,8 +1550,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefNON_SUBREF() {
-		setTestFile("subref_NON_SUBREF.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_NON_SUBREF.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1550,8 +1582,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefNON_SUBREF_LONG_SR() {
-		setTestFile("subref_NON_SUBREF_long_sr.txt");
-		setProperties("subref_UNIDENTIFIED_GLOBAL.properties");
+		setTestFile("importer/subref_NON_SUBREF_long_sr.txt");
+		setProperties("importer/subref_UNIDENTIFIED_GLOBAL.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1582,8 +1614,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefIDENTIFIED_GLOBAL_REAL1() {
-		setTestFile("subref_IDENTIFIED_GLOBAL_real_1.txt");
-		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		setTestFile("importer/subref_IDENTIFIED_GLOBAL_real_1.txt");
+		setProperties("importer/subref_IDENTIFIED_GLOBAL_real.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1637,8 +1669,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testSubRefIDENTIFIED_GLOBAL_REAL2() {
-		setTestFile("subref_IDENTIFIED_GLOBAL_real_2.txt");
-		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		setTestFile("importer/subref_IDENTIFIED_GLOBAL_real_2.txt");
+		setProperties("importer/subref_IDENTIFIED_GLOBAL_real.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1678,8 +1710,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSubRefIDENTIFIED_GLOBAL_REAL3() {
-		setTestFile("subref_IDENTIFIED_GLOBAL_real_3.txt");
-		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		setTestFile("importer/subref_IDENTIFIED_GLOBAL_real_3.txt");
+		setProperties("importer/subref_IDENTIFIED_GLOBAL_real.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1719,8 +1751,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test(expected=AssertionError.class)
 	public void testSubRefIDENTIFIED_GLOBAL_REAL1_FAIL() {
-		setTestFile("subref_IDENTIFIED_GLOBAL_real_1_fail.txt");
-		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		setTestFile("importer/subref_IDENTIFIED_GLOBAL_real_1_fail.txt");
+		setProperties("importer/subref_IDENTIFIED_GLOBAL_real.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1737,8 +1769,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test(expected=AssertionError.class)
 	public void testSubRefIDENTIFIED_GLOBAL_REAL2_FAIL() {
-		setTestFile("subref_IDENTIFIED_GLOBAL_real_2_fail.txt");
-		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		setTestFile("importer/subref_IDENTIFIED_GLOBAL_real_2_fail.txt");
+		setProperties("importer/subref_IDENTIFIED_GLOBAL_real.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1755,8 +1787,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test(expected=AssertionError.class)
 	public void testSubRefIDENTIFIED_GLOBAL_REAL3_FAIL() {
-		setTestFile("subref_IDENTIFIED_GLOBAL_real_3_fail.txt");
-		setProperties("subref_IDENTIFIED_GLOBAL_real.properties");
+		setTestFile("importer/subref_IDENTIFIED_GLOBAL_real_3_fail.txt");
+		setProperties("importer/subref_IDENTIFIED_GLOBAL_real.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1772,7 +1804,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testLiaison() {
-		setTestFile("liaison.txt");
+		setTestFile("importer/liaison.txt");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1791,8 +1823,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testWithoutMbLines() {
-		setTestFile("test-no-mb-lines.txt");
-		setProperties("test-no-mb-lines.properties");
+		setTestFile("importer/test-no-mb-lines.txt");
+		setProperties("importer/test-no-mb-lines.properties");
 		start();
 		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
 		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
@@ -1816,8 +1848,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	public void testDuplicateMarkers() {
 		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_LEX_ANNOTATION_MARKERS, "ta");
 		getFixture().getProperties().setPropertyValue(ToolboxTextImporterProperties.PROP_MORPH_ANNOTATION_MARKERS, "ge");
-		setTestFile("duplicate-markers.txt");
-		setProperties("duplicate-markers.properties");
+		setTestFile("importer/duplicate-markers.txt");
+		setProperties("importer/duplicate-markers.properties");
 		start();
 		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
 		assertEquals(1, graph.getDocument().getMetaAnnotations().size());
@@ -1851,8 +1883,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testNormalizeMarkersTrue() {
-		setTestFile("normalized-markers.txt");
-		setProperties("normalized-markers.properties");
+		setTestFile("importer/normalized-markers.txt");
+		setProperties("importer/normalized-markers.properties");
 		start();
 		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
 		assertThat(graph.getTextualDSs().size(), is(2));
@@ -1890,8 +1922,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testNormalizeMarkersTrueErr() {
-		setTestFile("normalized-markers-err.txt");
-		setProperties("normalized-markers.properties");
+		setTestFile("importer/normalized-markers-err.txt");
+		setProperties("importer/normalized-markers.properties");
 		start();
 		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
 		assertThat(graph.getTextualDSs().size(), is(2));
@@ -1933,8 +1965,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testNormalizeMarkersTrueAnnoErr() {
-		setTestFile("normalized-markers-annoerr.txt");
-		setProperties("normalized-markers.properties");
+		setTestFile("importer/normalized-markers-annoerr.txt");
+		setProperties("importer/normalized-markers.properties");
 		start();
 		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
 		assertThat(graph.getTextualDSs().size(), is(2));
@@ -1976,8 +2008,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testNormalizeMarkersDefault() {
-		setTestFile("unnormalized-markers.txt");
-		setProperties("unnormalized-markers.properties");
+		setTestFile("importer/unnormalized-markers.txt");
+		setProperties("importer/unnormalized-markers.properties");
 		start();
 		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
 		assertThat(graph.getTextualDSs().size(), is(2));
@@ -2015,8 +2047,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testNormalizeMarkersDefaultWithErrors() {
-		setTestFile("unnormalized-markers-err.txt");
-		setProperties("unnormalized-markers.properties");
+		setTestFile("importer/unnormalized-markers-err.txt");
+		setProperties("importer/unnormalized-markers.properties");
 		start();
 		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
 		assertThat(graph.getTextualDSs().size(), is(2));
@@ -2058,8 +2090,8 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 	 */
 	@Test
 	public void testNormalizeMarkersDefaultWithAnnoErrors() {
-		setTestFile("unnormalized-markers-annoerr.txt");
-		setProperties("unnormalized-markers.properties");
+		setTestFile("importer/unnormalized-markers-annoerr.txt");
+		setProperties("importer/unnormalized-markers.properties");
 		start();
 		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
 		assertThat(graph.getTextualDSs().size(), is(2));
@@ -2135,7 +2167,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertEquals(1, corpusGraph.getCorpora().size());
 
 		// Test single corpus
-		if (fileName.equals("test.txt")) {
+		if (fileName.equals("importer/test.txt")) {
 			for (SMetaAnnotation ma : corpusGraph.getCorpora().get(0).getMetaAnnotations()) {
 				assertThat(ma.getQName() + ":" + ma.getValue_STEXT(), anyOf(is("toolbox::_sh:v3.0 Test"), 
 						is("toolbox::info:" + DOC_INFO_ANNO),
