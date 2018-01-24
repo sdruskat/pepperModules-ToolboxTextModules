@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.io.FileUtils;
 import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.testFramework.PepperExporterTest;
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties;
@@ -37,7 +36,7 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 		getFixture().getProperties().setPropertyValue("refIdentifierAnnotation", "phrase::guid");
 		getFixture().getProperties().setPropertyValue("ignoreTxAnnotations", "mmg-fonipa-x-emic::word_txt,mmg-fonipa-x-emic::word_punct");
 		getFixture().getProperties().setPropertyValue("ignoreMbAnnotations", "mmg-fonipa-x-emic::morpheme_txt,mmg-fonipa-x-emic::morpheme_punct");
-		getFixture().getProperties().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "en::phrase_gls:ft, morpheme::type:ty");
+		getFixture().getProperties().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "en::phrase_gls:ft, morpheme::type:ty, nonamespace:nna, nonamespacetoken:nnat");
 		getFixture().getProperties().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "en::morph_gls:ge, fictional::word_txt:lt, en::word_gls:we, second::phrase_gls:xn");
 		addFormatWhichShouldBeSupported(ToolboxTextExporter.FORMAT_NAME, ToolboxTextExporter.FORMAT_VERSION);
 	}
@@ -59,14 +58,7 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 		File toolboxCorpusFile = new File(testPath = this.getClass().getClassLoader().getResource("exporter/1.txt").getFile());
 		assertTrue(result.exists());
 		assertTrue(toolboxCorpusFile.exists());
-		boolean fileContentsEqual = false;
-		try {
-			fileContentsEqual = FileUtils.contentEquals(result, toolboxCorpusFile);
-		}
-		catch (IOException e) {
-			fail("Couldn't read actual or test file.");
-		}
-
+		// Test the actual files
 		List<String> testFileContent = null, resultFileContent = null;
 		try {
 			testFileContent = Files.readAllLines(Paths.get(testPath), Charset.defaultCharset());
@@ -81,6 +73,7 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 		List<String> rtDiff = diffFiles(resultFileContent, testFileContent);
 		assertTrue(rtDiff.isEmpty());
 		assertTrue(trDiff.isEmpty());
+		
 	}
 
 	private static List<String> diffFiles(final List<String> firstFileContent, final List<String> secondFileContent) {
@@ -92,5 +85,5 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 		}
 		return diff;
 	}
-
+	
 }

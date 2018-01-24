@@ -28,6 +28,7 @@
 	<nodes xsi:type="sDocumentStructure:SToken" layers="//@layers.3">
 		<labels xsi:type="saltCore:SAnnotation" namespace="word" name="guid" value="T::35e2a00b-6e7b-42ec-8908-d5bea86c3c99"/>
 		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTok2"/>
+		<labels xsi:type="saltCore:SAnnotation" name="nonamespacetoken" value="T::no namespace for tx token 1"/>
 		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTok2"/>
 		<labels xsi:type="saltCore:SAnnotation" namespace="fictional" name="word_txt" value="T::Börsdae"/>
 		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="word_gls" value="T::Word 1"/>
@@ -53,6 +54,7 @@
 		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sTok5"/>
 		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTok5"/>
 		<labels xsi:type="saltCore:SAnnotation" namespace="fictional" name="word_txt" value="T::pounie"/>
+		<labels xsi:type="saltCore:SAnnotation" name="nonamespacetoken" value="T::no namespace for tx token 2"/>
 		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="word_gls" value="T::Word 2"/>
 	</nodes>
 	<nodes xsi:type="sDocumentStructure:SSpan" layers="//@layers.0">
@@ -61,6 +63,7 @@
 		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="phrase_segnum" value="T::1.1"/>
 		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/test#sSpan1"/>
 		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="phrase_gls" value="T::Birthday pony (phrase gloss)"/>
+		<labels xsi:type="saltCore:SAnnotation" name="nonamespace" value="T::nonamespaceannotation"/>
 		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpan1"/>
 	</nodes>
 	<nodes xsi:type="sDocumentStructure:SSpan" layers="//@layers.2">
