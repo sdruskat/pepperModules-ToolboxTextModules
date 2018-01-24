@@ -18,7 +18,7 @@
 \tx Börsdae pounie
 \xn Börsdae pounie (phrase gloss)
 \ft Birthday pony (phrase gloss)
-\we T1 T2 T3 T4 T5 PUNCT
+\we Word-1 Word-2
 \guid_[morpheme] d7f713e5-e8cf-11d3-9764-00c04f186933 d7f713e5-e8cf-11d3-9764-00c04f186933 d7f713dd-e8cf-11d3-9764-00c04f186933
 \mb mb_txt_Börsdae mb_txt_pou -nie
 \ge birthday-root pou-root nie-suffix
