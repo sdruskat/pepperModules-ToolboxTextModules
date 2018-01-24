@@ -1,4 +1,5 @@
-Copyright 2016 Humboldt-Universität zu Berlin.
+Copyright 2016ff. Humboldt-Universität zu Berlin.
+Exploitation rights belong exclusively to Humboldt-Universität zu Berlin.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
  
 Contributors:
-    Stephan Druskat - initial API and implementation
+    Stephan Druskat (toolboxtextmodules@sdruskat.net) - initial API and implementation
 
 

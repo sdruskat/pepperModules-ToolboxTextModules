@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>pepperModules-ToolboxTextModules</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>bundle</packaging>
 	<name>org.corpus-tools.pepperModules-ToolboxTextModules</name>
 	<!-- Declares this project to be an extension of the project pepper-parentModule. -->
@@ -23,12 +23,14 @@
 		</repository>
 	</distributionManagement>
 	<organization>
-		<name>Humboldt-Universität zu Berlin</name>
+		<name>MelaTAMP research project, Humboldt-Universität zu Berlin</name>
+		<url>https://wikis.hu-berlin.de/melatamp/</url>
 	</organization>
 	<developers>
 		<developer>
 			<name>Stephan Druskat</name>
-			<organization>Humboldt-Universität zu Berlin</organization>
+			<email>toolboxtextmodules@sdruskat.net</email>
+			<organization>MelaTAMP research project, Humboldt-Universität zu Berlin</organization>
 		</developer>
 	</developers>
 	
@@ -64,38 +66,52 @@
 	
 	<build>
 		<plugins>
-			<!-- start: creation of bundle jar -->
-			<!-- <plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<version>${maven-bundle-plugin.version}</version>
-				<extensions>true</extensions>
+			<plugin>
+				<!-- a plugin to clean the project when calling mvn clean -->
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>${maven-clean-plugin.version}</version>
+				<configuration>
+					<!-- removes META-INF and OSGI-INF -->
+					<filesets>
+						<fileset>
+							<directory>META-INF</directory>
+							<directory>OSGI-INF</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
 				<executions>
 					<execution>
-						<phase>process-classes</phase>
+						<!-- This is necessary, because of a problem in the carrot-maven-scr-plugin. 
+							The plugin produces empty files (null.xml) in the service-components folder, 
+							this file is removed by the current clean-plugin and its configuration. -->
+						<id>cleanup-null.xml</id>
+						<phase>prepare-package</phase>
 						<goals>
-							<goal>bundle</goal>
+							<goal>clean</goal>
 						</goals>
+						<configuration>
+							<excludeDefaultDirectories>true</excludeDefaultDirectories>
+							<filesets>
+								<fileset>
+									<directory>OSGI-INF/service-component</directory>
+									<includes>
+										<include>null.xml</include>
+									</includes>
+									<followSymlinks>false</followSymlinks>
+								</fileset>
+								<fileset>
+									<directory>target/classes/OSGI-INF/service-component</directory>
+									<includes>
+										<include>null.xml</include>
+									</includes>
+									<followSymlinks>false</followSymlinks>
+								</fileset>
+							</filesets>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<manifestLocation>${META-INF}</manifestLocation>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-					<instructions>
-						<Bundle-Name>${project.artifactId}</Bundle-Name>
-						<Bundle-SymbolicName>${project.groupId}.${project.artifactId};singleton:=true</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
-						<Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
-						<Service-Component>${allServiceComponents}</Service-Component>
-						<Embed-Dependency>hamcrest-all;scope=compile|runtime</Embed-Dependency>
-						<Bundle-ClassPath>.,{maven-dependencies} </Bundle-ClassPath>
-						<Include-Resource> {maven-resources}, {maven-dependencies}</Include-Resource>
-						<_exportcontents>org.hamcrest.*</_exportcontents>
-					</instructions>
-				</configuration>
-			</plugin>-->
-					<!-- end: creation of bundle jar -->
+			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9</version>
@@ -112,4 +128,11 @@
 			</plugin>
 		</plugins>
 	</build>
+	<url>http://corpus-tools.org/</url>
+	<description>A module for the Pepper conversion framework for linguistic data.
+
+The module provides an importer which reads the text format exportable from SIL Toolbox, and maps the data to an instance of the Salt meta model for linguistic data.
+
+It also provides an exporter which maps the data from an instance of the Salt meta model for linguistic data to a valid Toolbox text format file.</description>
+	<inceptionYear>2016</inceptionYear>
 </project>
