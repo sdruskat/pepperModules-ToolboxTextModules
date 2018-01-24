@@ -4,6 +4,7 @@
   <id>PepperModuleBundle</id>
   <formats>
     <format>zip</format>
+    <format>jar</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
   
@@ -23,6 +24,7 @@
   		<includes>
   			<include>${license.file}</include>
   			<include>${notice.file}</include>
+        <include>${citation.file}</include>
   		</includes>
   	</fileSet>
   	
