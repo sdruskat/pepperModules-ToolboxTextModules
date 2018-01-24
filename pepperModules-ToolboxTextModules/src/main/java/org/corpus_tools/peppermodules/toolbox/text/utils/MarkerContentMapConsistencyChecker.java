@@ -27,7 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO Description
+ * A utility class checking whether the converted data
+ * seems consistent.
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
@@ -57,6 +58,7 @@ public class MarkerContentMapConsistencyChecker {
 	 * @param morphAnnoMarkers
 	 * @param subrefAnnoMarkers
 	 * @param refAnnoMarkers
+	 * @param refList 
 	 */
 	public MarkerContentMapConsistencyChecker(Set<String> keySet, String refMarker, String lexMarker, String morphMarker, String subrefMarker, List<String> lexAnnoMarkers, List<String> morphAnnoMarkers, List<String> subrefAnnoMarkers, List<String> refAnnoMarkers, List<String> refList) {
 		this.set = keySet;
@@ -71,6 +73,17 @@ public class MarkerContentMapConsistencyChecker {
 		this.ref = refList.get(0);
 	}
 
+	/**
+	 * Runs the consistency check.
+	 * 
+	 * The consistency check itself removes all lines from
+	 * the map mapping Toolbox markers to content one by one
+	 * based on the supplied markers to be used and checks
+	 * whether the resulting set is empty.
+	 * 
+	 * If there are data that haven't been taken into account,
+	 * a {@link PepperModuleException} is thrown.
+	 */
 	public void run() {
 		set.remove(refMarker);
 		set.remove(lexMarker);

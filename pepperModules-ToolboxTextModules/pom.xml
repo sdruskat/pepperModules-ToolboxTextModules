@@ -95,19 +95,19 @@
 					</instructions>
 				</configuration>
 			</plugin>-->
-			<!-- end: creation of bundle jar -->
+					<!-- end: creation of bundle jar -->
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9</version>
 				<configuration>
-					<doclet>ch.raffael.doclets.pegdown.PegdownDoclet</doclet>
+					<doclet>ch.raffael.mddoclet.MarkdownDoclet</doclet>
 					<docletArtifact>
-						<groupId>ch.raffael.pegdown-doclet</groupId>
-						<artifactId>pegdown-doclet</artifactId>
-						<version>1.1</version>
+						<groupId>ch.raffael.markdown-doclet</groupId>
+						<artifactId>markdown-doclet</artifactId>
+						<version>1.4</version>
 					</docletArtifact>
 					<useStandardDocletOptions>true</useStandardDocletOptions>
-          			<show>private</show> <!-- TODO Decide if this should stay -->
+					<show>private</show>
 				</configuration>
 			</plugin>
 		</plugins>

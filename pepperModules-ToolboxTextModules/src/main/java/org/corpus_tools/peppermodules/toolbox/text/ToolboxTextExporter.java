@@ -12,7 +12,7 @@ import org.eclipse.emf.common.util.URI;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * // TODO Add description
+ * The point-of-entry class for export of Salt models to Toolbox text.
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  * 
@@ -21,17 +21,19 @@ import org.osgi.service.component.annotations.Component;
 public class ToolboxTextExporter extends PepperExporterImpl implements PepperExporter {
 
 	/**
-	 * TODO
+	 * Format name constant.
+	 * 
+	 * This is an arbitrary value, which called just as well
+	 * be `mdf` after the "Multi-Dictionary Formatter" format.
 	 */
 	public static final String FORMAT_NAME = "toolbox-text";
 	/**
-	 * TODO
+	 * Format version constant.
 	 */
 	public static final String FORMAT_VERSION = "3.0";
 
 	/**
-	 * // TODO Add description
-	 * 
+	 * Constructor setting metadata mostly. 
 	 */
 	public ToolboxTextExporter() {
 		super();
@@ -53,7 +55,6 @@ public class ToolboxTextExporter extends PepperExporterImpl implements PepperExp
 	public PepperMapper createPepperMapper(Identifier identifier) {
 		PepperMapper mapper = new ToolboxTextExportMapper();
 		URI resourceURI = getIdentifier2ResourceTable().get(identifier);
-		// TODO: Customize document file name by changing the resourceURI!
 		mapper.setResourceURI(resourceURI);
 		return (mapper);
 	}

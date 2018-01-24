@@ -31,7 +31,7 @@ import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SRelation;
 
 /**
- * // TODO Add description
+ * Utility class to simplify working with the conversion data.
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  * 
@@ -51,8 +51,8 @@ public class ToolboxTextModulesUtils {
 	 * by user [Jonas Klemming](http://stackoverflow.com/users/26609/jonas-klemming) under
 	 * CC-BY-SA-3.0.
 	 *
-	 * @param str
-	 * @return
+	 * @param str The string to check
+	 * @return whether the parameters represents a valid `int`
 	 */
 	public static boolean isInteger(String str) {
 	    if (str == null) {
@@ -93,10 +93,12 @@ public class ToolboxTextModulesUtils {
 	}
 	
 	/**
-	 * // TODO Add description
+	 * Sorts {@link SSpan}s by the order of the
+	 * text that is covered by their included
+	 * tokens, as it appears in the data source.
 	 * 
-	 * @param unorderedSpans
-	 * @return
+	 * @param unorderedSpans A {@link Set} of unordered {@link SSpan}s.
+	 * @return A {@link List} of ordered {@link SSpan}s.
 	 */
 	public static List<SSpan> sortSpansByTextCoverageOfIncludedToken(Set<SSpan> unorderedSpans) {
 		final List<SSpan> sortedSpans = new ArrayList<>(); 

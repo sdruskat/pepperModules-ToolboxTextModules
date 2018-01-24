@@ -22,7 +22,12 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 /**
- * // TODO Add description
+ * Properties for the ToolboxTextExporter.
+ * 
+ * The single properties are explained in the respective field Javadoc.
+ * 
+ * **Note:** The properties should be considered the central API for this
+ * and the other Pepper modules.
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  * 
@@ -33,9 +38,6 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextExporterProperties.class);
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -778762953092094905L;
 	
 	/*
@@ -78,15 +80,18 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	public static final String REF_IDENT_ANNOTATION = "refIdentifierAnnotation";
 	
 	/**
-	 * Annotations which contain primary data, i.e., lexical or morphological material
+	 * Annotations which contain primary data, i.e., lexical material
 	 * which will already be mapped to tokens but still exists as annotation
 	 * and should thus be left out during export to annotations (as they will
-	 * already be mapped to \tx or \mb).
+	 * already be mapped to \tx).
 	 */
 	public static final String TX_ANNOTATIONS_TO_IGNORE = "txMaterialAnnotations";
 	
 	/**
-	 * TODO 
+	 * Annotations which contain primary data, i.e., morphological material
+	 * which will already be mapped to tokens but still exists as annotation
+	 * and should thus be left out during export to annotations (as they will
+	 * already be mapped to \mb).
 	 */
 	public static final String MB_ANNOTATIONS_TO_IGNORE = "mbMaterialAnnotations";
 	
@@ -130,8 +135,7 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	public static final String MARKER_SPLIT_REGEX = "(?<!:):(?!:)";
 	
 	/**
-	 * // TODO Add description
-	 * 
+	 * Constructor adding all properties to the instance.
 	 */
 	public ToolboxTextExporterProperties() {
 		addProperty(PepperModuleProperty.create().withName(REF_SPAN_LAYER).withType(String.class)
@@ -169,39 +173,41 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 				.isRequired(false).build());
 	}
 	
-	/**
-	 * // TODO Add description
-	 * 
-	 * @return
-	 */
+	@SuppressWarnings("javadoc")
 	public String getRefSpanLayer() {
 		return (String) getProperty(REF_SPAN_LAYER).getValue();
 	}
 
+	@SuppressWarnings("javadoc")
 	public String getIdSpanLayer() {
 		return (String) getProperty(ID_SPAN_LAYER).getValue();
 	}
 	
+	@SuppressWarnings("javadoc")
 	public String getTxTokenLayer() {
 		return (String) getProperty(TX_TOKEN_LAYER).getValue();
 	}
 	
+	@SuppressWarnings("javadoc")
 	public String getMbTokenLayer() {
 		return (String) getProperty(MB_TOKEN_LAYER).getValue();
 	}
 	
+	@SuppressWarnings("javadoc")
 	public String getIdIdentifierAnnotation() {
 		return (String) getProperty(ID_IDENT_ANNOTATION).getValue();
 	}
 	
+	@SuppressWarnings("javadoc")
 	public String getRefIdentifierAnnotation() {
 		return (String) getProperty(REF_IDENT_ANNOTATION).getValue();
 	}
 	
 	/**
-	 * // TODO Add description
+	 * Returns a list of annotations that re-duplicate primary
+	 * lexical material and should be ignored during conversion.
 	 * 
-	 * @return TODO list or empty list
+	 * @return The list of annotations to ignore, or an empty {@link List}
 	 */
 	public List<String> getTxMaterialAnnotations() {
 		if (getProperty(TX_ANNOTATIONS_TO_IGNORE).getValue() != null) {
@@ -211,9 +217,10 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	}
 	
 	/**
-	 * // TODO Add description
+	 * Returns a list of annotations that re-duplicate primary
+	 * morphological material and should be ignored during conversion.
 	 * 
-	 * @return TODO list or empty list
+	 * @return The list of annotations to ignore, or an empty {@link List}
 	 */
 	public List<String> getMbMaterialAnnotations() {
 		if (getProperty(MB_ANNOTATIONS_TO_IGNORE).getValue() != null) {
@@ -224,16 +231,25 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 		}
 	}
 
+	@SuppressWarnings("javadoc")
 	public String getSpaceReplacement() {
 		return (String) getProperty(SPACE_REPLACEMENT).getValue();
 	}
 	
 	/**
-	 * // TODO Add description
+	 * Compiles and returns a map of annotations to MDF
+	 * markers.
 	 * 
-	 * UNIQUE KEYS AND VALUES!
+	 * **Note:** Direct access to this map is discouraged. Instead, use
+	 * {@link #getAnnotationMarkerMap()}!
 	 * 
-	 * @return TODO map or empty map
+	 * During compilation, both keys and values are checked
+	 * for uniqueness. If a duplicate key or value is found,
+	 * an {@link IllegalArgumentException} is thrown, as
+	 * processing duplicate keys or values will break the
+	 * data model.
+	 * 
+	 * @return The deduplicated map of annotations to MDF markers
 	 */
 	public Map<String, String> getMDFMap() {
 		Map<String, String> mdfMap = HashBiMap.create();
@@ -278,9 +294,19 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	}
 	
 	/**
-	 * // TODO Add description
+	 * Compiles and returns a map of annotations to user-defined
+	 * custom markers.
 	 * 
-	 * @return TODO map or empty map
+	 * **Note:** Direct access to this map is discouraged. Instead, use
+	 * {@link #getAnnotationMarkerMap()}!
+	 * 
+	 * During compilation, both keys and values are checked
+	 * for uniqueness. If a duplicate key or value is found,
+	 * an {@link IllegalArgumentException} is thrown, as
+	 * processing duplicate keys or values will break the
+	 * data model.
+	 * 
+	 * @return The deduplicated map of annotations to custom markers
 	 */
 	public Map<String, String> getCustomMarkerMap() {
 		Map<String, String> customMarkerMap = HashBiMap.create();
@@ -324,9 +350,21 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	}
 	
 	/**
-	 * // TODO Add description
+	 * Compiles and returns a map of annotations to Toolbox markers.
 	 * 
-	 * @return A map from Salt annotations to Toolbox markers
+	 * The returned map comprises both the MDF map and the custom
+	 * marker map.
+	 * 
+	 * During compilation, both keys and values are checked
+	 * for uniqueness. If a duplicate key or value is found,
+	 * an {@link IllegalArgumentException} is thrown, as
+	 * processing duplicate keys or values will break the
+	 * data model.
+	 * 
+	 * @return The deduplicated map of annotations to Toolbox markers
+	 * 
+	 * @see #getMDFMap()
+	 * @see #getCustomMarkerMap()
 	 */
 	public Map<String, String> getAnnotationMarkerMap() {
 		BiMap<String, String> annotationMarkerBiMap = HashBiMap.create();

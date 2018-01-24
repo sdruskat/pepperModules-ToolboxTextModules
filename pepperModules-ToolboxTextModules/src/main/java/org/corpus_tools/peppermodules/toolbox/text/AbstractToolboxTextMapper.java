@@ -22,7 +22,8 @@ package org.corpus_tools.peppermodules.toolbox.text;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
 
 /**
- * TODO Description
+ * An abstract mapper class providing a *toolbox* constant to
+ * be used for Salt namespaces. 
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *

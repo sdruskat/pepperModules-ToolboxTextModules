@@ -34,7 +34,9 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import java.io.IOException;
 
 /**
- * // TODO Add description
+ * A mapper for Salt to Toolbox Text mapping.
+ * 
+ * This class is responsible for the actual mapping process.
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  * 
@@ -366,18 +368,33 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
-	 * // TODO Add description
+	 * Takes an annotation and compiles a string representing
+	 * a valid line in a Toolbox text file with the following pattern.
 	 * 
-	 * @param a
-	 * @return
+	 * ```java
+	 * \{marker} {annotation value(s)}
+	 * ```
+	 * 
+	 * @param annotation The annotation for which the Toolbox text line is compiled.
+	 * @return A compiled Toolbox text line
 	 */
-	private String createMarkerAnnoString(SAbstractAnnotation a) {
-		String marker = createMarkerString(a.getNamespace(), a.getName());
-		return marker + " " + a.getValue_STEXT();
+	private String createMarkerAnnoString(SAbstractAnnotation annotation) {
+		String marker = createMarkerString(annotation.getNamespace(), annotation.getName());
+		return marker + " " + annotation.getValue_STEXT();
 	}
 
 	/**
-	 * // TODO Add description
+	 * Creates the marker string for the string representation of a 
+	 * valid Toolbox text line.
+	 * 
+	 * The passed namespace and name are combines to a valid Salt
+	 * qualified name string. This combination is either compiled
+	 * into a Toolbox marker with the pattern `name_[namespace]`,
+	 * or a marker that should be used for this combination and
+	 * has been supplied by the user via the properties.
+	 * 
+	 * In the process, all whitespaces in namespace and name
+	 * are being replaced with a dash (`-`).
 	 * 
 	 * @param namespace
 	 * @param name

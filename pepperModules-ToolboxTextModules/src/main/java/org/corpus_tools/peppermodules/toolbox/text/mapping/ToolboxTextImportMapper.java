@@ -47,7 +47,9 @@ import com.google.common.collect.Range;
 import com.google.common.io.CountingInputStream;
 
 /**
- * TODO Description
+ * A mapper for Toolbox Text to Salt mapping.
+ * 
+ * This class is responsible for the actual mapping process.
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
@@ -227,7 +229,7 @@ public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 	 * of the header (i.e., the offset of the first \id or \ref) and
 	 * writes all read bytes into a {@link ByteArrayOutputStream}.
 	 * Every time the stream encounters a marker (starting with \),
-	 * it calls {@link #getMarkerAndValueFromString(String)} passing
+	 * it calls the private getMarkerAndValueFromString(String) passing
 	 * the (non-empty) contents of the {@link ByteArrayOutputStream} 
 	 * as parameter. The resulting two elements of the returned
 	 * {@link String} array are then written to a new {@link SMetaAnnotation}

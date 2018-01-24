@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
  */
-class ToolboxTextDocumentNameParser {
+public class ToolboxTextDocumentNameParser {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextDocumentNameParser.class);
 	

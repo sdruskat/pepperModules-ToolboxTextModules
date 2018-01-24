@@ -47,35 +47,35 @@ public class SubrefDefinition {
 	 */
 	public enum SUBREF_TYPE {
 		/**
-		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#SIMPLE>.
+		 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#SIMPLE">wiki</a>
 		 */
 		SIMPLE, 
 		/**
-		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#SIMPLE_TARGETED>.
+		 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#SIMPLE_TARGETED">wiki</a>
 		 */
 		SIMPLE_TARGETED, 
 		/**
-		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#UNIDENTIFIED_GLOBAL>.		 
+		 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#UNIDENTIFIED_GLOBAL">wiki</a>		 
 		 */
 		UNIDENTIFIED_GLOBAL, 
 		/**
-		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#UNIDENTIFIED_GLOBAL_TARGETED>.		 
+		 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#UNIDENTIFIED_GLOBAL_TARGETED">wiki</a>		 
 		 */
 		UNIDENTIFIED_GLOBAL_TARGETED, 
 		/**
-		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#IDENTIFIED_GLOBAL>.		 
+		 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#IDENTIFIED_GLOBAL">wiki</a>		 
 		 */
 		IDENTIFIED_GLOBAL, 
 		/**
-		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#IDENTIFIED_GLOBAL_TARGETED>.		 
+		 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#IDENTIFIED_GLOBAL_TARGETED">wiki</a>		 
 		 */
 		IDENTIFIED_GLOBAL_TARGETED, 
 		/**
-		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#DISCONTINUOUS_TARGETED>.		 
+		 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#DISCONTINUOUS_TARGETED">wiki</a>		 
 		 */
 		DISCONTINUOUS_TARGETED, 
 		/**
-		 * Cf. <https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#FULL_REF_ANNOTATION>.		 
+		 * @see <a href="https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation#FULL_REF_ANNOTATION">wiki</a>		 
 		 */
 		FULL_REF_ANNOTATION
 	};

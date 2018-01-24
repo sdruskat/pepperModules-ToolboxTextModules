@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Range;
 
 /**
- * // TODO Add description
+ * The point-of-entry class for import of Toolbox text to a Salt model.
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  * 
@@ -55,13 +55,15 @@ import com.google.common.collect.Range;
 public class ToolboxTextImporter extends PepperImporterImpl implements PepperImporter {
 
 	/**
-	 * this is a logger, for recording messages during program process, like
-	 * debug messages
+	 * A static logger.
 	 **/
 	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextImporter.class);
 	
 	private Map<Identifier, ToolboxParseBean> parseMap = new HashMap<>();
 
+	/**
+	 * Constructor setting metadata mostly.
+	 */
 	public ToolboxTextImporter() {
 		super();
 		setName("ToolboxTextImporter");
@@ -89,11 +91,11 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	}
 
 	/**
-	 * TODO: Description
+	 * Imports the corpus structure from the Toolbox text files.
 	 *
-	 * @param corpusGraph
-	 * @param parent
-	 * @param corpusFile
+	 * @param corpusGraph The {@link SCorpusGraph} to contain the data
+	 * @param parent The parent {@link SCorpus} for the data
+	 * @param corpusFile The {@link File} (can be a directory) that contains the Toolbox data
 	 */
 	private void importCorpusStructure(SCorpusGraph corpusGraph, SCorpus parent, File corpusFile) {
 		if (corpusFile == null) {
@@ -180,7 +182,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 					SDocument doc = corpusGraph.createDocument(subCorpus, name);
 					getIdentifier2ResourceTable().put(doc.getIdentifier(), corpusFileURI);
 					offsetMap.put(doc.getIdentifier(), idOffset);
-					parseMap .put(doc.getIdentifier(), new ToolboxParseBean(idOffsets, refMap, headerEndOffset, monolithic, offsetMap, idStructureMap));
+					parseMap.put(doc.getIdentifier(), new ToolboxParseBean(idOffsets, refMap, headerEndOffset, monolithic, offsetMap, idStructureMap));
 				}
 			}
 			else {
@@ -191,6 +193,9 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.corpus_tools.pepper.impl.PepperModuleImpl#createPepperMapper(org.corpus_tools.salt.graph.Identifier)
+	 */
 	@Override
 	public PepperMapper createPepperMapper(Identifier identifier) {
 		ToolboxParseBean parse = parseMap.get(identifier);
@@ -240,36 +245,8 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		return (mapper);
 	}
 
-	/**
-	 * <strong>OVERRIDE THIS METHOD FOR CUSTOMIZATION</strong> <br/>
-	 * This method is called by the pepper framework and returns if a corpus
-	 * located at the given {@link URI} is importable by this importer. If yes,
-	 * 1 must be returned, if no 0 must be returned. If it is not quite sure, if
-	 * the given corpus is importable by this importer any value between 0 and 1
-	 * can be returned. If this method is not overridden, null is returned.
-	 * 
-	 * @return 1 if corpus is importable, 0 if corpus is not importable, 0 < X <
-	 *         1, if no definitive answer is possible, null if method is not
-	 *         overridden
-	 */
-	// public Double isImportable(URI corpusPath) {
-	// return (null);
-	// }
-
-	// =================================================== optional
-	// ===================================================
-	/**
-	 * <strong>OVERRIDE THIS METHOD FOR CUSTOMIZATION</strong> <br/>
-	 * This method is called by the pepper framework after initializing this
-	 * object and directly before start processing. Initializing means setting
-	 * properties {@link PepperModuleProperties}, setting temporary files,
-	 * resources etc. returns false or throws an exception in case of
-	 * {@link PepperModule} instance is not ready for any reason. <br/>
-	 * So if there is anything to do, before your importer can start working, do
-	 * it here.
-	 * 
-	 * @return false, {@link PepperModule} instance is not ready for any reason,
-	 *         true, else.
+	/* (non-Javadoc)
+	 * @see org.corpus_tools.pepper.impl.PepperModuleImpl#isReadyToStart()
 	 */
 	@Override
 	public boolean isReadyToStart() throws PepperModuleNotReadyException {
@@ -279,6 +256,9 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		return (super.isReadyToStart());
 	}
 
+	/* (non-Javadoc)
+	 * @see org.corpus_tools.pepper.impl.PepperModuleImpl#getProperties()
+	 */
 	@Override
 	public ToolboxTextImporterProperties getProperties() {
 		return (ToolboxTextImporterProperties) super.getProperties();
@@ -293,7 +273,7 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 	}
 
 	/**
-	 * // TODO Add description
+	 * A bean-like container for parsed data.
 	 *
 	 * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
 	 * 

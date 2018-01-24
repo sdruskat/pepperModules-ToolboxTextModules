@@ -34,7 +34,8 @@ import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import com.google.common.io.CountingInputStream;
 
 /**
- * TODO Description
+ * A parser for Toolbox files which detects document and phrase
+ * segmentations (`\id`s and `\ref`s in the Toolbox world). 
  *
  * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
  *
@@ -64,9 +65,6 @@ class ToolboxTextSegmentationParser {
 		this.morphMarkerLength = morphMarker.length();
 	}
 	
-	/**
-	 * 
-	 */
 	void parse() {
 		int longestMarkerLength = Math.max(idMarkerLength, Math.max(refMarkerLength, morphMarkerLength));
 		try (CountingInputStream stream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file)));
@@ -145,6 +143,9 @@ class ToolboxTextSegmentationParser {
 		return idOffsets;
 	}
 	
+	/**
+	 * @return the \id structure map
+	 */
 	Map<Long, Boolean> getIdStructureMap() {
 		return idStructureMap;
 	}

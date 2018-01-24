@@ -500,8 +500,6 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
-	 * FIXME Make private and mock in repsective tests 
-	 * 
 	 * Determines the type of a subreference by processing the
 	 * structure of its defining line.
 	 *
