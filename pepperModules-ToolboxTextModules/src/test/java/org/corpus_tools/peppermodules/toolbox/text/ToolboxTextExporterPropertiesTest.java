@@ -18,6 +18,9 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.LoggingEvent;
@@ -90,7 +93,7 @@ public class ToolboxTextExporterPropertiesTest {
 		invalidMDFMap.put("anTest", "an");
 		getFixture().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "ntTest:nt, anTest : an  , bbTest    :       invalid   ");
 		assertEquals(invalidMDFMap, getFixture().getMDFMap());
-		checkLog("MDF Map: The value \'invalid\' is not a valid MDF marker! Please refer to the following reference for a list of valid MDF markers: " + 
+		checkLog("MDF Map: The value \'invalid\' (key 'bbTest') is not a valid MDF marker! Entry will be ignored! Please refer to the following reference for a list of valid MDF markers: " + 
 				"Coward, David F.; Grimes, Charles E. (2000): \"Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter\"." + 
 				"SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.", Level.ERROR);
 	}
@@ -98,24 +101,150 @@ public class ToolboxTextExporterPropertiesTest {
 	/**
 	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getMDFMap()}.
 	 */
-	@Test
-	public final void testGetValidCustomMarkerMap() {
-		Map<String, String> testCustomMarkerMap = new HashMap<>();
-		testCustomMarkerMap.put("vaTest", "va");
-		testCustomMarkerMap.put("liTest", "li");
-		testCustomMarkerMap.put("dTest", "d");
-		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "vaTest:va, liTest : li  , dTest    :       d   ");
-		assertEquals(testCustomMarkerMap, getFixture().getCustomMarkerMap());
+	@Test(expected=IllegalArgumentException.class)
+	public final void testGetInvalidMDFMapKeyExists() {
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "ntTest:nt, anTest : an  , ntTest    :       invalid   ");
+		getFixture().getMDFMap(); // Should trigger exception
+	}
+
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getMDFMap()}.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public final void testGetInvalidMDFMapValueExists() {
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "ntTest:nt, anTest : an  , bbTest    :       nt   ");
+		getFixture().getMDFMap(); // Should trigger exception
 	}
 	
 	/**
 	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getMDFMap()}.
 	 */
 	@Test(expected = ArrayIndexOutOfBoundsException.class)
-	public final void testGetInvalidCustomMarkerMap() {
+	public final void testGetInvalidMDFMapAIOOB() {
 		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "ntTest:nt, anTest : an , invalid    ");
 		getFixture().getCustomMarkerMap();
 	}
+	
+
+
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getCustomMarkerMap()}.
+	 */
+	@Test
+	public final void testGetValidCustomMarkerMap() {
+		Map<String, String> testCustomMarkerMap = new HashMap<>();
+		testCustomMarkerMap.put("valTest", "val");
+		testCustomMarkerMap.put("iTest", "i");
+		testCustomMarkerMap.put("dTest", "d");
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "valTest:val, iTest : i  , dTest    :       d   ");
+		assertEquals(testCustomMarkerMap, getFixture().getCustomMarkerMap());
+	}
+	
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getCustomMarkerMap()}.
+	 */
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
+	public final void testGetInvalidCustomMarkerMap() {
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "ntTest:in, anTest : va , invalid    ");
+		getFixture().getCustomMarkerMap();
+	}
+	
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getMDFMap()}.
+	 */
+	@Test
+	public final void testGetInvalidCustomMarkerMapMDFValue() {
+		Map<String, String> invalidCustomMarkerMap = new HashMap<>();
+		invalidCustomMarkerMap.put("ntTest", "cus1");
+		invalidCustomMarkerMap.put("anTest", "cus2");
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "ntTest:cus1, anTest : cus2  , bbTest    :       va   ");
+		assertEquals(invalidCustomMarkerMap, getFixture().getCustomMarkerMap());
+		checkLog("Custom Marker Map: The value 'va' (key 'bbTest') is a reserved MDF marker! Entry will be ignored! Please refer to the following reference for a list of MDF markers and change the custom marker to something not contained in the list: \n" 
+				+ "Coward, David F.; Grimes, Charles E. (2000): \"Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter\".", Level.ERROR);
+	}
+
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getCustomMarkerMap()}.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public final void testGetInvalidCustomMarkerMapKeyExists() {
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "ntTest:in, anTest : va ,    ntTest   :      invalid    ");
+		getFixture().getCustomMarkerMap();
+	}
+	
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getCustomMarkerMap()}.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public final void testGetInvalidCustomMarkerMapValueExists() {
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "ntTest:in, anTest : va ,    bbTest   :      in    ");
+		getFixture().getCustomMarkerMap();
+	}
+	
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getAnnotationMarkerMap()}.
+	 */
+	@Test
+	public final void testGetValidAnnotationMarkerMap() {
+		BiMap<String, String> testMap = HashBiMap.create();
+		testMap.put("anTest", "an"); // MDF
+		testMap.put("bbTest", "bb"); // MDF
+		testMap.put("ntTest", "nt"); // MDF
+		testMap.put("iTest", "i"); // custom
+		testMap.put("dTest", "d"); // custom
+		testMap.put("valTest", "val"); // custom
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "ntTest:nt, anTest : an , bbTest    :       bb   ");
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "valTest:val, iTest : i  , dTest    :       d   ");
+		assertEquals(testMap, getFixture().getAnnotationMarkerMap());
+	}
+
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getAnnotationMarkerMap()}.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public final void testGetInvalidAnnotationMarkerMapKeyExists() {
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "ntTest:nt, anTest : an , bbTest    :       bb   ");
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "valTest:val, iTest : i  , bbTest    :       d   ");
+		getFixture().getAnnotationMarkerMap();
+	}
+
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getAnnotationMarkerMap()}.
+	 */
+	@Test
+	public final void testGetInvalidAnnotationMarkerMapReservedMarker() {
+		BiMap<String, String> testMap = HashBiMap.create();
+		testMap.put("anTest", "an"); // MDF
+		testMap.put("bbTest", "bb"); // MDF
+		testMap.put("ntTest", "nt"); // MDF
+		testMap.put("iTest", "i"); // custom
+		testMap.put("dTest", "d"); // custom
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "ntTest:nt, anTest : an , bbTest    :       bb   ");
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "vaTest:va, iTest : i  , dTest    :       d   ");
+		Map<String, String> resultMap = getFixture().getAnnotationMarkerMap();
+		assertEquals(testMap, resultMap);
+	}
+	
+	/**
+	 * Test method for {@link org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties#getAnnotationMarkerMap()}.
+	 */
+	@Test
+	public final void testGetInvalidAnnotationMarkerMapNoMDFMarker() {
+		BiMap<String, String> testMap = HashBiMap.create();
+		testMap.put("bbTest", "bb"); // MDF
+		testMap.put("ntTest", "nt"); // MDF
+		testMap.put("valTest", "val"); // custom
+		testMap.put("iTest", "i"); // custom
+		testMap.put("dTest", "d"); // custom
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.MDF_MAP, "ntTest:nt, anTest : nomdf , bbTest    :       bb   ");
+		getFixture().setPropertyValue(ToolboxTextExporterProperties.CUSTOM_MARKERS, "valTest:val, iTest : i  , dTest    :       d   ");
+		Map<String, String> resultMap = getFixture().getAnnotationMarkerMap();
+		assertEquals(testMap, resultMap);
+	}
+	
+
+
+
 
 	/**
 	 * @return the fixture

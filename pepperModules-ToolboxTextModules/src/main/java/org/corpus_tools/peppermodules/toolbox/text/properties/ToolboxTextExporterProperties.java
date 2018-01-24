@@ -3,12 +3,12 @@
  */
 package org.corpus_tools.peppermodules.toolbox.text.properties;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
@@ -17,6 +17,9 @@ import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils
 import org.corpus_tools.salt.core.SAnnotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 /**
  * // TODO Add description
@@ -223,27 +226,41 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	/**
 	 * // TODO Add description
 	 * 
+	 * UNIQUE KEYS AND VALUES!
+	 * 
 	 * @return TODO map or empty map
 	 */
 	public Map<String, String> getMDFMap() {
-		Map<String, String> mdfMap = new HashMap<>();
+		Map<String, String> mdfMap = HashBiMap.create();
 		if (getProperty(MDF_MAP).getValue() != null) {
 			List<String> entries = new ArrayList<>(Arrays.asList(
 					((String) getProperty(MDF_MAP).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
 			for (String entry : entries) {
 				try {
 					String[] split = entry.split(":");
-					String key = split[0].trim();
-					String mdf = split[1].trim();
+					String key = split[0].trim(); // Salt annotation
+					String mdf = split[1].trim(); // MDF marker
+					// Check if key exists
+					if (mdfMap.containsKey(key)) {
+						IllegalArgumentException iae = new IllegalArgumentException("Key already present: " + key);
+						logger.error("MDF Map: {}!", iae.getMessage(), iae);
+						throw iae;
+					}
 					if (!mdfKeys.contains(mdf)) {
 						logger.error(
-								"MDF Map: The value \'{}\' is not a valid MDF marker! Please refer to the following reference for a list of valid MDF markers: "
+								"MDF Map: The value '{}' (key '{}') is not a valid MDF marker! Entry will be ignored! Please refer to the following reference for a list of valid MDF markers: "
 										+ "Coward, David F.; Grimes, Charles E. (2000): \"Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter\"."
 										+ "SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.",
-								mdf);
+								mdf, key);
 						continue;
 					}
-					mdfMap.put(key, mdf);
+					try {
+						mdfMap.put(key, mdf);
+					}
+					catch (IllegalArgumentException e) {
+						logger.error("MDF Map: {}!", e.getMessage(), e);
+						throw e;
+					}
 				}
 				catch (ArrayIndexOutOfBoundsException e) {
 					logger.error(
@@ -261,7 +278,7 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	 * @return TODO map or empty map
 	 */
 	public Map<String, String> getCustomMarkerMap() {
-		Map<String, String> customMarkerMap = new HashMap<>();
+		Map<String, String> customMarkerMap = HashBiMap.create();
 		if (getProperty(CUSTOM_MARKERS).getValue() != null) {
 			List<String> entries = new ArrayList<>(Arrays.asList(((String) getProperty(CUSTOM_MARKERS).getValue())
 					.split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
@@ -270,7 +287,25 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 					String[] split = entry.split(":");
 					String key = split[0].trim();
 					String marker = split[1].trim();
-					customMarkerMap.put(key, marker);
+					// Check if key exists
+					if (customMarkerMap.containsKey(key)) {
+						IllegalArgumentException iae = new IllegalArgumentException("Key already present: " + key);
+						logger.error("Custom Marker Map: {}!", iae.getMessage(), iae);
+						throw iae;
+					}
+					if (mdfKeys.contains(marker)) {
+						logger.error("Custom Marker Map: The value '{}' (key '{}') is a reserved MDF marker! Entry will be ignored! Please refer to the following reference for a list of MDF markers and change the custom marker to something not contained in the list: \n" 
+																		+ "Coward, David F.; Grimes, Charles E. (2000): \"Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter\".", 
+								marker, key);
+						continue;
+					}
+					try {
+						customMarkerMap.put(key, marker);
+					}
+					catch (IllegalArgumentException e) {
+						logger.error("Custom Marker Map: {}!", e.getMessage(), e);
+						throw e;
+					}
 				}
 				catch (ArrayIndexOutOfBoundsException e) {
 					logger.error(
@@ -281,6 +316,48 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 			}
 		}
 		return customMarkerMap;
+	}
+	
+	/**
+	 * // TODO Add description
+	 * 
+	 * @return A map from Salt annotations to Toolbox markers
+	 */
+	public Map<String, String> getAnnotationMarkerMap() {
+		BiMap<String, String> annotationMarkerBiMap = HashBiMap.create();
+		for (Entry<String, String> mdf : getMDFMap().entrySet()) {
+			String key = mdf.getKey();
+			String marker = mdf.getValue();
+			if (annotationMarkerBiMap.containsKey(key)) {
+				IllegalArgumentException iae = new IllegalArgumentException("Key already present: " + key);
+				logger.error("Annotation Marker Map: {}!", iae.getMessage(), iae);
+				throw iae;
+			}
+			try {
+				annotationMarkerBiMap.put(key, marker);
+			}
+			catch (IllegalArgumentException e) {
+				logger.error("Annotation Marker Map: {}!", e.getMessage(), e);
+				throw e;
+			}
+		}
+		for (Entry<String, String> customMarker : getCustomMarkerMap().entrySet()) {
+			String key = customMarker.getKey();
+			String marker = customMarker.getValue();
+			if (annotationMarkerBiMap.containsKey(key)) {
+				IllegalArgumentException iae = new IllegalArgumentException("Key already present: " + key);
+				logger.error("Annotation Marker Map: {}!", iae.getMessage(), iae);
+				throw iae;
+			}
+			try {
+				annotationMarkerBiMap.put(key, marker);
+			}
+			catch (IllegalArgumentException e) {
+				logger.error("Annotation Marker Map: {}!", e.getMessage(), e);
+				throw e;
+			}
+		}
+		return annotationMarkerBiMap;
 	}
 
 	
