@@ -63,22 +63,22 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	 * Layer names
 	 */
 	/**
-	 * TODO Document that these layers are needed!
+	 * Name of layer with ref spans
 	 */
 	public static final String REF_SPAN_LAYER = "refSpanLayer";
 	
 	/**
-	 * 
+	 * Name of layer with id spans
 	 */
 	public static final String ID_SPAN_LAYER = "idSpanLayer";
 	
 	/**
-	 * 
+	 * Name of layer with lexical tokens
 	 */
 	public static final String TX_TOKEN_LAYER = "txTokenLayer";
 	
 	/**
-	 * 
+	 * Name of layer with morphological tokens
 	 */
 	public static final String MB_TOKEN_LAYER = "mbTokenLayer";
 	

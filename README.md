@@ -82,6 +82,16 @@ following sections.
 
 ## Importer
 
+### Requirements, assumptions, behaviour
+
+#### Pre-existing meta annotations for *id*s
+
+During conversion, when the importer encounters a pre-existing *meta* annotation
+on an *id*, it will overwrite the value of this annotation. This is highly unlikely
+to happen, unless the source file has been manually edited and the duplicate meta
+annotation introduced in the process.
+
+
 ### Properties
 
 Note that required values with a default value do not have to be specified in the
@@ -235,18 +245,43 @@ in document names should be replaced with default characters.
 
 ## Exporter
 
+### Requirements, assumptions, behaviour
+
+#### Data source sequences
+
+The exporter works on a single data source sequence only, which is acquired
+for an *id* during conversion via 
+`sDocumentGraph.getOverlappedDataSourceSequence(idSpan, SALT_TYPE.STEXT_OVERLAPPING_RELATION).get(0)`.
+
+This is due to the fact that the definitive data source in Toolbox is the single
+source text, i.e., the string of lexical tokens.
+
+#### Layers
+
+The Salt model must contain the following `SLayer`s that are picked up by the
+properties `idSpanLayer`, `refSpanLayer`, `txTokenLayer`, and `mbTokenLayer`
+respectively:
+
+- A layer containing spans annotated with *id*-scope annotations
+- A layer containing spans annotated with *id*-scope annotations
+- A layer containing lexical tokens
+- A layer containing morphological tokens
+
+The names for these layers must be **unique**, i.e., the model must contain
+exactly one SLayer with that name.
+
 ### Properties
 
 Note that required values with a default value do not have to be specified in the
 workflow file when the default value should be used.
 
-- **`refSpanLayer` (String) (required)**: The Salt layer that contains the spans to be mapped to Toolbox *ref*s.
-
-   Default value: `ref`
-
 - **`idSpanLayer` (String) (required)**: The Salt layer that contains the spans to be mapped to Toolbox *id*s.
 
    Default value: `id`
+
+- **`refSpanLayer` (String) (required)**: The Salt layer that contains the spans to be mapped to Toolbox *ref*s.
+
+   Default value: `ref`
 
 - **`txTokenLayer` (String) (required)**: The Salt layer that contains the tokens to be mapped to Toolbox' *tx* lines.
 
@@ -301,7 +336,7 @@ MDF markers.
 
 Contributions are welcome! When contributing to this repository, please first 
 discuss the change you wish to make via a 
-[new issue](https://github.com/sdruskat/pepperModules-ToolboxTextModules/issues/new), 
+[new issue](https://github.com/sdruskat/pepperModules-ToolboxTextModules/issues/new) 
 before making a change.
 
 ## Contributors

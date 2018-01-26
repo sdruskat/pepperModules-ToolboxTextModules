@@ -647,8 +647,7 @@ public class RefMapper extends AbstractBlockMapper {
 	private String getSingleLine(String marker) {
 		List<String> list = markerContentMap.get(marker);
 		if (list.size() > 1) {
-			throw new PepperModuleException("Reference block contains two \\" + marker + " lines, which at this point shouldn't be the case. Please report this as a bug!"); 
-			// FIXME: Provide link to final issue site
+			throw new PepperModuleException("Reference block contains two \\" + marker + " lines, which at this point shouldn't be the case. Please report this as a bug at https://github.com/sdruskat/pepperModules-ToolboxTextModules/issues!"); 
 		}
 		else if (list.size() == 1) {
 			return list.get(0);

@@ -132,8 +132,6 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		 */
 		// Get \id spans
 		String idSpanName = properties.getIdSpanLayer();
-		// TODO Document that we're using the first layer, issues with > 1 layers of the same name
-		// TODO Document that SLayers NEED TO BE PRESENT for the conversion to work at all
 		SLayer layer = graph.getLayerByName(idSpanName).get(0);
 		Set<SNode> potentialIdNodes = layer.getNodes();
 		Set<SSpan> idSpans = new HashSet<>();
@@ -145,7 +143,6 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		// Order \id spans by indices of tokens they're covering
 		List<SSpan> orderedIdSpans = ToolboxTextModulesUtils.sortSpansByTextCoverageOfIncludedToken(idSpans);
 		for (SSpan idSpan : orderedIdSpans) {
-			// FIXME Externalize \\id, etc. to properties for use here
 			lines.add("\\id " + idSpan.getAnnotation(properties.getIdIdentifierAnnotation()).getValue_STEXT());
 			for (SAnnotation a : idSpan.getAnnotations()) {
 				if (!a.getQName().equals(properties.getIdIdentifierAnnotation())) {
@@ -164,7 +161,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			@SuppressWarnings("rawtypes")
 			List<DataSourceSequence> dsSequences = graph.getOverlappedDataSourceSequence(idSpan, SALT_TYPE.STEXT_OVERLAPPING_RELATION);
 			/*
-			 *  We are currently working with only 1 data source! TODO Add this info to docs.
+			 *  We are currently working with only 1 data source!
 			 *  Spans should arguably only overlap one data source anyway, but some
 			 *  importers (notably the FLExImporter) will tie "phrase" spans (i.e., Toolbox refs)
 			 *  to both morphological and lexical tokens. Here it is assumed, that the spanned
@@ -177,7 +174,6 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			List<SNode> allNodes = graph.getNodesBySequence(dsSequence);
 			Set<SSpan> refSpans = new HashSet<>();
 			for (SNode node : allNodes) {
-				// TODO Document that we're using the first layer, issues with > 1 layers of the same name
 				if (node instanceof SSpan && node.getLayers().contains(graph.getLayerByName(properties.getRefSpanLayer()).get(0))) {
 					refSpans.add((SSpan) node);
 				}

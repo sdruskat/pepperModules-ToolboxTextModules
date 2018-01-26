@@ -257,7 +257,7 @@ public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 						markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
 						if (!markerAndValue[0].equals(getProperties().getRefMarker())) {
 							// If the meta annotation already exists, overwrite
-							// its value ; TODO Document this behaviour
+							// its value
 							if (getCorpus()
 									.getMetaAnnotation(SALT_NAMESPACE_TOOLBOX + "::" + markerAndValue[0]) != null) {
 								getCorpus().getMetaAnnotation(SALT_NAMESPACE_TOOLBOX + "::" + markerAndValue[0])
