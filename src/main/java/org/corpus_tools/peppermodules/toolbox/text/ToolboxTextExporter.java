@@ -57,9 +57,9 @@ public class ToolboxTextExporter extends PepperExporterImpl implements PepperExp
 	public ToolboxTextExporter() {
 		super();
 		setName("ToolboxTextExporter");
-		setVersion("1.0.0-SNAPSHOT");
+		setVersion("1.0.0");
 		setSupplierContact(URI.createURI("stephan.druskat@hu-berlin.de"));
-		setSupplierHomepage(URI.createURI("http://corpus-tools.org"));
+		setSupplierHomepage(URI.createURI("https://github.com/sdruskat/pepperModules-ToolboxTextModules"));
 		setDesc("An exporter for the text-based format written by SIL Toolbox (as opposed to the respective XML format).");
 		addSupportedFormat("toolbox-text", "3.0", null);
 		this.setProperties(new ToolboxTextExporterProperties());
