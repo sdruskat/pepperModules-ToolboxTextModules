@@ -165,10 +165,10 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 				.withDefaultValue("id").isRequired(true).build());
 		addProperty(PepperModuleProperty.create().withName(TX_TOKEN_LAYER).withType(String.class)
 				.withDescription("The Salt layer that contains the tokens to be mapped to Toolbox' \\tx lines.")
-				.withDefaultValue("id").isRequired(true).build());
+				.withDefaultValue("tx").isRequired(true).build());
 		addProperty(PepperModuleProperty.create().withName(MB_TOKEN_LAYER).withType(String.class)
 				.withDescription("The Salt layer that contains the tokens to be mapped to Toolbox' \\mb lines.")
-				.withDefaultValue("id").isRequired(true).build());
+				.withDefaultValue("mb").isRequired(true).build());
 		addProperty(PepperModuleProperty.create().withName(ID_IDENT_ANNOTATION).withType(String.class)
 				.withDescription("The annotation (namespace::name) that contains the identifier of \\ids.")
 				.isRequired(true).build());
