@@ -104,7 +104,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * morph: | ta | wane |
 	 * ```
 	 */
-	public final String PROP_LIAISON_DELIMITER = "liaisonDelimiter";
+	public static final String PROP_LIAISON_DELIMITER = "liaisonDelimiter";
 	
 	/**
 	 * The marker used for references, i.e., usually "ref" or "id".
@@ -145,17 +145,6 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * `false`: all lines but the first line marked with {marker} are dropped.
 	 */
 	public static final String PROP_MERGE_DUPL_MARKERS = "mergeDuplMarkers";
-
-	/**
-	 * Whether the importer should be run in **error detection mode**.
-	 * 
-	 * `true`: No mapping will take place, but warnings will be logged. 
-	 * This mode can be used to detect faulty data before attempting
-	 * a conversion.
-	 * 
-	 * `false` (default): Corpora and documents will be mapped in full. 
-	 */
-	public static final String PROP_DETECTION_MODE = "errorDetectionMode";
 
 	/**
 	 * Whether the importer should record errors.
@@ -235,7 +224,7 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		addProperty(PepperModuleProperty.create().withName(PROP_LEX_ANNOTATION_MARKERS).withType(String.class)
 				.withDescription(
 						"All Toolbox markers which precede lines with annotations of source text segments (usually lexical items), without the preceding backslashes, and as a comma-separated list.")
-				.withDefaultValue("false").build());
+				.isRequired(false).build());
 		addProperty(PepperModuleProperty.create().withName(PROP_MORPH_ANNOTATION_MARKERS).withType(String.class)
 				.withDescription(
 						"All Toolbox markers which precede lines with annotations of morphemes, without the preceding backslashes, and as a comma-separated list.")
@@ -270,9 +259,6 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 				.withDescription(
 						"Whether lines with the same marker in the same block should be merged into one line, or just the first line kept.")
 				.withDefaultValue(true).isRequired(true).build());
-		addProperty(PepperModuleProperty.create().withName(PROP_DETECTION_MODE).withType(Boolean.class).withDescription(
-				"Whether the importer should be run in error detection mode. true: Corpora and documents will be mapped, but documents will remain empty. This mode can be used to detect faulty data before attempting a conversion. false (default): Corpora and documents will be mapped in full. ")
-				.withDefaultValue(false).isRequired(true).build());
 		addProperty(PepperModuleProperty.create().withName(PROP_MISSING_ANNO_STRING).withType(String.class)
 				.withDescription("A string used to fill gaps in annotations. Default: ***.").withDefaultValue("***")
 				.isRequired(true).build());
@@ -347,11 +333,6 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return (Boolean) getProperty(PROP_MERGE_DUPL_MARKERS).getValue();
 	}
 
-	@SuppressWarnings("javadoc")
-	public boolean errorDetectionMode() {
-		return (Boolean) getProperty(PROP_DETECTION_MODE).getValue();
-	}
-	
 	@SuppressWarnings("javadoc")
 	public String getMissingAnnoString() {
 		return (String) getProperty(PROP_MISSING_ANNO_STRING).getValue();

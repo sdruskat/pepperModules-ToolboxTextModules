@@ -112,7 +112,6 @@ public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 			markerMap.put(properties.getMorphMarker(), properties.getMorphMarker());
 		}
 
-		final boolean eDM = getProperties().errorDetectionMode();
 		SDocumentGraph graph = getDocument().getDocumentGraph();
 		if (graph == null) {
 			graph = SaltFactory.createSDocumentGraph();
@@ -126,9 +125,7 @@ public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 		getLayer(markerMap.get(getProperties().getRefMarker()));
 		
 		// Create a timeline to linearize lexical and morphological tokens
-		if (!eDM) {
-			graph.createTimeline();
-		}
+		graph.createTimeline();
 		
 		// Create primary data sources
 		final STextualDS lexDS = graph.createTextualDS("");
@@ -151,13 +148,11 @@ public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 				 * instead of calling an instance of DocumentHeaderMapper, the
 				 * name of the SDocument will be set to the file name sans extension.
 				 */
-				if (!eDM) {
-					String fileName = file.getName();
-					graph.getDocument().setName(fileName.substring(0, fileName.lastIndexOf('.')));
-				}
+				String fileName = file.getName();
+				graph.getDocument().setName(fileName.substring(0, fileName.lastIndexOf('.')));
 				refOffsets = refMap.get(-1L);
 			}
-			else if (!eDM) {
+			else {
 				// The offset at which the header of this document ends
 				long docHeaderEndOffset;
 				/*
@@ -241,7 +236,6 @@ public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 	 */
 	@Override
 	public DOCUMENT_STATUS mapSCorpus() {
-		final boolean eDM = getProperties().errorDetectionMode();
 		File file = new File(getResourceURI().toFileString());
 		/*
 		 * headerEndOffset should only be null if the corpus represents
@@ -262,14 +256,16 @@ public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 					if (currentByte == '\\' && bos.size() > 0) {
 						markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
 						if (!markerAndValue[0].equals(getProperties().getRefMarker())) {
-							if (!eDM) {
-								// If the meta annotation already exists, overwrite its value ; TODO Document this behaviour
-								if (getCorpus().getMetaAnnotation(SALT_NAMESPACE_TOOLBOX + "::" + markerAndValue[0]) != null) {
-									getCorpus().getMetaAnnotation(SALT_NAMESPACE_TOOLBOX + "::" + markerAndValue[0]).setValue(markerAndValue.length > 1 ? markerAndValue[1] : "");
-								}
-								else {
-									getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
-								}
+							// If the meta annotation already exists, overwrite
+							// its value ; TODO Document this behaviour
+							if (getCorpus()
+									.getMetaAnnotation(SALT_NAMESPACE_TOOLBOX + "::" + markerAndValue[0]) != null) {
+								getCorpus().getMetaAnnotation(SALT_NAMESPACE_TOOLBOX + "::" + markerAndValue[0])
+										.setValue(markerAndValue.length > 1 ? markerAndValue[1] : "");
+							}
+							else {
+								getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0],
+										markerAndValue.length > 1 ? markerAndValue[1] : "");
 							}
 							bos.reset();
 						}
@@ -283,10 +279,8 @@ public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 				}
 				// bos still contains the last marker line, so write that to the
 				// list of marker lines.
-				if (!eDM) {
-					markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
-					getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
-				}
+				markerAndValue = getMarkerAndValueFromString(bos.toString().trim());
+				getCorpus().createMetaAnnotation(SALT_NAMESPACE_TOOLBOX, markerAndValue[0], markerAndValue.length > 1 ? markerAndValue[1] : "");
 			}
 			catch (FileNotFoundException e) {
 				throw new PepperModuleException("The corpus file " + getResourceURI().toFileString() + " has not been found.", e);
