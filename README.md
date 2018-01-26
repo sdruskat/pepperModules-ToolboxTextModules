@@ -80,46 +80,48 @@ Pepper conversions are defined in Pepper workflow files, see the
 The available properties for the Toolbox Text Modules are detailed in the 
 following sections.
 
-## Importer properties
+## Importer
+
+### Properties
 
 Note that required values with a default value do not have to be specified in the
 workflow file when the default value should be used.
 
-- **`fileExtensions` String (required)**: The file extensions that corpus files can have as a 
+- **`fileExtensions` (String) (required)**: The file extensions that corpus files can have as a 
 comma-separated list.
 
    Default value: `txt`
 
-- **`idMarker` String**: The Toolbox marker that precedes lines with IDs, without the 
+- **`idMarker` (String)**: The Toolbox marker that precedes lines with IDs, without the 
 preceding backslash.
 
    Default value: `id`
 
-- **`refMarker` String (required)**: The marker used for references, i.e., usually "ref" or "id".
+- **`refMarker` (String) (required)**: The marker used for references, i.e., usually "ref" or "id".
 
    Default value: `ref`
 
-- **`lexicalMarker` String (required)**: The Toolbox marker that precedes lines with source text 
+- **`lexicalMarker` (String) (required)**: The Toolbox marker that precedes lines with source text 
 (usually "words") without the preceding backslash.
 
    Default value: `tx`
 
-- **`morphologyMarker` String**: The Toolbox marker that precedes lines with morphological 
+- **`morphologyMarker` (String)**: The Toolbox marker that precedes lines with morphological 
 information, without the preceding backslash.
 
    Default value: `mb`
 
-- **`lexAnnotationMarkers` String**: All Toolbox markers which precede lines with 
+- **`lexAnnotationMarkers` (String)**: All Toolbox markers which precede lines with 
 annotations of source text segments (usually "words"), without the preceding 
 backslashes, and as a comma-separated list.
 
-- **`morphologyAnnotationMarkers` String**: All Toolbox markers which precede lines with 
+- **`morphologyAnnotationMarkers` (String)**: All Toolbox markers which precede lines with 
 annotations of morphemes, without the preceding backslashes, and as a 
 comma-separated list.
 
    Default value: `ge,ps`	
 
-- **`attachDelimiter` String**: Whether detached morphology delimiters (as in "item 
+- **`attachDelimiter` (String)**: Whether detached morphology delimiters (as in "item 
 - item" or similar) should be attached to the previous or subsequent item, as a 
 two-item comma-separated list, where the first item signifies whether the 
 delimiter should be attached at all (if `true` it will be attached), and the 
@@ -129,13 +131,13 @@ making the latter a suffix).
 
    Default value: `true,true`
 
-- **`morphemeDelimiters` String**: The morpheme delimiters used in the Toolbox files as a 
+- **`morphemeDelimiters` (String)**: The morpheme delimiters used in the Toolbox files as a 
 comma-separated two-point list where the first element is the **affix** 
 delimiter, and the second element is the **clitics** delimiter.
 
 Default value: `-,=`
 
-- **`liaisonDelimiter` String**: The morpheme delimiter used in the Toolbox files to mark 
+- **`liaisonDelimiter` (String)**: The morpheme delimiter used in the Toolbox files to mark 
 "words" represented on the morphological layer that are contracted into words on
 the lexical layer, e.g., Saliba `tane = ta wane`. This delimiter can be used for 
 cases where the importer may otherwise not have enough information to figure out 
@@ -157,16 +159,16 @@ ruled by one item on the lexical layer:
 
    Default value: `_`
 
-- **`subrefDefinitionMarker` String**: The marker used to define *subref*s.
+- **`subrefDefinitionMarker` (String)**: The marker used to define *subref*s.
 
    Default value: `subref`
 
-- **`subrefAnnotationMarkers` String**: The marker which precedes lines with 
+- **`subrefAnnotationMarkers` (String)**: The marker which precedes lines with 
 annotations that can potentially span subranges of the complete morphological 
 data source. For details about *subref*s see the respective 
 [MelaTAMP wiki page](https://wikis.hu-berlin.de/melatamp/Clause_segmentation_and_annotation).
 
-- **`mergeDuplMarkers` Boolean (required)**: Whether lines with the same marker in the same block 
+- **`mergeDuplMarkers` (Boolean) (required)**: Whether lines with the same marker in the same block 
 should be merged into one line.
 
    `true`: Subsequent lines marked with {marker} are concatenated to the first 
@@ -176,7 +178,7 @@ should be merged into one line.
 
    Default value: `true`
 
-- **`recordErrors` Boolean (required)**: Whether the importer should record errors.
+- **`recordErrors` (Boolean) (required)**: Whether the importer should record errors.
 
    `true` (default): Errors in the data model will be recorded, i.e., annotations
 	on an error layer (called `err`) will be added for each line which
@@ -187,18 +189,18 @@ should be merged into one line.
 
 	Default value: `true`
 
-- **`normalizeMarkers` Boolean (required)**: Whether annotation namespace-name combinations for the 
+- **`normalizeMarkers` (Boolean) (required)**: Whether annotation namespace-name combinations for the 
 default layers should be normalized to Toolbox standards (after the default values
 for *ref*s, *subref*s, *lexical* and *morphological* markers). 
 
 	Default value: `false`
 
-- **`normalizeDocNames` Boolean (required)**: Whether special characters and whitespaces 
+- **`normalizeDocNames` (Boolean) (required)**: Whether special characters and whitespaces 
 in document names should be replaced with default characters.
 
    Default value: `true`
 
-- **`fixInterl11n` Boolean (required)**: Whether the importer should fix interlinearization.
+- **`fixInterl11n` (Boolean) (required)**: Whether the importer should fix interlinearization.
 
    `true` (default): Interlinearization error in the data model will be fixed as 
    follows.
@@ -227,11 +229,73 @@ in document names should be replaced with default characters.
 
 	Default value: `true`
 	
-- **`missingAnnoString` String (required)**: A String used to fill interlinearization gaps.
+- **`missingAnnoString` (String) (required)**: A String used to fill interlinearization gaps.
 
    Default value: `***`
 
-## Exporter properties
+## Exporter
+
+### Properties
+
+Note that required values with a default value do not have to be specified in the
+workflow file when the default value should be used.
+
+- **`refSpanLayer` (String) (required)**: The Salt layer that contains the spans to be mapped to Toolbox *ref*s.
+
+   Default value: `ref`
+
+- **`idSpanLayer` (String) (required)**: The Salt layer that contains the spans to be mapped to Toolbox *id*s.
+
+   Default value: `id`
+
+- **`txTokenLayer` (String) (required)**: The Salt layer that contains the tokens to be mapped to Toolbox' *tx* lines.
+
+   Default value: `tx`
+
+- **`mbTokenLayer` (String)**: The Salt layer that contains the tokens to be mapped to Toolbox' *mb* lines.
+
+   Default value: `mb`
+	
+- **`idIdentifierAnnotation` (String) (required)**: The annotation (`namespace::name`) 
+that contains the identifiers of *id*s.
+
+- **`refIdentifierAnnotation` (String) (required)**: The annotation (`namespace::name`) 
+that contains the identifiers of *ref*s.
+	
+- **`txMaterialAnnotations` (String)**: Comma-separated list of annotations which contain primary data, i.e., 
+lexical material which will already be mapped to tokens but still exists as 
+annotation and should thus be left out during export to annotations (as they will
+already be mapped to \tx).
+	
+- **`mbMaterialAnnotations` (String)**: Comma-separated list of annotations which contain primary data, i.e., 
+morphological material which will already be mapped to tokens but still exists as 
+annotation and should thus be left out during export to annotations (as they will
+already be mapped to \mb).
+	
+- **`spaceReplacement` (String) (required)**: String to replace whitespaces in annotation 
+values with, as these whitespaces may break the item count in Toolbox 
+interlinearization.
+
+   Default value: `-`	
+
+- **`mdfMap` (String)**: A map whose keys are annotations with the pattern 
+`namespace::name`, and whose values are MDF markers.
+
+   In the export process, the value for the defined {@link SAnnotation} will
+   be mapped to the line marked with the respective MDF pattern.
+
+	- Example: `morph::gloss:ge` will map an annotation `morph::gloss:myglossvalue`
+	to `\ge myglossvalue`.
+
+	The map is defined in the format `namespace::name:marker,namespace::name:marker,...`.
+
+
+- **`customMarkers` (String)**: A map whose keys are annotations with the pattern 
+`namespace::name`, and whose values are custom markers supplementing the existing
+MDF markers.
+
+   In the export process, the value for the defined {@link SAnnotation} will
+   be mapped to the line marked with the respective MDF pattern.
 
 ## Contribute
 
