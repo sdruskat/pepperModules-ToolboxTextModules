@@ -8,7 +8,7 @@ If you use the Toolbox Text Modules for Pepper in your work, please cite it with
 - **Year:** 2018
 - **Title:** pepperModules-ToolboxTextModules
 - **Version:** 1.0.0
-- **DOI:** [TODO](doi link)
+- **DOI:** [10.5281/zenodo.1162208](https://doi.org/10.5281/zenodo.1162208)
 - **Release date:** 2018-01-24
 
 Note that this metadata is also provided in machine-readable form in the 
