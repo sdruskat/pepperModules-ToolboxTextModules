@@ -20,7 +20,6 @@
 package org.corpus_tools.peppermodules.toolbox.text;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,13 +27,10 @@ import java.util.Map;
 import org.corpus_tools.pepper.impl.PepperImporterImpl;
 import org.corpus_tools.pepper.modules.PepperImporter;
 import org.corpus_tools.pepper.modules.PepperMapper;
-import org.corpus_tools.pepper.modules.PepperModule;
-import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleNotReadyException;
 import org.corpus_tools.peppermodules.toolbox.text.mapping.ToolboxTextImportMapper;
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextImporterProperties;
-//import org.corpus_tools.peppermodules.toolbox.text.utils.CitationMetadata;
 import org.corpus_tools.salt.common.SCorpus;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocument;
@@ -45,8 +41,6 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.Range;
 
 /**
@@ -79,33 +73,6 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 		this.setProperties(new ToolboxTextImporterProperties());
 	}
 	
-//	@Override
-//	public void start() {
-//		super.start();
-////		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-////		CitationMetadata citation = null;
-////		try {
-////			citation = mapper.readValue(new File("CITATION.cff"), CitationMetadata.class);
-////		}
-////		catch (IOException e) {
-////			// TODO Auto-generated catch block
-////			e.printStackTrace();
-////		}
-////		logger.info(constructCitationString(citation));
-//	}
-
-//	private String constructCitationString(CitationMetadata citation) {
-//		String citationString = ""
-//				+ "##################################################################################\n"
-//				+ "#                                                                                #\n"
-//				+ "# " + citation.getMessage() + "\n"
-//				+ "# " + citation.getReleaseDate() + "\n"
-//				+ "# " + citation.getTitle() + "\n"
-//				+ "# " + citation.getVersion() + "\n"
-//				+ "# " + citation.getDoi();
-//		return citationString;
-//	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
