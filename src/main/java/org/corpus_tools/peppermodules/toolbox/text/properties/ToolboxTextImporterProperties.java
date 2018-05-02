@@ -207,6 +207,20 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	 * Default: *\*\*\**
 	 */
 	public static final String PROP_MISSING_ANNO_STRING = "missingAnnoString";
+
+	/**
+	 * Whether the importer should retain the original \tx line (with deduplicated whitespaces)
+	 * 
+	 * `true` (default): The original \tx line will be retained.
+	 */
+	public static final String PROP_RETAIN_TX = "retainTx";
+	
+	/**
+	 * The marker to prefix retained original \tx lines
+	 * 
+	 * Default: *rtx*
+	 */
+	public static final String PROP_RETAIN_TX_MARKER = "retainTxMarker";
 	
 	/**
 	 * Constructor adding all properties to the instance.	 
@@ -274,6 +288,12 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		addProperty(PepperModuleProperty.create().withName(PROP_NORMALIZE_DOC_NAMES).withType(Boolean.class)
 				.withDescription("Whether the importer should rename documents to defaults (no special characters).")
 				.withDefaultValue(true).isRequired(true).build());
+		addProperty(PepperModuleProperty.create().withName(PROP_RETAIN_TX).withType(Boolean.class)
+				.withDescription("Whether the importer should retain the original \\tx line (with deduplicated whitespaces).")
+				.withDefaultValue(true).isRequired(false).build());
+		addProperty(PepperModuleProperty.create().withName(PROP_RETAIN_TX_MARKER).withType(String.class)
+				.withDescription("The marker to prefix retained original \\tx lines")
+				.withDefaultValue("rtx").isRequired(false).build());
 	}
 
 	// Getter methods for the different property values.
@@ -383,5 +403,14 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		return (Boolean) getProperty(PROP_NORMALIZE_DOC_NAMES).getValue();
 	}
 	
+	@SuppressWarnings("javadoc")
+	public boolean retainOriginalTx() {
+		return (Boolean) getProperty(PROP_RETAIN_TX).getValue();
+	}
+	
+	@SuppressWarnings("javadoc")
+	public String getRetainedOriginalTxMarker() {
+		return (String) getProperty(PROP_RETAIN_TX_MARKER).getValue();
+	}
 }
 

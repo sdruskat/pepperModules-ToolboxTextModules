@@ -31,7 +31,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -401,9 +400,9 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 				case "1":
 					switch (s.getName()) {
 					case "Reference no. 1":
-						assertEquals(3, s.getAnnotations().size());
+						assertEquals(4, s.getAnnotations().size());
 						for (SAnnotation a : s.getAnnotations()) {
-							assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+							assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"), is("rtx"))));
 						}
 						assertNotNull((aut = s.getAnnotation("toolbox::ll")));
 						assertThat(aut.getValue_STEXT(), is("A reference testing composites, clitics, and such"));
@@ -414,9 +413,9 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 						break;
 					case "Subref sentence schema 1 (line-level) to mb":
 						if (!s.getName().equals("subref")) {
-							assertEquals(3, s.getAnnotations().size());
+							assertEquals(4, s.getAnnotations().size());
 							for (SAnnotation a : s.getAnnotations()) {
-								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"), is("rtx"))));
 							}
 							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
 							assertThat(aut.getValue_STEXT(), is("uref one-mb"));
@@ -428,9 +427,9 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 						break;
 					case "Subref sentence schema 1 (line-level) to tx":
 						if (!s.getName().equals("subref")) {
-							assertEquals(3, s.getAnnotations().size());
+							assertEquals(4, s.getAnnotations().size());
 							for (SAnnotation a : s.getAnnotations()) {
-								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"), is("rtx"))));
 							}
 							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
 							assertThat(aut.getValue_STEXT(), is("uref one-tx"));
@@ -442,9 +441,9 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 						break;
 					case "Subref sentence schema 2 (undefined global) with existing mb line":
 						if (!s.getName().equals("subref")) {
-							assertEquals(3, s.getAnnotations().size());
+							assertEquals(4, s.getAnnotations().size());
 							for (SAnnotation a : s.getAnnotations()) {
-								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"), is("rtx"))));
 							}
 							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
 							assertThat(aut.getValue_STEXT(), is("uref two-with"));
@@ -456,9 +455,9 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 						break;
 					case "Subref sentence schema 2 (undefined global) without mb line":
 						if (!s.getName().equals("subref")) {
-							assertEquals(3, s.getAnnotations().size());
+							assertEquals(4, s.getAnnotations().size());
 							for (SAnnotation a : s.getAnnotations()) {
-								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"), is("rtx"))));
 							}
 							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
 							assertThat(aut.getValue_STEXT(), is("uref two-without"));
@@ -470,9 +469,9 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 						break;
 					case "Subref sentence schema 3 (defined global) to mb":
 						if (!s.getName().equals("subref")) {
-							assertEquals(3, s.getAnnotations().size());
+							assertEquals(4, s.getAnnotations().size());
 							for (SAnnotation a : s.getAnnotations()) {
-								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"), is("rtx"))));
 							}
 							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
 							assertThat(aut.getValue_STEXT(), is("uref three-mb"));
@@ -484,9 +483,9 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 						break;
 					case "Subref sentence schema 3 (defined global) to tx":
 						if (!s.getName().equals("subref")) {
-							assertEquals(3, s.getAnnotations().size());
+							assertEquals(4, s.getAnnotations().size());
 							for (SAnnotation a : s.getAnnotations()) {
-								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"), is("rtx"))));
 							}
 							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
 							assertThat(aut.getValue_STEXT(), is("uref three-tx"));
@@ -498,9 +497,9 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 						break;
 					case "Subref sentence schema 4 (defined global with related line)":
 						if (!s.getName().equals("subref")) {
-							assertEquals(3, s.getAnnotations().size());
+							assertEquals(4, s.getAnnotations().size());
 							for (SAnnotation a : s.getAnnotations()) {
-								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"))));
+								assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("met"), is("rtx"))));
 							}
 							assertNotNull((aut = s.getAnnotation("toolbox::ll")));
 							assertThat(aut.getValue_STEXT(), is("uref four"));
@@ -520,9 +519,9 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 				case "3":
 				case "4":
 				case "5":
-					assertEquals(2, s.getAnnotations().size());
+					assertEquals(3, s.getAnnotations().size());
 					for (SAnnotation a : s.getAnnotations()) {
-						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"))));
+						assertThat(a.getName(), is(anyOf(is("ll"), is("ref"), is("rtx"))));
 					}
 					break;
 
@@ -899,7 +898,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertEquals(3, graph.getSpans().size());
 		for (SSpan span : graph.getSpans()) {
 			assertThat(span.getName(), anyOf(is("Sentence 2 *without* mb line"), is("Sentence 1 with mb line")));
-			assertEquals(2, span.getAnnotations().size());
+			assertEquals(3, span.getAnnotations().size());
 		}
 	}
 	
@@ -1565,7 +1564,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		for (SToken tok : graph.getOverlappedTokens(ref)) {
 			assertThat(graph.getText(tok), anyOf(is("subref"), is("sentence"), is("one")));
 		}
-		assertThat(ref.getAnnotations().size(), is(3));
+		assertThat(ref.getAnnotations().size(), is(4));
 		assertNotNull(ref.getAnnotation("toolbox::sr"));
 		assertThat(ref.getAnnotation("toolbox::sr").getValue_STEXT(), is("Full-ref annotation"));
 		assertThat(ref.getLayers().size(), is(2));
@@ -1597,7 +1596,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		for (SToken tok : graph.getOverlappedTokens(ref)) {
 			assertThat(graph.getText(tok), anyOf(is("subref"), is("sentence"), is("one")));
 		}
-		assertThat(ref.getAnnotations().size(), is(3));
+		assertThat(ref.getAnnotations().size(), is(4));
 		assertNotNull(ref.getAnnotation("toolbox::sr"));
 		assertThat(ref.getAnnotation("toolbox::sr").getValue_STEXT(), is("Full-ref annotation with an annotation line that is longer than 5 units if split with \\\\s+"));
 		assertThat(ref.getLayers().size(), is(2));
@@ -2217,6 +2216,86 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		}
 		return null;
 	}
+	
+	/* 
+	 * ███████╗███████╗ █████╗ ████████╗██╗   ██╗██████╗ ███████╗███████╗
+	 * ██╔════╝██╔════╝██╔══██╗╚══██╔══╝██║   ██║██╔══██╗██╔════╝██╔════╝
+	 * █████╗  █████╗  ███████║   ██║   ██║   ██║██████╔╝█████╗  ███████╗
+	 * ██╔══╝  ██╔══╝  ██╔══██║   ██║   ██║   ██║██╔══██╗██╔══╝  ╚════██║
+	 * ██║     ███████╗██║  ██║   ██║   ╚██████╔╝██║  ██║███████╗███████║
+	 * ╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝
+	 */
+	
+	/**
+	 * Retain the original \tx line and add it as an annotation on
+	 * the \ref span, with the default marker \rtx.
+	 * 
+	 */
+	@Test
+	public void testRetainTx() {
+		setTestFile("importer/retain-tx-span.txt");
+		/* 
+		 * Do not set properties, so as to use defaults:
+		 * - retainTx = true
+		 * - retainTxMarker = rtx
+		 */
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		SSpan refSpan = null;
+		assertNotNull(refSpan = graph.getSpans().get(0));
+		assertEquals(2, refSpan.getAnnotations().size());
+		SAnnotation a = null;
+		assertNotNull(a = refSpan.getAnnotation("toolbox::rtx"));
+		assertEquals("One Two Three Four", a.getValue_STEXT());
+	}
+	
+	/**
+	 * Retain the original \tx line and add it as an annotation on
+	 * the \ref span, with the user-provided custom marker \rtxcustom.
+	 * 
+	 */
+	@Test
+	public void testRetainTxCustom() {
+		setTestFile("importer/retain-tx-span.txt");
+		setProperties("importer/retain-tx-span.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		SSpan refSpan = null;
+		assertNotNull(refSpan = graph.getSpans().get(0));
+		assertEquals(2, refSpan.getAnnotations().size());
+		SAnnotation a = null;
+		for (SAnnotation aX : refSpan.getAnnotations()) {
+			System.err.println(aX);
+		}
+		assertNotNull(a = refSpan.getAnnotation("toolbox::rtxcustom"));
+		assertEquals("One Two Three Four", a.getValue_STEXT());
+	}
+	                                                                  
+	/**
+	 * Retain the original \tx line and add it as an annotation on
+	 * the \ref span, with the user-provided custom marker \rtxcustom.
+	 * 
+	 */
+	@Test
+	public void testDoNotRetainTx() {
+		setTestFile("importer/retain-tx-span.txt");
+		setProperties("importer/retain-tx-span-false.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		SSpan refSpan = null;
+		assertNotNull(refSpan = graph.getSpans().get(0));
+		assertEquals(1, refSpan.getAnnotations().size());
+		assertNull(refSpan.getAnnotation("toolbox::rtx"));
+	}
+	                                                                  
+
+
 	
 	/*
 	 * ██████╗ ██╗   ██╗ ██████╗ ███████╗██╗██╗  ██╗███████╗███████╗

@@ -222,7 +222,7 @@ public class RefMapper extends AbstractBlockMapper {
 
 	/**
 	 * Maps primary data for the whole reference to an
-	 * {@link SSpan} object dedicate to the reference in 
+	 * {@link SSpan} object dedicated to the reference in 
 	 * question.
 	 *
 	 * @param refData The primary data for the reference.
@@ -241,6 +241,17 @@ public class RefMapper extends AbstractBlockMapper {
 		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, markerMap.get(refData.getMarker()), refData.getPrimaryData().get(0).trim());
 		span.setName(refData.getPrimaryData().get(0).trim());
 		addAnnotations(refData, Arrays.asList(new SNode[]{span}), false);
+		/*
+		 * Check if the original \tx line should be retained,
+		 * and retain it if so.
+		 */
+		if (properties.retainOriginalTx()) {
+			StringBuilder sb = new StringBuilder("");
+			for (SToken token : lexTokens) {
+				sb.append(graph.getText(token) + " ");
+			}
+			span.createAnnotation(SALT_NAMESPACE_TOOLBOX, properties.getRetainedOriginalTxMarker(), sb.toString().trim());
+		}
 		return span;
 	}
 
