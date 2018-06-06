@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<saltCommon:SaltProject xmlns:sCorpusStructure="sCorpusStructure" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:saltCore="saltCore" xmlns:saltCommon="saltCommon" xmi:version="2.0">
+	<sCorpusGraphs>
+	<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::missing-morph-annos.flextext"/>
+	<nodes xsi:type="sCorpusStructure:SCorpus">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/missing-morph-annos"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::missing-morph-annos"/>
+	</nodes>
+	<nodes xsi:type="sCorpusStructure:SDocument">
+		<labels xsi:type="saltCore:SAnnotation" namespace="interlinear-text" name="guid" value="T::5c7ca17a-c656-42ec-bf17-bab39b6272a0"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="mmg-fonipa-x-emic" name="interlinear-text_title" value="T::Title"/>
+		
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::missing-morph-annos"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="languages" name="mmg-fonipa-x-emic" value="T::encoding=null,vernacular=true,font=Times New Roman"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="languages" name="bi" value="T::encoding=null,vernacular=null,font=Times New Roman"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="mmg-fonipa-x-emic" name="interlinear-text_source" value="T::Foo Bar"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/missing-morph-annos/missing-morph-annos"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SDOCUMENT_GRAPH_LOCATION" value="T::file:/tmp/pepper_stephan/workspace/k6mg17vv/missing-morph-annos5460130789066622286.salt"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="languages" name="en" value="T::encoding=null,vernacular=null,font=Times New Roman"/>
+	</nodes>
+	<edges xsi:type="sCorpusStructure:SCorpusDocumentRelation" source="//@nodes.0" target="//@nodes.1">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/corpDocRel1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::corpDocRel1"/>
+	</edges>
+	</sCorpusGraphs>
+	<sCorpusGraphs>
+	</sCorpusGraphs>
+	<sCorpusGraphs>
+	</sCorpusGraphs>
+</saltCommon:SaltProject>

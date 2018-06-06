@@ -154,6 +154,11 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	public static final String MARKER_SPLIT_REGEX = "(?<!:):(?!:)";
 	
 	/**
+	 * A placeholder inserted for null values to keep linearization intact.
+	 */
+	public static final String NULL_PLACEHOLDER = "nullPlaceholder";
+	
+	/**
 	 * Constructor adding all properties to the instance.
 	 */
 	public ToolboxTextExporterProperties() {
@@ -189,6 +194,9 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 				.isRequired(false).build());
 		addProperty(PepperModuleProperty.create().withName(CUSTOM_MARKERS).withType(String.class)
 				.withDescription("Map mapping existing annotation keys to custom Toolbox markers supplementing the official MDF markers.")
+				.isRequired(false).build());
+		addProperty(PepperModuleProperty.create().withName(NULL_PLACEHOLDER).withType(String.class)
+				.withDescription("Placeholder for null values to be inserted into Toolbox file to keep linearization intact.")
 				.isRequired(false).build());
 	}
 	
@@ -253,6 +261,11 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	@SuppressWarnings("javadoc")
 	public String getSpaceReplacement() {
 		return (String) getProperty(SPACE_REPLACEMENT).getValue();
+	}
+	
+	@SuppressWarnings("javadoc")
+	public String getNullPlaceholder() {
+		return (String) getProperty(NULL_PLACEHOLDER).getValue();
 	}
 	
 	/**

@@ -263,7 +263,7 @@ properties `idSpanLayer`, `refSpanLayer`, `txTokenLayer`, and `mbTokenLayer`
 respectively:
 
 - A layer containing spans annotated with *id*-scope annotations
-- A layer containing spans annotated with *id*-scope annotations
+- A layer containing spans annotated with *ref*-scope annotations
 - A layer containing lexical tokens
 - A layer containing morphological tokens
 

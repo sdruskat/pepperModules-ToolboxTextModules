@@ -31,6 +31,7 @@ import java.util.List;
 import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.testFramework.PepperExporterTest;
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties;
+import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextImporterProperties;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SaltProject;
 import org.eclipse.emf.common.util.URI;
@@ -93,6 +94,52 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 		assertTrue(rtDiff.isEmpty());
 		assertTrue(trDiff.isEmpty());
 		
+	}
+	
+	@Test 
+	public final void testConversionWithGaps() {
+		setTestFile("exporter/flextext/test.salt");
+		setProperties("exporter/flextext/props.properties");
+		URI projectURI = URI.createFileURI(this.getClass().getClassLoader().getResource("exporter/salt-project/saltProject.salt").getFile());
+		SaltProject saltProject = SaltFactory.createSaltProject();
+		saltProject.loadSaltProject(projectURI);
+		getFixture().setSaltProject(saltProject);
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getTempPath("ToolboxTextExporter").getAbsolutePath())));	
+		start();
+		String resultPath = null, testPath = null;
+		File result = new File(URI.createFileURI(resultPath = getTempPath("ToolboxTextExporter").getAbsolutePath() + "/missing-morph-annos/missing-morph-annos.txt").toFileString());
+		File toolboxCorpusFile = new File(testPath = this.getClass().getClassLoader().getResource("exporter/salt-project/1.txt").getFile());
+		assertTrue(result.exists());
+		assertTrue(toolboxCorpusFile.exists());
+		// Test the actual files
+		List<String> testFileContent = null, resultFileContent = null;
+		try {
+			testFileContent = Files.readAllLines(Paths.get(testPath), Charset.defaultCharset());
+			resultFileContent = Files.readAllLines(Paths.get(resultPath), Charset.defaultCharset());
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		assertTrue(testFileContent.size() == resultFileContent.size());
+		List<String> trDiff = diffFiles(testFileContent, resultFileContent);
+		List<String> rtDiff = diffFiles(resultFileContent, testFileContent);
+		assertTrue(rtDiff.isEmpty());
+		assertTrue(trDiff.isEmpty());
+	}
+	
+	private String getFile(String fileName) {
+		return this.getClass().getClassLoader().getResource(fileName).getFile();
+	}
+
+	private void setTestFile(String fileName) {
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile(fileName))));
+	}
+	
+	private void setProperties(String fileName) {
+		ToolboxTextExporterProperties properties = new ToolboxTextExporterProperties();
+		properties.setPropertyValues(new File(getFile(fileName)));
+		getFixture().setProperties(properties);
 	}
 
 	private static List<String> diffFiles(final List<String> firstFileContent, final List<String> secondFileContent) {

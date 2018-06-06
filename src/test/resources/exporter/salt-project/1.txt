@@ -1,0 +1,28 @@
+\_sh v3.0 400 Text
+
+\guid__interlinear-text 5c7ca17a-c656-42ec-bf17-bab39b6272a0
+\interlinear-text_source__mmg-fonipa-x-emic Foo Bar
+\en__languages encoding=null,vernacular=null,font=Times New Roman
+\mmg-fonipa-x-emic__languages encoding=null,vernacular=true,font=Times New Roman
+\bi__languages encoding=null,vernacular=null,font=Times New Roman
+\interlinear-text_title__mmg-fonipa-x-emic Title
+
+\id 091f3010-2a9c-4721-aabf-af4931a3b318
+\seqnum__paragraph 1
+ 
+\ref 4d685927-f383-474c-9a3e-859cc5f4d3bd
+\phrase_gls__en null
+\phrase_segnum__en 2.4
+\phrase_gls__bi null
+\tx Te bya rru te fhe , lehe ta Foobar te fe a lelne tungan bya Raboof .
+\word_gls__en NREC.PST go stay NREC.PST like look from Foobar NREC.PST say go war go Raboof
+\word_txt__mmg-fonipa-x-emic Te bya rru te fhe lehe ta Foobar te fe a lelne tungan bya Raboof
+\word_punct__mmg-fonipa-x-emic , .
+\guid__word 69f013e1-1c4e-4640-b1d8-2deef3f75f1b 2d62672b-e148-4a33-9751-b24fa8720398 c362a6f6-2f19-4315-ac78-d2d8266bb854 db914ce3-799c-4a9b-bc83-70b6f3832b62 9776306c-b0c0-4c92-a11e-83336b3e9c3f 3eeeb05b-19ae-4ffb-b3b0-2de68b5aafbe bdf506a3-13d8-4879-ac18-1cfa5e615b3b cf2bd179-f04d-449d-ae4f-baca0c6bad0f db914ce3-799c-4a9b-bc83-70b6f3832b62 31dd67fe-bfce-486f-a129-43b6797c6840 e11fd03a-7180-4e91-8579-d5065f7e01eb 311a7039-7bf4-485e-90ce-f19e39b6f79a db5984f3-a216-4fb0-aa45-41c44fbcd132 2d62672b-e148-4a33-9751-b24fa8720398 5247732c-8c86-4fc3-a6a2-2ad22a00f472
+\mb te bya rru te fhe #DELETE# lehe ta Foobar te fe a lel -ne tungan bya Raboof #DELETE#
+\guid__morpheme d7f713e5-e8cf-11d3-9764-00c04f186933 d7f713e5-e8cf-11d3-9764-00c04f186933 d7f713e5-e8cf-11d3-9764-00c04f186933 d7f713e5-e8cf-11d3-9764-00c04f186933 d7f713e5-e8cf-11d3-9764-00c04f186933 d7f713e5-e8cf-11d3-9764-00c04f186933 d7f713dd-e8cf-11d3-9764-00c04f186933 d7f713e5-e8cf-11d3-9764-00c04f186933 d7f713e5-e8cf-11d3-9764-00c04f186933
+\morph_hn__en #DELETE# #DELETE# 1 #DELETE# #DELETE# #DELETE# 1 1 #DELETE# #DELETE# 1 #DELETE# #DELETE# #DELETE# #DELETE# #DELETE# #DELETE# #DELETE#
+\morph_gls__en #DELETE# go stay #DELETE# like #DELETE# see from Foobar #DELETE# say go walk transitive revenge go Raboof #DELETE#
+\type__morpheme #DELETE# root root #DELETE# #DELETE# root root root #DELETE# root #DELETE# #DELETE# suffix #DELETE# root root
+\morph_cf__mmg-fonipa-x-emic #DELETE# bya rru #DELETE# #DELETE# #DELETE# lehe ta Foobar #DELETE# fe #DELETE# #DELETE# -ne #DELETE# bya Raboof #DELETE#
+
