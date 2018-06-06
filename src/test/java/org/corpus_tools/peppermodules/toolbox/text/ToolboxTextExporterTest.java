@@ -19,6 +19,7 @@
  */
 package org.corpus_tools.peppermodules.toolbox.text;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -122,6 +123,18 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 			e.printStackTrace();
 		}
 		assertTrue(testFileContent.size() == resultFileContent.size());
+		int resultTxLength = 0;
+		int resultMbLength = 0;
+		for (String line : resultFileContent) {
+			if (line.startsWith("\\tx")) {
+				resultTxLength = line.split(" ").length;
+			}
+			else if (line.startsWith("\\mb")) {
+				resultMbLength = line.split(" ").length;
+			}
+		}
+		// \mb includes one token with two morphemes, so should be same length + 1
+		assertThat(resultMbLength, is(resultTxLength + 1));
 		List<String> trDiff = diffFiles(testFileContent, resultFileContent);
 		List<String> rtDiff = diffFiles(resultFileContent, testFileContent);
 		assertTrue(rtDiff.isEmpty());

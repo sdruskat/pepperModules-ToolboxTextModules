@@ -270,6 +270,12 @@ respectively:
 The names for these layers must be **unique**, i.e., the model must contain
 exactly one SLayer with that name.
 
+#### Timeline
+
+The Salt model must contain a timeline (`STimeline`), and the lexical tokens
+and morphological tokens must be interlinearized via this timeline. Lexical
+tokens must be aligned along the timeline *without* any gaps in indices.
+
 ### Properties
 
 Note that required values with a default value do not have to be specified in the
@@ -331,6 +337,9 @@ MDF markers.
 
    In the export process, the value for the defined {@link SAnnotation} will
    be mapped to the line marked with the respective MDF pattern.
+
+- **`nullPlaceholder` (String)**: A string that is inserted into the Toolbox text
+file for missing annotation values to preserve interlinearization.
 
 ## Contribute
 

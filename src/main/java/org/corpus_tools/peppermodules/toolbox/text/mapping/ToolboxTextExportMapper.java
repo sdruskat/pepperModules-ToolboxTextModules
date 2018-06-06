@@ -24,28 +24,42 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
+import org.corpus_tools.peppermodules.toolbox.text.mapping.ToolboxTextExportMapper.RangeComparator;
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
 import org.corpus_tools.salt.SALT_TYPE;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.SSequentialDS;
+import org.corpus_tools.salt.common.SSequentialRelation;
 import org.corpus_tools.salt.common.SSpan;
+import org.corpus_tools.salt.common.STimeline;
+import org.corpus_tools.salt.common.STimelineRelation;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.core.SAbstractAnnotation;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.corpus_tools.salt.core.SNode;
+import org.corpus_tools.salt.core.SRelation;
 import org.corpus_tools.salt.util.DataSourceSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.APPEND;
@@ -205,7 +219,17 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 				List<SToken> orderedTxTokens = graph.getSortedTokenByText(txTokens);
 				// Build list of tx token annotations
 				Set<String> txTokenAnnotations = new HashSet<>();
+				// Build a list of ranges for all timeline ranges for tx tokens
+				List<Range<Integer>> ranges = new ArrayList<>();
+				STimeline timeline = graph.getTimeline();
 				for (SToken txToken : orderedTxTokens) {
+					for (SRelation<?, ?> outRel : txToken.getOutRelations()) {
+						if (outRel instanceof STimelineRelation && outRel.getTarget() == timeline) {
+							STimelineRelation timelineRel = (STimelineRelation) outRel;
+							Range<Integer> range = Range.closed(timelineRel.getStart(), timelineRel.getEnd());
+							ranges.add(range);
+						}
+					}
 					for (SAnnotation a : txToken.getAnnotations()) {
 						txTokenAnnotations.add(a.getQName());
 					}
@@ -312,12 +336,63 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 				for (String mba : properties.getMbMaterialAnnotations()) {
 					mbAnnotationLines.remove(mba);
 				}
-				for (String mbmba : properties.getMbMaterialAnnotations()) {
-					mbAnnotationLines.remove(mbmba);
+				for (String txa : properties.getTxMaterialAnnotations()) {
+					mbAnnotationLines.remove(txa);
 				}
+				int lastEndIndex = 0;
 				// Build mb text
 				for (SToken mbToken : orderedMbTokens) {
-					mbLine += " " + graph.getText(mbToken);
+					/* 
+					 * Check if the timeline start index of this token
+					 * starts at the end index of the last token. If
+					 * not, for each integer between the last end index and
+					 * this start index, check if the lexical token ranges
+					 * contain such a range, and create a placeholder token in
+					 * its place. 
+					 */
+					List<STimelineRelation> timelineRels = new ArrayList<>();
+					for (SRelation<?, ?> outRel : mbToken.getOutRelations()) {
+						if (outRel instanceof STimelineRelation && outRel.getTarget() == timeline) {
+							timelineRels.add((STimelineRelation) outRel);
+						}
+					}
+					assert timelineRels.size() == 1;
+					STimelineRelation timelineRel = timelineRels.get(0);
+					Integer startIndex = timelineRel.getStart();
+					Set<Range<Integer>> precedingUncoveredRanges = null;
+					Set<Range<Integer>> succeedingUncoveredRanges = null;
+					if (startIndex != lastEndIndex) {
+						precedingUncoveredRanges = checkForUncoveredness(ranges, lastEndIndex, startIndex);
+					}
+					/* 
+					 * For the last token, check if there are any other tx tokens
+					 * beyond its end index.
+					 */
+					if (orderedMbTokens.indexOf(mbToken) == orderedMbTokens.size() - 1) {
+						int currentEndIndex = timelineRel.getEnd();
+						int endIndexLastRange = ranges.get(ranges.size() - 1).upperEndpoint();
+						succeedingUncoveredRanges = checkForUncoveredness(ranges, currentEndIndex, endIndexLastRange);
+					}
+					else {
+						lastEndIndex = timelineRel.getEnd();
+					}
+					// Add token text to data sequence
+					StringBuilder textBuilder = new StringBuilder(" ");
+					if (precedingUncoveredRanges != null && !precedingUncoveredRanges.isEmpty()) {
+						for (int i = 0; i < precedingUncoveredRanges.size(); i++) {
+							textBuilder.append(properties.getNullPlaceholder() + " ");
+						}
+					}
+					textBuilder.append(graph.getText(mbToken) + " ");
+					if (succeedingUncoveredRanges != null && !succeedingUncoveredRanges.isEmpty()) {
+						for (int i = 0; i < succeedingUncoveredRanges.size(); i++) {
+							textBuilder.append(properties.getNullPlaceholder() + " ");
+						}
+					}
+					String textString = textBuilder.toString();
+					// Remove last whitespace
+					textString = textString.substring(0, textString.length() - 1);
+					mbLine += textString;
 					for (String aKey : mbAnnotationLines.keySet()) {
 						if (mbToken.getAnnotation(aKey) != null) {
 							String oldValue = mbAnnotationLines.get(aKey);
@@ -383,6 +458,35 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 	}
 
 	/**
+	 * // TODO Add description
+	 * 
+	 * @param ranges
+	 * @param uncoveredRanges
+	 * @param currentEndIndex
+	 * @param endIndexLastRange
+	 * @return 
+	 */
+	private Set<Range<Integer>> checkForUncoveredness(List<Range<Integer>> ranges, int currentEndIndex,
+			int endIndexLastRange) {
+		Set<Range<Integer>> localUncoveredRanges = new HashSet<>(); 
+		for (Range<Integer> range : ranges) {
+			if (range.lowerEndpoint() == currentEndIndex) {
+				localUncoveredRanges.add(range);
+				if (range.upperEndpoint() == endIndexLastRange) {
+					break;
+				}
+			}
+			else if (range.lowerEndpoint() > currentEndIndex && range.upperEndpoint() <= endIndexLastRange) {
+				localUncoveredRanges.add(range);
+				if (range.upperEndpoint() == endIndexLastRange) {
+					break;
+				}
+			}
+		}
+		return localUncoveredRanges;
+	}
+
+	/**
 	 * Takes an annotation and compiles a string representing
 	 * a valid line in a Toolbox text file with the following pattern.
 	 * 
@@ -424,8 +528,23 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		}
 		else {
 			line = "\\" + name.replaceAll("\\s", "-")
-					+ (namespace != null ? "_[" + namespace.replaceAll("\\s", "-") : "") + "]";
+					+ (namespace != null ? "__" + namespace.replaceAll("\\s", "-") : "") + "";
 		}
 		return line;
+	}
+
+	/**
+		 * // TODO Add description
+		 *
+		 * @author Stephan Druskat <[mail@sdruskat.net](mailto:mail@sdruskat.net)>
+		 * 
+		 */
+	public class RangeComparator implements Comparator<Range<Integer>> {
+
+		@Override
+		public int compare(Range<Integer> o1, Range<Integer> o2) {
+			return o1.lowerEndpoint() - o2.lowerEndpoint();
+		}
+	
 	}
 }
