@@ -230,8 +230,16 @@ public class RefMapper extends AbstractBlockMapper {
 	 * @return The reference span.
 	 */
 	private SSpan mapRef(LayerData refData, List<SToken> lexTokens) {
+		boolean hasPDFPageAnnotations = properties.hasPDFPageAnnotations();
+		String pdfPageAnnotationMarker = properties.getPDFPageAnnotationMarker(); 
 		SSpan span = graph.createSpan(lexTokens);
 		layers.get(markerMap.get(refData.getMarker())).addNode(span);
+		SSpan pdfPageSpan = null;
+		if (hasPDFPageAnnotations) {
+			pdfPageSpan = graph.createSpan(lexTokens);
+			layers.get(markerMap.get(refData.getMarker())).addNode(pdfPageSpan);
+		}
+		
 		/*
 		 *  Add the actual primary data as annotation.
 		 *  As we deal with refData, for which #segmented == false,
@@ -240,6 +248,19 @@ public class RefMapper extends AbstractBlockMapper {
 		 */
 		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, markerMap.get(refData.getMarker()), refData.getPrimaryData().get(0).trim());
 		span.setName(refData.getPrimaryData().get(0).trim());
+		if (hasPDFPageAnnotations) {
+			if (refData.getAnnotations().containsKey(pdfPageAnnotationMarker)) {
+				List<List<String>> pdfPageAnnotationValueList =	refData.getAnnotations().removeAll(pdfPageAnnotationMarker);
+				try {
+					String value = pdfPageAnnotationValueList.get(0).get(0);
+					pdfPageSpan.createAnnotation(SALT_NAMESPACE_TOOLBOX, pdfPageAnnotationMarker, value);
+				}
+				catch (IndexOutOfBoundsException | NullPointerException e) {
+					// TODO Test this catch
+					log.warn("More than one PDF page annotation on ref {}. Ignoring.", refData.getRef());
+				}
+			}
+		}
 		addAnnotations(refData, Arrays.asList(new SNode[]{span}), false);
 		/*
 		 * Check if the original \tx line should be retained,

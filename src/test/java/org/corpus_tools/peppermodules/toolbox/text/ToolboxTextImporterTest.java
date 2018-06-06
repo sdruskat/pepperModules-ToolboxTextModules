@@ -2268,9 +2268,6 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertNotNull(refSpan = graph.getSpans().get(0));
 		assertEquals(2, refSpan.getAnnotations().size());
 		SAnnotation a = null;
-		for (SAnnotation aX : refSpan.getAnnotations()) {
-			System.err.println(aX);
-		}
 		assertNotNull(a = refSpan.getAnnotation("toolbox::rtxcustom"));
 		assertEquals("One Two Three Four", a.getValue_STEXT());
 	}
@@ -2293,6 +2290,83 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertEquals(1, refSpan.getAnnotations().size());
 		assertNull(refSpan.getAnnotation("toolbox::rtx"));
 	}
+	
+	/**
+	 * If activated via property, create a new span for the 
+	 * PDF page annotation (for complimentary PDF files for
+	 * annotations, e.g., storyboard files), as otherwise, the
+	 * auto-linkage in ANNIS will create PDF links for all
+	 * annotations on the node which contains the PDF page
+	 * annotation.
+	 * 
+	 */
+	@Test
+	public void testPDFPageNode() {
+		setTestFile("importer/custom-pdf-page-span.txt");
+		setProperties("importer/custom-pdf-page.properties");
+		start();
+		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+		SDocumentGraph graph = doc.getDocumentGraph();
+		SSpan refSpan = null;
+		SSpan pdfPageSpan = null;
+		assertEquals(2, graph.getSpans().size());
+		for (SSpan span : graph.getSpans()) {
+			if (span.getAnnotation("toolbox", "ref") != null) {
+				refSpan = span;
+			}
+			else if (span.getAnnotation("toolbox", "ppdf") != null) {
+				pdfPageSpan = span;
+			}
+		}
+		assertNotNull(refSpan);
+		assertNull(refSpan.getAnnotation("toolbox", "ppdf"));
+		assertNotNull(pdfPageSpan);
+		assertEquals("42", pdfPageSpan.getAnnotation("toolbox", "ppdf").getValue_STEXT());
+	}
+	
+//	/**
+//	 * Retain the original \tx line and add it as an annotation on
+//	 * the \ref span, with the user-provided custom marker \rtxcustom.
+//	 * 
+//	 */
+//	@Test
+//	public void testRetainTxCustom() {
+//		setTestFile("importer/retain-tx-span.txt");
+//		setProperties("importer/retain-tx-span.properties");
+//		start();
+//		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+//		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+//		SDocumentGraph graph = doc.getDocumentGraph();
+//		SSpan refSpan = null;
+//		assertNotNull(refSpan = graph.getSpans().get(0));
+//		assertEquals(2, refSpan.getAnnotations().size());
+//		SAnnotation a = null;
+//		for (SAnnotation aX : refSpan.getAnnotations()) {
+//			System.err.println(aX);
+//		}
+//		assertNotNull(a = refSpan.getAnnotation("toolbox::rtxcustom"));
+//		assertEquals("One Two Three Four", a.getValue_STEXT());
+//	}
+//	                                                                  
+//	/**
+//	 * Retain the original \tx line and add it as an annotation on
+//	 * the \ref span, with the user-provided custom marker \rtxcustom.
+//	 * 
+//	 */
+//	@Test
+//	public void testDoNotRetainTx() {
+//		setTestFile("importer/retain-tx-span.txt");
+//		setProperties("importer/retain-tx-span-false.properties");
+//		start();
+//		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
+//		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
+//		SDocumentGraph graph = doc.getDocumentGraph();
+//		SSpan refSpan = null;
+//		assertNotNull(refSpan = graph.getSpans().get(0));
+//		assertEquals(1, refSpan.getAnnotations().size());
+//		assertNull(refSpan.getAnnotation("toolbox::rtx"));
+//	}
 	                                                                  
 
 

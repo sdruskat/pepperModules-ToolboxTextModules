@@ -31,6 +31,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.peppermodules.toolbox.text.mapping.ToolboxTextImportMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.io.CountingInputStream;
 
 /**
@@ -41,6 +45,8 @@ import com.google.common.io.CountingInputStream;
  *
  */
 class ToolboxTextSegmentationParser {
+	
+	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextSegmentationParser.class);
 	
 	private final File file;
 	private final String idMarker;
@@ -122,6 +128,10 @@ class ToolboxTextSegmentationParser {
 				idStructureMap.put(lastOffset, hasMorphology);
 			}
 			else {
+				logger.error("\n\nrefmap\n{}", refMap);
+				logger.error("\n\n-1l\n{}", refMap.get(-1L));
+				logger.error("\n\n0\n{}", refMap.get(-1L).get(0));
+				logger.error("\n\nmorph\n{}", hasMorphology);
 				idStructureMap.put(refMap.get(-1L).get(0), hasMorphology);
 			}
 		} catch (IOException e) {

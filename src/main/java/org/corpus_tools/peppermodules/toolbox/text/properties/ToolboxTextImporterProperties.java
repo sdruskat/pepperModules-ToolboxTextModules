@@ -223,6 +223,20 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public static final String PROP_RETAIN_TX_MARKER = "retainTxMarker";
 	
 	/**
+	 * The marker to prefix PDF page number annotations
+	 * 
+	 * Default: *page*
+	 */
+	public static final String PROP_PDF_PAGE_ANNO = "pdfPageAnno";
+	
+	/**
+	 * Whether a corpus contains PDF page number annotations
+	 * 
+	 * Default: *false*
+	 */
+	public static final String PROP_HAS_PDF_PAGE_ANNO = "hasPDFPageAnno";
+	
+	/**
 	 * Constructor adding all properties to the instance.	 
 	 */
 	public ToolboxTextImporterProperties() {
@@ -294,6 +308,13 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		addProperty(PepperModuleProperty.create().withName(PROP_RETAIN_TX_MARKER).withType(String.class)
 				.withDescription("The marker to prefix retained original \\tx lines")
 				.withDefaultValue("rtx").isRequired(false).build());
+		addProperty(PepperModuleProperty.create().withName(PROP_PDF_PAGE_ANNO).withType(String.class)
+				.withDescription("The marker to prefix PDF page number annotations")
+				.withDefaultValue("page").isRequired(false).build());
+		addProperty(PepperModuleProperty.create().withName(PROP_HAS_PDF_PAGE_ANNO).withType(Boolean.class)
+				.withDescription("Whether a corpus contains PDF page number annotations")
+				.withDefaultValue(false).isRequired(false).build());
+
 	}
 
 	// Getter methods for the different property values.
@@ -411,6 +432,16 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	@SuppressWarnings("javadoc")
 	public String getRetainedOriginalTxMarker() {
 		return (String) getProperty(PROP_RETAIN_TX_MARKER).getValue();
+	}
+	
+	@SuppressWarnings("javadoc")
+	public boolean hasPDFPageAnnotations() {
+		return (Boolean) getProperty(PROP_HAS_PDF_PAGE_ANNO).getValue();
+	}
+
+	@SuppressWarnings("javadoc")
+	public String getPDFPageAnnotationMarker() {
+		return (String) getProperty(PROP_PDF_PAGE_ANNO).getValue();
 	}
 }
 
