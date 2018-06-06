@@ -135,8 +135,24 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 		}
 		// \mb includes one token with two morphemes, so should be same length + 1
 		assertThat(resultMbLength, is(resultTxLength + 1));
+		String mbResult = null;
+		String mbTest = null;
+		for (String line : resultFileContent) {
+			if (line.startsWith("\\mb ")) {
+				mbResult = line;
+				break;
+			}
+		}
+		for (String line : testFileContent) {
+			if (line.startsWith("\\mb ")) {
+				mbTest = line;
+				break;
+			}
+		}
+		assertThat(mbResult, is(mbTest));
 		List<String> trDiff = diffFiles(testFileContent, resultFileContent);
 		List<String> rtDiff = diffFiles(resultFileContent, testFileContent);
+		System.err.println(rtDiff);
 		assertTrue(rtDiff.isEmpty());
 		assertTrue(trDiff.isEmpty());
 	}

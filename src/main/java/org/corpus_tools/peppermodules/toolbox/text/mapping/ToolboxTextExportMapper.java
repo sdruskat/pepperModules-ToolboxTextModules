@@ -377,22 +377,29 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 						lastEndIndex = timelineRel.getEnd();
 					}
 					// Add token text to data sequence
-					StringBuilder textBuilder = new StringBuilder(" ");
+					String prefix = " ";
+					String suffix = "";
 					if (precedingUncoveredRanges != null && !precedingUncoveredRanges.isEmpty()) {
 						for (int i = 0; i < precedingUncoveredRanges.size(); i++) {
-							textBuilder.append(properties.getNullPlaceholder() + " ");
+							prefix += properties.getNullPlaceholder() + " ";
 						}
 					}
-					textBuilder.append(graph.getText(mbToken) + " ");
 					if (succeedingUncoveredRanges != null && !succeedingUncoveredRanges.isEmpty()) {
 						for (int i = 0; i < succeedingUncoveredRanges.size(); i++) {
-							textBuilder.append(properties.getNullPlaceholder() + " ");
+							suffix += properties.getNullPlaceholder() + " ";
 						}
 					}
-					String textString = textBuilder.toString();
+					String textString = prefix + graph.getText(mbToken) + " " + suffix;
 					// Remove last whitespace
 					textString = textString.substring(0, textString.length() - 1);
 					mbLine += textString;
+					
+					// Annotations
+					/* 
+					 * FIXME: Match annotations against ordered tokens. If
+					 * an orderedToken doesn't have an annotation, it must get
+					 * one with the null placeholder as value.
+					 */
 					for (String aKey : mbAnnotationLines.keySet()) {
 						if (mbToken.getAnnotation(aKey) != null) {
 							String oldValue = mbAnnotationLines.get(aKey);
@@ -402,7 +409,11 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 								annotation.setValue("[missing-annotation]");
 							}
 							String sanitizedValue = annotation.getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
-							mbAnnotationLines.put(aKey, oldValue += " " + sanitizedValue);
+							String annotationString = prefix + sanitizedValue + " " + suffix;
+							// Remove last whitespace
+							annotationString = annotationString.substring(0, annotationString.length() - 1);
+
+							mbAnnotationLines.put(aKey, oldValue += annotationString);
 						}
 						else if (mbToken.getMetaAnnotation(aKey) != null) {
 							String oldValue = mbAnnotationLines.get(aKey);
@@ -412,7 +423,10 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 								annotation.setValue("[missing-annotation]");
 							}
 							String sanitizedValue = annotation.getValue_STEXT().replaceAll("\\s", properties.getSpaceReplacement());
-							mbAnnotationLines.put(aKey, oldValue += " " + sanitizedValue);
+							String annotationString = prefix + sanitizedValue + " " + suffix;
+							// Remove last whitespace
+							annotationString = annotationString.substring(0, annotationString.length() - 1);
+							mbAnnotationLines.put(aKey, oldValue += annotationString);
 						}
 
 					}
