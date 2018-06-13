@@ -66,7 +66,7 @@ public class DocumentHeaderMapper extends AbstractBlockMapper {
 	public boolean map() {
 		for (String line : lines) {
 			if (line.startsWith("\\" + properties.getIdMarker() + " ")) {
-				String name = line.split("\\s+", 2)[1];
+				String name = line.split("\\s+", 2)[1].trim();
 				if (properties.normalizeDocNames()) {
 					String d1 = name.replaceAll(" ", "-");
 					String d2 = d1.replaceAll("\\.", "_");
