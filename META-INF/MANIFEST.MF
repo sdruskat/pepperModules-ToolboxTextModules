@@ -1,13 +1,13 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1529921842929
+Bnd-LastModified: 1529922373548
 Build-Jdk: 1.8.0_171
 Built-By: stephan
 Bundle-Description: A module for the Pepper conversion framework for lin
- guistic data.The module provides an importer which reads the text forma
- t exportable from SIL Toolbox, and maps the data to an instance of the 
- Salt meta model for linguistic data.It also provides an exporter which 
- maps the data from an instance of the Salt meta model for linguistic da
- ta to a valid Toolbox text format file.
+ guistic data.	The module provides an importer which reads the text form
+ at exportable from SIL Toolbox, and maps the data to an instance of the
+  Salt meta model for linguistic data.	It also provides an exporter whic
+ h maps the data from an instance of the Salt meta model for linguistic 
+ data to a valid Toolbox text format file.
 Bundle-DocURL: https://wikis.hu-berlin.de/melatamp/
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
 Bundle-ManifestVersion: 2
