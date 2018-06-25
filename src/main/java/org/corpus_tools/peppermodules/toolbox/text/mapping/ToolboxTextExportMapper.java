@@ -24,25 +24,19 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
-
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
-import org.corpus_tools.peppermodules.toolbox.text.mapping.ToolboxTextExportMapper.RangeComparator;
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
 import org.corpus_tools.salt.SALT_TYPE;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocumentGraph;
-import org.corpus_tools.salt.common.SSequentialDS;
-import org.corpus_tools.salt.common.SSequentialRelation;
 import org.corpus_tools.salt.common.SSpan;
 import org.corpus_tools.salt.common.STimeline;
 import org.corpus_tools.salt.common.STimelineRelation;
@@ -58,9 +52,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeRangeSet;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;

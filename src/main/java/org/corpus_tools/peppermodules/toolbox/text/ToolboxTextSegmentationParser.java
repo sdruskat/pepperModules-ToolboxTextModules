@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
-import org.corpus_tools.peppermodules.toolbox.text.mapping.ToolboxTextImportMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
