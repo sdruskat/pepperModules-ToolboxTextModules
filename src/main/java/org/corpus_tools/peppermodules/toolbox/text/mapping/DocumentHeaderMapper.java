@@ -1,5 +1,5 @@
 /**
- * Copyright 2016ff. Humboldt-Universität zu Berlin.
+ * Copyright (c) 2016ff. Stephan Druskat.
  * Exploitation rights belong exclusively to Humboldt-Universität zu Berlin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
