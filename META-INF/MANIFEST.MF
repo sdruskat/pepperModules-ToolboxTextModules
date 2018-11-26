@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1529922373548
-Build-Jdk: 1.8.0_171
+Bnd-LastModified: 1543221753028
+Build-Jdk: 1.8.0_181
 Built-By: stephan
 Bundle-Description: A module for the Pepper conversion framework for lin
  guistic data.	The module provides an importer which reads the text form
@@ -12,7 +12,7 @@ Bundle-DocURL: https://wikis.hu-berlin.de/melatamp/
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
 Bundle-ManifestVersion: 2
 Bundle-Name: pepperModules-ToolboxTextModules
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.corpus-tools.pepperModules-ToolboxTextModules;s
  ingleton:=true
 Bundle-Vendor: MelaTAMP research project, Humboldt-Universität zu Berli
@@ -38,9 +38,9 @@ Import-Package: com.google.common.collect;version="[19.0,20)",com.google
  .common.io;version="[19.0,20)",org.apache.commons.io.output;version="[1
  .4,2)",org.apache.commons.lang3;version="[3.4,4)",org.apache.commons.la
  ng3.tuple;version="[3.4,4)",org.corpus_tools.pepper.common;version="[3.
- 1,4)",org.corpus_tools.pepper.impl;version="[3.1,4)",org.corpus_tools.p
- epper.modules;version="[3.1,4)",org.corpus_tools.pepper.modules.excepti
- ons;version="[3.1,4)",org.corpus_tools.salt;version="[3.3,4)",org.corpu
+ 2,4)",org.corpus_tools.pepper.impl;version="[3.2,4)",org.corpus_tools.p
+ epper.modules;version="[3.2,4)",org.corpus_tools.pepper.modules.excepti
+ ons;version="[3.2,4)",org.corpus_tools.salt;version="[3.3,4)",org.corpu
  s_tools.salt.common;version="[3.3,4)",org.corpus_tools.salt.core;versio
  n="[3.3,4)",org.corpus_tools.salt.graph;version="[3.3,4)",org.corpus_to
  ols.salt.util;version="[3.3,4)",org.eclipse.emf.common.util,org.slf4j
@@ -48,4 +48,4 @@ META-INF: /home/stephan/src/toolbox-text-importer/META-INF
 OSGI-INF: OSGI-INF
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.7))"
 Service-Component: OSGI-INF/service-component/*.xml
-Tool: Bnd-2.3.0.201405100607
+Tool: Bnd-2.4.1.201501161923

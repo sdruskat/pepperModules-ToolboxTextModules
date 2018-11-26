@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>pepperModules-ToolboxTextModules</artifactId>
 	<version>1.1.0-SNAPSHOT</version>
@@ -22,7 +23,7 @@
 	<parent>
 		<groupId>org.corpus-tools</groupId>
 		<artifactId>pepper-parentModule</artifactId>
-		<version>3.1.1-SNAPSHOT</version>
+		<version>3.2.7</version>
 	</parent>
 	<distributionManagement>
 		<!-- Site to deploy releases to. -->
@@ -158,18 +159,11 @@
 					<useStandardDocletOptions>true</useStandardDocletOptions>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.7</version>
-				<extensions>true</extensions>
-				<configuration>
-					<serverId>ossrh</serverId>
-					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-					<autoReleaseAfterClose>true</autoReleaseAfterClose>
-				</configuration>
-			</plugin>
-		<!-- Automatically add license headers (license:format) -->
+			<!-- <plugin> <groupId>org.sonatype.plugins</groupId> <artifactId>nexus-staging-maven-plugin</artifactId> 
+				<version>1.6.7</version> <extensions>true</extensions> <configuration> <serverId>ossrh</serverId> 
+				<nexusUrl>https://oss.sonatype.org/</nexusUrl> <autoReleaseAfterClose>true</autoReleaseAfterClose> 
+				</configuration> </plugin> -->
+			<!-- Automatically add license headers (license:format) -->
 			<!-- start: for generating license headers in source files. Run mvn license:format -->
 			<plugin>
 				<groupId>com.google.code.maven-license-plugin</groupId>
@@ -190,6 +184,41 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<!-- RELEASE PLUGIN -->
+			<!-- <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-release-plugin</artifactId><version>2.5.3</version><configuration><goals>deploy 
+				site-deploy</goals><tagNameFormat>@{project.version}</tagNameFormat></configuration></plugin> -->
+			<plugin>
+				<groupId>external.atlassian.jgitflow</groupId>
+				<artifactId>jgitflow-maven-plugin</artifactId>
+				<version>1.0-m5.1</version>
+				<configuration>
+					<pushReleases>true</pushReleases>
+				</configuration>
+			</plugin>
+			<!-- gpg sign -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Disable Findbugs Plugin -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>${findbugs-maven-plugin.version}</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
 			</plugin>
 		</plugins>
 		<extensions>
@@ -226,6 +255,14 @@
 						</reports>
 					</reportSet>
 				</reportSets>
+			</plugin>
+			<plugin>
+				<groupId>org.eluder.coveralls</groupId>
+				<artifactId>coveralls-maven-plugin</artifactId>
+				<version>4.3.0</version>
+				<configuration>
+					<repoToken>${env.coveralls_token}</repoToken>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
