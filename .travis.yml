@@ -1,0 +1,16 @@
+language: java
+jdk:
+  - openjdk8
+  - oraclejdk8
+install: mvn install -Dgpg.skip
+after_success:
+  - mvn clean test jacoco:report coveralls:report javadoc:javadoc
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  local-dir: target/site/apidocs/
+  keep-history: true
+  on:
+    branch: master
