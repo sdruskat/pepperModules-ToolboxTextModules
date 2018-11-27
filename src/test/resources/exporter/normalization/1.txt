@@ -1,0 +1,10 @@
+\_sh v3.0 400 Text
+
+
+\id one
+ 
+\ref one
+\tx Birthday pony
+\mb m_birth m_day m_pony
+\word one two
+\morph one two three

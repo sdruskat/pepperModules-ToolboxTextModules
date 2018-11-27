@@ -27,4 +27,3 @@
 \ty root root suffix
 \morph_cf__fictional cf_birthday cf_pou cf_-nie
 \lt Börsdae pounie
- 

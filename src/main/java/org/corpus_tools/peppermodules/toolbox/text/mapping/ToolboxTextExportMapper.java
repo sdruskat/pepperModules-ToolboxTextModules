@@ -288,7 +288,8 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 				// Map \mb
 				String mbLine = "\\mb";
 				List<SToken> mbTokens = new ArrayList<>();
-				List<SToken> mbCandidateTokens = graph.getOverlappedTokens(refSpan);
+				List<SToken> mbCandidateTokens = graph.getOverlappedTokens(refSpan); // FIXME Make requirement clear that both token types must be covered by the refspan!
+				// FIXME ALternatively, solve via timeline
 				Set<SNode> mbLayerNodes = graph.getLayerByName(properties.getMbTokenLayer()).get(0).getNodes();
 				for (SToken token : mbCandidateTokens) {
 					if (mbLayerNodes.contains(token)) {
@@ -427,8 +428,6 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 				for (String al : mbAnnotationLines.values()) {
 					lines.add(al);
 				}
-
-				lines.add("");
 			}
 		}
 		
