@@ -24,6 +24,7 @@ package org.corpus_tools.peppermodules.toolbox.text.properties;
 
 import java.util.ArrayList; 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import java.util.Set;
 
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.PepperModuleProperty;
+import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.slf4j.Logger;
@@ -159,6 +161,16 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	public static final String NULL_PLACEHOLDER = "nullPlaceholder";
 	
 	/**
+	 * A map mapping annotation names to other annotation names.
+	 * 
+	 * Format: `markerMap=aa=bb,cc=dd`.
+	 * 
+	 * This will result in annotations with name "aa" mapped
+	 * to a line "\bb ..." in the Toolbox file output.
+	 */
+	public static final String MARKER_MAP = "markerMap";
+	
+	/**
 	 * Constructor adding all properties to the instance.
 	 */
 	public ToolboxTextExporterProperties() {
@@ -197,6 +209,9 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 				.isRequired(false).build());
 		addProperty(PepperModuleProperty.create().withName(NULL_PLACEHOLDER).withType(String.class)
 				.withDescription("Placeholder for null values to be inserted into Toolbox file to keep linearization intact.")
+				.isRequired(false).build());
+		addProperty(PepperModuleProperty.create().withName(MARKER_MAP).withType(String.class)
+				.withDescription("map mapping annotation names to other annotation names.")
 				.isRequired(false).build());
 	}
 	
@@ -433,6 +448,30 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 			}
 		}
 		return annotationMarkerBiMap;
+	}
+	
+	/**
+	 * Builds a {@link HashMap} from the value of property
+	 * {@link ToolboxTextExporterProperties#MARKER_MAP}.
+	 * 
+	 * @return the markerMap
+	 */
+	public Map<String, String> getMarkerMap() {
+		Map<String, String> markerMap = new HashMap<>();
+		String property = (String) getProperty(MARKER_MAP).getValue();
+		if (property == null) {
+			return markerMap;
+		}
+		property.trim();
+		String[] split = property.split(",");
+		for (String s : split) {
+			String[] pair = s.split("=");
+			if (pair.length != 2) {
+				throw new PepperModuleException("The property 'markerMap' is not well-defined. Please check its format and retry.");
+			}
+			markerMap.put(pair[0].trim(), pair[1].trim());
+		}
+		return markerMap;
 	}
 
 	

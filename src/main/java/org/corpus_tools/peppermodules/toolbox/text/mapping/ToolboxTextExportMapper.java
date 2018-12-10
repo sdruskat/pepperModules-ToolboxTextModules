@@ -148,7 +148,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		// Order \id spans by indices of tokens they're covering
 		List<SSpan> orderedIdSpans = ToolboxTextModulesUtils.sortSpansByTextCoverageOfIncludedToken(idSpans);
 		for (SSpan idSpan : orderedIdSpans) {
-			lines.add("\\id " + idSpan.getAnnotation(properties.getIdIdentifierAnnotation()).getValue_STEXT());
+			lines.add(getMarker("id") + idSpan.getAnnotation(properties.getIdIdentifierAnnotation()).getValue_STEXT());
 			for (SAnnotation a : idSpan.getAnnotations()) {
 				if (!a.getQName().equals(properties.getIdIdentifierAnnotation())) {
 					lines.add(createMarkerAnnoString(a));
@@ -185,7 +185,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			}
 			List<SSpan> orderedRefs = ToolboxTextModulesUtils.sortSpansByTextCoverageOfIncludedToken(refSpans);
 			for (SSpan refSpan : orderedRefs) {
-				lines.add("\\ref " + refSpan.getAnnotation(properties.getRefIdentifierAnnotation()).getValue_STEXT());
+				lines.add(getMarker("ref") + refSpan.getAnnotation(properties.getRefIdentifierAnnotation()).getValue_STEXT());
 				for (SAnnotation a : refSpan.getAnnotations()) {
 					if (!a.getQName().equals(properties.getRefIdentifierAnnotation())) {
 						lines.add(createMarkerAnnoString(a));
@@ -461,7 +461,18 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		}
 	}
 
-	/**
+	private String getMarker(String string) {
+		Map<String, String> markerMap = null;
+		if (!(markerMap = properties.getMarkerMap()).isEmpty()) {
+			String idName = markerMap.get(string);
+			if (idName != null) {
+				return "\\" + idName + " ";
+			}
+		}
+		return "\\" + string + " ";
+	}
+
+		/**
 	 * // TODO Add description
 	 * 
 	 * @param ranges
@@ -533,6 +544,13 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		else {
 			line = "\\" + name.replaceAll("\\s", "-")
 					+ (namespace != null ? "__" + namespace.replaceAll("\\s", "-") : "") + "";
+		}
+		Map<String, String> markerMap;
+		if (!(markerMap = properties.getMarkerMap()).isEmpty()) {
+			String newName = markerMap.get(name);
+			if (newName != null) {
+				line.replaceFirst("\\.\\s", "\\" + newName + " ");
+			}
 		}
 		return line;
 	}

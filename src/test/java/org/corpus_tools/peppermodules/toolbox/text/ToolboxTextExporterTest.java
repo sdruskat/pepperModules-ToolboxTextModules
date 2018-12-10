@@ -29,7 +29,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.corpus_tools.pepper.common.CorpusDesc;
 import org.corpus_tools.pepper.testFramework.PepperExporterTest;
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties;
@@ -122,10 +121,9 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 	 * Test conversion with a generic Salt example
 	 */
 	@Test
-	public void testConversion2() {
+	public void testConversionNormalization() {
 		createTestProject();
 		setProperties("exporter/normalization/1.properties");
-		setTestFile("exporter/normalization/1.txt");
 		URI projectURI = URI
 				.createFileURI(getTempPath("ToolboxTextExporter-testProject/saltProject.salt").getAbsolutePath());
 		SaltProject saltProject = SaltFactory.createSaltProject();
@@ -136,58 +134,28 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 				.createFileURI(getTempPath("ToolboxTextExporter-testProject/marker-normalization").getAbsolutePath())));
 		start();
 
-		String resultPath = null, testPath = null;
+		String resultPath = null;
 		File result = new File(URI.createFileURI(
 				resultPath = getTempPath("ToolboxTextExporter-testProject/marker-normalization").getAbsolutePath()
 						+ "/corpus/document.txt")
 				.toFileString());
-		File toolboxCorpusFile = new File(
-				testPath = this.getClass().getClassLoader().getResource("exporter/normalization/1.txt").getFile());
 		assertTrue(result.exists());
-		assertTrue(toolboxCorpusFile.exists());
 		// Test the actual files
-		List<String> testFileContent = null, resultFileContent = null;
 		try {
-			testFileContent = Files.readAllLines(Paths.get(testPath), Charset.defaultCharset());
-			resultFileContent = Files.readAllLines(Paths.get(resultPath), Charset.defaultCharset());
+			List<String> lines = Files.readAllLines(Paths.get(resultPath));
+			assertThat(lines.size(), is(10));
+			assertThat(lines.get(3), is("\\doc ione"));
+			assertThat(lines.get(5), is("\\phrase rone"));
+			assertThat(lines.get(6), is("\\lex Birthday pony"));
+			assertThat(lines.get(7), is("\\morph m_birth m_day m_pony"));
+			assertThat(lines.get(8), is("\\lexanno lone ltwo"));
+			assertThat(lines.get(9), is("\\morphanno mone mtwo mthree"));
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			fail("Could not read result file.");
 		}
-		assertTrue(testFileContent.size() == resultFileContent.size());
-		int resultTxLength = 0;
-		int resultMbLength = 0;
-		for (String line : resultFileContent) {
-			if (line.startsWith("\\tx")) {
-				resultTxLength = line.split(" ").length;
-			}
-			else if (line.startsWith("\\mb")) {
-				resultMbLength = line.split(" ").length;
-			}
-		}
-		// \mb includes 1 token with 2 morphemes, so same length + 1
-		assertThat(resultMbLength, is(resultTxLength + 1));
-		String mbResult = null;
-		String mbTest = null;
-		for (String line : resultFileContent) {
-			if (line.startsWith("\\mb ")) {
-				mbResult = line;
-				break;
-			}
-		}
-		for (String line : testFileContent) {
-			if (line.startsWith("\\mb ")) {
-				mbTest = line;
-				break;
-			}
-		}
-		assertThat(mbResult, is(mbTest));
-		List<String> trDiff = diffFiles(testFileContent, resultFileContent);
-		List<String> rtDiff = diffFiles(resultFileContent, testFileContent);
-		assertTrue(rtDiff.isEmpty());
-		assertTrue(trDiff.isEmpty());
 	}
-
+	
 	/**
 	 * Creates a test project with one "ref":
 	 * - 1 Annotation: ref=one
@@ -213,27 +181,27 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 		STimeline tl = graph.createTimeline();
 		STextualDS ds1 = graph.createTextualDS("Birthday pony");
 		SToken lt1 = graph.createToken(ds1, 0, 8);
-		lt1.createAnnotation(null, "word", "one");
+		lt1.createAnnotation(null, "word", "wone");
 		createTimelineRelation(graph, tl, lt1, 0, 13);
 		SToken lt2 = graph.createToken(ds1, 9, 13);
-		lt2.createAnnotation(null, "word", "two");
+		lt2.createAnnotation(null, "word", "wtwo");
 		createTimelineRelation(graph, tl, lt2, 9, 13);
 		STextualDS ds2 = graph.createTextualDS("m_birth m_day m_pony");
 		SToken mt1 = graph.createToken(ds2, 0, 7);
-		mt1.createAnnotation(null, "morph", "one");
+		mt1.createAnnotation(null, "morph", "mone");
 		createTimelineRelation(graph, tl, mt1, 0, 7);
 		SToken mt2 = graph.createToken(ds2, 8, 13);
-		mt2.createAnnotation(null, "morph", "two");
+		mt2.createAnnotation(null, "morph", "mtwo");
 		createTimelineRelation(graph, tl, mt2, 8, 13);
 		SToken mt3 = graph.createToken(ds2, 14, 20);
-		mt3.createAnnotation(null, "morph", "three");
+		mt3.createAnnotation(null, "morph", "mthree");
 		createTimelineRelation(graph, tl, mt3, 14, 20);
 		SSpan refSpan = graph.createSpan(lt1, lt2, mt1, mt2, mt3);
-		refSpan.createAnnotation(null, "ref", "one");
+		refSpan.createAnnotation(null, "ref", "rone");
 		
 		// Add the required spans and layers
 		SSpan idSpan = graph.createSpan(lt1, lt2);
-		idSpan.createAnnotation(null, "id", "one");
+		idSpan.createAnnotation(null, "id", "ione");
 		
 		SLayer refSpanLayer = SaltFactory.createSLayer();
 		refSpanLayer.setName("ref");
@@ -275,10 +243,6 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 
 	private String getFile(String fileName) {
 		return this.getClass().getClassLoader().getResource(fileName).getFile();
-	}
-
-	private void setTestFile(String fileName) {
-		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI.createFileURI(getFile(fileName))));
 	}
 
 	private void setProperties(String fileName) {
