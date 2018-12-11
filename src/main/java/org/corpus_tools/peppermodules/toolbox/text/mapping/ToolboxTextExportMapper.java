@@ -148,7 +148,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		// Order \id spans by indices of tokens they're covering
 		List<SSpan> orderedIdSpans = ToolboxTextModulesUtils.sortSpansByTextCoverageOfIncludedToken(idSpans);
 		for (SSpan idSpan : orderedIdSpans) {
-			lines.add(getMarker("id") + idSpan.getAnnotation(properties.getIdIdentifierAnnotation()).getValue_STEXT());
+			lines.add(getMarker("id") + " " + idSpan.getAnnotation(properties.getIdIdentifierAnnotation()).getValue_STEXT());
 			for (SAnnotation a : idSpan.getAnnotations()) {
 				if (!a.getQName().equals(properties.getIdIdentifierAnnotation())) {
 					lines.add(createMarkerAnnoString(a));
@@ -185,7 +185,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			}
 			List<SSpan> orderedRefs = ToolboxTextModulesUtils.sortSpansByTextCoverageOfIncludedToken(refSpans);
 			for (SSpan refSpan : orderedRefs) {
-				lines.add(getMarker("ref") + refSpan.getAnnotation(properties.getRefIdentifierAnnotation()).getValue_STEXT());
+				lines.add(getMarker("ref") + " " + refSpan.getAnnotation(properties.getRefIdentifierAnnotation()).getValue_STEXT());
 				for (SAnnotation a : refSpan.getAnnotations()) {
 					if (!a.getQName().equals(properties.getRefIdentifierAnnotation())) {
 						lines.add(createMarkerAnnoString(a));
@@ -198,7 +198,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 				}
 				
 				// Map \tx
-				String txLine = "\\tx";
+				String txLine = getMarker("tx");
 				List<SToken> txTokens = new ArrayList<>();
 				List<SToken> txCandidateTokens = graph.getOverlappedTokens(refSpan);
 				Set<SNode> txLayerNodes = graph.getLayerByName(properties.getTxTokenLayer()).get(0).getNodes();
@@ -242,6 +242,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 						name = split[0];
 					}
 					String marker = createMarkerString(namespace, name);
+					marker = getMarker(marker.substring(1)); // Removes the existing backslash
 					txAnnotationLines.put(annoQName, marker);
 				}
 				// Clean list from annotations that contain primary lexical or morphological material
@@ -286,7 +287,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 				
 				
 				// Map \mb
-				String mbLine = "\\mb";
+				String mbLine = getMarker("mb");
 				List<SToken> mbTokens = new ArrayList<>();
 				List<SToken> mbCandidateTokens = graph.getOverlappedTokens(refSpan); // FIXME Make requirement clear that both token types must be covered by the refspan!
 				// FIXME ALternatively, solve via timeline
@@ -322,6 +323,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 						name = split[0];
 					}
 					String marker = createMarkerString(namespace, name);
+					marker = getMarker(marker.substring(1)); // Removes the existing backslash
 					mbAnnotationLines.put(annoQName, marker);
 				}
 				// Clean list from annotations that contain primary lexical or morphological material
@@ -466,10 +468,10 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		if (!(markerMap = properties.getMarkerMap()).isEmpty()) {
 			String idName = markerMap.get(string);
 			if (idName != null) {
-				return "\\" + idName + " ";
+				return "\\" + idName;
 			}
 		}
-		return "\\" + string + " ";
+		return "\\" + string;
 	}
 
 		/**

@@ -2123,6 +2123,17 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(ref.getAnnotation("toolbox::err").getValue_STEXT(), is("ge-m"));
 		assertNotNull(ref.getAnnotation("toolbox::ge-m"));
 	}
+	
+	/**
+	 * Tests marker normalization, i.e., the changing
+	 * of markers = annotation names to something else than
+	 * the original.
+	 * 
+	 */
+	@Test
+	public void testMarkerNormalization() {
+		fail("Not yet implemented.");
+	}
 
 	/**
 	 * Test method for

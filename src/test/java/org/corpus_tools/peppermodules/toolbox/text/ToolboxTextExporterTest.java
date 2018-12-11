@@ -143,12 +143,15 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 		// Test the actual files
 		try {
 			List<String> lines = Files.readAllLines(Paths.get(resultPath));
+			for (String l : lines) {
+				System.err.println(l);
+			}
 			assertThat(lines.size(), is(10));
 			assertThat(lines.get(3), is("\\doc ione"));
 			assertThat(lines.get(5), is("\\phrase rone"));
 			assertThat(lines.get(6), is("\\lex Birthday pony"));
-			assertThat(lines.get(7), is("\\morph m_birth m_day m_pony"));
-			assertThat(lines.get(8), is("\\lexanno lone ltwo"));
+			assertThat(lines.get(7), is("\\lexanno wone wtwo"));
+			assertThat(lines.get(8), is("\\morph m_birth m_day m_pony"));
 			assertThat(lines.get(9), is("\\morphanno mone mtwo mthree"));
 		}
 		catch (IOException e) {
