@@ -1929,6 +1929,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		boolean containsDS = false;
 		for (SNode n : graph.getLayerByName("tx").get(0).getNodes()) {
 			if (n instanceof STextualDS) {
+				System.err.println(n);
 				containsDS = true;
 				assertThat(((STextualDS) n).getText(), is ("One Two Three Four"));
 			}
@@ -2389,9 +2390,28 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 			assertThat(ds.getName(), anyOf(is("tx"), is("mb")));
 		}
 		SSpan refSpan = graph.getSpans().get(0);
-		assertNotNull(refSpan.getAnnotation("ref"));
-		// The markers of ids and refs should be changed
-//		assertThat
+		assertThat(refSpan.getName(), is("rone"));
+		assertNotNull(refSpan.getAnnotation("toolbox::rtx"));
+		assertNotNull(refSpan.getAnnotation("toolbox::ref"));
+		assertThat(refSpan.getAnnotation("toolbox::ref").getValue_STEXT(), is("rone"));
+		// Test token annotations
+		assertThat(graph.getLayerByName("ref").isEmpty(), is(false));
+		assertThat(graph.getLayerByName("tx").isEmpty(), is(false));
+		assertThat(graph.getLayerByName("mb").isEmpty(), is(false));
+		SLayer txLayer = graph.getLayerByName("tx").get(0);
+		SLayer mbLayer = graph.getLayerByName("mb").get(0);
+		for (SNode n : txLayer.getNodes()) {
+			if (n instanceof SToken) {
+				assertNotNull(n.getAnnotation("toolbox::la"));
+				assertNull(n.getAnnotation("toolbox::lexanno"));
+			}
+		}
+		for (SNode n : mbLayer.getNodes()) {
+			if (n instanceof SToken) {
+				assertNotNull(n.getAnnotation("toolbox::ma"));
+				assertNull(n.getAnnotation("toolbox::morphanno"));
+			}
+		}
 	}
 	                                                                  
 

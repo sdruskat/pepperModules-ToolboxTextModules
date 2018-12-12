@@ -120,20 +120,20 @@ public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 		File file = new File(getResourceURI().toFileString());
 		
 		// Create layers
-		getLayer(markerMap.get(getProperties().getLexMarker()));
-		getLayer(markerMap.get(getProperties().getMorphMarker()));
-		getLayer(markerMap.get(getProperties().getRefMarker()));
+		getLayer(getMarker(markerMap.get(getProperties().getLexMarker())));
+		getLayer(getMarker(markerMap.get(getProperties().getMorphMarker())));
+		getLayer(getMarker(markerMap.get(getProperties().getRefMarker())));
 		
 		// Create a timeline to linearize lexical and morphological tokens
 		graph.createTimeline();
 		
 		// Create primary data sources
 		final STextualDS lexDS = graph.createTextualDS("");
-		lexDS.setName(markerMap.get(getProperties().getLexMarker()));
+		lexDS.setName(getMarker(markerMap.get(getProperties().getLexMarker())));
 		STextualDS morphDS = null;
 		if (hasMorphology) {
 			morphDS = graph.createTextualDS("");
-			morphDS.setName(markerMap.get(getProperties().getMorphMarker()));
+			morphDS.setName(getMarker(markerMap.get(getProperties().getMorphMarker())));
 		}
  
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r"); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
@@ -202,9 +202,9 @@ public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 					}
 					bos.reset();
 				}
-				getLayer(markerMap.get(getProperties().getLexMarker())).addNode(lexDS);
+				getLayer(getMarker(markerMap.get(getProperties().getLexMarker()))).addNode(lexDS);
 				if (morphDS != null) {
-					getLayer(markerMap.get(getProperties().getMorphMarker())).addNode(morphDS);
+					getLayer(getMarker(markerMap.get(getProperties().getMorphMarker()))).addNode(morphDS);
 				}
 			}
 		}
@@ -342,7 +342,16 @@ public class ToolboxTextImportMapper extends AbstractToolboxTextMapper {
 		return layer;
 	}
 
-
+	protected String getMarker(String string) {
+		Map<String, String> markerMap = null;
+		if (!(markerMap = ((ToolboxTextImporterProperties) getProperties()).getMarkerMap()).isEmpty()) {
+			String idName = markerMap.get(string);
+			if (idName != null) {
+				return idName;
+			}
+		}
+		return string;
+	}
 
 
 	/**

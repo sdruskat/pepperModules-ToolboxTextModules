@@ -233,11 +233,11 @@ public class RefMapper extends AbstractBlockMapper {
 		boolean hasPDFPageAnnotations = properties.hasPDFPageAnnotations();
 		String pdfPageAnnotationMarker = properties.getPDFPageAnnotationMarker(); 
 		SSpan span = graph.createSpan(lexTokens);
-		layers.get(markerMap.get(refData.getMarker())).addNode(span);
+		layers.get(getMarker(markerMap.get(refData.getMarker()))).addNode(span);
 		SSpan pdfPageSpan = null;
 		if (hasPDFPageAnnotations) {
 			pdfPageSpan = graph.createSpan(lexTokens);
-			layers.get(markerMap.get(refData.getMarker())).addNode(pdfPageSpan);
+			layers.get(getMarker(markerMap.get(refData.getMarker()))).addNode(pdfPageSpan);
 		}
 		
 		/*
@@ -246,7 +246,7 @@ public class RefMapper extends AbstractBlockMapper {
 		 *  we can safely assume that the list of primary data has
 		 *  size 1 and contains only the complete ref name String.
 		 */
-		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, markerMap.get(refData.getMarker()), refData.getPrimaryData().get(0).trim());
+		span.createAnnotation(SALT_NAMESPACE_TOOLBOX, getMarker(markerMap.get(refData.getMarker())), refData.getPrimaryData().get(0).trim());
 		span.setName(refData.getPrimaryData().get(0).trim());
 		if (hasPDFPageAnnotations) {
 			if (refData.getAnnotations().containsKey(pdfPageAnnotationMarker)) {
@@ -314,7 +314,7 @@ public class RefMapper extends AbstractBlockMapper {
 					timeLineRel.setStart(morphTimelineEnd);
 					timeLineRel.setEnd(morphTimelineEnd += 1);
 					graph.addRelation(timeLineRel);
-					layers.get(markerMap.get(morphData.getMarker())).addNode(token);
+					layers.get(getMarker(markerMap.get(morphData.getMarker()))).addNode(token);
 				}
 				/* 
 				 * Use int-based iteration because this helps interacting
@@ -340,7 +340,7 @@ public class RefMapper extends AbstractBlockMapper {
 					timeLineRel.setEnd(lexTimelineEnd += timeSteps);
 					timeline.increasePointOfTime(timeSteps);
 					graph.addRelation(timeLineRel);
-					layers.get(markerMap.get(lexData.getMarker())).addNode(token);
+					layers.get(getMarker(markerMap.get(lexData.getMarker()))).addNode(token);
 				}
 				addAnnotations(lexData, lexTokens, false);
 				addAnnotations(morphData, morphTokens, hasLiaisonDelimiter);
@@ -363,7 +363,7 @@ public class RefMapper extends AbstractBlockMapper {
 					timeLineRel.setEnd(timelineEnd += 1);
 					timeline.increasePointOfTime(1);
 					graph.addRelation(timeLineRel);
-					layers.get(markerMap.get(lexData.getMarker())).addNode(token);
+					layers.get(getMarker(markerMap.get(lexData.getMarker()))).addNode(token);
 				}
 				addAnnotations(lexData, lexTokens, false);
 			}
@@ -377,7 +377,7 @@ public class RefMapper extends AbstractBlockMapper {
 				lexDS.setText(lexDS.getText().isEmpty() ? lexUnit : lexDS.getText() + " " + lexUnit);
 				SToken token = graph.createToken(lexDS, lexDS.getEnd() - lexUnit.length(), lexDS.getEnd());
 				lexTokens.add(token);
-				layers.get(markerMap.get(lexData.getMarker())).addNode(token);
+				layers.get(getMarker(markerMap.get(lexData.getMarker()))).addNode(token);
 				STimelineRelation timeLineRel = SaltFactory.createSTimelineRelation();
 				timeLineRel.setSource(token);
 				timeLineRel.setTarget(timeline);
@@ -435,7 +435,7 @@ public class RefMapper extends AbstractBlockMapper {
 						else if (split.length == 2 && (split[0].equals(properties.getRefMarker()) || split[0].equals(properties.getSubrefDefinitionMarker()) || split[0].equals(properties.getLexMarker()) || split[0].equals(properties.getMorphMarker()))) {
 							key = markerMap.get(split[0]).concat("-").concat(split[1]);
 						}
-						((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, key, sb.toString().trim());
+						((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, getMarker(key), sb.toString().trim());
 					}
 					else {
 						if (hasLiaisonDelimiter && annotation.getValue().get(i).startsWith(properties.getLiaisonDelim())) {
@@ -444,10 +444,10 @@ public class RefMapper extends AbstractBlockMapper {
 						else {
 							annotationValue = annotation.getValue().get(i);
 						}
-						if (key.equals(properties.getRefMarker()) || key.equals(properties.getSubrefDefinitionMarker()) || key.equals(properties.getLexMarker()) || key.equals(properties.getMorphMarker())) {
+						if (key.equals(properties.getRefMarker()) || key.equals(properties.getSubrefDefinitionMarker()) || key.equals(getMarker(properties.getLexMarker())) || key.equals(properties.getMorphMarker())) {
 							key = markerMap.get(key);
 						}
-						((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, key, annotationValue);
+						((SNode) node).createAnnotation(SALT_NAMESPACE_TOOLBOX, getMarker(key), annotationValue);
 					}
 				}
 			}
@@ -725,6 +725,17 @@ public class RefMapper extends AbstractBlockMapper {
 	 */
 	public boolean refHasMorphology() {
 		return refHasMorphology;
+	}
+	
+	private String getMarker(String string) {
+		Map<String, String> markerMap = null;
+		if (!(markerMap = properties.getMarkerMap()).isEmpty()) {
+			String idName = markerMap.get(string);
+			if (idName != null) {
+				return idName;
+			}
+		}
+		return string;
 	}
 
 }

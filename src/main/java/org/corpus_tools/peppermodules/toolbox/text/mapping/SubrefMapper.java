@@ -261,7 +261,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 			else {
 				subref.createAnnotation("toolbox", annoKey, annoValue);
 			}
-			SLayer layer = graph.getLayerByName(mapToMorphTokens ? markerMap.get(morphMarker) : markerMap.get(lexMarker)).get(0);
+			SLayer layer = graph.getLayerByName(mapToMorphTokens ? getMarker(markerMap.get(morphMarker)) : getMarker(markerMap.get(lexMarker))).get(0);
 			layer.addNode(subref);
 		}
 	}
@@ -411,7 +411,7 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 				return;
 			}
 		}
-		layer = graph.getLayerByName(mapToMorphTokens ? markerMap.get(morphMarker) : markerMap.get(lexMarker)).get(0);
+		layer = graph.getLayerByName(mapToMorphTokens ? getMarker(markerMap.get(morphMarker)) : getMarker(markerMap.get(lexMarker))).get(0);
 		layer.addNode(subref);
 	}
 
@@ -552,6 +552,19 @@ public class SubrefMapper extends AbstractToolboxTextMapper {
 	 */
 	private boolean areInts(String string, String string2) {
 		return (ToolboxTextModulesUtils.isInteger(string) && ToolboxTextModulesUtils.isInteger(string2));
+	}
+	
+	private String getMarker(String string) {
+		if (getProperties() != null) {
+			Map<String, String> markerMap = null;
+			if (!(markerMap = ((ToolboxTextImporterProperties) getProperties()).getMarkerMap()).isEmpty()) {
+				String idName = markerMap.get(string);
+				if (idName != null) {
+					return idName;
+				}
+			}
+		}
+		return string;
 	}
 
 }

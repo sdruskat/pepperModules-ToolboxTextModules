@@ -143,9 +143,6 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 		// Test the actual files
 		try {
 			List<String> lines = Files.readAllLines(Paths.get(resultPath));
-			for (String l : lines) {
-				System.err.println(l);
-			}
 			assertThat(lines.size(), is(10));
 			assertThat(lines.get(3), is("\\doc ione"));
 			assertThat(lines.get(5), is("\\phrase rone"));

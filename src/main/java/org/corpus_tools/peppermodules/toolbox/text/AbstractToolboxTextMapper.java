@@ -19,7 +19,10 @@
  */
 package org.corpus_tools.peppermodules.toolbox.text;
 
+import java.util.Map;
+
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
+import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextImporterProperties;
 
 /**
  * An abstract mapper class providing a *toolbox* constant to
@@ -31,5 +34,5 @@ import org.corpus_tools.pepper.impl.PepperMapperImpl;
 public class AbstractToolboxTextMapper extends PepperMapperImpl {
 	
 	protected final String SALT_NAMESPACE_TOOLBOX = "toolbox";
-
+	
 }
