@@ -1,0 +1,10 @@
+\_sh v3.0 400 Text
+
+
+\doc ione
+ 
+\phrase rone
+\lex Birthday pony
+\lexanno wone wtwo
+\morph m_birth -m_day m_pony
+\morphanno mone mtwo mthree
