@@ -180,8 +180,6 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			
 			// Map \refs
 			// Get refs per id
-			@SuppressWarnings("rawtypes")
-			List<DataSourceSequence> dsSequences = graph.getOverlappedDataSourceSequence(idSpan, SALT_TYPE.STEXT_OVERLAPPING_RELATION);
 			/*
 			 *  We are currently working with only 1 data source!
 			 *  Spans should arguably only overlap one data source anyway, but some
@@ -191,9 +189,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			 *  DataSourceSequence of the two (or possibly more) will have the same effect
 			 *  on the Toolbox ref.
 			 */
-			@SuppressWarnings("rawtypes")
-			DataSourceSequence dsSequence = dsSequences.get(0);
-			List<SNode> allNodes = graph.getNodesBySequence(dsSequence);
+			List<SNode> allNodes = graph.getNodes();
 			Set<SSpan> refSpans = new HashSet<>();
 			for (SNode node : allNodes) {
 				if (node instanceof SSpan && node.getLayers().contains(graph.getLayerByName(properties.getRefSpanLayer()).get(0))) {
