@@ -2123,17 +2123,7 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertThat(ref.getAnnotation("toolbox::err").getValue_STEXT(), is("ge-m"));
 		assertNotNull(ref.getAnnotation("toolbox::ge-m"));
 	}
-	
-	/**
-	 * Tests marker normalization, i.e., the changing
-	 * of markers = annotation names to something else than
-	 * the original.
-	 * 
-	 */
-	@Test
-	public void testMarkerNormalization() {
-		fail("Not yet implemented.");
-	}
+
 
 	/**
 	 * Test method for
@@ -2378,6 +2368,31 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 //		assertEquals(1, refSpan.getAnnotations().size());
 //		assertNull(refSpan.getAnnotation("toolbox::rtx"));
 //	}
+	
+	/**
+	 * Tests marker normalization, i.e., the changing
+	 * of markers = annotation names to something else than
+	 * the original.
+	 * 
+	 */
+	@Test
+	public void testMarkerNormalization() {
+		setTestFile("importer/marker-mapping.txt");
+		setProperties("importer/marker-mapping.properties");
+		start();
+		SDocumentGraph graph = getNonEmptyCorpusGraph().getDocuments().get(0).getDocumentGraph();
+		assertThat(graph.getDocument().getName(), is("ione"));
+		assertThat(graph.getTextualDSs().size(), is(2));
+		for (STextualDS ds : graph.getTextualDSs()) {
+			assertThat(ds.getText(), anyOf(is("Birthday pony"), is("m_birth-m_daym_pony")));
+			// The names of the data sources should be changed
+			assertThat(ds.getName(), anyOf(is("tx"), is("mb")));
+		}
+		SSpan refSpan = graph.getSpans().get(0);
+		assertNotNull(refSpan.getAnnotation("ref"));
+		// The markers of ids and refs should be changed
+//		assertThat
+	}
 	                                                                  
 
 

@@ -21,10 +21,13 @@ package org.corpus_tools.peppermodules.toolbox.text.properties;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.PepperModuleProperty;
+import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.ToolboxTextDocumentNameParser;
 import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
 
@@ -237,6 +240,16 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	public static final String PROP_HAS_PDF_PAGE_ANNO = "hasPDFPageAnno";
 	
 	/**
+	 * A map mapping annotation names to other annotation names.
+	 * 
+	 * Format: `markerMap=aa=bb,cc=dd`.
+	 * 
+	 * This will result in annotations with name "aa" mapped
+	 * to a line "\bb ..." in the Toolbox file output.
+	 */
+	public static final String MARKER_MAP = "markerMap";
+	
+	/**
 	 * Constructor adding all properties to the instance.	 
 	 */
 	public ToolboxTextImporterProperties() {
@@ -314,7 +327,9 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 		addProperty(PepperModuleProperty.create().withName(PROP_HAS_PDF_PAGE_ANNO).withType(Boolean.class)
 				.withDescription("Whether a corpus contains PDF page number annotations")
 				.withDefaultValue(false).isRequired(false).build());
-
+		addProperty(PepperModuleProperty.create().withName(MARKER_MAP).withType(String.class)
+				.withDescription("map mapping annotation names to other annotation names.")
+				.isRequired(false).build());
 	}
 
 	// Getter methods for the different property values.
@@ -442,6 +457,24 @@ public class ToolboxTextImporterProperties extends PepperModuleProperties {
 	@SuppressWarnings("javadoc")
 	public String getPDFPageAnnotationMarker() {
 		return (String) getProperty(PROP_PDF_PAGE_ANNO).getValue();
+	}
+
+	public Map<String, String> getMarkerMap() {
+		Map<String, String> markerMap = new HashMap<>();
+		String property = (String) getProperty(MARKER_MAP).getValue();
+		if (property == null) {
+			return markerMap;
+		}
+		property.trim();
+		String[] split = property.split(",");
+		for (String s : split) {
+			String[] pair = s.split("=");
+			if (pair.length != 2) {
+				throw new PepperModuleException("The property 'markerMap' is not well-defined. Please check its format and retry.");
+			}
+			markerMap.put(pair[0].trim(), pair[1].trim());
+		}
+		return markerMap;
 	}
 }
 
