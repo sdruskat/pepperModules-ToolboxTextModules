@@ -35,6 +35,7 @@ import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
 import org.corpus_tools.salt.SALT_TYPE;
+import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocumentGraph;
 import org.corpus_tools.salt.common.SSpan;
@@ -137,29 +138,45 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		 */
 		// Get \id spans
 		String idSpanName = properties.getIdSpanLayer();
-		SLayer layer = graph.getLayerByName(idSpanName).get(0);
-		Set<SNode> potentialIdNodes = layer.getNodes();
+		List<SLayer> idSpanLayers = graph.getLayerByName(idSpanName);
 		Set<SSpan> idSpans = new HashSet<>();
-		for (SNode node : potentialIdNodes) {
-			if (node instanceof SSpan) {
-				idSpans.add((SSpan) node);
+		if (!idSpanLayers.isEmpty()) {
+			SLayer layer = graph.getLayerByName(idSpanName).get(0);
+			Set<SNode> potentialIdNodes = layer.getNodes();
+			for (SNode node : potentialIdNodes) {
+				if (node instanceof SSpan) {
+					idSpans.add((SSpan) node);
+				}
 			}
 		}
-		// Order \id spans by indices of tokens they're covering
-		List<SSpan> orderedIdSpans = ToolboxTextModulesUtils.sortSpansByTextCoverageOfIncludedToken(idSpans);
+		List<SSpan> orderedIdSpans = new ArrayList<>();
+		if (!idSpans.isEmpty()) {
+			// Order \id spans by indices of tokens they're covering
+			orderedIdSpans = ToolboxTextModulesUtils.sortSpansByTextCoverageOfIncludedToken(idSpans);
+		}
+		else {
+			// Add a dummy span
+			SSpan dummySpan = SaltFactory.createSSpan();
+			dummySpan.setId("TOOLBOXTEXTEXPORTERDUMMYSPAN");
+			orderedIdSpans.add(dummySpan);
+		}
 		for (SSpan idSpan : orderedIdSpans) {
-			lines.add(getMarker("id") + " " + idSpan.getAnnotation(properties.getIdIdentifierAnnotation()).getValue_STEXT());
-			for (SAnnotation a : idSpan.getAnnotations()) {
-				if (!a.getQName().equals(properties.getIdIdentifierAnnotation())) {
-					lines.add(createMarkerAnnoString(a));
+			if (!idSpan.getId().equals("TOOLBOXTEXTEXPORTERDUMMYSPAN")) {
+				lines.add(getMarker("id") + " " + idSpan.getAnnotation(properties.getIdIdentifierAnnotation()).getValue_STEXT());
+				for (SAnnotation a : idSpan.getAnnotations()) {
+					if (!a.getQName().equals(properties.getIdIdentifierAnnotation())) {
+						lines.add(createMarkerAnnoString(a));
+					}
+				}
+				for (SMetaAnnotation ma : idSpan.getMetaAnnotations()) {
+					if (!ma.getQName().equals(properties.getIdIdentifierAnnotation())) {
+						lines.add(createMarkerAnnoString(ma));
+					}
 				}
 			}
-			for (SMetaAnnotation ma : idSpan.getMetaAnnotations()) {
-				if (!ma.getQName().equals(properties.getIdIdentifierAnnotation())) {
-					lines.add(createMarkerAnnoString(ma));
-				}
+			else {
+				lines.add(getMarker("id") + " " + graph.getDocument().getName());
 			}
-			lines.add(" ");
 			
 			// Map \refs
 			// Get refs per id
@@ -185,6 +202,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			}
 			List<SSpan> orderedRefs = ToolboxTextModulesUtils.sortSpansByTextCoverageOfIncludedToken(refSpans);
 			for (SSpan refSpan : orderedRefs) {
+				lines.add(" ");
 				lines.add(getMarker("ref") + " " + refSpan.getAnnotation(properties.getRefIdentifierAnnotation()).getValue_STEXT());
 				for (SAnnotation a : refSpan.getAnnotations()) {
 					if (!a.getQName().equals(properties.getRefIdentifierAnnotation())) {
