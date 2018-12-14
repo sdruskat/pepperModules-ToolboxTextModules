@@ -131,8 +131,7 @@ comma-separated list.
 
    Default value: `ge,ps`	
 
-- **`attachDelimiter` (String)**: Whether detached morphology delimiters (as in "item 
-- item" or similar) should be attached to the previous or subsequent item, as a 
+- **`attachDelimiter` (String)**: Whether detached morphology delimiters (as in "item - item" or similar) should be attached to the previous or subsequent item, as a 
 two-item comma-separated list, where the first item signifies whether the 
 delimiter should be attached at all (if `true` it will be attached), and the 
 second item signifies whether the delimiter should be attached to the 
