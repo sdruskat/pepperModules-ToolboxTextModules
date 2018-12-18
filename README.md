@@ -356,9 +356,13 @@ MDF markers.
 - **`nullPlaceholder` (String)**: A string that is inserted into the Toolbox text
 file for missing annotation values to preserve interlinearization.
 
-- **`markerScheme` (String)**: A pattern defining how Toolbox markers should be
-generated. Available reserved names: `l` - Name of the annotation's layer;
-`ns` - The annotation's namespace; `n` - The annotation's name.
+- **`markerMap` (String)**: A map mapping annotation names to other annotation names.
+
+    Format: `markerMap={name-of-first-layer-of-container}::{namespace}:{name}={marker-pattern}`,
+	where `{marker-pattern}` can include `l` (layer name value), `ns` (namespace value), `n` (name value)
+
+	Example: `layer1::ns1:n1=l__ns_n` will result in a marker `layer1__ns1_n1 {value}` for
+	an annotation matching that pattern
 
 ## Contribute
 

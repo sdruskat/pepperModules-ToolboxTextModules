@@ -19,6 +19,7 @@
  */
 package org.corpus_tools.peppermodules.toolbox.text;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
@@ -26,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,7 @@ import org.corpus_tools.salt.common.STimelineRelation;
 import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.common.SaltProject;
 import org.corpus_tools.salt.core.SLayer;
+import org.corpus_tools.salt.util.internal.GetXBySequence;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 import org.junit.Test;
@@ -143,17 +146,104 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 		// Test the actual files
 		try {
 			List<String> lines = Files.readAllLines(Paths.get(resultPath));
-			assertThat(lines.size(), is(10));
+			assertThat(lines.size(), is(11));
 			assertThat(lines.get(3), is("\\doc ione"));
 			assertThat(lines.get(5), is("\\phrase rone"));
-			assertThat(lines.get(6), is("\\lex Birthday pony"));
-			assertThat(lines.get(7), is("\\lexanno wone wtwo"));
-			assertThat(lines.get(8), is("\\morph m_birth m_day m_pony"));
-			assertThat(lines.get(9), is("\\morphanno mone mtwo mthree"));
+			assertThat(lines.get(6), is("\\name refname"));
+			assertThat(lines.get(7), is("\\lex Birthday pony"));
+			assertThat(lines.get(8), is("\\lexanno wone wtwo"));
+			assertThat(lines.get(9), is("\\morph m_birth m_day m_pony"));
+			assertThat(lines.get(10), is("\\morphanno mone mtwo mthree"));
 		}
 		catch (IOException e) {
 			fail("Could not read result file.");
 		}
+	}
+	
+	/**
+	 * Test conversion with a generic Salt example
+	 */
+	@Test
+	public void testConversionNormalizationFromFLExTextSource() {
+		URI saltProjectURI = URI.createFileURI(this.getClass().getClassLoader().getResource("exporter/normalization/saltProject.salt").getFile());
+		setProperties("exporter/normalization/2.properties");
+		SaltProject saltProject = SaltFactory.createSaltProject();
+		saltProject.loadSaltProject(saltProjectURI);
+
+		getFixture().setSaltProject(saltProject);
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI
+				.createFileURI(getTempPath("ToolboxTextExporter-testProject/normalization-flex").getAbsolutePath())));
+		start();
+		String resultDir = getTempPath("ToolboxTextExporter-testProject/normalization-flex/flextext/flextext.txt").getAbsolutePath();
+		Path resultPath = Paths.get(resultDir);
+		List<String> resultFile = null;
+		try {
+			resultFile = Files.readAllLines(resultPath);
+		}
+		catch (IOException e) {
+			fail("Could not read file! " + e.getMessage());
+		}
+		assertThat(resultFile.size(), is(23));
+		for (String line : resultFile) {
+			System.err.println(">" + line);
+		}
+		
+		assertThat(resultFile, contains("\\_sh v3.0 400 Text", 
+				"", 
+				"\\docguid b9742267-dd19-4170-81fd-ed849c4fb834",
+				"\\3 DUMMY",
+				"\\2 DUMMY",
+				"\\14 DUMMY",
+				"\\6 DUMMY",
+				"\\id flextext",
+				"\\ref f1a628a1-7d76-4bb5-841a-8221b87398b4",
+				"\\4 DUMMY",
+				"\\18 DUMMY",
+				"\\17 DUMMY",
+				"\\tx DUMMY",
+				"\\12 DUMMY",
+				"\\wordguid ac646ce8-ca4b-4d51-bc8e-c66dd0c57ba3",
+				"\\16 DUMMY",
+				"\\mb DUMMY",
+				"\\13 DUMMY",
+				"\\19 DUMMY",
+				"\\morphguid d7f713e5-e8cf-11d3-9764-00c04f186933",
+				"\\type root"));
+	}
+	
+	/**
+	 * Tests the property `markerScheme` with its
+	 * default value `n`, i.e., only the name of an
+	 * annotation is used to generate a marker.
+	 * 
+	 */
+	@Test
+	public void testMarkerScheme1() {
+		setProperties("exporter/normalization/3.properties");
+		createTestProject();
+		URI projectURI = URI
+				.createFileURI(getTempPath("ToolboxTextExporter-testProject/saltProject.salt").getAbsolutePath());
+		SaltProject saltProject = SaltFactory.createSaltProject();
+		saltProject.loadSaltProject(projectURI);
+
+		getFixture().setSaltProject(saltProject);
+		getFixture().setCorpusDesc(new CorpusDesc().setCorpusPath(URI
+				.createFileURI(getTempPath("ToolboxTextExporter-testProject/marker-scheme").getAbsolutePath())));
+		start();
+
+		String resultDir = getTempPath("ToolboxTextExporter-testProject/marker-scheme/corpus/document.txt").getAbsolutePath();
+		Path resultPath = Paths.get(resultDir);
+		List<String> resultFile = null;
+		try {
+			resultFile = Files.readAllLines(resultPath);
+		}
+		catch (IOException e) {
+			fail("Could not read file! " + e.getMessage());
+		}
+		for (String line : resultFile) {
+			System.err.println(">" + line);
+		}
+		assertTrue(resultFile.contains("\\name refname"));
 	}
 	
 	/**
@@ -198,6 +288,7 @@ public class ToolboxTextExporterTest extends PepperExporterTest {
 		createTimelineRelation(graph, tl, mt3, 14, 20);
 		SSpan refSpan = graph.createSpan(lt1, lt2, mt1, mt2, mt3);
 		refSpan.createAnnotation(null, "ref", "rone");
+		refSpan.createAnnotation("ns", "name", "refname");
 		
 		// Add the required spans and layers
 		SSpan idSpan = graph.createSpan(lt1, lt2);

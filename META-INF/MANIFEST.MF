@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1544616215294
+Bnd-LastModified: 1545120576960
 Build-Jdk: 1.8.0_191
 Built-By: stephan
 Bundle-Description: A module for the Pepper conversion framework for lin
@@ -42,8 +42,8 @@ Import-Package: com.google.common.collect;version="[19.0,20)",com.google
  epper.modules;version="[3.2,4)",org.corpus_tools.pepper.modules.excepti
  ons;version="[3.2,4)",org.corpus_tools.salt;version="[3.3,4)",org.corpu
  s_tools.salt.common;version="[3.3,4)",org.corpus_tools.salt.core;versio
- n="[3.3,4)",org.corpus_tools.salt.graph;version="[3.3,4)",org.corpus_to
- ols.salt.util;version="[3.3,4)",org.eclipse.emf.common.util,org.slf4j
+ n="[3.3,4)",org.corpus_tools.salt.graph;version="[3.3,4)",org.eclipse.e
+ mf.common.util,org.slf4j
 META-INF: /home/stephan/src/toolbox-text-importer/META-INF
 OSGI-INF: OSGI-INF
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"

@@ -163,10 +163,11 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	/**
 	 * A map mapping annotation names to other annotation names.
 	 * 
-	 * Format: `markerMap=aa=bb,cc=dd`.
+	 * Format: `markerMap={name-of-first-layer-of-container}::{namespace}:{name}={marker-pattern}`,
+	 * where `{marker-pattern}` can include `l` (layer name value), `ns` (namespace value), `n` (name value)
 	 * 
-	 * This will result in annotations with name "aa" mapped
-	 * to a line "\bb ..." in the Toolbox file output.
+	 * Example: `layer1::ns1:n1=l__ns_n` will result in a marker `layer1__ns1_n1 {value}` for
+	 * an annotation matching that pattern.
 	 */
 	public static final String MARKER_MAP = "markerMap";
 	
