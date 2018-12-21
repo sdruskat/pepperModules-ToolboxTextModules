@@ -334,13 +334,12 @@ interlinearization.
 
    Default value: `-`	
 
-- **`markerMap` (String)**: A map mapping annotation names to other annotation names.
+- **`markerMap` (String)**: A map mapping combinations of an annotation container's
+first layer name, the annotation's namespace and the annotation's name to a new
+annotation name.
 	
-	Format: `markerMap=aa=bb,cc=dd`.
+	Format: `markerMap=layer-name::namespace:name=newName, layer::name=newName, namespace:name=newName, name=newName`.
 	
-	This will result in annotations with name "aa" mapped
-	to a line "\bb ..." in the Toolbox file output.
-
 - **`mapLayer` (Boolean)**: Whether the name of the first layer in the list of
 an annotation container's layers should
 be mapped onto the marker. If true, this will result in a marker
