@@ -1,12 +1,12 @@
-/**
- * Copyright (c) 2016ff. Stephan Druskat.
- * Exploitation rights belong exclusively to Humboldt-Universität zu Berlin.
+/*******************************************************************************
+ * Copyright (c) 2016, 2018ff. Stephan Druskat
+ * Exploitation rights for this version belong exclusively to Humboldt-Universität zu Berlin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,8 +15,8 @@
  * limitations under the License.
  *
  * Contributors:
- *     Stephan Druskat (toolboxtextmodules@sdruskat.net) - initial API and implementation
- */
+ *     Stephan Druskat (mail@sdruskat.net) - initial API and implementation
+ *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
 import java.util.ArrayList; 

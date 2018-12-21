@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1545423364142
+Bnd-LastModified: 1545424353337
 Build-Jdk: 1.8.0_191
 Built-By: stephan
 Bundle-Description: Modules bundle for the Pepper conversion framework f

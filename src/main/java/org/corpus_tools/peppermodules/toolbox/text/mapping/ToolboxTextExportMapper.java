@@ -1,12 +1,12 @@
-/**
- * Copyright (c) 2016ff. Stephan Druskat.
- * Exploitation rights belong exclusively to Humboldt-Universität zu Berlin.
+/*******************************************************************************
+ * Copyright (c) 2016, 2018ff. Stephan Druskat
+ * Exploitation rights for this version belong exclusively to Humboldt-Universität zu Berlin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,8 +15,8 @@
  * limitations under the License.
  *
  * Contributors:
- *     Stephan Druskat (toolboxtextmodules@sdruskat.net) - initial API and implementation
- */
+ *     Stephan Druskat (mail@sdruskat.net) - initial API and implementation
+ *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text.mapping;
 
 import java.net.URI;
@@ -490,7 +490,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		 * @param name
 		 * @return
 		 */
-		public String getMappedName(String layerName, String namespace, String name) {
+		private String getMappedName(String layerName, String namespace, String name) {
 			for (Entry<Triple<String, String, String>, String> entry : properties.getMarkerMap().entrySet()) {
 				Triple<String, String, String> triple = entry.getKey();
 				if (triple.equals(Triple.of(layerName, namespace, name))
@@ -578,7 +578,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 	 * @param name
 	 * @return
 	 */
-	public String createMarkerString(String layerName, String namespace, String name) {
+	private String createMarkerString(String layerName, String namespace, String name) {
 		String line = "";
 		// Test if we need to map according to custom markers or MDF Map
 		if (properties.mapLayer() && layerName != null) {
