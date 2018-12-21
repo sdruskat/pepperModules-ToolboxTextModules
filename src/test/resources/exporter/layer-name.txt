@@ -11,7 +11,7 @@
 
 \id 091f3010-2a9c-4721-aabf-af4931a3b318
 \seqnum 1
- 
+
 \ref 10c0409c-6189-424f-aa8b-74e7eeef6cfe
 \phrase_gls Börsdae pounie (phrase gloss)
 \nonamespace nonamespaceannotation
