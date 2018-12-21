@@ -1929,7 +1929,6 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		boolean containsDS = false;
 		for (SNode n : graph.getLayerByName("tx").get(0).getNodes()) {
 			if (n instanceof STextualDS) {
-				System.err.println(n);
 				containsDS = true;
 				assertThat(((STextualDS) n).getText(), is ("One Two Three Four"));
 			}
@@ -2326,49 +2325,6 @@ public class ToolboxTextImporterTest extends PepperImporterTest {
 		assertNotNull(pdfPageSpan);
 		assertEquals("42", pdfPageSpan.getAnnotation("toolbox", "ppdf").getValue_STEXT());
 	}
-	
-//	/**
-//	 * Retain the original \tx line and add it as an annotation on
-//	 * the \ref span, with the user-provided custom marker \rtxcustom.
-//	 * 
-//	 */
-//	@Test
-//	public void testRetainTxCustom() {
-//		setTestFile("importer/retain-tx-span.txt");
-//		setProperties("importer/retain-tx-span.properties");
-//		start();
-//		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
-//		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
-//		SDocumentGraph graph = doc.getDocumentGraph();
-//		SSpan refSpan = null;
-//		assertNotNull(refSpan = graph.getSpans().get(0));
-//		assertEquals(2, refSpan.getAnnotations().size());
-//		SAnnotation a = null;
-//		for (SAnnotation aX : refSpan.getAnnotations()) {
-//			System.err.println(aX);
-//		}
-//		assertNotNull(a = refSpan.getAnnotation("toolbox::rtxcustom"));
-//		assertEquals("One Two Three Four", a.getValue_STEXT());
-//	}
-//	                                                                  
-//	/**
-//	 * Retain the original \tx line and add it as an annotation on
-//	 * the \ref span, with the user-provided custom marker \rtxcustom.
-//	 * 
-//	 */
-//	@Test
-//	public void testDoNotRetainTx() {
-//		setTestFile("importer/retain-tx-span.txt");
-//		setProperties("importer/retain-tx-span-false.properties");
-//		start();
-//		assertEquals(1, getNonEmptyCorpusGraph().getDocuments().size());
-//		SDocument doc = getNonEmptyCorpusGraph().getDocuments().get(0);
-//		SDocumentGraph graph = doc.getDocumentGraph();
-//		SSpan refSpan = null;
-//		assertNotNull(refSpan = graph.getSpans().get(0));
-//		assertEquals(1, refSpan.getAnnotations().size());
-//		assertNull(refSpan.getAnnotation("toolbox::rtx"));
-//	}
 	
 	/**
 	 * Tests marker normalization, i.e., the changing

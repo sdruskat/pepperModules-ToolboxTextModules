@@ -138,7 +138,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9</version>
 				<executions>
@@ -158,7 +158,7 @@
 					</docletArtifact>
 					<useStandardDocletOptions>true</useStandardDocletOptions>
 				</configuration>
-			</plugin>
+			</plugin> -->
 			<!-- <plugin> <groupId>org.sonatype.plugins</groupId> <artifactId>nexus-staging-maven-plugin</artifactId> 
 				<version>1.6.7</version> <extensions>true</extensions> <configuration> <serverId>ossrh</serverId> 
 				<nexusUrl>https://oss.sonatype.org/</nexusUrl> <autoReleaseAfterClose>true</autoReleaseAfterClose> 

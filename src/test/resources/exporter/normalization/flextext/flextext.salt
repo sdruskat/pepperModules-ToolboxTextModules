@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<sDocumentStructure:SDocumentGraph xmlns:sDocumentStructure="sDocumentStructure" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:saltCore="saltCore" xmi:version="2.0">
+	<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1"/>
+	
+	<nodes xsi:type="sDocumentStructure:STimeline">
+		<labels xsi:type="saltCore:SFeature" namespace="saltCommon" name="SDATA" value="N::5"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sTimeline1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTimeline1"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:STextualDS">
+		<labels xsi:type="saltCore:SFeature" namespace="saltCommon" name="SDATA" value="T::DUMMY"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sText1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::morphological-data"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:STextualDS">
+		<labels xsi:type="saltCore:SFeature" namespace="saltCommon" name="SDATA" value="T::DUMMY"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sText2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::lexical-data"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:SToken" layers="//@layers.1 //@layers.2">
+		<labels xsi:type="saltCore:SAnnotation" namespace="mmg-fonipa-x-emic" name="12" value="T::DUMMY"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="word" name="wordguid" value="T::ac646ce8-ca4b-4d51-bc8e-c66dd0c57ba3"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="16" value="T::DUMMY"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sTok1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTok1"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:SToken" layers="//@layers.0 //@layers.3">
+		<labels xsi:type="saltCore:SAnnotation" namespace="mmg-fonipa-x-emic" name="13" value="T::DUMMY"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="morph" name="morphguid" value="T::d7f713e5-e8cf-11d3-9764-00c04f186933"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="19" value="T::DUMMY"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="morph" name="type" value="T::root"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sTok2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTok2"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:SSpan" layers="//@layers.4">
+		<labels xsi:type="saltCore:SAnnotation" namespace="phrase" name="guid" value="T::f1a628a1-7d76-4bb5-841a-8221b87398b4"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="bi" name="17" value="T::DUMMY"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="4" value="T::DUMMY"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="en" name="18" value="T::DUMMY"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sSpan1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpan1"/>
+	</nodes>
+	<nodes xsi:type="sDocumentStructure:SSpan">
+		<labels xsi:type="saltCore:SAnnotation" namespace="paragraph" name="seqnum" value="T::1"/>
+		<labels xsi:type="saltCore:SAnnotation" namespace="paragraph" name="guid" value="T::b3b97b5a-24f8-4334-9d6d-1a82adb0c108"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sSpan2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpan2"/>
+	</nodes>
+	<edges xsi:type="sDocumentStructure:STextualRelation" source="//@nodes.4" target="//@nodes.1">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::5"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sTextRel1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::0"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTextRel1"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STimelineRelation" source="//@nodes.4" target="//@nodes.0">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::5"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sTimeRel1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::0"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTimeRel1"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STextualRelation" source="//@nodes.3" target="//@nodes.2">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::5"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sTextRel2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::0"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTextRel2"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:STimelineRelation" source="//@nodes.3" target="//@nodes.0">
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SEND" value="N::5"/>
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sTimeRel2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SSTART" value="N::0"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sTimeRel2"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.5" target="//@nodes.3">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sSpanRel1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel1"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.5" target="//@nodes.4">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sSpanRel2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel2"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.6" target="//@nodes.3">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sSpanRel3"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel3"/>
+	</edges>
+	<edges xsi:type="sDocumentStructure:SSpanningRelation" source="//@nodes.6" target="//@nodes.4">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::salt:/flextext/north-ambrym-flextext-tuuan-ne-murr-1#sSpanRel4"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::sSpanRel4"/>
+	</edges>
+	<layers xsi:type="saltCore:SLayer" nodes="//@nodes.4">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::l2"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::morph"/>
+	</layers>
+	<layers xsi:type="saltCore:SLayer" nodes="//@nodes.3">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::l1"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::word"/>
+	</layers>
+	<layers xsi:type="saltCore:SLayer" nodes="//@nodes.3">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::l3"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::lexical-data"/>
+	</layers>
+	<layers xsi:type="saltCore:SLayer" nodes="//@nodes.4">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::l4"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::morphological-data"/>
+	</layers>
+	<layers xsi:type="saltCore:SLayer" nodes="//@nodes.5">
+		<labels xsi:type="saltCore:SElementId" namespace="salt" name="id" value="T::l0"/>
+		<labels xsi:type="saltCore:SFeature" namespace="salt" name="SNAME" value="T::phrase"/>
+	</layers>
+</sDocumentStructure:SDocumentGraph>

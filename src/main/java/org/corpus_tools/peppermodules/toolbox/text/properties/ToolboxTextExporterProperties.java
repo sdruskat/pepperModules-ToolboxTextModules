@@ -25,22 +25,14 @@ package org.corpus_tools.peppermodules.toolbox.text.properties;
 import java.util.ArrayList; 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.corpus_tools.pepper.modules.PepperModuleProperties;
 import org.corpus_tools.pepper.modules.PepperModuleProperty;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
 import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
-import org.corpus_tools.salt.core.SAnnotation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
 /**
  * Properties for the ToolboxTextExporter.
@@ -54,10 +46,6 @@ import com.google.common.collect.HashBiMap;
  * 
  */
 public class ToolboxTextExporterProperties extends PepperModuleProperties {
-	
-	private static final Set<String> mdfKeys = new HashSet<>(Arrays.asList("an", "bb", "bw", "ce", "cf", "cn", "cr", "de", "dn", "dr", "dt", "dv", "ec", "ee", "eg", "en", "er", "es", "et", "ev", "ge", "gn", "gr", "gv", "hm", "is", "lc", "le", "lf", "ln", "lr", "lt", "lx", "mn", "mr", "na", "nd", "ng", "np", "nq", "ns", "nt", "oe", "on", "or", "ov", "pc", "pd", "ph", "pl", "pn", "ps", "rd", "re", "rf", "rn", "rr", "sc", "sd", "se", "sg", "sn", "so", "st", "sy", "tb", "th", "ue", "un", "ur", "uv", "va", "ve", "vn", "vr", "we", "wn", "wr", "xe", "xg", "xn", "xr", "xv", "1d", "1e", "1i", "1p", "1s", "2d", "2p", "2s", "3d", "3p", "3s", "4d", "4p", "4s"));
-	
-	private static final Logger logger = LoggerFactory.getLogger(ToolboxTextExporterProperties.class);
 	
 	private static final long serialVersionUID = -778762953092094905L;
 	
@@ -124,34 +112,7 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	public static final String SPACE_REPLACEMENT = "spaceReplacement";
 	
 	/**
-	 * A map whose keys are {@link SAnnotation}s
-	 * with the pattern `namespace::name`, and whose values
-	 * are MDF markers.
-	 * 
-	 * In the export process, the value for the defined {@link SAnnotation} will
-	 * be mapped to the line marked with the respective MDF pattern.
-	 * 
-	 * - Example: `morph::gloss:ge` will map an {@link SAnnotation}
-	 * `morph::gloss:myglossvalue` to `\ge myglossvalue`.
-	 * 
-	 * @see Coward, David F.; Grimes, Charles E. (2000): "Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter". SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.
-	 */
-	public static final String MDF_MAP = "mdfMap";
-	
-	/**
-	 * A map whose keys are {@link SAnnotation}s
-	 * with the pattern `namespace::name`, and whose
-	 * values are custom markers.
-	 * 
-	 * In the export process, the value for the defined {@link SAnnotation} will
-	 * be mapped to the line marked with the respective custom pattern.
-	 * 
-	 * @see #MDF_MAP
-	 */
-	public static final String CUSTOM_MARKERS = "customMarkers";
-
-	/**
-	 * 
+	 * TODO CHeck if this is API
 	 */
 	public static final String MARKER_SPLIT_REGEX = "(?<!:):(?!:)";
 	
@@ -163,13 +124,22 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 	/**
 	 * A map mapping annotation names to other annotation names.
 	 * 
-	 * Format: `markerMap={name-of-first-layer-of-container}::{namespace}:{name}={marker-pattern}`,
-	 * where `{marker-pattern}` can include `l` (layer name value), `ns` (namespace value), `n` (name value)
+	 * Format: `markerMap=aa=bb,cc=dd`.
 	 * 
-	 * Example: `layer1::ns1:n1=l__ns_n` will result in a marker `layer1__ns1_n1 {value}` for
-	 * an annotation matching that pattern.
+	 * This will result in annotations with name "aa" mapped
+	 * to a line "\bb ..." in the Toolbox file output.
 	 */
 	public static final String MARKER_MAP = "markerMap";
+
+	/**
+	 * TODO
+	 */
+	public static final String MAP_LAYER = "mapLayer";
+
+	/**
+	 * TODO
+	 */
+	public static final String MAP_NAMESPACE = "mapNamespace";
 	
 	/**
 	 * Constructor adding all properties to the instance.
@@ -202,18 +172,18 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 		addProperty(PepperModuleProperty.create().withName(SPACE_REPLACEMENT).withType(String.class)
 				.withDescription("String to replace whitespaces in annotation values with, as these whitespaces may break the item count in Toolbox interlinearization.")
 				.withDefaultValue("-").isRequired(true).build());
-		addProperty(PepperModuleProperty.create().withName(MDF_MAP).withType(String.class)
-				.withDescription("Map mapping existing annotation keys to MDF markers.")
-				.isRequired(false).build());
-		addProperty(PepperModuleProperty.create().withName(CUSTOM_MARKERS).withType(String.class)
-				.withDescription("Map mapping existing annotation keys to custom Toolbox markers supplementing the official MDF markers.")
-				.isRequired(false).build());
 		addProperty(PepperModuleProperty.create().withName(NULL_PLACEHOLDER).withType(String.class)
 				.withDescription("Placeholder for null values to be inserted into Toolbox file to keep linearization intact.")
 				.isRequired(false).build());
 		addProperty(PepperModuleProperty.create().withName(MARKER_MAP).withType(String.class)
 				.withDescription("map mapping annotation names to other annotation names.")
 				.isRequired(false).build());
+		addProperty(PepperModuleProperty.create().withName(MAP_LAYER).withType(Boolean.class)
+				.withDescription("Whether to map the layer of an annotation's container to the Toolbox marker.")
+				.isRequired(false).withDefaultValue(false).build());
+		addProperty(PepperModuleProperty.create().withName(MAP_NAMESPACE).withType(Boolean.class)
+				.withDescription("Whether to map the namespace of an annotation to the Toolbox marker.")
+				.isRequired(false).withDefaultValue(false).build());
 	}
 	
 	@SuppressWarnings("javadoc")
@@ -284,195 +254,73 @@ public class ToolboxTextExporterProperties extends PepperModuleProperties {
 		return (String) getProperty(NULL_PLACEHOLDER).getValue();
 	}
 	
-	/**
-	 * Compiles and returns a map of annotations to MDF
-	 * markers.
-	 * 
-	 * **Note:** Direct access to this map is discouraged. Instead, use
-	 * {@link #getAnnotationMarkerMap()}!
-	 * 
-	 * During compilation, both keys and values are checked
-	 * for uniqueness. If a duplicate key or value is found,
-	 * an {@link IllegalArgumentException} is thrown, as
-	 * processing duplicate keys or values will break the
-	 * data model.
-	 * 
-	 * @return The deduplicated map of annotations to MDF markers
-	 */
-	public Map<String, String> getMDFMap() {
-		Map<String, String> mdfMap = HashBiMap.create();
-		if (getProperty(MDF_MAP).getValue() != null) {
-			List<String> entries = new ArrayList<>(Arrays.asList(
-					((String) getProperty(MDF_MAP).getValue()).split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
-			for (String entry : entries) {
-				try {
-					String[] split = entry.split(MARKER_SPLIT_REGEX, 2);
-					String key = split[0].trim(); // Salt annotation
-					String mdf = split[1].trim(); // MDF marker
-					// Check if key exists
-					if (mdfMap.containsKey(key)) {
-						IllegalArgumentException iae = new IllegalArgumentException("Key already present: " + key);
-						logger.error("MDF Map: {}!", iae.getMessage(), iae);
-						throw iae;
-					}
-					if (!mdfKeys.contains(mdf)) {
-						logger.error(
-								"MDF Map: The value '{}' (key '{}') is not a valid MDF marker! Entry will be ignored! Please refer to the following reference for a list of valid MDF markers: "
-										+ "Coward, David F.; Grimes, Charles E. (2000): \"Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter\"."
-										+ "SIL International: Waxhaw, North Carolina. 183-185. URL http://downloads.sil.org/legacy/shoebox/MDF_2000.pdf.",
-								mdf, key);
-						continue;
-					}
-					try {
-						mdfMap.put(key, mdf);
-					}
-					catch (IllegalArgumentException e) {
-						logger.error("MDF Map: {}!", e.getMessage(), e);
-						throw e;
-					}
-				}
-				catch (ArrayIndexOutOfBoundsException e) {
-					logger.error(
-							"Map of annotation keys to MDF markers produced an error. Please check the syntactical correctness and re-try conversion.");
-					throw e;
-				}
-			}
-		}
-		return mdfMap;
-	}
 	
-	/**
-	 * Compiles and returns a map of annotations to user-defined
-	 * custom markers.
-	 * 
-	 * **Note:** Direct access to this map is discouraged. Instead, use
-	 * {@link #getAnnotationMarkerMap()}!
-	 * 
-	 * During compilation, both keys and values are checked
-	 * for uniqueness. If a duplicate key or value is found,
-	 * an {@link IllegalArgumentException} is thrown, as
-	 * processing duplicate keys or values will break the
-	 * data model.
-	 * 
-	 * @return The deduplicated map of annotations to custom markers
-	 */
-	public Map<String, String> getCustomMarkerMap() {
-		Map<String, String> customMarkerMap = HashBiMap.create();
-		if (getProperty(CUSTOM_MARKERS).getValue() != null) {
-			List<String> entries = new ArrayList<>(Arrays.asList(((String) getProperty(CUSTOM_MARKERS).getValue())
-					.split(ToolboxTextModulesUtils.COMMA_DELIM_SPLIT_REGEX)));
-			for (String entry : entries) {
-				try {
-					String[] split = entry.split(MARKER_SPLIT_REGEX, 2);
-					String key = split[0].trim();
-					String marker = split[1].trim();
-					// Check if key exists
-					if (customMarkerMap.containsKey(key)) {
-						IllegalArgumentException iae = new IllegalArgumentException("Key already present: " + key);
-						logger.error("Custom Marker Map: {}!", iae.getMessage(), iae);
-						throw iae;
-					}
-					if (mdfKeys.contains(marker)) {
-						logger.error("Custom Marker Map: The value '{}' (key '{}') is a reserved MDF marker! Entry will be ignored! Please refer to the following reference for a list of MDF markers and change the custom marker to something not contained in the list: \n" 
-																		+ "Coward, David F.; Grimes, Charles E. (2000): \"Making Dictionaries. A guide to lexicography and the Multi-Dictionary Formatter\".", 
-								marker, key);
-						continue;
-					}
-					try {
-						customMarkerMap.put(key, marker);
-					}
-					catch (IllegalArgumentException e) {
-						logger.error("Custom Marker Map: {}!", e.getMessage(), e);
-						throw e;
-					}
+	@SuppressWarnings("javadoc")
+	public Map<Triple<String,String,String>,String> getMarkerMap() {
+		Map<Triple<String,String,String>,String> map = new HashMap<>();
+		String prop = (String) getProperty(MARKER_MAP).getValue();
+		if (prop != null) {
+			String[] split = prop.split(",");
+			for (String mapping : split) {
+				String[] newNameSplit = mapping.split("=");
+				if (newNameSplit.length == 2) {
+					String tripleString = newNameSplit[0];
+					String newName = newNameSplit[1];
+					Triple<String, String, String> triple = createTripleFromString(tripleString);
+					map.put(triple, newName);
 				}
-				catch (ArrayIndexOutOfBoundsException e) {
-					logger.error(
-							"Map of annotation keys to custom markers produced an error. Please check the syntactical correctness and re-try conversion.",
-							e);
-					throw e;
+				else {
+					throw new PepperModuleException(
+							"Property 'markerMap' is formatted incorrectly (no '=' found for value).");
 				}
 			}
 		}
-		return customMarkerMap;
+		return map;
 	}
-	
-	/**
-	 * Compiles and returns a map of annotations to Toolbox markers.
-	 * 
-	 * The returned map comprises both the MDF map and the custom
-	 * marker map.
-	 * 
-	 * During compilation, both keys and values are checked
-	 * for uniqueness. If a duplicate key or value is found,
-	 * an {@link IllegalArgumentException} is thrown, as
-	 * processing duplicate keys or values will break the
-	 * data model.
-	 * 
-	 * @return The deduplicated map of annotations to Toolbox markers
-	 * 
-	 * @see #getMDFMap()
-	 * @see #getCustomMarkerMap()
-	 */
-	public Map<String, String> getAnnotationMarkerMap() {
-		BiMap<String, String> annotationMarkerBiMap = HashBiMap.create();
-		for (Entry<String, String> mdf : getMDFMap().entrySet()) {
-			String key = mdf.getKey();
-			String marker = mdf.getValue();
-			if (annotationMarkerBiMap.containsKey(key)) {
-				IllegalArgumentException iae = new IllegalArgumentException("Key already present: " + key);
-				logger.error("Annotation Marker Map: {}!", iae.getMessage(), iae);
-				throw iae;
+
+	private Triple<String, String, String> createTripleFromString(String string) {
+		String layer = null;
+		String namespace = null;
+		String name = null;
+		String[] layerSplit = string.split("::");
+		if (layerSplit.length == 2) {
+			// layer::name | layer::namespace:name
+			layer = layerSplit[0].trim();
+			String[] languageNameSplit = null;
+			if ((languageNameSplit = layerSplit[1].split(":")).length == 2) {
+				// layer::namespace:name
+				namespace = languageNameSplit[0].trim();
+				name = languageNameSplit[1].trim();
 			}
-			try {
-				annotationMarkerBiMap.put(key, marker);
-			}
-			catch (IllegalArgumentException e) {
-				logger.error("Annotation Marker Map: {}!", e.getMessage(), e);
-				throw e;
+			else {
+				// layer::name
+				name = layerSplit[1];
 			}
 		}
-		for (Entry<String, String> customMarker : getCustomMarkerMap().entrySet()) {
-			String key = customMarker.getKey();
-			String marker = customMarker.getValue();
-			if (annotationMarkerBiMap.containsKey(key)) {
-				IllegalArgumentException iae = new IllegalArgumentException("Key already present: " + key);
-				logger.error("Annotation Marker Map: {}!", iae.getMessage(), iae);
-				throw iae;
+		else {
+			// layer:name | name
+			String[] languageNameSplit = string.split(":");
+			if (languageNameSplit.length == 2) {
+				// layer:name
+				namespace = languageNameSplit[0].trim();
+				name = languageNameSplit[1].trim();
 			}
-			try {
-				annotationMarkerBiMap.put(key, marker);
-			}
-			catch (IllegalArgumentException e) {
-				logger.error("Annotation Marker Map: {}!", e.getMessage(), e);
-				throw e;
+			else {
+				// name
+				name = string.trim();
 			}
 		}
-		return annotationMarkerBiMap;
+		return Triple.of(layer, namespace, name);
 	}
-	
-	/**
-	 * Builds a {@link HashMap} from the value of property
-	 * {@link ToolboxTextExporterProperties#MARKER_MAP}.
-	 * 
-	 * @return the markerMap
-	 */
-	public Map<String, String> getMarkerMap() {
-		Map<String, String> markerMap = new HashMap<>();
-		String property = (String) getProperty(MARKER_MAP).getValue();
-		if (property == null) {
-			return markerMap;
-		}
-		property.trim();
-		String[] split = property.split(",");
-		for (String s : split) {
-			String[] pair = s.split("=");
-			if (pair.length != 2) {
-				throw new PepperModuleException("The property 'markerMap' is not well-defined. Please check its format and retry.");
-			}
-			markerMap.put(pair[0].trim(), pair[1].trim());
-		}
-		return markerMap;
+
+	@SuppressWarnings("javadoc")
+	public Boolean mapLayer() {
+		return (Boolean) getProperty(MAP_LAYER).getValue();
+	}
+
+	@SuppressWarnings("javadoc")
+	public Boolean mapNamespace() {
+		return (Boolean) getProperty(MAP_NAMESPACE).getValue();
 	}
 
 	

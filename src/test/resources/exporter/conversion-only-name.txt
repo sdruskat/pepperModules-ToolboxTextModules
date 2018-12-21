@@ -1,0 +1,29 @@
+\_sh v3.0 400 Text
+
+\guid 5c7ca17a-c656-42ec-bf17-XXX
+\interlinear-text_source Stephan Druskat
+\fictional encoding=null,vernacular=true,font=Times New Roman
+\interlinear-text_title Birthday pony
+\interlinear-text_title Börsday pony text
+\interlinear-text_title Brsd pn
+\second encoding=null,vernacular=null,font=Times New Roman
+\en encoding=null,vernacular=null,font=Times New Roman
+
+\id 091f3010-2a9c-4721-aabf-af4931a3b318
+\seqnum 1
+ 
+\ref 10c0409c-6189-424f-aa8b-74e7eeef6cfe
+\phrase_segnum 1.1
+\guid 35e2a00b-6e7b-42ec-8908-d5bea86c3c99 de92acc4-1d29-4167-9c4a-9b994b48818a
+\tx Börsdae pounie
+\phrase_gls Börsdae pounie (phrase gloss)
+\phrase_gls Birthday pony (phrase gloss)
+\nonamespace nonamespaceannotation
+\nonamespacetoken no-namespace-for-tx-token-1 no-namespace-for-tx-token-2
+\word_gls Word-1 Word-2
+\guid d7f713e5-e8cf-11d3-9764-00c04f186933 d7f713e5-e8cf-11d3-9764-00c04f186933 d7f713dd-e8cf-11d3-9764-00c04f186933
+\mb mb_txt_Börsdae mb_txt_pou -nie
+\morph_gls birthday-root pou-root nie-suffix
+\type root root suffix
+\morph_cf cf_birthday cf_pou cf_-nie
+\word_txt Börsdae pounie

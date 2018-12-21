@@ -30,11 +30,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
+
+import org.apache.commons.lang3.tuple.Triple;
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.peppermodules.toolbox.text.AbstractToolboxTextMapper;
 import org.corpus_tools.peppermodules.toolbox.text.properties.ToolboxTextExporterProperties;
 import org.corpus_tools.peppermodules.toolbox.text.utils.ToolboxTextModulesUtils;
-import org.corpus_tools.salt.SALT_TYPE;
 import org.corpus_tools.salt.SaltFactory;
 import org.corpus_tools.salt.common.SCorpusGraph;
 import org.corpus_tools.salt.common.SDocumentGraph;
@@ -48,7 +50,6 @@ import org.corpus_tools.salt.core.SLayer;
 import org.corpus_tools.salt.core.SMetaAnnotation;
 import org.corpus_tools.salt.core.SNode;
 import org.corpus_tools.salt.core.SRelation;
-import org.corpus_tools.salt.util.DataSourceSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,7 +163,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		}
 		for (SSpan idSpan : orderedIdSpans) {
 			if (!idSpan.getId().equals("TOOLBOXTEXTEXPORTERDUMMYSPAN")) {
-				lines.add(getMarker("id") + " " + idSpan.getAnnotation(properties.getIdIdentifierAnnotation()).getValue_STEXT());
+				lines.add(getMappedName("id") + " " + idSpan.getAnnotation(properties.getIdIdentifierAnnotation()).getValue_STEXT());
 				for (SAnnotation a : idSpan.getAnnotations()) {
 					if (!a.getQName().equals(properties.getIdIdentifierAnnotation())) {
 						lines.add(createMarkerAnnoString(a));
@@ -175,7 +176,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 				}
 			}
 			else {
-				lines.add(getMarker("id") + " " + graph.getDocument().getName());
+				lines.add(getMappedName("id") + " " + graph.getDocument().getName());
 			}
 			
 			// Map \refs
@@ -198,8 +199,8 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 			}
 			List<SSpan> orderedRefs = ToolboxTextModulesUtils.sortSpansByTextCoverageOfIncludedToken(refSpans);
 			for (SSpan refSpan : orderedRefs) {
-				lines.add(" ");
-				lines.add(getMarker("ref") + " " + refSpan.getAnnotation(properties.getRefIdentifierAnnotation()).getValue_STEXT());
+				lines.add("");
+				lines.add(getMappedName("ref") + " " + refSpan.getAnnotation(properties.getRefIdentifierAnnotation()).getValue_STEXT());
 				for (SAnnotation a : refSpan.getAnnotations()) {
 					if (!a.getQName().equals(properties.getRefIdentifierAnnotation())) {
 						lines.add(createMarkerAnnoString(a));
@@ -212,7 +213,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 				}
 				
 				// Map \tx
-				String txLine = getMarker("tx");
+				String txLine = getMappedName("tx");
 				List<SToken> txTokens = new ArrayList<>();
 				List<SToken> txCandidateTokens = graph.getOverlappedTokens(refSpan);
 				Set<SNode> txLayerNodes = graph.getLayerByName(properties.getTxTokenLayer()).get(0).getNodes();
@@ -255,8 +256,8 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 					else if (split.length == 1) {
 						name = split[0];
 					}
-					String marker = createMarkerString(namespace, name);
-					marker = getMarker(marker.substring(1)); // Removes the existing backslash
+					String marker = createMarkerString(refSpan.getLayers().iterator().next().getName(), namespace, name);
+					marker = getMappedName(marker.substring(1)); // Removes the existing backslash
 					txAnnotationLines.put(annoQName, marker);
 				}
 				// Clean list from annotations that contain primary lexical or morphological material
@@ -301,7 +302,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 				
 				
 				// Map \mb
-				String mbLine = getMarker("mb");
+				String mbLine = getMappedName("mb");
 				List<SToken> mbTokens = new ArrayList<>();
 				List<SToken> mbCandidateTokens = graph.getOverlappedTokens(refSpan); // FIXME Make requirement clear that both token types must be covered by the refspan!
 				// FIXME ALternatively, solve via timeline
@@ -337,7 +338,7 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 						name = split[0];
 					}
 					String marker = createMarkerString(namespace, name);
-					marker = getMarker(marker.substring(1)); // Removes the existing backslash
+					marker = getMappedName(marker.substring(1)); // Removes the existing backslash
 					mbAnnotationLines.put(annoQName, marker);
 				}
 				// Clean list from annotations that contain primary lexical or morphological material
@@ -477,19 +478,34 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 		}
 	}
 
-	private String getMarker(String string) {
-		Map<String, String> markerMap = null;
-		if (!(markerMap = properties.getMarkerMap()).isEmpty()) {
-			String idName = markerMap.get(string);
-			if (idName != null) {
-				return "\\" + idName;
-			}
-		}
-		return "\\" + string;
+	private String getMappedName(String name) {
+		return "\\" + getMappedName(null, null, name);
 	}
 
 		/**
-	 * // TODO Add description
+		 * // TODO Add description
+		 * 
+		 * @param layerName
+		 * @param namespace
+		 * @param name
+		 * @return
+		 */
+		public String getMappedName(String layerName, String namespace, String name) {
+			for (Entry<Triple<String, String, String>, String> entry : properties.getMarkerMap().entrySet()) {
+				Triple<String, String, String> triple = entry.getKey();
+				if (triple.equals(Triple.of(layerName, namespace, name))
+						|| triple.equals(Triple.of(null, namespace, name))
+						|| triple.equals(Triple.of(layerName, null, name))
+						|| triple.equals(Triple.of(null, null, name))
+						) {
+					return entry.getValue();
+				}
+			}
+			return name;
+	}
+
+		/**
+	 * // TODO Add descriptiongetMappedName
 	 * 
 	 * @param ranges
 	 * @param uncoveredRanges
@@ -551,24 +567,30 @@ public class ToolboxTextExportMapper extends AbstractToolboxTextMapper {
 	 * @return
 	 */
 	private String createMarkerString(String namespace, String name) {
-		String nsn = namespace != null ? namespace + "::" + name : name;
-		String marker = properties.getAnnotationMarkerMap().get(nsn);
-		String line = "MISSING " + nsn;
-		if (marker != null) {
-			line = "\\" + marker;
+		return createMarkerString(null, namespace, name);
+	}
+	
+	/**
+	 * // TODO Add description
+	 * 
+	 * @param layerName
+	 * @param namespace
+	 * @param name
+	 * @return
+	 */
+	public String createMarkerString(String layerName, String namespace, String name) {
+		String line = "";
+		// Test if we need to map according to custom markers or MDF Map
+		if (properties.mapLayer() && layerName != null) {
+			line = layerName + "__"; // TODO: Replace with property
 		}
-		else {
-			line = "\\" + name.replaceAll("\\s", "-")
-					+ (namespace != null ? "__" + namespace.replaceAll("\\s", "-") : "") + "";
+		if (properties.mapNamespace() && namespace != null) {
+			line = line + namespace + "_"; // TODO: Replace with property
 		}
-		Map<String, String> markerMap;
-		if (!(markerMap = properties.getMarkerMap()).isEmpty()) {
-			String newName = markerMap.get(name);
-			if (newName != null) {
-				line.replaceFirst("\\.\\s", "\\" + newName + " ");
-			}
+		if (!properties.getMarkerMap().isEmpty()) {
+			name = getMappedName(layerName, namespace, name);
 		}
-		return line;
+		return "\\" + line + name;
 	}
 
 	/**
