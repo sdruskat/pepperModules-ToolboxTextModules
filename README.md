@@ -360,6 +360,16 @@ discuss the change you wish to make via a
 [new issue](https://github.com/sdruskat/pepperModules-ToolboxTextModules/issues/new) 
 before making a change.
 
+## Maintenance
+
+### Release workflow
+
+*Requirements:* JIRA account for releases is set up in `~/.m2/settings.xml` and configured for release.
+
+1. `mvn gitflow:release-start`
+2. `mvn keepachangelog:release`
+3. `mvn gitflow:release-finish`
+
 ## Contributors
 
 An overview of contributors to this project can be found 
