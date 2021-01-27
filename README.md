@@ -57,10 +57,10 @@ just as well.
 
 - Download [Pepper_2018.01.26-SNAPSHOT.zip](https://korpling.german.hu-berlin.de/saltnpepper/pepper/download/snapshot/Pepper_2018.01.26-SNAPSHOT.zip)
 (or newer) and extract it to a directory of your choice
-- Download the latest *pepperModules-ToolboxTextModules* zip from 
-[releases](https://github.com/sdruskat/pepperModules-ToolboxTextModules/releases)
+- Download the latest *pepperModules-ToolboxTextModules* `.jar` from 
+[releases](https://github.com/sdruskat/pepperModules-ToolboxTextModules/releases/latest)
 and extract it to a directory of your choice
-- Add the path to the directory containing `pepperModules-ToolboxTextModules-1.0.0.jar`
+- Add the path to the directory containing `pepperModules-ToolboxTextModules-<version>.jar`
 to the Pepper configuration file:
 	- Open `{Pepper directory}/pepper/conf/pepper.properties`
 	- Remove the comment hash (`#`) from the line
