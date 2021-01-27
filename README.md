@@ -360,6 +360,20 @@ discuss the change you wish to make via a
 [new issue](https://github.com/sdruskat/pepperModules-ToolboxTextModules/issues/new) 
 before making a change.
 
+## Maintenance
+
+### Release workflow
+
+*Requirements:* JIRA account for releases is set up in `~/.m2/settings.xml` and configured for release.
+
+1. `mvn gitflow:release-start`
+2. `mvn keepachangelog:release`
+3. `mvn gitflow:release-finish`
+4. `mvn clean install`
+5. Attach .jar file to GitHub Release
+
+Project is not pushed to Maven Central as of now, as Pepper plugins are dropped in manually.
+
 ## Contributors
 
 An overview of contributors to this project can be found 

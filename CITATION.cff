@@ -6,8 +6,11 @@ authors:
   - family-names: Druskat
     given-names: Stephan
     orcid: https://orcid.org/0000-0003-4925-7248
+  - family-names: Krause
+    given-names: Thomas
+    orcid: https://orcid.org/0000-0003-3731-2422
 title: ToolboxTextModules
-version: 1.1.0
+version: 1.1.1
 doi: 10.5281/zenodo.1297366
-date-released: 2018-06-25
+date-released: 2021-01-27
 repository-code: https://github.com/sdruskat/pepperModules-ToolboxTextModules
