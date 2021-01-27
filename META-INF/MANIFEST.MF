@@ -17,7 +17,7 @@ Bundle-SymbolicName: org.corpus-tools.pepperModules-ToolboxTextModules;s
  ingleton:=true
 Bundle-Vendor: MelaTAMP research project, Humboldt-Universität zu Berli
  n
-Bundle-Version: 1.1.2
+Bundle-Version: 1.1.3.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
 Export-Package: org.corpus_tools.peppermodules.toolbox.text;uses:="org.c
  orpus_tools.pepper.impl,org.corpus_tools.pepper.modules,org.corpus_tool
