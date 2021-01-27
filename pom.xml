@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>pepperModules-ToolboxTextModules</artifactId>
-	<version>1.1.1-SNAPSHOT</version>
+	<version>1.1.1</version>
 	<packaging>bundle</packaging>
 	<name>ToolboxTextModules</name>
 	<description>Modules bundle for the Pepper conversion framework for linguistic data.
@@ -148,16 +148,15 @@
 				</executions>
 			</plugin>
 			<!-- RELEASE PLUGIN -->
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.5.3</version>
 				<configuration>
-					<preparationGoals>clean verify keepachangelog:release scm:add -Dincludes=CHANGELOG.md</preparationGoals>
 					<goals>deploy site-deploy</goals>
 					<tagNameFormat>@{project.version}</tagNameFormat>
 				</configuration>
-			</plugin>
+			</plugin> -->
 			<!-- USE GITFLOW -->
 			<plugin>
 				<groupId>com.amashchenko.maven.plugin</groupId>
@@ -176,6 +175,7 @@
 					<gitFlowConfig>
 						<versionTagPrefix>v</versionTagPrefix>
 					</gitFlowConfig>
+					<postReleaseGoals>deploy site-deploy</postReleaseGoals>
 				</configuration>
 			</plugin>
 			<!-- gpg sign -->
