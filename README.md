@@ -369,6 +369,10 @@ before making a change.
 1. `mvn gitflow:release-start`
 2. `mvn keepachangelog:release`
 3. `mvn gitflow:release-finish`
+4. `mvn clean install`
+5. Attach .jar file to GitHub Release
+
+Project is not pushed to Maven Central as of now, as Pepper plugins are dropped in manually.
 
 ## Contributors
 
