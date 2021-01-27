@@ -148,7 +148,16 @@
 				</executions>
 			</plugin>
 			<!-- RELEASE PLUGIN -->
-			<!-- <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-release-plugin</artifactId><version>2.5.3</version><configuration><goals>deploy site-deploy</goals><tagNameFormat>@{project.version}</tagNameFormat></configuration></plugin>-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+				<configuration>
+					<preparationGoals>clean verify keepachangelog:release scm:add -Dincludes=CHANGELOG.md</preparationGoals>
+					<goals>deploy site-deploy</goals>
+					<tagNameFormat>@{project.version}</tagNameFormat>
+				</configuration>
+			</plugin>
 			<!-- USE GITFLOW -->
 			<plugin>
 				<groupId>com.amashchenko.maven.plugin</groupId>
@@ -168,7 +177,7 @@
 						<versionTagPrefix>v</versionTagPrefix>
 					</gitFlowConfig>
 				</configuration>
-			</plugin> 
+			</plugin>
 			<!-- gpg sign -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
