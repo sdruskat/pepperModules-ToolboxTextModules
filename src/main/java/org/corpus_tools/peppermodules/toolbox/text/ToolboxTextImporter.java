@@ -19,11 +19,12 @@
  *******************************************************************************/
 package org.corpus_tools.peppermodules.toolbox.text;
 
+import com.google.common.collect.Range;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import org.apache.commons.io.FilenameUtils;
 import org.corpus_tools.pepper.impl.PepperImporterImpl;
 import org.corpus_tools.pepper.modules.PepperImporter;
 import org.corpus_tools.pepper.modules.PepperMapper;
@@ -40,8 +41,6 @@ import org.eclipse.emf.common.util.URI;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Range;
 
 /**
  * The point-of-entry class for import of Toolbox text to a Salt model.
@@ -119,6 +118,13 @@ public class ToolboxTextImporter extends PepperImporterImpl implements PepperImp
 			}
 		}
 		else if (corpusFile.isFile()) {
+		    if (getDocumentEndings() != null && !getDocumentEndings().isEmpty()) {
+              String corpusFileEnding = FilenameUtils.getExtension(corpusFile.getName());
+              if (!getDocumentEndings().contains(corpusFileEnding)) {
+                // Ignore this file
+                return;
+              }
+		    }
 			// Create a corpus for the file
 			SCorpus subCorpus = corpusGraph.createCorpus(parent, corpusFileName.substring(0, corpusFileName.lastIndexOf('.')));
 			getIdentifier2ResourceTable().put(subCorpus.getIdentifier(), corpusFileURI);
