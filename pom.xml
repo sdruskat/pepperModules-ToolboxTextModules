@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>pepperModules-ToolboxTextModules</artifactId>
-	<version>1.1.1</version>
+	<version>1.1.2</version>
 	<packaging>bundle</packaging>
 	<name>ToolboxTextModules</name>
 	<description>Modules bundle for the Pepper conversion framework for linguistic data.
@@ -175,7 +175,7 @@
 					<gitFlowConfig>
 						<versionTagPrefix>v</versionTagPrefix>
 					</gitFlowConfig>
-					<postReleaseGoals>deploy site-deploy</postReleaseGoals>
+					<postReleaseGoals>deploy</postReleaseGoals>
 				</configuration>
 			</plugin>
 			<!-- gpg sign -->
