@@ -176,6 +176,8 @@
 					<gitFlowConfig>
 						<versionTagPrefix>v</versionTagPrefix>
 					</gitFlowConfig>
+					<preReleaseGoals>clean verify keepachangelog:release scm:add -Dincludes=CHANGELOG.md</preReleaseGoals>
+					<postReleaseGoals>deploy site-deploy</postReleaseGoals>
 				</configuration>
 			</plugin>
 			<!-- gpg sign -->
