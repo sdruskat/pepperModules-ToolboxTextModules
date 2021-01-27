@@ -175,7 +175,7 @@
 					<gitFlowConfig>
 						<versionTagPrefix>v</versionTagPrefix>
 					</gitFlowConfig>
-					<postReleaseGoals>deploy site-deploy</postReleaseGoals>
+					<postReleaseGoals>deploy</postReleaseGoals>
 				</configuration>
 			</plugin>
 			<!-- gpg sign -->
